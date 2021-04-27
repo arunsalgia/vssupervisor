@@ -219,8 +219,13 @@ export default function SU_Player() {
   };
   
   function ShowPlayerImage(props) {
+    // if (props.pid === 0)
+    // return(
+    // <Avatar variant="square" src={`${props.pid}.JPG`} className={classes.medium} />    
+    // )
+    // else
     return(
-    <Avatar variant="square" src={`${props.pid}.JPG`} className={classes.medium} />    
+      <Avatar variant="square" src={`https://www.cricapi.com/playerpic/${props.pid}.jpg`} className={classes.medium} />
     )
   } 
   
