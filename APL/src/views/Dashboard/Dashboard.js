@@ -70,11 +70,11 @@ export default function Dashboard() {
   useEffect(() => {
     var sendMessage = {page: "DASH", gid: localStorage.getItem("gid"), uid: localStorage.getItem("uid") };
 
-    setRank(JSON.parse(localStorage.getItem("saveRank")));
-    setScore(JSON.parse(localStorage.getItem("saveScore")));
-    setRankArray(JSON.parse(localStorage.getItem("saveRankArray")));
-    setMostRuns(JSON.parse(localStorage.getItem("saveMaxRun")))
-    setMostwickets(JSON.parse(localStorage.getItem("saveMaxWicket")));
+    // setRank(JSON.parse(localStorage.getItem("saveRank")));
+    // setScore(JSON.parse(localStorage.getItem("saveScore")));
+    // setRankArray(JSON.parse(localStorage.getItem("saveRankArray")));
+    // setMostRuns(JSON.parse(localStorage.getItem("saveMaxRun")))
+    // setMostwickets(JSON.parse(localStorage.getItem("saveMaxWicket")));
 
 
     const makeconnection = async () => {
