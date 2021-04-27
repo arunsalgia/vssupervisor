@@ -60,6 +60,13 @@ const useStyles = makeStyles((theme) => ({
     padding: "none",
     //height: 20,
   },
+  cc0: {
+    // color: theme.palette.getContrastText(deepOrange[500]),
+    fontWeight: theme.typography.fontWeightBold,
+    fontSize: '14px',
+    margin: theme.spacing(0, 0, 0),
+    padding: "none",
+  },
   cc1: {
     // color: theme.palette.getContrastText(deepOrange[500]),
     fontWeight: theme.typography.fontWeightBold,
@@ -236,7 +243,7 @@ export default function Stats() {
     if (iplovers > 0)
       return (
         <div>
-          <Typography className={classes.cc1}>{iplmatch}</Typography>
+          <Typography className={classes.cc0}>{iplmatch}</Typography>
           <Typography className={classes.cc1}>Statistics after {iplovers} overs</Typography>
         </div>
       )
