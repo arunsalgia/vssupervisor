@@ -196,7 +196,7 @@ export function CricDreamTabs() {
         <div>
         <MenuItem onClick={handleSuTournament}>SU Tournament</MenuItem>
         <MenuItem onClick={handleSuPlayer}>SU Player</MenuItem>
-        <MenuItem onClick={handleSuImage}>SU Load Image</MenuItem>
+        {/* <MenuItem onClick={handleSuImage}>SU Load Image</MenuItem> */}
         </div>)
     } else {
       return (<div></div>)
