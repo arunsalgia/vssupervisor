@@ -196,7 +196,7 @@ export function CricDreamTabs() {
         <div>
         <MenuItem onClick={handleSuTournament}>SU Tournament</MenuItem>
         <MenuItem onClick={handleSuPlayer}>SU Player</MenuItem>
-        {/* <MenuItem onClick={handleSuImage}>SU Load Image</MenuItem> */}
+        <MenuItem onClick={handleSuImage}>SU Load Image</MenuItem>
         </div>)
     } else {
       return (<div></div>)
@@ -338,6 +338,7 @@ export function CricDreamTabs() {
           </IconButton>
           <Button color="inherit" className={classes.dashButton} onClick={handleDash}>DashBoard</Button>
           <Button color="inherit" className={classes.statButton} onClick={handleStat}>Stats</Button>
+          {/* <Button color="inherit" className={classes.statButton} onClick={handleAuction}>Auction</Button> */}
           <Button color="inherit" className={classes.teamButton} onClick={handleTeam}>Team</Button>
           {/* <Typography variant="h6" className={classes.title}>
             Photos
