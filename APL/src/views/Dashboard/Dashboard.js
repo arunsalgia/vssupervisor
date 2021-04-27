@@ -70,6 +70,13 @@ export default function Dashboard() {
   useEffect(() => {
     var sendMessage = {page: "DASH", gid: localStorage.getItem("gid"), uid: localStorage.getItem("uid") };
 
+    setRank(JSON.parse(localStorage.getItem("saveRank")));
+    setScore(JSON.parse(localStorage.getItem("saveScore")));
+    setRankArray(JSON.parse(localStorage.getItem("saveRankArray")));
+    setMostRuns(JSON.parse(localStorage.getItem("saveMaxRun")))
+    setMostwickets(JSON.parse(localStorage.getItem("saveMaxWicket")));
+
+
     const makeconnection = async () => {
       await sockConn.connect();
       // console.log("just after connect command");
@@ -87,6 +94,8 @@ export default function Dashboard() {
       sockConn.on("rank", (rank) => {
         // console.log(new Date());
         // console.log(localStorage.getItem("uid"))
+        
+
         const allRank = rank.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
         const userDetails = allRank.filter(x => x.uid === parseInt(localStorage.getItem("uid")));
         //console.log(allRank);
@@ -97,6 +106,10 @@ export default function Dashboard() {
           setRank(userDetails[0].rank);
           setScore(userDetails[0].grandScore)
           setRankArray(tableData(allRank));
+          localStorage.setItem("saveRank", JSON.stringify(userDetails[0].rank));
+          localStorage.setItem("saveScore", JSON.stringify(userDetails[0].grandScore));
+          localStorage.setItem("saveRankArray", JSON.stringify(tableData(allRank)));
+
         } else if (localStorage.getItem("admin") === "true") {
           // current user is not member of the group but is ADMIN. Thus show the rank details
           setRankArray(tableData(allRank));
@@ -105,22 +118,25 @@ export default function Dashboard() {
       });
 
       sockConn.on("maxRun", (maxRun) => {
-
+        
         const allMaxRun = maxRun.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
         const runDetails = allMaxRun.filter(x => x.uid === parseInt(localStorage.getItem("uid")));
         // console.log(runDetails)
         if (runDetails.length > 0) {
           setMostRuns(runDetails[0])
+          localStorage.setItem("saveMaxRun", JOSN.stringify(runDetails[0]));
         }
 
       });
 
       sockConn.on("maxWicket", (maxWicket) => {
+        
         const allMaxWicket = maxWicket.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
         const wicketDetails = allMaxWicket.filter(x => x.uid === parseInt(localStorage.getItem("uid")));
         // console.log(wicketDetails);
         if (wicketDetails.length > 0) {
           setMostwickets(wicketDetails[0]);
+          localStorage.setItem("saveMaxWicket", JOSN.stringify(wicketDetails[0]));
         }
 
       });
