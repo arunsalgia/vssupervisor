@@ -90,8 +90,12 @@ export default function Stats() {
   const [ipltitle, setIPLTitle] = useState("");
   const [iplmatch, setIPLMatch] = useState("");
   const [updTime, setUpdTime] = useState("");
+  // const [statData, setStatData] = useState([]);
 
   useEffect(() => {  
+    if (localStorage.getItem("statData"))
+      setTeamArray(JSON.parse(localStorage.getItem("statData")));
+
     const makeconnection = async () => {
       await socket.connect();
     }
@@ -110,6 +114,7 @@ export default function Stats() {
         var gStat = stat.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
         if (gStat.length > 0) {
           setTeamArray(gStat)
+          localStorage.setItem("statData", JSON.stringify(gStat));
           // console.log(gStat);
         }
         let myTime = new Date().toDateString() + " " + new Date().toLocaleTimeString();
