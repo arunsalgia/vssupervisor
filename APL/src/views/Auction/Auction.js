@@ -181,10 +181,12 @@ export default function Auction() {
             // console.log(`New: ${newPlayerDetails.pid}  Old: ${playerId} `)
             // first set PID so that display is better
             setPid(newPlayerDetails.pid)
-            let tmp = `${process.env.PUBLIC_URL}/${newPlayerDetails.pid}.JPG`
+            // let tmp = `${process.env.PUBLIC_URL}/${newPlayerDetails.pid}.JPG`
+            let tmp = `https://www.cricapi.com/playerpic/${newPlayerDetails.pid}.JPG`
             if (playerImage != tmp) {
                 // console.log("Different image")
-                setPlayerImage(`${process.env.PUBLIC_URL}/${newPlayerDetails.pid}.JPG`);
+                // setPlayerImage(`${process.env.PUBLIC_URL}/${newPlayerDetails.pid}.JPG`);
+                setPlayerImage(tmp);
             } else {
                 // console.log("Same player image")
             }

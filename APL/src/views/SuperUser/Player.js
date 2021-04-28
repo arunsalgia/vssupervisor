@@ -225,7 +225,7 @@ export default function SU_Player() {
     // )
     // else
     return(
-      <Avatar variant="square" src={`https://www.cricapi.com/playerpic/${props.pid}.jpg`} className={classes.medium} />
+      <Avatar variant="square" src={`https://www.cricapi.com/playerpic/${props.pid}.JPG`} className={classes.medium} />
     )
   } 
   
