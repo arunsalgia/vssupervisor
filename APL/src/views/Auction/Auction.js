@@ -4,9 +4,16 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import Typography from '@material-ui/core/Typography';
-import Table from "components/Table/Table.js";
+// import Table from "components/Table/Table.js";
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 // import MenuItem from '@material-ui/core/MenuItem';
 // import FormControl from '@material-ui/core/FormControl';
@@ -33,7 +40,7 @@ import { BlankArea, NoGroup, DisplayPageHeader, MessageToUser } from 'CustomComp
 import { UserContext } from "../../UserContext";
 import socketIOClient from "socket.io-client";
 import { hasGroup } from 'views/functions';
-
+import {orange, deepOrange}  from '@material-ui/core/colors';
 
 const drawerWidth = 100;
 const useStyles = makeStyles((theme) => ({
@@ -64,7 +71,8 @@ const useStyles = makeStyles((theme) => ({
     container: {
         backgroundImage: `url(${process.env.PUBLIC_URL}/0.JPG)`,
         backgroundSize: 'cover'
-    }, drawer: {
+    }, 
+    drawer: {
         width: drawerWidth,
         flexShrink: 0,
     },
@@ -112,6 +120,22 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(0, 0),
         justifyContent: 'flex-start',
     },
+    th: { 
+        spacing: 0,
+        align: "center",
+        padding: "none",
+        backgroundColor: '#EEEEEE', 
+        color: deepOrange[700], 
+        // border: "1px solid black",
+        fontWeight: theme.typography.fontWeightBold,
+      },
+      td : {
+        spacing: 0,
+        // border: 5,
+        align: "center",
+        padding: "none",
+        height: 10,
+      },    
 }));
 
 
@@ -351,6 +375,37 @@ export default function Auction() {
     }
 
     function ShowBalance() {
+        return (
+            <Table>
+            <TableHead p={0}>
+                <TableRow align="center">
+                <TableCell className={classes.th} p={0} align="center">Franchise</TableCell>
+                <TableCell className={classes.th} p={0} align="center">Player Count</TableCell>
+                <TableCell className={classes.th} p={0} align="center">Balance</TableCell>      
+                </TableRow>
+            </TableHead>
+            < TableBody p={0}>
+                {AuctionTableData.map(item => {
+                  return (
+                    <TableRow key={item.userName}>
+                      <TableCell  className={classes.td} p={0} align="center" >
+                        {item.userName}
+                      </TableCell>
+                      <TableCell  className={classes.td} p={0} align="center" >
+                        {item.playerCount}
+                      </TableCell>
+                      <TableCell className={classes.td} p={0} align="center" >
+                        {item.balance}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+            </TableBody> 
+            </Table>
+        );
+    }
+
+    function OrgShowBalance() {
         return (
             <Table tableHeaderColor="warning" align="center"
                 tableHead={["Franchise", "Player Count", "Balance"]}
