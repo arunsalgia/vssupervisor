@@ -323,28 +323,28 @@ export default function Dashboard() {
       // <Grid container justify="center" alignItems="center" >
       // <GridItem xs={12} sm={12} md={12} lg={12} >
       <Table>
-        <TableHead>
+        <TableHead p={0}>
         <TableRow align="center">
-          <TableCell className={dashClasses.th} align="center">Rank</TableCell>
-          <TableCell className={dashClasses.th} align="center">Franchise</TableCell>
-          <TableCell className={dashClasses.th} align="center">Owner</TableCell>
-          <TableCell className={dashClasses.th} align="center">Score</TableCell>      
+          <TableCell className={dashClasses.th} p={0} align="center">Rank</TableCell>
+          <TableCell className={dashClasses.th} p={0} align="center">Franchise (Owner)</TableCell>
+          {/* <TableCell className={dashClasses.th} p={0} align="center">Owner</TableCell> */}
+          <TableCell className={dashClasses.th} p={0} align="center">Score</TableCell>      
         </TableRow>
       </TableHead>
-      < TableBody>
+      < TableBody p={0}>
         {rankArray.map(item => {
           return (
             <TableRow key={item.rank}>
-              <TableCell  className={dashClasses.td} align="center" >
+              <TableCell  className={dashClasses.td} p={0} align="center" >
                 {item.rank}
               </TableCell>
-              <TableCell  className={dashClasses.td} align="center" >
-                {item.displayName}
+              <TableCell  className={dashClasses.td} p={0} align="center" >
+                {item.displayName+" ("+item.userName+")"}
               </TableCell>
-              <TableCell  className={dashClasses.td} align="center" >
+              {/* <TableCell  className={dashClasses.td} p={0} align="center" >
                 {item.userName}
-              </TableCell>
-              <TableCell className={dashClasses.td} align="center" >
+              </TableCell> */}
+              <TableCell className={dashClasses.td} p={0} align="center" >
                 {item.grandScore}
               </TableCell>
             </TableRow>
