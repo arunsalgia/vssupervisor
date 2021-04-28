@@ -94,7 +94,7 @@ export default function Stats() {
   const dashClasses = dashStyles();
 
   const [teamArray, setTeamArray] = useState([]);
-  const [iplovers, setIPLOvers] = useState("0");
+  const [iplovers, setIPLOvers] = useState(0);
   const [ipltitle, setIPLTitle] = useState("");
   const [iplmatch, setIPLMatch] = useState("");
   const [updTime, setUpdTime] = useState("");

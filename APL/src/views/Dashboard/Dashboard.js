@@ -115,7 +115,10 @@ export default function Dashboard() {
   const [mostRuns, setMostRuns] = useState({});
   const [mostWickets, setMostwickets] = useState({});
   const date = new Date().toDateString() + " " + new Date().toLocaleTimeString();
-  
+  const [iplovers, setIPLOvers] = useState("0");
+  const [ipltitle, setIPLTitle] = useState("");
+  const [iplmatch, setIPLMatch] = useState("");
+
   const classes = useStyles();
   const dashClasses = useDashStyles();
 
@@ -213,8 +216,29 @@ export default function Dashboard() {
         }
 
       });
+
+      socket.on("overs", (myOvers) => {
+        // console.log(myOvers);
+        if (myOvers.tournament !== "") {
+          let currOver = 0;
+          let currTitle = "";
+          let currMatch = myOvers.team1 + " Vs. " + myOvers.team2;
+          if (myOvers.bowl4)      { currOver = myOvers.bowl4;  currTitle = myOvers.title4 }
+          else if (myOvers.bowl3) { currOver = myOvers.bowl3;  currTitle = myOvers.title3 }
+          else if (myOvers.bowl2) { currOver = myOvers.bowl2;  currTitle = myOvers.title2 }
+          else                    { currOver = myOvers.bowl1;  currTitle = myOvers.title1 }
+          // currOver = currOver / 10;
+          setIPLOvers(currOver);
+          setIPLTitle(currTitle);
+          setIPLMatch(currMatch);
+        } else {
+          setIPLOvers(0);
+          setIPLTitle("");
+          setIPLMatch("");
+        }
+      });
     });
-    
+
     return () => {
       // componentwillunmount in functional component.
       // Anything in here is fired on component unmount.
@@ -357,14 +381,32 @@ export default function Dashboard() {
     );
   }
 
+  function ShowHeader() {
+    if (iplovers > 0)
+      return (
+        <div>
+          <h4 className={classes.cardTitleWhite}>Franchise Score Board</h4>
+          <p className={classes.cardCategoryWhite}>{iplmatch}</p>
+          <p className={classes.cardCategoryWhite}>Points last updated after {iplovers} overs</p>
+          <p className={classes.cardCategoryWhite}>{`Updated as of ${date}`}</p>
+        </div>
+      )
+    else
+    return (
+      <div>
+        <h4 className={classes.cardTitleWhite}>Franchise Score Board</h4>
+        {/* <p className={classes.cardCategoryWhite}>{iplmatch}</p>
+        <p className={classes.cardCategoryWhite}>Points last updated after {iplovers} overs</p> */}
+        <p className={classes.cardCategoryWhite}>{`Updated as of ${date}`}</p>
+      </div>
+    )
+}
+
   function ShowUserRank() {
     return(
         <Card key="db_card">
           <CardHeader key="db_cheader" color="warning">
-            <h4 className={classes.cardTitleWhite}>Franchise Score Board</h4>
-            <p className={classes.cardCategoryWhite}>
-              {`Updated as of ${date}`}
-            </p>
+            <ShowHeader />
           </CardHeader>
           <CardBody key="db_cbody">
             <DisplayAllRank />
