@@ -217,7 +217,7 @@ export default function Dashboard() {
 
       });
 
-      socket.on("overs", (myOvers) => {
+      sockConn.on("overs", (myOvers) => {
         // console.log(myOvers);
         if (myOvers.tournament !== "") {
           let currOver = 0;
