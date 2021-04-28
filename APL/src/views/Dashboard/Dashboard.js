@@ -17,9 +17,17 @@ import Accessibility from "@material-ui/icons/Accessibility";
 
 
 // core components
+import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
-import Table from "components/Table/Table.js";
+// import Table from "components/Table/Table.js";
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
 
 
 import Card from "components/Card/Card.js";
@@ -32,11 +40,65 @@ import socketIOClient from "socket.io-client";
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
 import {hasGroup} from "views/functions.js";
 import { NoGroup } from 'CustomComponents/CustomComponents.js';
+import {orange, deepOrange}  from '@material-ui/core/colors';
 
 
 
 const useStyles = makeStyles(styles);
 
+const useDashStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular,
+  },
+  th: { 
+    spacing: 0,
+    align: "center",
+    padding: "none",
+    backgroundColor: '#EEEEEE', 
+    color: deepOrange[700], 
+    // border: "1px solid black",
+    fontWeight: theme.typography.fontWeightBold,
+  },
+  td : {
+    spacing: 0,
+    // border: 5,
+    align: "center",
+    padding: "none",
+    height: 10,
+  },
+  cardContent: {
+    // color: theme.palette.getContrastText(deepOrange[500]),
+    backgroundColor: '#18FFFF',   //deepOrange[500],
+    margin: 0,
+    padding: "none",
+    //height: 20,
+  },
+  cc0: {
+    // color: theme.palette.getContrastText(deepOrange[500]),
+    fontWeight: theme.typography.fontWeightBold,
+    fontSize: '14px',
+    margin: theme.spacing(0, 0, 0),
+    padding: "none",
+  },
+  cc1: {
+    // color: theme.palette.getContrastText(deepOrange[500]),
+    fontWeight: theme.typography.fontWeightBold,
+    fontSize: '14px',
+    margin: theme.spacing(0, 0, 0),
+    padding: "none",
+  },
+  cc2: {
+    margin: theme.spacing(0, 0, 0),
+    fontSize: '12px',
+    padding: "none",
+    // color: theme.palette.getContrastText(deepOrange[500]),
+    // fontWeight: theme.typography.fontWeightBold,
+  },
+})); 
 
 function leavingDashboard(myConn) {
   //console.log("Leaving Dashboard wah wah ");
@@ -54,7 +116,8 @@ export default function Dashboard() {
   const [mostWickets, setMostwickets] = useState({});
   const date = new Date().toDateString() + " " + new Date().toLocaleTimeString();
   
-
+  const classes = useStyles();
+  const dashClasses = useDashStyles();
 
   const tableData = (rankDetails) => {
     const arr = rankDetails.map(element => {
@@ -70,11 +133,20 @@ export default function Dashboard() {
   useEffect(() => {
     var sendMessage = {page: "DASH", gid: localStorage.getItem("gid"), uid: localStorage.getItem("uid") };
 
-    // setRank(JSON.parse(localStorage.getItem("saveRank")));
-    // setScore(JSON.parse(localStorage.getItem("saveScore")));
-    // setRankArray(JSON.parse(localStorage.getItem("saveRankArray")));
-    // setMostRuns(JSON.parse(localStorage.getItem("saveMaxRun")))
-    // setMostwickets(JSON.parse(localStorage.getItem("saveMaxWicket")));
+    if (localStorage.getItem("saveRank"))
+      setRank(JSON.parse(localStorage.getItem("saveRank")));
+
+    if (localStorage.getItem("saveScore"))
+      setScore(JSON.parse(localStorage.getItem("saveScore")));
+
+    if (localStorage.getItem("saveRankArray"))
+      setRankArray(JSON.parse(localStorage.getItem("saveRankArray")));
+
+    if (localStorage.getItem("saveMaxRun"))
+      setMostRuns(JSON.parse(localStorage.getItem("saveMaxRun")))
+
+    if (localStorage.getItem("saveMaxWicket"))
+      setMostwickets(JSON.parse(localStorage.getItem("saveMaxWicket")));
 
 
     const makeconnection = async () => {
@@ -94,8 +166,6 @@ export default function Dashboard() {
       sockConn.on("rank", (rank) => {
         // console.log(new Date());
         // console.log(localStorage.getItem("uid"))
-        
-
         const allRank = rank.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
         const userDetails = allRank.filter(x => x.uid === parseInt(localStorage.getItem("uid")));
         //console.log(allRank);
@@ -105,10 +175,13 @@ export default function Dashboard() {
           // console.log("Data available");
           setRank(userDetails[0].rank);
           setScore(userDetails[0].grandScore)
-          setRankArray(tableData(allRank));
           localStorage.setItem("saveRank", JSON.stringify(userDetails[0].rank));
           localStorage.setItem("saveScore", JSON.stringify(userDetails[0].grandScore));
-          localStorage.setItem("saveRankArray", JSON.stringify(tableData(allRank)));
+
+          // let myArray = tableData(allRank)
+          let myArray = allRank;
+          setRankArray(myArray);
+          localStorage.setItem("saveRankArray", JSON.stringify(myArray));
 
         } else if (localStorage.getItem("admin") === "true") {
           // current user is not member of the group but is ADMIN. Thus show the rank details
@@ -124,7 +197,7 @@ export default function Dashboard() {
         // console.log(runDetails)
         if (runDetails.length > 0) {
           setMostRuns(runDetails[0])
-          localStorage.setItem("saveMaxRun", JOSN.stringify(runDetails[0]));
+          localStorage.setItem("saveMaxRun", JSON.stringify(runDetails[0]));
         }
 
       });
@@ -136,7 +209,7 @@ export default function Dashboard() {
         // console.log(wicketDetails);
         if (wicketDetails.length > 0) {
           setMostwickets(wicketDetails[0]);
-          localStorage.setItem("saveMaxWicket", JOSN.stringify(wicketDetails[0]));
+          localStorage.setItem("saveMaxWicket", JSON.stringify(wicketDetails[0]));
         }
 
       });
@@ -234,6 +307,56 @@ export default function Dashboard() {
     //     return(<div></div>);        // no display if not a member
   } 
 
+  function OrgDisplayAllRank() {
+    return (
+      <Table
+      tableHeaderColor="warning"
+      tableHead={["Rank", "Franchise", "Owner", "Score"]}
+      tableData={rankArray}
+      />
+    );
+  }
+
+
+  function DisplayAllRank() {
+    return (
+      // <Grid container justify="center" alignItems="center" >
+      // <GridItem xs={12} sm={12} md={12} lg={12} >
+      <Table>
+        <TableHead>
+        <TableRow align="center">
+          <TableCell className={dashClasses.th} align="center">Rank</TableCell>
+          <TableCell className={dashClasses.th} align="center">Franchise</TableCell>
+          <TableCell className={dashClasses.th} align="center">Owner</TableCell>
+          <TableCell className={dashClasses.th} align="center">Score</TableCell>      
+        </TableRow>
+      </TableHead>
+      < TableBody>
+        {rankArray.map(item => {
+          return (
+            <TableRow key={item.rank}>
+              <TableCell  className={dashClasses.td} align="center" >
+                {item.rank}
+              </TableCell>
+              <TableCell  className={dashClasses.td} align="center" >
+                {item.displayName}
+              </TableCell>
+              <TableCell  className={dashClasses.td} align="center" >
+                {item.userName}
+              </TableCell>
+              <TableCell className={dashClasses.td} align="center" >
+                {item.grandScore}
+              </TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody> 
+    </Table>
+      // </GridItem>
+      // </Grid>
+    );
+  }
+
   function ShowUserRank() {
     return(
         <Card key="db_card">
@@ -244,32 +367,19 @@ export default function Dashboard() {
             </p>
           </CardHeader>
           <CardBody key="db_cbody">
-            <Table
-              tableHeaderColor="warning"
-              tableHead={["Rank", "Franchise", "Owner", "Score"]}
-              tableData={rankArray}
-            />
+            <DisplayAllRank />
           </CardBody>
         </Card>
     )
-    // else 
-    // return (
-    //     <Card>
-    //       <CardHeader color="warning">
-    //         <h4 className={classes.cardTitleWhite}>Not a member of this group</h4>
-    //       </CardHeader>
-    //     </Card>
-    // )
   }
 
-  const classes = useStyles();
-    if (hasGroup())
-      return (
-      <div>
-        <ShowUserBoard />
-        <ShowUserRank />
-      </div>
-      );
-    else
-        return <NoGroup/>  
+  if (hasGroup())
+    return (
+    <div>
+      <ShowUserBoard />
+      <ShowUserRank />
+    </div>
+    );
+  else
+      return <NoGroup/>  
 }

@@ -135,10 +135,10 @@ export default function Stats() {
           let currOver = 0;
           let currTitle = "";
           let currMatch = myOvers.team1 + " Vs. " + myOvers.team2;
-          if (myOvers.bowl4) { currOver = myOvers.bowl4;  currTitle = myOvers.title4 }
-          if (myOvers.bowl3) { currOver = myOvers.bowl3;  currTitle = myOvers.title3 }
-          if (myOvers.bowl2) { currOver = myOvers.bowl2;  currTitle = myOvers.title2 }
-          if (myOvers.bowl1) { currOver = myOvers.bowl1;  currTitle = myOvers.title1 }
+          if (myOvers.bowl4)      { currOver = myOvers.bowl4;  currTitle = myOvers.title4 }
+          else if (myOvers.bowl3) { currOver = myOvers.bowl3;  currTitle = myOvers.title3 }
+          else if (myOvers.bowl2) { currOver = myOvers.bowl2;  currTitle = myOvers.title2 }
+          else                    { currOver = myOvers.bowl1;  currTitle = myOvers.title1 }
           // currOver = currOver / 10;
           setIPLOvers(currOver);
           setIPLTitle(currTitle);
