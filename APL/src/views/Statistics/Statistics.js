@@ -127,6 +127,17 @@ export default function Stats() {
     setPlayerList(allPlayers);
   }
 
+  function saveSearchText() {
+    let myText = document.getElementById("searchText").value;
+    setSearchText(myText);
+  }
+
+  function restoreSearchText() {
+    let myId = document.getElementById("searchText");
+    myId.value = searchText;
+  }
+
+
   useEffect(() => {  
     if (localStorage.getItem("statData")) {
       let sData = JSON.parse(localStorage.getItem("statData"))
@@ -275,7 +286,7 @@ export default function Stats() {
   function handleSearchFieldOnChange() {
     // console.log("search presses");
     // console.log(searchText);
-    let myText = searchText.toUpperCase();
+    let myText = document.getElementById("searchText").value.toUpperCase()
     let userIdx = -1;
     for(let i=0; i< playerList.length; ++i) {
       let tmp = playerList[i].playerNames.findIndex(element => element.includes(myText));
@@ -286,17 +297,22 @@ export default function Stats() {
     setExpandedPanel(currUser);
   }
 
+  const handleChange = e => {
+    setSearchText(e.target.value);
+  };
+
   function DisplayFilter() {
     return (
       <div>
       <TextField
+        id="searchText"
         placeholder="Search"
         autoFocus
         type="text"
         variant="outlined"
         fullWidth
         size="small"
-        onChange={(e) => setSearchText(e.target.value)}
+        onChange={handleChange}
         value={searchText}
         InputProps={{
           endAdornment: searchText && (
