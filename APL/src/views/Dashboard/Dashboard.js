@@ -9,12 +9,17 @@ import { makeStyles } from "@material-ui/core/styles";
 // @material-ui/icons
 import SportsHandballIcon from '@material-ui/icons/SportsHandball';
 import TimelineIcon from '@material-ui/icons/Timeline';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import GroupIcon from '@material-ui/icons/Group';
 
 import Update from "@material-ui/icons/Update";
 
 import Accessibility from "@material-ui/icons/Accessibility";
 
+import Typography from '@material-ui/core/Typography';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
 
 // core components
 import Grid from "@material-ui/core/Grid";
@@ -141,6 +146,7 @@ export default function Dashboard() {
   const [iplovers, setIPLOvers] = useState("0");
   const [ipltitle, setIPLTitle] = useState("");
   const [iplmatch, setIPLMatch] = useState("");
+  const [teamArray, setTeamArray] = useState([]);
 
   const classes = useStyles();
   const dashClasses = useDashStyles();
@@ -165,15 +171,20 @@ export default function Dashboard() {
     if (localStorage.getItem("saveScore"))
       setScore(JSON.parse(localStorage.getItem("saveScore")));
 
-    if (localStorage.getItem("saveRankArray"))
-      setRankArray(JSON.parse(localStorage.getItem("saveRankArray")));
-
     if (localStorage.getItem("saveMaxRun"))
       setMostRuns(JSON.parse(localStorage.getItem("saveMaxRun")))
 
     if (localStorage.getItem("saveMaxWicket"))
       setMostwickets(JSON.parse(localStorage.getItem("saveMaxWicket")));
 
+    if (localStorage.getItem("statData")) {
+      let sData = JSON.parse(localStorage.getItem("statData"))
+      setTeamArray(sData);
+      // generatePlayerList(sData);
+    }
+
+    if (localStorage.getItem("saveRankArray"))
+      setRankArray(JSON.parse(localStorage.getItem("saveRankArray")));
 
     const makeconnection = async () => {
       await sockConn.connect();
@@ -239,6 +250,16 @@ export default function Dashboard() {
         }
 
       });
+
+      sockConn.on("brief", (stat) => {
+        var gStat = stat.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
+        if (gStat.length > 0) {
+          setTeamArray(gStat)
+          localStorage.setItem("statData", JSON.stringify(gStat));
+        }
+        // let myTime = new Date().toDateString() + " " + new Date().toLocaleTimeString();
+        // setUpdTime(myTime);
+      })
 
       sockConn.on("overs", (myOvers) => {
         // console.log(myOvers);
@@ -425,6 +446,57 @@ export default function Dashboard() {
     )
 }
 
+function DisplayFranchiseeDetails(props) {
+  return (
+    <Grid container justify="center" alignItems="center" >
+    <GridItem xs={12} sm={12} md={12} lg={12} >
+    <Table>
+      <TableHead>
+        <TableRow align="center">
+          <TableCell className={dashClasses.th} align="center">Player Name</TableCell>
+          <TableCell className={dashClasses.th} align="center">Score</TableCell>      
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {props.franchisee.map(item => {
+          return (
+            <TableRow key={item.playerName}>
+              <TableCell  className={dashClasses.td} align="center" >
+                {item.playerName}
+              </TableCell>
+              <TableCell className={dashClasses.td} align="center" >
+                {item.playerScore}
+              </TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody> 
+    </Table>
+    </GridItem>
+    </Grid>
+  )
+}
+
+const [expandedPanel, setExpandedPanel] = useState(false);
+const handleAccordionChange = (panel) => (event, isExpanded) => {
+  console.log({ event, isExpanded });
+  setExpandedPanel(isExpanded ? panel : false);
+};
+
+function ShowStats() {  
+  // console.log(teamArray);
+  return (teamArray.map(team =>
+  <Accordion key={"AC"+team.displayName} expanded={expandedPanel === team.displayName} onChange={handleAccordionChange(team.displayName)}>
+      <AccordionSummary key={"AS"+team.displayName} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+          <Typography className={dashClasses.heading}>{team.displayName} ({team.userScore})</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <DisplayFranchiseeDetails franchisee={team.playerStat} />
+      </AccordionDetails>
+  </Accordion>
+  ))
+}
+
   function ShowUserRank() {
     return(
         <Card key="db_card">
@@ -432,7 +504,8 @@ export default function Dashboard() {
             <ShowHeader />
           </CardHeader>
           <CardBody key="db_cbody">
-            <DisplayAllRank />
+            {/* <DisplayAllRank /> */}
+            <ShowStats/>
           </CardBody>
         </Card>
     )
