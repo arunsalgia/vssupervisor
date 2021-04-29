@@ -24,6 +24,8 @@ import TextField from '@material-ui/core/TextField';
 import { InputAdornment } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import IconButton from '@material-ui/core/IconButton';
+import Select from "@material-ui/core/Select";
+import MenuItem from '@material-ui/core/MenuItem';
 
 // import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
 import {orange, deepOrange}  from '@material-ui/core/colors';
@@ -106,17 +108,20 @@ export default function Stats() {
   const [searchText,setSearchText] = useState("")
   const [playerList, setPlayerList] = useState([]);
   const [firstTime, setFirstTime] = useState(true);
+  const [searchList, setSeachList] = useState([]);
   // const [statData, setStatData] = useState([]);
 
   function generatePlayerList(statData) {
     console.log("In generate");
     let allPlayers = [];
+    let myseachList = [""]
     for(let idx=0; idx < statData.length; ++idx) {
       let newPlayers = statData[idx].playerStat;      // franchisee.map(a => a.playerName);
       let newPlayerNames = [];
       for(let p=0; p<newPlayers.length; ++p) {
         //console.log(newPlayers[p].playerName);
         newPlayerNames.push(newPlayers[p].playerName.toUpperCase());
+        myseachList.push(newPlayers[p].playerName);
       }
       allPlayers.push({
         userName: statData[idx].displayName,
@@ -125,16 +130,7 @@ export default function Stats() {
     }
     // console.log(allPlayers);
     setPlayerList(allPlayers);
-  }
-
-  function saveSearchText() {
-    let myText = document.getElementById("searchText").value;
-    setSearchText(myText);
-  }
-
-  function restoreSearchText() {
-    let myId = document.getElementById("searchText");
-    myId.value = searchText;
+    setSeachList(myseachList);
   }
 
 
@@ -142,7 +138,7 @@ export default function Stats() {
     if (localStorage.getItem("statData")) {
       let sData = JSON.parse(localStorage.getItem("statData"))
       setTeamArray(sData);
-      generatePlayerList(sData);
+      // generatePlayerList(sData);
     }
     const makeconnection = async () => {
       await socket.connect();
@@ -163,8 +159,8 @@ export default function Stats() {
         if (gStat.length > 0) {
           setTeamArray(gStat)
           // console.log(first);
-          if (first) generatePlayerList(gStat);
-          first = false;
+          // if (first) generatePlayerList(gStat);
+          // first = false;
           localStorage.setItem("statData", JSON.stringify(gStat));
           // console.log(gStat);
         }
@@ -283,10 +279,12 @@ export default function Stats() {
     )
   };
 
-  function handleSearchFieldOnChange() {
+  function handleSearchFieldOnChange(playerName) {
     // console.log("search presses");
     // console.log(searchText);
-    let myText = document.getElementById("searchText").value.toUpperCase()
+    console.log(playerName);
+    setSearchText(playerName);
+    let myText = playerName.toUpperCase()
     let userIdx = -1;
     for(let i=0; i< playerList.length; ++i) {
       let tmp = playerList[i].playerNames.findIndex(element => element.includes(myText));
@@ -301,7 +299,7 @@ export default function Stats() {
     setSearchText(e.target.value);
   };
 
-  function DisplayFilter() {
+  function OldDisplayFilter() {
     return (
       <div>
       <TextField
@@ -326,6 +324,28 @@ export default function Stats() {
         }}
       />
       </div>
+    )
+  }
+
+  function DisplayFilter() {
+    // console.log(searchList);
+    return (
+      <Select labelId='searchItem' id='searchItem'
+        variant="outlined"
+        required
+        fullWidth
+        label="Serch Player"
+        name="searchItem"
+        value={searchText}
+        inputProps={{
+          name: 'Group',
+          id: 'filled-age-native-simple',
+        }}
+        onChange={(event) => setSearchText(event.target.value)}
+        >
+        {searchList.map(x =>
+          <MenuItem key={x} value={x}>{x}</MenuItem>)}
+      </Select>
     )
   }
 
@@ -355,7 +375,7 @@ export default function Stats() {
           <CardContent className={classes.cardContent}>
             <ShowCurrent />
             <Typography className={classes.cc2}>Updated as of {updTime}</Typography>
-            <DisplayFilter />
+            {/* <DisplayFilter /> */}
           </CardContent>
           {/* <CardBody key="db_cbody"> */}
             {/* <Table
