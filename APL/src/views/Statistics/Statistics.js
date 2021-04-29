@@ -20,6 +20,10 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
+import TextField from '@material-ui/core/TextField';
+import { InputAdornment } from '@material-ui/core';
+import SearchIcon from '@material-ui/icons/Search';
+import IconButton from '@material-ui/core/IconButton';
 
 // import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
 import {orange, deepOrange}  from '@material-ui/core/colors';
@@ -89,6 +93,7 @@ function leavingStatistics(myConn) {
   myConn.disconnect();
 }
 
+let first = true;
 export default function Stats() { 
   const classes = useStyles();
   const dashClasses = dashStyles();
@@ -98,12 +103,36 @@ export default function Stats() {
   const [ipltitle, setIPLTitle] = useState("");
   const [iplmatch, setIPLMatch] = useState("");
   const [updTime, setUpdTime] = useState("");
+  const [searchText,setSearchText] = useState("")
+  const [playerList, setPlayerList] = useState([]);
+  const [firstTime, setFirstTime] = useState(true);
   // const [statData, setStatData] = useState([]);
 
-  useEffect(() => {  
-    if (localStorage.getItem("statData"))
-      setTeamArray(JSON.parse(localStorage.getItem("statData")));
+  function generatePlayerList(statData) {
+    console.log("In generate");
+    let allPlayers = [];
+    for(let idx=0; idx < statData.length; ++idx) {
+      let newPlayers = statData[idx].playerStat;      // franchisee.map(a => a.playerName);
+      let newPlayerNames = [];
+      for(let p=0; p<newPlayers.length; ++p) {
+        //console.log(newPlayers[p].playerName);
+        newPlayerNames.push(newPlayers[p].playerName.toUpperCase());
+      }
+      allPlayers.push({
+        userName: statData[idx].displayName,
+        playerNames: newPlayerNames
+      })
+    }
+    // console.log(allPlayers);
+    setPlayerList(allPlayers);
+  }
 
+  useEffect(() => {  
+    if (localStorage.getItem("statData")) {
+      let sData = JSON.parse(localStorage.getItem("statData"))
+      setTeamArray(sData);
+      generatePlayerList(sData);
+    }
     const makeconnection = async () => {
       await socket.connect();
     }
@@ -122,6 +151,9 @@ export default function Stats() {
         var gStat = stat.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
         if (gStat.length > 0) {
           setTeamArray(gStat)
+          // console.log(first);
+          if (first) generatePlayerList(gStat);
+          first = false;
           localStorage.setItem("statData", JSON.stringify(gStat));
           // console.log(gStat);
         }
@@ -161,7 +193,7 @@ export default function Stats() {
 
   const [expandedPanel, setExpandedPanel] = useState(false);
   const handleAccordionChange = (panel) => (event, isExpanded) => {
-    // console.log({ event, isExpanded });
+    console.log({ event, isExpanded });
     setExpandedPanel(isExpanded ? panel : false);
   };
 
@@ -239,7 +271,48 @@ export default function Stats() {
       </Card>
     )
   };
-  
+
+  function handleSearchFieldOnChange() {
+    // console.log("search presses");
+    // console.log(searchText);
+    let myText = searchText.toUpperCase();
+    let userIdx = -1;
+    for(let i=0; i< playerList.length; ++i) {
+      let tmp = playerList[i].playerNames.findIndex(element => element.includes(myText));
+      if (tmp >= 0) { userIdx = i; break; }
+    }
+    let currUser = (userIdx >= 0) ? playerList[userIdx].userName : "";
+    // console.log(currUser); 
+    setExpandedPanel(currUser);
+  }
+
+  function DisplayFilter() {
+    return (
+      <div>
+      <TextField
+        placeholder="Search"
+        autoFocus
+        type="text"
+        variant="outlined"
+        fullWidth
+        size="small"
+        onChange={(e) => setSearchText(e.target.value)}
+        value={searchText}
+        InputProps={{
+          endAdornment: searchText && (
+            <IconButton
+              aria-label="toggle password visibility"
+              onClick={handleSearchFieldOnChange}
+            >
+              <SearchIcon />
+            </IconButton>
+          )
+        }}
+      />
+      </div>
+    )
+  }
+
   function ShowCurrent() {
     if (iplovers > 0)
       return (
@@ -266,6 +339,7 @@ export default function Stats() {
           <CardContent className={classes.cardContent}>
             <ShowCurrent />
             <Typography className={classes.cc2}>Updated as of {updTime}</Typography>
+            <DisplayFilter />
           </CardContent>
           {/* <CardBody key="db_cbody"> */}
             {/* <Table

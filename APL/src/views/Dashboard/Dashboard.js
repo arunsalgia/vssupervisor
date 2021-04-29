@@ -42,6 +42,7 @@ import {hasGroup} from "views/functions.js";
 import { NoGroup } from 'CustomComponents/CustomComponents.js';
 import {orange, deepOrange}  from '@material-ui/core/colors';
 
+const CardColor = "#ff9800";
 
 
 const useStyles = makeStyles(styles);
@@ -77,8 +78,30 @@ const useDashStyles = makeStyles((theme) => ({
     padding: "none",
     //height: 20,
   },
+  dashTitleWhite: {
+    color: theme.palette.getContrastText(CardColor),
+    marginTop: "0px",
+    minHeight: "auto",
+    fontWeight: "300",
+    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+    marginBottom: "3px",
+    textDecoration: "none",
+    "& small": {
+      // color: grayColor[1],
+      color: theme.palette.getContrastText(CardColor),
+      fontWeight: "400",
+      lineHeight: "1"
+    }
+  },
+  dashCategoryWhite: {
+    color: theme.palette.getContrastText(CardColor),
+    margin: "0",
+    fontSize: "14px",
+    marginTop: "0",
+    marginBottom: "0"
+  },
   cc0: {
-    // color: theme.palette.getContrastText(deepOrange[500]),
+    color: theme.palette.getContrastText(CardColor),
     fontWeight: theme.typography.fontWeightBold,
     fontSize: '14px',
     margin: theme.spacing(0, 0, 0),
@@ -385,19 +408,19 @@ export default function Dashboard() {
     if (iplovers > 0)
       return (
         <div>
-          <h4 className={classes.cardTitleWhite}>Franchise Score Board</h4>
-          <p className={classes.cardCategoryWhite}>{iplmatch}</p>
-          <p className={classes.cardCategoryWhite}>Points last updated after {iplovers} overs</p>
-          <p className={classes.cardCategoryWhite}>{`Updated as of ${date}`}</p>
+          <h4 className={dashClasses.dashTitleWhite}>Franchise Score Board</h4>
+          <p className={dashClasses.dashCategoryWhite}>{iplmatch}</p>
+          <p className={dashClasses.dashCategoryWhite}>Points last updated after {iplovers} overs</p>
+          <p className={dashClasses.dashCategoryWhite}>{`Updated as of ${date}`}</p>
         </div>
       )
     else
     return (
       <div>
-        <h4 className={classes.cardTitleWhite}>Franchise Score Board</h4>
-        {/* <p className={classes.cardCategoryWhite}>{iplmatch}</p>
-        <p className={classes.cardCategoryWhite}>Points last updated after {iplovers} overs</p> */}
-        <p className={classes.cardCategoryWhite}>{`Updated as of ${date}`}</p>
+        <h4 className={dashClasses.dashTitleWhite}>Franchise Score Board</h4>
+        {/* <p className={classes.dashCategoryWhite}>{iplmatch}</p>
+        <p className={classes.dashCategoryWhite}>Points last updated after {iplovers} overs</p> */}
+        <p className={dashClasses.dashCategoryWhite}>{`Updated as of ${date}`}</p>
       </div>
     )
 }
