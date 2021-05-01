@@ -18,7 +18,7 @@ import { UserContext } from "../../UserContext";
 import axios from "axios";
 import red from '@material-ui/core/colors/red';
 import { DesktopWindows } from '@material-ui/icons';
-import { cdRefresh, specialSetPos, encrypt } from "views/functions.js"
+import { cdRefresh, specialSetPos, encrypt, clearBackupData } from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { CricDreamLogo } from 'CustomComponents/CustomComponents.js';
 import { BlankArea } from 'CustomComponents/CustomComponents';
@@ -120,6 +120,8 @@ export default function SignIn() {
       window.localStorage.setItem("userPlan", userPlan);
       window.localStorage.setItem("SNG", "");
       window.localStorage.setItem("cGroup", "");
+
+      clearBackupData();
       // setUser({ uid: myUID, admin: response.data.admin });
       // cdRefresh(true);
       //let newPos = specialSetPos();

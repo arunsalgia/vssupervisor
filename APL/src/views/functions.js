@@ -218,3 +218,15 @@ export async function upGradeRequired() {
   // console.log(`Latest upgrade: ${upGrade}`);
   return (upGrade);
 }
+
+export function clearBackupData() {
+  /* Clear dash board items */
+  localStorage.removeItem("saveRank");
+  localStorage.removeItem("saveScore");
+  localStorage.removeItem("saveMaxRun");
+  localStorage.removeItem("saveMaxWicket");
+  localStorage.removeItem("statData");
+  localStorage.removeItem("saveRankArray");
+  /* Clear Stat items */
+  localStorage.removeItem("statData");
+}

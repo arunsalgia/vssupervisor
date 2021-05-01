@@ -18,7 +18,7 @@ import Typography from '@material-ui/core/Typography';
 // import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useHistory } from "react-router-dom";
 import { UserContext } from "../../UserContext";
-import { cdCurrent, cdDefault, hasGroup, getUserBalance} from "views/functions.js"
+import { cdCurrent, cdDefault, hasGroup, clearBackupData} from "views/functions.js"
 import {BlankArea, NothingToDisplay, DisplayBalance} from "CustomComponents/CustomComponents.js"
 import {red, blue, green } from '@material-ui/core/colors';
 import {setTab} from "CustomComponents/CricDreamTabs.js"
@@ -70,7 +70,7 @@ export default function Group() {
     const [newDefaultGroup, setNewDefaultGroup] = useState("");
     // const history = useHistory();
     const [balance, setBalance] = useState(0);
-
+    const [originalDefaultGroup, setOriginalDefaultGroup] = useState("");
       
     useEffect(() => {
         const a = async () => {
@@ -86,6 +86,7 @@ export default function Group() {
                 let tmp = allGroups.find(x => x.defaultGroup == true);
                 if (tmp) {
                     setNewDefaultGroup(tmp.groupName);
+                    setOriginalDefaultGroup(tmp.groupName);
                 } else {
                     localStorage.setItem("gid", allGroups[0].gid.toString());
                     localStorage.setItem("groupName", allGroups[0].groupName);
@@ -156,6 +157,8 @@ export default function Group() {
             localStorage.setItem("groupName", gRec.groupName);
             localStorage.setItem("tournament", gRec.tournament);
             localStorage.setItem("admin", gRec.admin);
+
+            clearBackupData();
         } catch (e) {
             console.log(e);
         } 
@@ -247,12 +250,6 @@ export default function Group() {
             {/* <DisplayBalance balance={balance} /> */}
             <ShowPageHeader />
             <ShowAllGroups />
-            {/* <Button key={"create"} variant="contained" color="primary" size="small"
-                className={classes.button} onClick={handleNewGroup}>New Group
-            </Button>
-            <Button key={"progile"} variant="contained" color="primary" size="small"
-               className={classes.button} onClick={handleJoinGroup}>Join Group
-            </Button> */}
         </div>
         );
     
