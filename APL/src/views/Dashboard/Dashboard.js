@@ -134,6 +134,7 @@ function leavingDashboard(myConn) {
 }
 
 
+let first =  true;
 
 export default function Dashboard() {
 
@@ -254,8 +255,15 @@ export default function Dashboard() {
       sockConn.on("brief", (stat) => {
         var gStat = stat.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
         if (gStat.length > 0) {
+          for(let rank=0; rank < gStat.length; ++rank) {
+            gStat[rank]["rank"] = rank+1;
+          }
           setTeamArray(gStat)
           localStorage.setItem("statData", JSON.stringify(gStat));
+          if (first) {
+            console.log(gStat);
+            first = false;
+          }
         }
         // let myTime = new Date().toDateString() + " " + new Date().toLocaleTimeString();
         // setUpdTime(myTime);
@@ -488,7 +496,8 @@ function ShowStats() {
   return (teamArray.map(team =>
   <Accordion key={"AC"+team.displayName} expanded={expandedPanel === team.displayName} onChange={handleAccordionChange(team.displayName)}>
       <AccordionSummary key={"AS"+team.displayName} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-          <Typography className={dashClasses.heading}>{team.displayName} ({team.userScore})</Typography>
+          <Typography className={dashClasses.heading}>{team.rank}-{team.userName} </Typography>
+          <Typography className={dashClasses.heading}>Rank-{team.rank} Score({team.userScore})</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <DisplayFranchiseeDetails franchisee={team.playerStat} />
@@ -504,8 +513,8 @@ function ShowStats() {
             <ShowHeader />
           </CardHeader>
           <CardBody key="db_cbody">
-            {/* <DisplayAllRank /> */}
-            <ShowStats/>
+            <DisplayAllRank />
+            {/* <ShowStats/> */}
           </CardBody>
         </Card>
     )
