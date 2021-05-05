@@ -136,6 +136,7 @@ export default function CreateGroup() {
   const [balance, setBalance] = useState(0);
   const [prizeCount, setPrizeCount] = useState(1);
   const [prizeTable, setPrizeTable] = useState([]);
+  const [auctionCoins, setAuctionCoins] = useState(1000);
   const [masterPrizeTable, setMasterPrizeTable] = useState([]);
   const [newGid, setNewGid] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -393,18 +394,6 @@ export default function CreateGroup() {
           value={groupName}
       />
       <BlankArea/>
-      {/* <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="Maximum Bid Amount"
-          onChange={(event) => setBidAmount(event.target.value)}
-          name="bidamount"
-          type="number"
-          validators={['required', 'minNumber:1000', 'maxNumber:5000']}
-          errorMessages={['Bid Amount to be provided', 'Bid Amount cannot be less than 1000', 'Bid Amount cannot be greater than 5000']}
-          value={bidAmount}
-      /> */}
       <div>
       <TextValidator
           variant="outlined"
@@ -433,6 +422,20 @@ export default function CreateGroup() {
           errorMessages={['Member count to be provided', 'Member fee cannot be less than 50', 'Insufficient Balance']}
           value={memberFee}
       />
+      <BlankArea/>
+      <TextValidator
+          variant="outlined"
+          required
+          fullWidth      
+          // size="small"  
+          label="Auction Coins"
+          onChange={(event) => setBidAmount(event.target.value)}
+          name="auctioncoins"
+          type="number"
+          validators={['required', 'minNumber:1000', 'maxNumber:10000']}
+          errorMessages={['Member count to be provided', 'Auction Coins cannot be less than 1000', 'Auction Coins cannot be more than 10000']}
+          value={bidAmount}
+      />
       </div>
       <BlankArea/>
       <Select labelId='tournament' id='tournament'
@@ -448,7 +451,7 @@ export default function CreateGroup() {
         {tournamentData.map(x =>
         <MenuItem key={x.name} value={x.name}>{x.name}</MenuItem>)}
       </Select>
-      <BlankArea/>
+      <BlankArea/> 
       <ShowResisterStatus/>
       <BlankArea/>
       <div align="center">
@@ -462,7 +465,7 @@ export default function CreateGroup() {
     </ValidatorForm>
     </div>
     <ChildComp p1={balance} p3={selectedTournament}/>   
-    <BlankArea/> 
+    <BlankArea/>
     <SelectPrizeCount/>
     <BlankArea />
     <DisplayGroupCode/>

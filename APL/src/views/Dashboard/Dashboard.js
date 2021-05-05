@@ -1,5 +1,5 @@
 import React from "react";
-// import axios from "axios";
+import axios from "axios";
 // react plugin for creating charts
 
 // @material-ui/core
@@ -11,7 +11,7 @@ import SportsHandballIcon from '@material-ui/icons/SportsHandball';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import GroupIcon from '@material-ui/icons/Group';
-
+import Button from '@material-ui/core/Button';
 import Update from "@material-ui/icons/Update";
 
 import Accessibility from "@material-ui/icons/Accessibility";
@@ -44,11 +44,28 @@ import CardFooter from "components/Card/CardFooter.js";
 import socketIOClient from "socket.io-client";
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
 import {hasGroup} from "views/functions.js";
-import { NoGroup } from 'CustomComponents/CustomComponents.js';
-import {orange, deepOrange}  from '@material-ui/core/colors';
+import { NoGroup, BlankArea } from 'CustomComponents/CustomComponents.js';
+import { blue, orange, deepOrange}  from '@material-ui/core/colors';
+import { getTsBuildInfoEmitOutputFilePath } from "typescript";
+
+import Modal from 'react-modal';
 
 const CardColor = "#ff9800";
 
+const modelStyles = {
+  content : {
+    top                   : '50%',
+    left                  : '50%',
+    right                 : 'auto',
+    bottom                : 'auto',
+    marginRight           : '-50%',
+    marginBottom          : '-50%',
+    transform             : 'translate(-50%, -50%)',
+    background            : '#000000',
+    color                 : '#FFFFFF',
+    transparent           : false,   
+  }
+};
 
 const useStyles = makeStyles(styles);
 
@@ -126,6 +143,35 @@ const useDashStyles = makeStyles((theme) => ({
     // color: theme.palette.getContrastText(deepOrange[500]),
     // fontWeight: theme.typography.fontWeightBold,
   },
+  modalContainer: {
+    content: "",
+    opacity: 0.8,
+    // background: rgb(26, 31, 41) url("your picture") no-repeat fixed top;
+    // background-blend-mode: luminosity;
+    /* also change the blend mode to what suits you, from darken, to other 
+    many options as you deem fit*/
+    // background-size: cover;
+    // top: 0;
+    // left: 0;
+    // right: 0;
+    // bottom: 0;
+    // position: absolute;
+    // z-index: -1;
+    // height: 500px;
+  },
+  modalTitle: {
+    color: blue[700],
+    fontSize: theme.typography.pxToRem(20),
+    fontWeight: theme.typography.fontWeightBold,
+  },
+  modalMessage: {
+    //color: blue[700],
+    fontSize: theme.typography.pxToRem(14),
+    //fontWeight: theme.typography.fontWeightBold,
+  },
+  modalbutton: {
+    margin: theme.spacing(2, 2, 2),
+  },
 })); 
 
 function leavingDashboard(myConn) {
@@ -148,7 +194,8 @@ export default function Dashboard() {
   const [ipltitle, setIPLTitle] = useState("");
   const [iplmatch, setIPLMatch] = useState("");
   const [teamArray, setTeamArray] = useState([]);
-
+  const [currentGuide, setCurrentGuide] = useState({guideNumber: 0});
+  const [maxGuide, setMaxGuide] = useState(0);
   const classes = useStyles();
   const dashClasses = useDashStyles();
 
@@ -291,15 +338,81 @@ export default function Dashboard() {
       });
     });
 
+    async function getGuide() {
+      try {
+        let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/apl/getmaxguide`;
+        // console.log(myURL);
+        let response = await axios.get(myURL);
+        console.log(response);
+        setMaxGuide(parseInt(response.data));
+        let tmp = await getNextGuide();
+        if (tmp) {
+          console.log(tmp);
+          openModal();
+        } else
+          closeModal();
+      } catch(e) {
+        console.log(e);
+        setCurrentGuide({guideNumber: 0});
+        closeModal();
+      }
+    }
+
+    //getGuide();
     return () => {
       // componentwillunmount in functional component.
       // Anything in here is fired on component unmount.
       leavingDashboard(sockConn);
-  }
+    }
    
 
   }, []);
 // }, [rankArray]);
+
+  async function getNextGuide() {
+    let myGuide;
+    try {
+    let tmp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/getnextguide/${localStorage.getItem("uid")}`);
+      myGuide = tmp.data;
+      setCurrentGuide(myGuide);
+      // myNum = myGuide.data.guideNUmber;
+    } catch (e) {
+      setCurrentGuide({guideNumber: 0});
+      // myNum = 0;
+      console.log(e);
+    }
+    return myGuide;
+  }
+
+  async function getPrevGuide() {
+    let myNum;
+    try {
+    let myGuide = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/getprevguide/${localStorage.getItem("uid")}`);
+      setCurrentGuide(myGuide.data);
+      myNum = myGuide.data.guideNUmber;
+      openModal();  
+    } catch (e) {
+      setCurrentGuide({guideNumber: 0});
+      myNum = 0;
+      console.log(e);
+    }
+    return myNum;
+  }
+
+  const [modalIsOpen,setIsOpen] = React.useState(false);
+  function openModal() {
+    setIsOpen(true);
+  }
+
+  function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    //subtitle.style.color = '#f00';
+  }
+
+  function closeModal(){
+    setIsOpen(false);
+  }
+
 
   function ShowUserBoard() {
     // if (localStorage.getItem("ismember") === "true")
@@ -410,7 +523,7 @@ export default function Dashboard() {
       < TableBody p={0}>
         {rankArray.map(item => {
           return (
-            <TableRow key={item.rank}>
+            <TableRow key={item.userName}>
               <TableCell  className={dashClasses.td} p={0} align="center" >
                 {item.rank}
               </TableCell>
@@ -520,13 +633,60 @@ function ShowStats() {
     )
   }
 
+  async function handleNextGuide() {
+    let myNum = await getNextGuide();
+    if (myNum === 0) closeModal();
+  }
+
+  async function handlePrevGuide() {
+    let myNum = await getPrevGuide();
+    if (myNum === 0) closeModal();
+  }
+
+
+  function ShowGuide() {
+    return (
+    <form>
+      <Typography id="modalTitle" className={dashClasses.modalTitle} align="center">{currentGuide.guideTitle}</Typography>
+      <BlankArea />
+      <p align="ceter">{currentGuide.guideText}</p>
+      <BlankArea />
+      <div align="center">
+        <Button key={"prevGuide"} variant="contained" color="primary" size="small"
+          disabled={currentGuide.guideNumber === 1}
+          className={classes.modalbutton} onClick={handlePrevGuide}>Prev
+        </Button>
+        <Button key="nextGuide" variant="contained" color="primary" size="small"
+          disabled={currentGuide.guideNumber === maxGuide}        
+          className={classes.modalbutton} onClick={handleNextGuide}>Next
+      </Button>
+      </div>
+    </form>  
+    )
+  }
+
   if (hasGroup())
     return (
     <div>
       <ShowUserBoard />
       <ShowUserRank />
+      <div className={dashClasses.modalContainer} >
+        <Modal
+          isOpen={modalIsOpen}
+          onAfterOpen={afterOpenModal}
+          onRequestClose={closeModal}
+          style={modelStyles}
+          contentLabel="Example Modal"
+          aria-labelledby="modalTitle"
+          aria-describedby="modalDescription"
+        >
+          <ShowGuide />
+        </Modal>
+      </div>
     </div>
     );
   else
-      return <NoGroup/>  
+    return (
+    <NoGroup/>  
+    )
 }

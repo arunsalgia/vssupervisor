@@ -6,7 +6,7 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from '@material-ui/core/CardHeader';
@@ -27,14 +27,38 @@ import IconButton from '@material-ui/core/IconButton';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
 
+import axios from "axios";
+import Button from '@material-ui/core/Button';
+import Modal from 'react-modal';
+import Checkbox from '@material-ui/core/Checkbox';
+// import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+// import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+
 // import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
-import {orange, deepOrange}  from '@material-ui/core/colors';
+import {blue, orange, deepOrange}  from '@material-ui/core/colors';
 
 import socketIOClient from "socket.io-client";
 import { NoGroup, DisplayPageHeader, 
+  BlankArea,
   ShowCreateGroup, ShowJoinGroup, ShowAuctionGroup, ShowCaptainGroup, ShowMultipleGroup
 } from 'CustomComponents/CustomComponents.js';
 // import {socketPoint} from "views/functions.js";
+
+const modalStyles = {
+  content : {
+    top                   : '50%',
+    left                  : '50%',
+    right                 : 'auto',
+    bottom                : 'auto',
+    marginRight           : '-50%',
+    marginBottom          : '-50%',
+    transform             : 'translate(-50%, -50%)',
+    background            : '#000000',
+    color                 : '#FFFFFF',
+    transparent           : false,   
+  }
+};
 
 const dashStyles = makeStyles(styles);
 
@@ -87,8 +111,46 @@ const useStyles = makeStyles((theme) => ({
     // color: theme.palette.getContrastText(deepOrange[500]),
     // fontWeight: theme.typography.fontWeightBold,
   },
+  modalContainer: {
+    content: "",
+    opacity: 0.8,
+    // background: rgb(26, 31, 41) url("your picture") no-repeat fixed top;
+    // background-blend-mode: luminosity;
+    /* also change the blend mode to what suits you, from darken, to other 
+    many options as you deem fit*/
+    // background-size: cover;
+    // top: 0;
+    // left: 0;
+    // right: 0;
+    // bottom: 0;
+    // position: absolute;
+    // z-index: -1;
+    // height: 500px;
+  },
+  modalTitle: {
+    color: blue[700],
+    fontSize: theme.typography.pxToRem(20),
+    fontWeight: theme.typography.fontWeightBold,
+  },
+  modalMessage: {
+    //color: blue[700],
+    fontSize: theme.typography.pxToRem(14),
+    //fontWeight: theme.typography.fontWeightBold,
+  },
+  modalbutton: {
+    margin: theme.spacing(2, 2, 2),
+  },
 })); 
   
+const BlueCheckbox = withStyles({
+  root: {
+    color: blue[700],
+    '&$checked': {
+      color: blue[700],
+    },
+  },
+  checked: {},
+})((props) => <Checkbox color="default" {...props} />);
 
 function leavingStatistics(myConn) {
   console.log("Leaving Statistics wah wah ");
@@ -107,9 +169,12 @@ export default function Stats() {
   const [updTime, setUpdTime] = useState("");
   const [searchText,setSearchText] = useState("")
   const [playerList, setPlayerList] = useState([]);
-  const [firstTime, setFirstTime] = useState(true);
+  // const [firstTime, setFirstTime] = useState(true);
   const [searchList, setSeachList] = useState([]);
   // const [statData, setStatData] = useState([]);
+  const [currentGuide, setCurrentGuide] = useState({guideNumber: 0});
+  const [maxGuide, setMaxGuide] = useState(0);
+
 
   function generatePlayerList(statData) {
     console.log("In generate");
@@ -190,6 +255,27 @@ export default function Stats() {
       })
     });
 
+    async function getGuide() {
+      try {
+        let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/apl/getmaxguide`;
+        // console.log(myURL);
+        let response = await axios.get(myURL);
+        console.log(response);
+        setMaxGuide(parseInt(response.data));
+        let tmp = await getNextGuide();
+        if (tmp) {
+          console.log(tmp);
+          openModal();
+        } else
+          closeModal();
+      } catch(e) {
+        console.log(e);
+        setCurrentGuide({guideNumber: 0});
+        closeModal();
+      }
+    }
+    getGuide();
+
     return () => {
       // componentwillunmount in functional component.
       // Anything in here is fired on component unmount.
@@ -197,6 +283,46 @@ export default function Stats() {
     }
   }, []);
 
+  async function getNextGuide() {
+    let myGuide;
+    try {
+    let tmp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/getnextguide/${localStorage.getItem("uid")}`);
+      myGuide = tmp.data;
+      setCurrentGuide(myGuide);
+      // myNum = myGuide.data.guideNUmber;
+    } catch (e) {
+      setCurrentGuide({guideNumber: 0});
+      // myNum = 0;
+      console.log(e);
+    }
+    return myGuide;
+  }
+
+  async function getPrevGuide() {
+    let myNum;
+    try {
+    let myGuide = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/getprevguide/${localStorage.getItem("uid")}`);
+      setCurrentGuide(myGuide.data);
+      myNum = myGuide.data.guideNUmber;
+      openModal();  
+    } catch (e) {
+      setCurrentGuide({guideNumber: 0});
+      myNum = 0;
+      console.log(e);
+    }
+    return myNum;
+  }
+
+  const [modalIsOpen,setIsOpen] = React.useState(false);
+  
+  function openModal() { setIsOpen(true); }
+  function closeModal() { setIsOpen(false); }
+  function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    //subtitle.style.color = '#f00';
+  }
+
+  
 
   const [expandedPanel, setExpandedPanel] = useState(false);
   const handleAccordionChange = (panel) => (event, isExpanded) => {
@@ -444,16 +570,99 @@ export default function Stats() {
       </Accordion>
       ))
   }
+
+  async function handleNextGuide() {
+    let myNum = await getNextGuide();
+    if (myNum === 0) closeModal();
+  }
+
+  async function handlePrevGuide() {
+    let myNum = await getPrevGuide();
+    if (myNum === 0) closeModal();
+  }
+
+  async function handleDisableGuide() {
+    try {
+      await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/disableguide/${localStorage.getItem("uid")}`);
+      closeModal();
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  function ShowGuide() {
+    return (
+    <form>
+      <Typography id="modalTitle" className={classes.modalTitle} align="center">{currentGuide.guideTitle}</Typography>
+      <BlankArea />
+      <p align="center" className={classes.modalMessage}>{currentGuide.guideText}</p>
+      <BlankArea />
+      <div align="center" >
+        <Button key="prevGuide" variant="contained" color="primary" size="small"
+          disabled={currentGuide.guideNumber === 1}
+          className={classes.modalbutton} onClick={handlePrevGuide}>Prev
+        </Button>
+        <Button key="nextGuide" variant="contained" color="primary" size="small"
+          disabled={currentGuide.guideNumber === maxGuide}        
+          className={classes.modalbutton} onClick={handleNextGuide}>Next
+      </Button>
+      <BlankArea />
+      <FormControlLabel
+        control={
+          <BlueCheckbox
+            checked={false}
+            onChange={handleDisableGuide}
+            name="checkedB"
+            color="primary"
+          />
+        }
+        label="Do not show Guide again"
+      />
+      </div>
+    </form>  
+    )
+  }
+
   if (localStorage.getItem("tournament").length > 0)
   return (
     <div className={classes.root}>
       <DisplayPageHeader headerName="Statistics" groupName={localStorage.getItem("groupName")} tournament={localStorage.getItem("tournament")}/>
       <ShowStatCard />
       <ShowStats/>
+      <div className={classes.modalContainer} >
+        <Modal
+          isOpen={modalIsOpen}
+          onAfterOpen={afterOpenModal}
+          onRequestClose={closeModal}
+          style={modalStyles}
+          contentLabel="Example Modal"
+          aria-labelledby="modalTitle"
+          aria-describedby="modalDescription"
+        >
+          <ShowGuide />
+        </Modal>
+      </div>
     </div>
   );
   else
-    return <NoGroup/>;
+    return (
+    <div>
+      <NoGroup/>
+      <div className={classes.modalContainer} >
+        <Modal
+          isOpen={modalIsOpen}
+          onAfterOpen={afterOpenModal}
+          onRequestClose={closeModal}
+          style={modalStyles}
+          contentLabel="Example Modal"
+          aria-labelledby="modalTitle"
+          aria-describedby="modalDescription"
+        >
+          <ShowGuide />
+        </Modal>
+      </div>
+    </div>
+    );
 };
 
 
