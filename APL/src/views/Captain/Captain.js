@@ -137,8 +137,8 @@ export default function Captain() {
             if (response.data > 0) {
                 // console.log("GT0");
                 setTournamentStarted(false);
-                // setTimeLeft(response.data)
-                setTimeLeft(90);
+                setTimeLeft(response.data)
+                // setTimeLeft(90);
             } else {
                 // console.log("LT0");
                 setTournamentStarted(true);
