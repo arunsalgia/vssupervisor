@@ -237,14 +237,17 @@ export default function Group() {
     }
 
     function ShowPageHeader() {
-    return(
-        <div className={classes.root} align="center">
-            <h3>My Groups</h3>
-            {/* <Typography className={classes.messageText}>{curr}</Typography> */}
-            {/* <Typography className={classes.messageText}>{clickmsg}</Typography> */}
-        </div>
-    )}
-    console.log(`currrent group ${localStorage.getItem("groupName")}`)
+        return(
+            <div className={classes.root} align="center">
+                <h3>My Groups</h3>
+                {/* <Typography className={classes.messageText}>{curr}</Typography> */}
+                {/* <Typography className={classes.messageText}>{clickmsg}</Typography> */}
+            </div>
+        );
+    }
+
+
+    // console.log(`currrent group ${localStorage.getItem("groupName")}`)
     return (
         <div className={classes.root} align="center" key="groupinfo">
             {/* <DisplayBalance balance={balance} /> */}

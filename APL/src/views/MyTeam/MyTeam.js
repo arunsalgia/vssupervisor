@@ -109,7 +109,11 @@ export default function MyTeam() {
   const classes = useStyles();
   const [teamArray, setTeamArray] = useState([]);
 
+
   useEffect(() => {
+    if (localStorage.getItem("team")) 
+    setTeamArray(JSON.parse(localStorage.getItem("team")));
+
     const fetchTeam = async () => {
       try {
           var myTeamUrl = "";
@@ -117,6 +121,7 @@ export default function MyTeam() {
           {
               var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/myteam/${localStorage.getItem("gid")}/${localStorage.getItem("uid")}`);
               setTeamArray(response.data);
+              localStorage.setItem("team", JSON.stringify(response.data));
           }
       } catch (e) {
           console.log(e)

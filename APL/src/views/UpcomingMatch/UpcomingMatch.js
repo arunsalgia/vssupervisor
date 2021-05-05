@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
-import Table from "components/Table/Table.js";
+// import Table from "components/Table/Table.js";
+import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
@@ -15,7 +16,7 @@ import CardBody from "components/Card/CardBody.js";
 import Avatar from "@material-ui/core/Avatar";
 import Paper from "@material-ui/core/Paper";
 import Typography from '@material-ui/core/Typography';
-import {red, blue} from '@material-ui/core/colors';
+import {red, blue, deepOrange} from '@material-ui/core/colors';
 import { NothingToDisplay, NoGroup, DisplayPageHeader } from 'CustomComponents/CustomComponents.js';
 import {hasGroup} from 'views/functions'
 
@@ -87,6 +88,22 @@ const useStyles = makeStyles((theme) => ({
         alignItems: 'center',
         marginTop: '0px',
     },
+    th: { 
+        spacing: 0,
+        align: "center",
+        padding: "none",
+        backgroundColor: '#EEEEEE', 
+        color: deepOrange[700], 
+        // border: "1px solid black",
+        fontWeight: theme.typography.fontWeightBold,
+      },
+    td : {
+        spacing: 0,
+        // border: 5,
+        align: "center",
+        padding: "none",
+        height: 10,
+    },        
   }));
 
 
@@ -166,22 +183,38 @@ export default function MatchInfo() {
     }
 
     function MatchTable(props) {
-        //console.log(props.myTable)
         if (props.myTable.length > 0)
-            return (
-                <Table
-                tableHeaderColor="warning"
-                tableHead={["Teams", "Time"]}
-                tableData={props.myTable.map(mmm => {
-                    const arr = [ mmm.team1 + " Vs. " + mmm.team2, mmm.matchTime]
-                    return { data: arr, collapse: [] }
+        return (
+            <Table>
+            <TableHead p={0}>
+                <TableRow align="center">
+                <TableCell className={classes.th} p={0} align="center">Teams</TableCell>
+                <TableCell className={classes.th} p={0} align="center">Time</TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody p={0}>
+                {props.myTable.map(x => {
+                    return (
+                        <TableRow key={x.matchTime} align="center">
+                        <TableCell  className={classes.td} p={0} align="center" >
+                            {x.team1 + " Vs. " + x.team2}
+                        </TableCell>
+                        <TableCell  className={classes.td} p={0} align="center" >
+                            {x.matchTime}
+                        </TableCell>
+                        </TableRow>
+                    )
                 })}
-                />
-            );
+            </TableBody>
+            </Table>
+        );
         else
             return <NothingToDisplay />
     }
 
+    /***
+
+     */
     function ShowCurrentMatch() {
         var myHeader = "Match running just now";    // : "Currently No Matches running";
         return(

@@ -229,4 +229,10 @@ export function clearBackupData() {
   localStorage.removeItem("saveRankArray");
   /* Clear Stat items */
   localStorage.removeItem("statData");
+  /* clear team */
+  localStorage.removeItem("team");
+  /* clear captain */
+  localStorage.removeItem("captain");
+  localStorage.removeItem("viceCaptain");
+  localStorage.removeItem("captainList");
 }
