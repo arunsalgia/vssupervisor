@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     },
     captain: {
         color: "yellow",
-    },     
+    },
     heading: {
       fontSize: theme.typography.pxToRem(15),
       flexBasis: '33.33%',
@@ -79,8 +79,8 @@ const useStyles = makeStyles((theme) => ({
         spacing: 0,
         align: "center",
         padding: "none",
-        backgroundColor: '#EEEEEE', 
-        color: deepOrange[700], 
+        backgroundColor: '#EEEEEE',
+        color: deepOrange[700],
         // border: "1px solid black",
         fontWeight: theme.typography.fontWeightBold,
       },
@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
     align: "center",
     padding: "none",
     height: 10,
-    },        
+    },
 }));
 
 
@@ -143,7 +143,7 @@ export default function Captain() {
                 // console.log("LT0");
                 setTournamentStarted(true);
             }
-            
+
             var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/getcaptain/${mygroup}/${localStorage.getItem("uid")}`);
             // console.log(response.data[0]);
             if (response.data.length > 0) {
@@ -163,7 +163,7 @@ export default function Captain() {
         if (firstTime) a();
         setFirstTime(false);
         if (timeLeft)
-            setTimeout(() => setTimeLeft(timeLeft-1), 1000); 
+            setTimeout(() => setTimeLeft(timeLeft-1), 1000);
         else
             setTournamentStarted(true);
     }, [timeLeft])
@@ -174,7 +174,7 @@ export default function Captain() {
         // console.log(`Status is ${registerStatus}`);
         let myMsg;
         let errmsg = true;
-        switch (registerStatus) { 
+        switch (registerStatus) {
           case 200:
             myMsg = "Successfully updated Captain / ViceCaptain details";
             errmsg = false;
@@ -194,9 +194,9 @@ export default function Captain() {
           </div>
         );
       }
-    
-    
-   
+
+
+
     function handleSelectedCaptain(newCap) {
         setRegisterStatus(0);
         if (!tournamentStated)
@@ -247,21 +247,21 @@ export default function Captain() {
             tableData={myTeamTableData.map(x => {
                 const arr = [
                     x.playerName,
-                    <FormControlLabel 
+                    <FormControlLabel
                     key={cPrefix+x.playerName}
                     id={cPrefix+x.playerName}
-                    className={classes.captain} 
-                    value={x.playerName}    
+                    className={classes.captain}
+                    value={x.playerName}
                     control={<Radio color="primary" key={cPrefix+x.playerName} id={cPrefix+x.playerName} defaultChecked={x.playerName === selectedCaptain}/>}
                     onClick={() => handleSelectedCaptain(x.playerName)}
                     checked={selectedCaptain === x.playerName}
                     disabled={tournamentStated}
                     />,
-                    <FormControlLabel 
+                    <FormControlLabel
                     key={vcPrefix+x.playerName}
                     id={vcPrefix+x.playerName}
-                    className={classes.captain} 
-                    value={x.playerName}    
+                    className={classes.captain}
+                    value={x.playerName}
                     control={<Radio color="primary" key={vcPrefix+x.playerName} id={cPrefix+x.playerName} defaultChecked={x.playerName === selectedViceCaptain}/>}
                     onClick={() => handleSelectedViceCaptain(x.playerName)}
                     checked={selectedViceCaptain === x.playerName}
@@ -281,7 +281,7 @@ export default function Captain() {
                 <TableRow align="center">
                 <TableCell className={classes.th} p={0} align="center">Player Name</TableCell>
                 <TableCell className={classes.th} p={0} align="center">Captain</TableCell>
-                <TableCell className={classes.th} p={0} align="center">Vice Captain</TableCell>      
+                <TableCell className={classes.th} p={0} align="center">Vice Captain</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody p={0}>
@@ -292,11 +292,11 @@ export default function Captain() {
                         {x.playerName}
                     </TableCell>
                     <TableCell  className={classes.td} p={0} align="center" >
-                        <FormControlLabel 
+                        <FormControlLabel
                             key={cPrefix+x.playerName}
                             id={cPrefix+x.playerName}
-                            className={classes.captain} 
-                            value={x.playerName}    
+                            className={classes.captain}
+                            value={x.playerName}
                             control={<Radio color="primary" key={cPrefix+x.playerName} id={cPrefix+x.playerName} defaultChecked={x.playerName === selectedCaptain}/>}
                             onClick={() => handleSelectedCaptain(x.playerName)}
                             checked={selectedCaptain === x.playerName}
@@ -304,11 +304,11 @@ export default function Captain() {
                         />
                     </TableCell>
                     <TableCell className={classes.td} p={0} align="center" >
-                        <FormControlLabel 
+                        <FormControlLabel
                             key={vcPrefix+x.playerName}
                             id={vcPrefix+x.playerName}
-                            className={classes.captain} 
-                            value={x.playerName}    
+                            className={classes.captain}
+                            value={x.playerName}
                             control={<Radio color="primary" key={vcPrefix+x.playerName} id={cPrefix+x.playerName} defaultChecked={x.playerName === selectedViceCaptain}/>}
                             onClick={() => handleSelectedViceCaptain(x.playerName)}
                             checked={selectedViceCaptain === x.playerName}
@@ -318,7 +318,7 @@ export default function Captain() {
                     </TableRow>
                 )
                 })}
-            </TableBody> 
+            </TableBody>
             </Table>
         );
     };

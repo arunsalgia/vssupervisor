@@ -40,8 +40,24 @@ import { BlankArea, NoGroup, DisplayPageHeader, MessageToUser } from 'CustomComp
 import { UserContext } from "../../UserContext";
 import socketIOClient from "socket.io-client";
 import { hasGroup } from 'views/functions';
-import {orange, deepOrange}  from '@material-ui/core/colors';
+import {blue, green, orange, deepOrange}  from '@material-ui/core/colors';
+import Modal from 'react-modal';
 
+const modalStyles = {
+    content : {
+      top                   : '50%',
+      left                  : '50%',
+      right                 : 'auto',
+      bottom                : 'auto',
+      marginRight           : '-50%',
+      marginBottom          : '-50%',
+      transform             : 'translate(-50%, -50%)',
+      background            : '#000000',
+      color                 : '#FFFFFF',
+      transparent           : false,   
+    }
+  };
+  
 const drawerWidth = 100;
 const useStyles = makeStyles((theme) => ({
     infoButton: {
@@ -90,6 +106,16 @@ const useStyles = makeStyles((theme) => ({
     sold: {
         color: "green"
     }, 
+    countDownMessage: {
+        color: green[700],
+        fontSize: "14px",
+        fontWeight: theme.typography.fontWeightBold
+    }, 
+    countDownBigMessage: {
+        color: green[700],
+        fontSize: "20px",
+        fontWeight: theme.typography.fontWeightBold
+    }, 
     cardCategoryWhite: {
         color: "rgba(255,255,255,.62)",
         margin: "0",
@@ -129,22 +155,56 @@ const useStyles = makeStyles((theme) => ({
         // border: "1px solid black",
         fontWeight: theme.typography.fontWeightBold,
       },
-      td : {
-        spacing: 0,
-        // border: 5,
-        align: "center",
-        padding: "none",
-        height: 10,
-      },    
+    td : {
+    spacing: 0,
+    // border: 5,
+    align: "center",
+    padding: "none",
+    height: 10,
+    },    
+    modalContainer: {
+        content: "",
+        opacity: 0.8,
+        // background: rgb(26, 31, 41) url("your picture") no-repeat fixed top;
+        // background-blend-mode: luminosity;
+        /* also change the blend mode to what suits you, from darken, to other 
+        many options as you deem fit*/
+        // background-size: cover;
+        // top: 0;
+        // left: 0;
+        // right: 0;
+        // bottom: 0;
+        // position: absolute;
+        // z-index: -1;
+        // height: 500px;
+    },
+    modalTitle: {
+        color: blue[700],
+        fontSize: theme.typography.pxToRem(20),
+        fontWeight: theme.typography.fontWeightBold,
+    },
+    modalMessage: {
+        //color: blue[700],
+        fontSize: theme.typography.pxToRem(14),
+        //fontWeight: theme.typography.fontWeightBold,
+    },
+        modalbutton: {
+        margin: theme.spacing(2, 2, 2),
+    },
+    
 }));
 
 
+  
 function leavingAuction(myConn) {
     //console.log("Leaving Auction wah wah ");
     myConn.disconnect();
-  }
+}
   
   
+let arunCancel = false;
+const MAXCOUNTDOWN = parseInt(process.env.REACT_APP_AUCTIONCOUNTDOWN);
+
 
 export default function Auction() {
 
@@ -174,13 +234,18 @@ export default function Auction() {
     const [playerStatus, setPlayerStatus] = useState("");
     const [AuctionTableData, setAuctionTableData] = useState([]);
     const [myBalanceAmount, setMyBalanceAmount] = useState(0);
+    const [countDown, setCountDown] = useState(0);
+    const [modalIsOpen,setIsOpen] = React.useState(false);
+  
+    function isModalOpen() { return modalIsOpen}
+    function openModal() { setIsOpen(false); }
+    function closeModal() { setIsOpen(false); }
+    function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    //subtitle.style.color = '#f00';
+    }
+    
 
-    // const handleDrawerClose = () => {
-    //     setOpen(false);
-    // };
-    // const handleModalClose = () => {
-    //     setConfirmDialogOpen(false);
-    // };
     function DisplayBidOverMsg(msg) {
         setPlayerStatus(msg);
         // setConfirmDialogOpen(false);
@@ -238,14 +303,21 @@ export default function Auction() {
                 setAuctionStatus(newAuctionStatus);
             });
 
+            sockConn.on("countDown", (message) => {
+                console.log(message);
+                if (arunCancel) setCountDown(0);
+                else setCountDown(message.countDown);
+            });
+
             sockConn.on("bidOver", (myrec) => {
                 //console.log("bid over reveived");
                 // console.log(myrec);
                 DisplayBidOverMsg(`${myrec.playerName} successfully purchased by ${myrec.userName}`);
             });
             sockConn.on("newBid", (grec) => {
-                // console.log("new bid reveived");
-                // console.log(grec);
+                // console.log("---------------- new bid");
+                arunCancel = true;
+                setCountDown(0);        
                 setBidAmount(grec.auctionBid);
                 setBidUser(grec.currentBidUser);
                 setBidUid(grec.currentBidUid);
@@ -287,12 +359,7 @@ export default function Auction() {
     }, []);
 
 
-    // const handleOwnerChange = (event) => {
-    //     setSelectedOwner(event.target.value);
-    // };
-
-
-    async function sellPlayer() {
+    async function finallySellPlayer() {
         setBidPaused(true);
         let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/auction/add/${localStorage.getItem("gid")}/${bidUid}/${playerId}/${bidAmount}`
         // console.log(myUrl);
@@ -315,6 +382,39 @@ export default function Auction() {
         }
     }
 
+    async function sellplayer(count) {
+        if (count === MAXCOUNTDOWN) {
+            setBidPaused(true);
+            arunCancel = false;
+        } else {
+            if (arunCancel) { 
+                count = 0; 
+                arunCancel = false;  
+                setCountDown(0) 
+            }
+        }
+    
+        try {
+            await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/auction/countdown/${localStorage.getItem("gid")}/${count}`);
+            if (count > 0) setTimeout(() => sellplayer(count-1), 1000);
+            else  {
+                if (arunCancel) {
+                    setBidPaused(false);
+                    arunCancel = false;
+                } else {
+                    console.log("time to send sell message");
+                    await finallySellPlayer();
+                }
+                
+            }
+        } catch (e) {
+            console.log("Unable to send countdown");
+            console.log(e);
+            setBidPaused(false);
+            setCountDown(0);
+        }
+    }
+
     async function handleAuctionOver() {
         const response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setauctionstatus/${localStorage.getItem("gid")}/OVER`);
         if (response.data) {
@@ -328,12 +428,25 @@ export default function Auction() {
         await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/auction/skip/${localStorage.getItem("gid")}/${playerId}`);
     }
 
+    function ShowCountDown() {
+        if (countDown > 0) 
+            return (
+                <div align="center">
+                <Typography className={classes.countDownBigMessage}>{countDown}</Typography>
+                <Typography className={classes.countDownMessage}>Player will be sold in {countDown} seconds</Typography>
+                </div>
+            );
+        else 
+            return null;
+    }
+
     function DisplayRunningAuction() {
         // console.log(`Pid from admin auction ${playerId}`)
         return (<div align="center" className={classes.root}>
             <Grid container justify="center" alignItems="center" >
                 <GridItem xs={12} sm={12} md={12} lg={12} >
                     <ShowPlayerAvatar pName={playerName} pImage={playerImage} pTeamLogo={team} /> 
+                    <ShowCountDown />
                     <ShowValueButtons />
                     <ShowAdminButtons/>
                 </GridItem>
@@ -347,6 +460,8 @@ export default function Auction() {
     }
 
     function ShowPlayerAvatar(props) {
+        if (props.pTeamLogo === "") return null;
+    
         let myTeam = `${process.env.PUBLIC_URL}/${props.pTeamLogo}.JPG`
         myTeam = myTeam.replaceAll(" ", "");
         // console.log(`Team:${myTeam}`);
@@ -418,7 +533,6 @@ export default function Auction() {
 
     async function handleMyBid(newBid) {
         var value = parseInt(newBid) + parseInt(bidAmount);
-
         let myURL=`${process.env.REACT_APP_AXIOS_BASEPATH}/auction/nextbid/${localStorage.getItem("gid")}/${localStorage.getItem("uid")}/${playerId}/${value}`;
         // console.log(myURL);
         var resp = await axios(myURL);
@@ -521,7 +635,7 @@ export default function Auction() {
             </div>
             );
         else 
-            return(<div></div>);
+            return(<div></div>); 
     }
 
 
@@ -541,8 +655,8 @@ export default function Auction() {
                 size="small"
                 className={classes.button}
                 // startIcon={<CheckSharpIcon />}
-                disabled={((bidAmount === 0) || (bidPaused === "true"))}
-                onClick={sellPlayer}>
+                disabled={((bidAmount === 0) || (bidPaused === true))}
+                onClick={() => sellplayer(MAXCOUNTDOWN)}>
                 SOLD
             </Button>
             </GridItem>
@@ -553,7 +667,7 @@ export default function Auction() {
                 size="small"
                 className={classes.button}
                 // startIcon={<ClearSharpIcon />}
-                disabled={((bidAmount !== 0) || (bidPaused === "true"))}
+                disabled={((bidAmount !== 0) || (bidPaused === true))}
                 onClick={() => skipPlayer()}>
                 UNSOLD
             </Button>
@@ -674,11 +788,34 @@ export default function Auction() {
             return <NoGroup/>;
     }
 
+    function modalShowCountDown() {
+        return (
+        <form>
+          <Typography id="modalTitle" className={classes.modalTitle} align="center">Sell Count Down</Typography>
+          <BlankArea />
+          <p align="center" className={classes.modalMessage}>{countDown} seconds</p>
+        </form>  
+        )
+    }
+    
     return (
         <div align="center">
             <DisplayPageHeader headerName="AUCTION" groupName={localStorage.getItem("groupName")} tournament={localStorage.getItem("tournament")}/>
             <BlankArea/>
             <DisplayAuctionInformation/>
+            <div className={classes.modalContainer} >
+                <Modal
+                isOpen={modalIsOpen}
+                onAfterOpen={afterOpenModal}
+                onRequestClose={closeModal}
+                style={modalStyles}
+                contentLabel="Example Modal"
+                aria-labelledby="modalTitle"
+                aria-describedby="modalDescription"
+                >
+                    <modalShowCountDown />
+                </Modal>
+            </div>
         </div>
     );
 

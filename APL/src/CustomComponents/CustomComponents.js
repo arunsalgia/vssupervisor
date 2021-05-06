@@ -19,7 +19,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import {red, blue, green, yellow} from '@material-ui/core/colors';
+import {red, blue, green, deepOrange, yellow} from '@material-ui/core/colors';
 import {validateSpecialCharacters, validateEmail, validateMobile,
   encrypt, decrypt, currentAPLVersion, latestAPLVersion} from "views/functions.js";
 
@@ -85,6 +85,22 @@ const useStyles = makeStyles((theme) => ({
   table: {
     // minWidth: 650,
   },
+  th: { 
+    spacing: 0,
+    align: "center",
+    padding: "none",
+    backgroundColor: '#EEEEEE',
+    color: deepOrange[700],
+    // border: "1px solid black",
+    fontWeight: theme.typography.fontWeightBold,
+  },
+  td : {
+    spacing: 0,
+    // border: 5,
+    align: "center",
+    padding: "none",
+    height: 10,
+  },
   ngHeader: {
     fontSize: theme.typography.pxToRem(15),
     fontWeight: theme.typography.fontWeightRegular,
@@ -97,24 +113,32 @@ const useStyles = makeStyles((theme) => ({
 
 export function DisplayPrizeTable(props) {
   const classes = useStyles();
+  // console.log("in Table");
+  // console.log(props.tableName);
   return (
     <TableContainer component={Paper}>
-    <Table size="small" className={classes.table} aria-label="simple table">
-      <TableHead>
-        <TableRow>
-          <TableCell color="warning" align="center">Rank</TableCell>
-          <TableCell color="warning" align="center">Prize</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {props.tableName.map((row) => (
-          <TableRow key={row.rank}>
-            <TableCell align="center">{row.rank}</TableCell>
-            <TableCell align="center">{row.prize}</TableCell>
+      <Table> 
+      <TableHead p={0}>
+          <TableRow align="center">
+          <TableCell className={classes.th} p={0} align="center">Rank</TableCell>
+          <TableCell className={classes.th} p={0} align="center">Prize</TableCell>
           </TableRow>
-        ))}
+      </TableHead>
+      <TableBody p={0}>
+        {props.tableName.map(x => {
+        return (
+          <TableRow key={x.rank} align="center">
+          <TableCell  className={classes.td} p={0} align="center" >
+              {x.rank}
+          </TableCell>
+          <TableCell  className={classes.td} p={0} align="center" >
+              {x.prize}
+          </TableCell>
+          </TableRow>
+          )
+          })}
       </TableBody>
-    </Table>
+      </Table>
   </TableContainer>    
   );
 }

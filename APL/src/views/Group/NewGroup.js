@@ -36,6 +36,7 @@ import {setTab} from "CustomComponents/CricDreamTabs.js"
 // import copy from 'copy-clipboard';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { DisplayPageHeader } from 'CustomComponents/CustomComponents';
+import { getAllPrizeTable } from 'views/functions';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -116,7 +117,9 @@ class ChildComp extends React.Component {
 
 }
 
-
+const STARTMEMBERCOUNT = 2;
+const STARTMEMBERFEE  = 50;
+const STARTPRIZECOUNT = 1;
 
 export default function CreateGroup() {
   const classes = useStyles();
@@ -124,8 +127,8 @@ export default function CreateGroup() {
   const [groupName, setGroupName] = useState("");
   // const [displayName, setDisplayName] = useState("");
   const [bidAmount, setBidAmount] = useState(1000);
-  const [memberCount, setMemberCount] =useState(2);
-  const [memberFee, setMemberFee] = useState(50);
+  const [memberCount, setMemberCount] =useState(STARTMEMBERCOUNT);
+  const [memberFee, setMemberFee] = useState(STARTMEMBERFEE);
   const [registerStatus, setRegisterStatus] = useState(0);
   const [tournamentData, setTournamentData] = useState([]);
   const [selectedTournament, SetSelectedTournament] = useState("");
@@ -134,7 +137,7 @@ export default function CreateGroup() {
   const [groupCode, setGroupCode] = useState("");
   const [copyState, setCopyState] = useState({value: '', copied: false});
   const [balance, setBalance] = useState(0);
-  const [prizeCount, setPrizeCount] = useState(1);
+  const [prizeCount, setPrizeCount] = useState(STARTPRIZECOUNT);
   const [prizeTable, setPrizeTable] = useState([]);
   const [auctionCoins, setAuctionCoins] = useState(1000);
   const [masterPrizeTable, setMasterPrizeTable] = useState([]);
@@ -167,6 +170,10 @@ export default function CreateGroup() {
         }
         SetSelectedTournament(selTournament);
         setIsDisabled(myDisable);
+        let myTable = await getAllPrizeTable(STARTMEMBERFEE*STARTMEMBERCOUNT);
+        // console.log(myTable);
+        setMasterPrizeTable(myTable)
+        setPrizeTable(myTable[STARTPRIZECOUNT-1]);
     };    
     a();
   }, []);
@@ -187,21 +194,29 @@ export default function CreateGroup() {
       setNewGid(response.data.gid)      
 
       // set this as default
-      localStorage.setItem("gid", response.data.gid.toString());
+      let myGid = response.data.gid.toString();
+      localStorage.setItem("gid", myGid);
       localStorage.setItem("groupName", response.data.name);
       localStorage.setItem("tournament", response.data.tournament);
       localStorage.setItem("admin", true);
 
       let myBalance = await getUserBalance();
       setBalance(myBalance);
+
       // SET PRIZE is not required here since create by default will set it to 1
       // let myURL=`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setprize/${response.data.gid}/1`;
       // console.log(myURL);
       // let xxx = await axios.get(myURL);
-      let totprize = memberFee*memberCount;
-      var prizeres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/all/${totprize}`)
-      setMasterPrizeTable(prizeres.data)
-      setPrizeTable(prizeres.data[prizeCount-1]);
+      // let totprize = memberFee*memberCount;
+      // var prizeres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/all/${totprize}`)
+      // setMasterPrizeTable(prizeres.data)
+      // setPrizeTable(prizeres.data[prizeCount-1]);
+
+      let xxx = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setprize/${myGid}/${prizeCount}`);
+      // setPrizeTable(masterPrizeTable[idx-1])
+      // setPrizeCount(idx);
+      // await xxx;
+
       setCopyState({value: response.data._id})
       setGroupCode(response.data._id);
       setRegisterStatus(200);
@@ -211,42 +226,12 @@ export default function CreateGroup() {
     }
   }
 
-  // function handleCopyCode() {
-  //   // const el = this.textArea
-  //   // el.select()
-  //   // document.execCommand("copy")
-  //   // this.setState({copySuccess: true})
-  //   const xxx = document.getElementById("codestring");
-  //   console.log(xxx);
-  //   xxx.select();
-  //   // setRegisterStatus(1000);
-  // }
-
+  
   async function handleCountChange(event) {
     let idx = parseInt(event.target.value);
-    let xxx = axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setprize/${newGid}/${idx}`);
     setPrizeTable(masterPrizeTable[idx-1])
     setPrizeCount(idx);
-    await xxx;
   };
-
-/*
-  function org_DisplayPrizeTable() {
-    return (
-      <Table
-      tableKey="t-cvc"
-      id="t-cvc"
-      size="small"
-      tableHeaderColor="warning"
-      tableHead={["Rank", "Prize"]}
-      tableData={prizeTable.map(x => {
-          const arr = [x.rank,  x.prize]
-          return { data: arr, collapse: [] }
-      })}
-      />
-    );
-  }
-*/
 
 
   function DisplayPrizeRadio(props) {
@@ -279,16 +264,13 @@ export default function CreateGroup() {
   }
 
   function SelectPrizeCount() {
-    if (groupCode.length > 0) {
-      return (
-        <div>
-          <DisplayMemberCount/>
-          <DisplayPrizeTable tableName={prizeTable}/>
-        </div>
-      )
-    } else {
-      return  <NothingToDisplay/>;
-    }
+    // console.log(prizeTable);
+    return (
+      <div>
+        <DisplayMemberCount/>
+        <DisplayPrizeTable tableName={prizeTable}/>
+      </div>
+    )
   }
 
   function DisplayGroupCode() {
@@ -314,11 +296,6 @@ export default function CreateGroup() {
       return  <NothingToDisplay/>;
     }
   }
-  // function handleCancel() {
-  //   // history.push("/admin/mygroup")
-  //   setTab(0);
-  // }
-
 
   function ShowResisterStatus() {
     // console.log(`Status is ${registerStatus}`);
@@ -368,15 +345,29 @@ export default function CreateGroup() {
     );
   }
 
-  
+  async function changeMemberCount(newCount) {
+    setMemberCount(newCount);
+    let myTable = await getAllPrizeTable(memberFee*newCount);
+    // console.log(myTable);
+    setMasterPrizeTable(myTable)
+    setPrizeCount(1);
+    setPrizeTable(myTable[0]);
+  }
+
+  async function changeMemberFee(newFee) {
+    setMemberFee(newFee);
+    let myTable = await getAllPrizeTable(newFee*memberCount);
+    // console.log(myTable);
+    setMasterPrizeTable(myTable)
+    setPrizeCount(1);
+    setPrizeTable(myTable[0]);
+  }
+
   return (
     <Container component="main" maxWidth="xs">
       <DisplayBalance balance={balance} />
       <CssBaseline />
       <div className={classes.paper}>
-        {/* <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar> */}
         <Typography component="h1" variant="h5">
           Create New Group
         </Typography>
@@ -401,7 +392,7 @@ export default function CreateGroup() {
           fullWidth      
           // size="small"  
           label="MemberCount"
-          onChange={(event) => setMemberCount(event.target.value)}
+          onChange={(event) => changeMemberCount(event.target.value)}
           name="membercount"
           type="number"
           validators={['required', 'minNumber:2', 'maxNumber:25']}
@@ -415,7 +406,7 @@ export default function CreateGroup() {
           fullWidth    
           // size="small"  
           label="MemberFee"
-          onChange={(event) => setMemberFee(event.target.value)}
+          onChange={(event) => changeMemberFee(event.target.value)}
           name="membercount"
           type="number"
           validators={['required', 'minNumber:50', 'lessthanbalance']}
@@ -436,6 +427,8 @@ export default function CreateGroup() {
           errorMessages={['Member count to be provided', 'Auction Coins cannot be less than 1000', 'Auction Coins cannot be more than 10000']}
           value={bidAmount}
       />
+      <BlankArea/>
+      <SelectPrizeCount/>
       </div>
       <BlankArea/>
       <Select labelId='tournament' id='tournament'
@@ -456,6 +449,7 @@ export default function CreateGroup() {
       <BlankArea/>
       <div align="center">
         <Button type="submit" key={"create"} variant="contained" color="primary" size="small"
+            disabled={groupCode !== ""}
             className={classes.button}>Create
         </Button>
         {/* <Button key={"members"} variant="contained" color="primary" size="small"
@@ -465,8 +459,6 @@ export default function CreateGroup() {
     </ValidatorForm>
     </div>
     <ChildComp p1={balance} p3={selectedTournament}/>   
-    <BlankArea/>
-    <SelectPrizeCount/>
     <BlankArea />
     <DisplayGroupCode/>
     {/* <Switch>
