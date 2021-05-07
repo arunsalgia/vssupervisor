@@ -15,7 +15,14 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-import Table from "components/Table/Table.js";
+//import Table from "components/Table/Table.js";
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
 import Grid from '@material-ui/core/Grid';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
@@ -27,7 +34,7 @@ import Container from '@material-ui/core/Container';
 import { UserContext } from "../../UserContext";
 import axios from "axios";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import {red, blue, yellow } from '@material-ui/core/colors';
+import {red, blue, yellow, deepOrange } from '@material-ui/core/colors';
 import { useHistory } from "react-router-dom";
 import {BlankArea, NothingToDisplay, DisplayPageHeader, DisplayPrizeTable, MessageToUser} from "CustomComponents/CustomComponents.js"
 import { useParams } from "react-router";
@@ -95,6 +102,22 @@ error:  {
       alignItems: 'center',
       marginTop: '0px',
   },
+  th: { 
+    spacing: 0,
+    align: "center",
+    padding: "none",
+    backgroundColor: '#EEEEEE', 
+    color: deepOrange[700], 
+    // border: "1px solid black",
+    fontWeight: theme.typography.fontWeightBold,
+  },
+  td : {
+    spacing: 0,
+    // border: 5,
+    align: "center",
+    padding: "none",
+    height: 10,
+  },    
 }));
 
 
@@ -165,16 +188,28 @@ export default function GroupDetails() {
 
   function DisplayGroupMembers() {
   return (
-    <Table
-    align="center"
-    id="gm"
-    tableHeaderColor="warning"
-    tableHead={["Member", "Franchise"]}
-    tableData={memberArray.map(x => {
-    const arr = [x.userName, x.displayName]
-        return { data: arr, collapse: [] }
-    })}
-    />
+    <Table>
+    <TableHead p={0}>
+        <TableRow align="center">
+        <TableCell className={classes.th} p={0} align="center">Member</TableCell>      
+        <TableCell className={classes.th} p={0} align="center">Franchise</TableCell>
+        </TableRow>
+    </TableHead>
+    < TableBody p={0}>
+        {memberArray.map(item => {
+          return (
+            <TableRow key={item.userName}>
+              <TableCell  className={classes.td} p={0} align="center" >
+                {item.userName}
+              </TableCell>
+              <TableCell  className={classes.td} p={0} align="center" >
+                {item.displayName}
+              </TableCell>
+            </TableRow>
+          )
+        })}
+    </TableBody> 
+    </Table>
   )};
 
 

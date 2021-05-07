@@ -5,13 +5,20 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 // import Grid from '@material-ui/core/Grid';
 // import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import Table from "components/Table/Table.js";
+// import Table from "components/Table/Table.js";
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 // import { UserContext } from "../../UserContext";
 import axios from "axios";
 // import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import red from '@material-ui/core/colors/red';
+import { red, deepOrange } from '@material-ui/core/colors';
 // import { useHistory } from "react-router-dom";
 // import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
 
@@ -42,6 +49,22 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
       marginTop: '0px',
   },
+  th: { 
+    spacing: 0,
+    align: "center",
+    padding: "none",
+    backgroundColor: '#EEEEEE', 
+    color: deepOrange[700], 
+    // border: "1px solid black",
+    fontWeight: theme.typography.fontWeightBold,
+  },
+  td : {
+    spacing: 0,
+    // border: 5,
+    align: "center",
+    padding: "none",
+    height: 10,
+  },    
 }));
 
 
@@ -74,14 +97,32 @@ export default function Wallet() {
       <CssBaseline />
       <div className={classes.paper}>
         <Typography component="h1" variant="h5">Wallet Details (Balance: {balance})</Typography>
-        <Table
-          tableHeaderColor="warning"
-          tableHead={["Date", "Type", "Amount"]}
-          tableData={transactions.map(tRec => {
-              const arr = [tRec.date, tRec.type, tRec.amount]
-              return { data: arr, collapse: [] }
-          })}
-          />
+        <Table>
+        <TableHead p={0}>
+            <TableRow align="center">
+            <TableCell className={classes.th} p={0} align="center">Date</TableCell>      
+            <TableCell className={classes.th} p={0} align="center">Type</TableCell>
+            <TableCell className={classes.th} p={0} align="center">Amount</TableCell>
+            </TableRow>
+        </TableHead>
+        < TableBody p={0}>
+            {transactions.map( (item, index) => {
+              return (
+                <TableRow key={index}>
+                  <TableCell  className={classes.td} p={0} align="center" >
+                    {item.date}
+                  </TableCell>
+                  <TableCell  className={classes.td} p={0} align="center" >
+                    {item.type}
+                  </TableCell>
+                  <TableCell  className={classes.td} p={0} align="center" >
+                    {item.amount}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+        </TableBody> 
+        </Table>
       </div>
     </Container>
   );

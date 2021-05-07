@@ -199,24 +199,30 @@ export default function Captain() {
 
     function handleSelectedCaptain(newCap) {
         setRegisterStatus(0);
-        if (!tournamentStated)
-        if (newCap !== selectedViceCaptain)
+        if (!tournamentStated) {
+            if (newCap === selectedViceCaptain)
+                SetSelectedViceCaptain("");
             SetSelectedCaptain(newCap);
+        }
     };
 
     function handleSelectedViceCaptain(newViceCap) {
         setRegisterStatus(0);
-        if (!tournamentStated)
-        if (newViceCap !== selectedCaptain)
+        if (!tournamentStated) {
+            if (newViceCap === selectedCaptain)
+                SetSelectedCaptain("");
             SetSelectedViceCaptain(newViceCap);
+        }
     };
 
 
     async function updateCaptain() {
         // console.log("upd captin vc details");
-        var tmp1 = myTeamTableData.find(x => x.playerName === selectedCaptain);
-        var tmp2 = myTeamTableData.find(x => x.playerName === selectedViceCaptain);
-        var myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/user/captainvicecaptain/${localStorage.getItem("gid")}/${localStorage.getItem("uid")}/${tmp1.pid}/${tmp2.pid}`;
+        var tmp = myTeamTableData.find(x => x.playerName === selectedCaptain);
+        capPid = (tmp) ?  tmp.pid : 0;
+        tmp = myTeamTableData.find(x => x.playerName === selectedViceCaptain);
+        vicecapPid = (tmp) ?  tmp.pid : 0;
+        var myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/user/captainvicecaptain/${localStorage.getItem("gid")}/${localStorage.getItem("uid")}/${capPid}/${vicecapPid}`;
         // console.log(myUrl);
         const resp = await  axios.get(myUrl);
         // console.log(resp.status)

@@ -106,6 +106,11 @@ const useStyles = makeStyles((theme) => ({
     sold: {
         color: "green"
     }, 
+    noPlayerMsg: {
+        color: green[700],
+        fontSize: "14px",
+        fontWeight: theme.typography.fontWeightBold
+    }, 
     countDownMessage: {
         color: green[700],
         fontSize: "14px",
@@ -113,7 +118,7 @@ const useStyles = makeStyles((theme) => ({
     }, 
     countDownBigMessage: {
         color: green[700],
-        fontSize: "20px",
+        fontSize: "24px",
         fontWeight: theme.typography.fontWeightBold
     }, 
     cardCategoryWhite: {
@@ -222,8 +227,7 @@ export default function Auction() {
     const [battingStyle, setBattingStyle] = useState("");
     const [bowlingStyle, setBowlingStyle] = useState("");
     const [bidPaused, setBidPaused] = useState(true);
-    // const [open, setOpen] = useState(false);
-
+  
     const [bidAmount, setBidAmount] = useState(0);
     const [bidUser, setBidUser] = useState("");
     const [bidUid, setBidUid] = useState(0);
@@ -235,8 +239,8 @@ export default function Auction() {
     const [AuctionTableData, setAuctionTableData] = useState([]);
     const [myBalanceAmount, setMyBalanceAmount] = useState(0);
     const [countDown, setCountDown] = useState(0);
+    const [noPlayerMessage, setNoPlayerMessage] = React.useState("");
     const [modalIsOpen,setIsOpen] = React.useState(false);
-  
     function isModalOpen() { return modalIsOpen}
     function openModal() { setIsOpen(false); }
     function closeModal() { setIsOpen(false); }
@@ -303,10 +307,23 @@ export default function Auction() {
                 setAuctionStatus(newAuctionStatus);
             });
 
+            sockConn.on("noPlayer", (message) => {
+                console.log(`Rcbd no player aauction status`);
+                setNoPlayerMessage("All players purchased. Auction is now closed");
+                setAuctionStatus("OVER");
+            });
+
             sockConn.on("countDown", (message) => {
-                console.log(message);
-                if (arunCancel) setCountDown(0);
-                else setCountDown(message.countDown);
+                //console.log(message);
+                let myCountdown = message.countDown;
+                if (localStorage.getItem("admin").toLowerCase() === "true") {
+                    //console.log("Cancel", arunCancel, message.countDown);
+                    if (arunCancel) 
+                        myCountdown = 0;
+                }
+                //console.log("mycount", myCountdown);
+                setCountDown(myCountdown);
+                //console.log("arun",countDown)
             });
 
             sockConn.on("bidOver", (myrec) => {
@@ -389,7 +406,7 @@ export default function Auction() {
         } else {
             if (arunCancel) { 
                 count = 0; 
-                arunCancel = false;  
+                //arunCancel = false;  
                 setCountDown(0) 
             }
         }
@@ -402,7 +419,7 @@ export default function Auction() {
                     setBidPaused(false);
                     arunCancel = false;
                 } else {
-                    console.log("time to send sell message");
+                    //console.log("time to send sell message");
                     await finallySellPlayer();
                 }
                 
@@ -429,6 +446,7 @@ export default function Auction() {
     }
 
     function ShowCountDown() {
+        // console.log("About to show cd:",countDown);
         if (countDown > 0) 
             return (
                 <div align="center">
@@ -517,17 +535,6 @@ export default function Auction() {
                 })}
             </TableBody> 
             </Table>
-        );
-    }
-
-    function OrgShowBalance() {
-        return (
-            <Table tableHeaderColor="warning" align="center"
-                tableHead={["Franchise", "Player Count", "Balance"]}
-                tableData={AuctionTableData.map(x => {
-                    const arr = [x.userName, x.playerCount, x.balance]
-                    return { data: arr, collapse: [] }
-                })}/>
         );
     }
 
@@ -728,7 +735,7 @@ export default function Auction() {
     const startAuction = async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setauctionstatus/${localStorage.getItem("gid")}/RUNNING`);
-            setAuctionStatus("RUNNING");
+            //setAuctionStatus("RUNNING");
         } catch (err) {
             // should show the display
             // console.log("cannot start auction");
@@ -746,8 +753,6 @@ export default function Auction() {
                 color="primary"
                 size="small"
                 className={classes.button}
-                // disabled={localStorage.getItem("admin") !== "true"}            
-                // startIcon={<NavigateBeforeIcon />}
                 onClick={() => startAuction("PENDING")}>Start Auction
                 </Button>
             );
@@ -757,12 +762,22 @@ export default function Auction() {
 
     function DisplayPendingOver(props) {
         // console.log(props);
-        return (<Typography align="center">{props.message}</Typography>);
+        return (
+        <div>
+            <Typography align="center" className={classes.noPlayerMsg}>
+                {noPlayerMessage}
+            </Typography>
+            <Typography align="center">
+                {props.message}
+            </Typography>
+        </div>
+        );
     }
 
     function DisplayAuctionInformation() {
-        if (hasGroup()) {
             // console.log(auctionStatus);
+            if (hasGroup()) {
+            // console.log("In has group");
             if ( auctionStatus === "PENDING") {
                 return (
                     <div align="center">
@@ -788,7 +803,8 @@ export default function Auction() {
             return <NoGroup/>;
     }
 
-    function modalShowCountDown() {
+    /***
+    function ModalShowCountDown() {
         return (
         <form>
           <Typography id="modalTitle" className={classes.modalTitle} align="center">Sell Count Down</Typography>
@@ -797,13 +813,14 @@ export default function Auction() {
         </form>  
         )
     }
-    
+    ***/
+
     return (
         <div align="center">
             <DisplayPageHeader headerName="AUCTION" groupName={localStorage.getItem("groupName")} tournament={localStorage.getItem("tournament")}/>
             <BlankArea/>
             <DisplayAuctionInformation/>
-            <div className={classes.modalContainer} >
+            {/* <div className={classes.modalContainer} >
                 <Modal
                 isOpen={modalIsOpen}
                 onAfterOpen={afterOpenModal}
@@ -813,9 +830,9 @@ export default function Auction() {
                 aria-labelledby="modalTitle"
                 aria-describedby="modalDescription"
                 >
-                    <modalShowCountDown />
-                </Modal>
-            </div>
+                    <ModalShowCountDown />
+                </Modal> */}
+            {/* </div> */}
         </div>
     );
 
