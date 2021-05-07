@@ -302,9 +302,15 @@ export default function GroupDetails() {
         let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/group/updatewithoutfee/${currGroup}/${localStorage.getItem("uid")}/${memberCount}`;
         let resp = await axios.get(myURL);
         setMemberCountUpdated(memberCount);
+        // is this IF required *************************
         if (prizeCount > memberCount) {
-          writePrizeCount(memberCount);
+          await writePrizeCount(memberCount);
         }
+        let myTable = await getAllPrizeTable(memberCount * memberFee);
+        //console.log(myTable);
+        setMasterPrizeTable(myTable);
+        setPrizeTable(myTable[prizeCount-1]);
+
         setRegisterStatus(2000);
         setEditNotStarted(true);
         setExpandedPanel(false);
@@ -380,6 +386,14 @@ export default function GroupDetails() {
           {copyState.copied ? <span style={{color: 'blue'}}>Copied.</span> : null}
         </div>       
       )
+  }
+
+  async function changeMemberCount(newCount) {
+    setMemberCount(newCount);
+    let myTable = await getAllPrizeTable(newCount * memberFee);
+    //console.log(myTable);
+    setMasterPrizeTable(myTable);
+    setPrizeTable(myTable[prizeCount-1]);
   }
 
   function DisplayGroupDetails() {
@@ -547,11 +561,24 @@ export default function GroupDetails() {
     //  1) user is owner of the group
     //  2) auction status is pending
     //  2) tournament has not yet started
-    if ((grpResponse.data.info.owner == localStorage.getItem("uid")) &&
-        (grpResponse.data.info.auctionStatus === "PENDING") &&
-        (!grpResponse.data.tournamentStarted))
-      setDisableEdit(false);
-  
+    //if ((grpResponse.data.info.owner == localStorage.getItem("uid")) &&
+    //    (grpResponse.data.info.auctionStatus === "PENDING") &&
+    //    (!grpResponse.data.tournamentStarted))
+    //  setDisableEdit(false);
+	
+    // if OWNER 
+    // and AUTION PENDING
+    // and TOURNAMENT not started 
+    // the allow edit
+    
+    let myDisable = true;  // by default not edit permission. i.e edit disabled = true
+
+    if (grpResponse.data.info.owner == localStorage.getItem("uid"))	
+    if (grpResponse.data.info.auctionStatus === "PENDING")
+    if (grpResponse.data.tournamentStarted === false)
+      myDisable = false;				// allow group edit. Thus not disableEdit
+    setDisableEdit(myDisable);
+    
     const sts = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/getfranchisename/${localStorage.getItem("uid")}/${gRec.gid}`);
     setFranchiseeName(sts.data);
     //setMasterDisplayName(sts.data);
