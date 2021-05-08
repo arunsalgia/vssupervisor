@@ -19,7 +19,7 @@ import Radio from '@material-ui/core/Radio';
 // import Card from "components/Card/Card.js";
 // import CardBody from "components/Card/CardBody.js";
 import { UserContext } from "../../UserContext";
-import { NoGroup, DisplayPageHeader, MessageToUser } from 'CustomComponents/CustomComponents.js';
+import { NoGroup, JumpButton, DisplayPageHeader, MessageToUser } from 'CustomComponents/CustomComponents.js';
 import { hasGroup } from 'views/functions';
 import { red, blue, green, deepOrange, deepPurple } from '@material-ui/core/colors';
 // import { updateLanguageServiceSourceFile } from 'typescript';
@@ -219,9 +219,9 @@ export default function Captain() {
     async function updateCaptain() {
         // console.log("upd captin vc details");
         var tmp = myTeamTableData.find(x => x.playerName === selectedCaptain);
-        capPid = (tmp) ?  tmp.pid : 0;
+        let capPid = (tmp) ?  tmp.pid : 0;
         tmp = myTeamTableData.find(x => x.playerName === selectedViceCaptain);
-        vicecapPid = (tmp) ?  tmp.pid : 0;
+        let vicecapPid = (tmp) ?  tmp.pid : 0;
         var myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/user/captainvicecaptain/${localStorage.getItem("gid")}/${localStorage.getItem("uid")}/${capPid}/${vicecapPid}`;
         // console.log(myUrl);
         const resp = await  axios.get(myUrl);
@@ -348,11 +348,19 @@ export default function Captain() {
             let strM = ("0" + m).slice(-2);
             let strS = ("0" + s).slice(-2);
             return (
-                <Typography className={classes.nonerror} align="center">(Detail update will be disabled after {strD}{strH}:{strM}:{strS})</Typography>
+                <Typography className={classes.nonerror} align="center">(Update will be disabled after {strD}{strH}:{strM}:{strS})</Typography>
             );
         }
     }
 
+    function ShowJumpButtons() {
+        return (
+        <div>
+            <BlankArea />
+            <JumpButton page={process.env.REACT_APP_TEAM} text="My Team" />
+        </div>
+        )
+    }
 
     if (hasGroup())
         return (
@@ -368,6 +376,7 @@ export default function Captain() {
             <ShowResisterStatus/>
             <BlankArea/>
             <DisplayCaptainSelectButton/>
+            <ShowJumpButtons />
             {/* <MessageToUser mtuOpen={backDropOpen} mtuClose={setBackDropOpen} mtuMessage={userMessage} /> */}
         </div>
         );

@@ -36,7 +36,7 @@ import Avatar from "@material-ui/core/Avatar"
 import Card from "components/Card/Card.js";
 import CardAvatar from "components/Card/CardAvatar.js";
 import CardBody from "components/Card/CardBody.js";
-import { BlankArea, NoGroup, DisplayPageHeader, MessageToUser } from 'CustomComponents/CustomComponents.js';
+import { BlankArea, NoGroup, JumpButton, DisplayPageHeader, MessageToUser } from 'CustomComponents/CustomComponents.js';
 import { UserContext } from "../../UserContext";
 import socketIOClient from "socket.io-client";
 import { hasGroup } from 'views/functions';
@@ -309,7 +309,7 @@ export default function Auction() {
 
             sockConn.on("noPlayer", (message) => {
                 console.log(`Rcbd no player aauction status`);
-                setNoPlayerMessage("All players purchased. Auction is now closed");
+                setNoPlayerMessage("All players purchased during Auction");
                 setAuctionStatus("OVER");
             });
 
@@ -759,7 +759,20 @@ export default function Auction() {
         else
             return <div></div>;
     }
-
+    
+    function ShowJumpButtons() {
+        console.log("Status", auctionStatus)
+        if (auctionStatus === "OVER") {
+            return (
+            <div>
+                <BlankArea />
+                <JumpButton page={process.env.REACT_APP_CAPTAIN} text="Captain and ViceCaptain" />
+            </div>
+            )
+        } else
+            return null;
+    }
+    
     function DisplayPendingOver(props) {
         // console.log(props);
         return (
@@ -800,7 +813,7 @@ export default function Auction() {
                 return (<BlankArea/>);
         } 
         } else
-            return <NoGroup/>;
+            return <NoGroup/>
     }
 
     /***
@@ -833,6 +846,7 @@ export default function Auction() {
                     <ModalShowCountDown />
                 </Modal> */}
             {/* </div> */}
+            <ShowJumpButtons />
         </div>
     );
 

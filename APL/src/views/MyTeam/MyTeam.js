@@ -17,9 +17,10 @@ import Card from "components/Card/Card.js";
 // import CardAvatar from "components/Card/CardAvatar.js";
 import CardBody from "components/Card/CardBody.js";
 import Avatar from "@material-ui/core/Avatar"
-import { NoGroup, DisplayPageHeader } from 'CustomComponents/CustomComponents.js';
+import { NoGroup, DisplayPageHeader, BlankArea, JumpButton } from 'CustomComponents/CustomComponents.js';
 import { hasGroup } from 'views/functions';
 import {orange, deepOrange}  from '@material-ui/core/colors';
+import { Divider } from '@material-ui/core';
 
 
 const drawerWidth = 100;
@@ -130,24 +131,23 @@ export default function MyTeam() {
     fetchTeam();
   }, []);
 
+
+  function ShowJumpButtons() {
+    return (
+      <div>
+        <BlankArea />
+        <JumpButton page={process.env.REACT_APP_HOME} text="Home" />
+      </div>
+    )
+  }
+
+
+
   if (hasGroup())
     return (
       teamArray.map(team => 
       <div>
         <DisplayPageHeader headerName="My Team" groupName={localStorage.getItem("groupName")} tournament={localStorage.getItem("tournament")}/>
-        {/* <Table
-            key={team.displayName}
-            id={team.displayName}
-            tableHeaderColor="warning"
-            tableHead={["Player Name", "Team", "Bid Amount"]}
-            tableData={team.players.map(team => {
-                const arr = [team.playerName, 
-                    // <Avatar variant="circle" src={`${process.env.PUBLIC_URL}/${team.team}.JPG`} className={classes.medium} />, 
-                    team.team,                        
-                    team.bidAmount]
-                    return { data: arr, collapse: [] }
-            })}
-        /> */}
         <Table>
         <TableHead p={0}>
             <TableRow align="center">
@@ -174,11 +174,19 @@ export default function MyTeam() {
             })}
         </TableBody> 
         </Table>
+        <Divider />
+        <ShowJumpButtons />
       </div>
       )
     )
   else
-    return <NoGroup/>;
+    return (
+      <div>
+        <NoGroup/>
+        <Divider />
+        <ShowJumpButtons />
+      </div>
+    )
 };
 
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -22,6 +23,8 @@ import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {red, blue, green, deepOrange, yellow} from '@material-ui/core/colors';
 import {validateSpecialCharacters, validateEmail, validateMobile,
   encrypt, decrypt, currentAPLVersion, latestAPLVersion} from "views/functions.js";
+import {setTab} from "CustomComponents/CricDreamTabs.js"
+import Divider from "@material-ui/core/Divider";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -108,6 +111,11 @@ const useStyles = makeStyles((theme) => ({
   ngCard: {
     backgroundColor: '#B3E5FC',
   },
+  divider: {
+    backgroundColor: '#FFFF00',
+    color: '#000000',
+    fontWeight: theme.typography.fontWeightBold,
+  }
 }));
 
 
@@ -245,43 +253,13 @@ export function NoGroup() {
   return (<h3>Does not belong to any Group</h3>);
 }
 
-/**
-const [noGroupPanel, setNGExpandedPanel] = useState(false);
-  const handleNoGroupChange = (panel) => (event, isExpanded) => {
-    // console.log({ event, isExpanded });
-    handleNoGroupChange(isExpanded ? panel : false);
-  };
- 
-
-export function NoGroup() {
-  const classes = useStyles();
-  return (
-    <Card className={classes.ngCard}>
-    <CardContent>
-    <Accordion expanded={noGroupPanel === "CREATE"} onChange={handleNoGroupChange("CREATE")}>
-    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-    <Typography className={classes.ngHeader}>Create Group</Typography>
-    </AccordionSummary>
-    <AccordionDetails><ShowCreateGroup/></AccordionDetails>
-    </Accordion>
-    <Accordion expanded={noGroupPanel === "JOIN"} onChange={handleNoGroupChange("JOIN")}>
-    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-    <Typography className={classes.ngHeader}>Join Group</Typography>
-    </AccordionSummary>
-    <AccordionDetails><ShowJoinGroup/></AccordionDetails>
-    </Accordion>
-    </CardContent>
-    </Card>
-  )
-};
-*/
 
 export class BlankArea extends React.Component {
   render() {return <h3></h3>;}
 }
 
 export class NothingToDisplay extends React.Component {
-  render() {return <div></div>;}
+  render() {return null}
 }
 
 
@@ -390,6 +368,20 @@ export class Copyright extends React.Component {
       {'.'}
     </Typography>
   }
+}
+
+export function JumpButton(props) {
+  const classes = useStyles();
+  return (
+    <div>
+      <Divider className={classes.divider} />
+      <BlankArea />
+      <Button variant="contained" fullWidth color="primary" align="center"
+        onClick={() => setTab(props.page) }>
+        {props.text}
+      </Button>
+  </div>
+  )
 }
 
 export function CricDreamLogo () {

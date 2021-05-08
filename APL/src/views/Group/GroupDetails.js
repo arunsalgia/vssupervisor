@@ -36,7 +36,7 @@ import axios from "axios";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {red, blue, yellow, deepOrange } from '@material-ui/core/colors';
 import { useHistory } from "react-router-dom";
-import {BlankArea, NothingToDisplay, DisplayPageHeader, DisplayPrizeTable, MessageToUser} from "CustomComponents/CustomComponents.js"
+import {BlankArea, JumpButton, NothingToDisplay, DisplayPageHeader, DisplayPrizeTable, MessageToUser} from "CustomComponents/CustomComponents.js"
 import { useParams } from "react-router";
 // import GroupMember from "views/Group/GroupMember.js"
 import { SettingsPowerSharp } from '@material-ui/icons';
@@ -65,6 +65,9 @@ const useStyles = makeStyles((theme) => ({
     fontSize: theme.typography.pxToRem(14),
     fontWeight: theme.typography.fontWeightBold,
     // color: yellow[900]
+  },
+  jump: {
+    margin: theme.spacing(3, 0, 2),
   },
   groupMessage: {
     fontSize: theme.typography.pxToRem(10),
@@ -659,16 +662,21 @@ export default function GroupDetails() {
           <MenuItem key={x.groupName} value={x.groupName}>{x.groupName}</MenuItem>)}
       </Select>
     </Grid>
-    {/* <Grid item key="gi2-group" xs={3} sm={3} md={3} lg={3} >
-      <Button key={"create"} variant="contained" color="primary" size="small"
-          onClick={() => { handleFetchGroup() }}
-          className={classes.button}>Fetch
-      </Button>
-    </Grid> */}
     </Grid>
   )}
 
+  function ShowJumpButtons() {
+    return (
+      <div>
+        <BlankArea />
+        <JumpButton page={process.env.REACT_APP_AUCTION} text="Auction" />
+      </div>
+    )
+  }
+
+
   return (
+    <div>
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper} align="center">
@@ -680,6 +688,8 @@ export default function GroupDetails() {
         <ShowResisterStatus/>
       </div>
     </Container>
+    <ShowJumpButtons />
+    </div>
   );
 }
 

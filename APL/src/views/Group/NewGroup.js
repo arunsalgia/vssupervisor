@@ -35,7 +35,7 @@ import {red, blue, yellow} from '@material-ui/core/colors';
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 // import copy from 'copy-clipboard';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
-import { DisplayPageHeader } from 'CustomComponents/CustomComponents';
+import { DisplayPageHeader, JumpButton } from 'CustomComponents/CustomComponents';
 import { getAllPrizeTable } from 'views/functions';
 
 const useStyles = makeStyles((theme) => ({
@@ -64,6 +64,9 @@ const useStyles = makeStyles((theme) => ({
     // color: yellow[900]
   },
   submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+  jump: {
     margin: theme.spacing(3, 0, 2),
   },
   button: {
@@ -363,6 +366,19 @@ export default function CreateGroup() {
     setPrizeTable(myTable[0]);
   }
 
+  function ShowJumpButtons() {
+    if (groupCode.length > 0) {
+      return (
+        <div>
+          <BlankArea />
+          <JumpButton page={process.env.REACT_APP_GROUPDETAILS} text="Group Details" />
+        </div>
+      )
+    } else
+      return null;
+  }
+
+
   return (
     <Container component="main" maxWidth="xs">
       <DisplayBalance balance={balance} />
@@ -464,6 +480,7 @@ export default function CreateGroup() {
     {/* <Switch>
       <Route  path='/admin/signin' component={SignIn} key="MemberList"/>
     </Switch> */}
+    <ShowJumpButtons />
     </Container>
   );
 }
