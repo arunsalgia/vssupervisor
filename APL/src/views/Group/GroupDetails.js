@@ -520,7 +520,7 @@ export default function GroupDetails() {
           <DisplayFranchise />
         </AccordionDetails>
     </Accordion>
-    <Typography align="left" className={classes.helpMessage}>You can update the Group Franchise name</Typography>
+    <Typography align="left" className={classes.helpMessage}>Update Franchise name</Typography>
     <BlankArea />
     <Accordion expanded={expandedPanel === "group"} onChange={handleAccordionChange("group")}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
@@ -530,7 +530,7 @@ export default function GroupDetails() {
           <DisplayGroupDetails />
         </AccordionDetails>
     </Accordion>
-    <Typography align="left" className={classes.helpMessage}>View Group details</Typography>
+    <Typography align="left" className={classes.helpMessage}>View/Edit Group details</Typography>
     <BlankArea />
     <Accordion expanded={expandedPanel === "prize"} onChange={handleAccordionChange("prize")}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
@@ -540,7 +540,7 @@ export default function GroupDetails() {
         <DisplayPrize />
       </AccordionDetails>
     </Accordion>
-    <Typography align="left" className={classes.helpMessage}>Modify Prize count</Typography>
+    <Typography align="left" className={classes.helpMessage}>View/Edit Prize Details</Typography>
     <BlankArea />
    <Accordion expanded={expandedPanel === "members"} onChange={handleAccordionChange("members")}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
@@ -588,10 +588,10 @@ export default function GroupDetails() {
     // await generatePrizeTable(grpResponse.data.info.memberCount,
     //   grpResponse.data.info.memberFee,
     //   grpResponse.data.info.prizeCount);
-    console.log(grpResponse.data.info);
+    // console.log(grpResponse.data.info);
     let myTable = await getAllPrizeTable(grpResponse.data.info.memberCount *
       grpResponse.data.info.memberFee);
-    console.log(myTable);
+    // console.log(myTable);
     setMasterPrizeTable(myTable);
     setPrizeTable(myTable[grpResponse.data.info.prizeCount-1]);
     setMinimumMemberCount(grpResponse.data.currentCount);
@@ -642,6 +642,9 @@ export default function GroupDetails() {
 
   function SelectGroup() {
   return (
+    <Typography className={classes.groupCode}>{groupName}</Typography>
+  );
+  return (
     <Grid key="gr-group" container justify="center" alignItems="center" >
     <Grid item key="gi1-group" xs={12} sm={12} md={12} lg={12} >
       <Select labelId='team' id='team'
@@ -681,8 +684,8 @@ export default function GroupDetails() {
       <CssBaseline />
       <div className={classes.paper} align="center">
         <DisplayPageHeader headerName="Group Details" groupName={masterData.name} tournament={masterData.tournament}/>
-        <BlankArea />
-        <SelectGroup />
+        {/* <BlankArea />
+        <SelectGroup /> */}
         <BlankArea />
         <DisplayAccordian />
         <ShowResisterStatus/>

@@ -112,7 +112,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: '#B3E5FC',
   },
   divider: {
-    backgroundColor: '#FFFF00',
+    backgroundColor: '#000000',
     color: '#000000',
     fontWeight: theme.typography.fontWeightBold,
   }

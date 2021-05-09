@@ -177,7 +177,7 @@ export default function Stats() {
 
 
   function generatePlayerList(statData) {
-    console.log("In generate");
+    //console.log("In generate");
     let allPlayers = [];
     let myseachList = [""]
     for(let idx=0; idx < statData.length; ++idx) {
@@ -260,11 +260,11 @@ export default function Stats() {
         let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/apl/getmaxguide`;
         // console.log(myURL);
         let response = await axios.get(myURL);
-        console.log(response);
+        //console.log(response);
         setMaxGuide(parseInt(response.data));
         let tmp = await getNextGuide();
         if (tmp) {
-          console.log(tmp);
+          //console.log(tmp);
           openModal();
         } else
           closeModal();
@@ -326,7 +326,7 @@ export default function Stats() {
 
   const [expandedPanel, setExpandedPanel] = useState(false);
   const handleAccordionChange = (panel) => (event, isExpanded) => {
-    console.log({ event, isExpanded });
+    //console.log({ event, isExpanded });
     setExpandedPanel(isExpanded ? panel : false);
   };
 

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import axios from "axios";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -116,10 +117,11 @@ export function CricDreamTabs() {
   const [grpAuth, setGrpAuth] = React.useState(true);
   const [grpAnchorEl, setGrpAnchorEl] = React.useState(null);
   const grpOpen = Boolean(grpAnchorEl);
+  const [arunGroup, setArunGroup] = React.useState(false);
   const [value, setValue] = React.useState(parseInt(localStorage.getItem("menuValue")));
   const [upgrade, setUpgrade] = React.useState(false);
   const [modalIsOpen,setIsOpen] = React.useState(true);
-
+  const [userGroup, setUserGroup] = React.useState([]);
 
   useEffect(() => {       
     const testUpgrade = async () => {
@@ -144,16 +146,50 @@ export function CricDreamTabs() {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleGrpMenu = (event) => {
+  function handleGrpMenu(event) {
     setGrpAnchorEl(event.currentTarget);
+    // console.log(event.currentTarget);
+    var myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/group/memberof/${localStorage.getItem("uid")}`;
+    axios.get(myUrl).then((response) => {
+      let allGroups = response.data[0].groups;
+      if (allGroups.length > 0) {
+        let tmp = allGroups.find(x => x.defaultGroup == true);
+        if (!tmp) {
+          tmp = allGroups[0];
+          tmp.defaultGroup = true;
+          localStorage.setItem("gid", tmp.gid.toString());
+          localStorage.setItem("groupName", tmp.groupName);
+          localStorage.setItem("tournament", tmp.tournament);
+          localStorage.setItem("admin", tmp.admin);
+        }
+      }
+      setUserGroup(allGroups);
+      // console.log('Everything is awesome.');
+      setArunGroup(true);
+    }).catch((error) => {
+      console.warn('Not good man :(');
+      console.log(error);
+      setUserGroup([]);
+      setArunGroup(true);
+    })
   };
 
+  function handleGroupSelect(index) {
+    setArunGroup(false);
+    let gRec = userGroup[index];
+    localStorage.setItem("gid", gRec.gid);
+    localStorage.setItem("groupName", gRec.groupName);
+    localStorage.setItem("tournament", gRec.tournament);
+    localStorage.setItem("admin", gRec.admin);
+  }
+  
   const handleClose = () => {
     setAnchorEl(null);
   };
 
   const handleGrpClose = () => {
     setGrpAnchorEl(null);
+    setArunGroup(false);
   };
 
   function setMenuValue(num) {
@@ -267,7 +303,19 @@ export function CricDreamTabs() {
       return(<BlankArea/>)
   }
 
-
+  function DisplayGroupMenu() {
+    // console.log("Group length", userGroup.length);
+    return (
+      <div>
+      {userGroup.map( (item, index) => {
+        return (
+        <MenuItem onClick={() => handleGroupSelect(index)}>{item.groupName}</MenuItem>
+        )
+      })}
+      </div>
+    );
+  }
+    
   let mylogo = `${process.env.PUBLIC_URL}/APLLOGO1.ICO`;
   return (
     <div className={classes.root}>
@@ -306,6 +354,11 @@ export function CricDreamTabs() {
                 open={open}
                 onClose={handleClose}
               >
+                {/* <MenuItem onClick={handleGroup}>Group</MenuItem> */}
+                <MenuItem onClick={handleGroupDetails}>Group Details</MenuItem>
+                <MenuItem onClick={handleGroupJoin}>Join Group</MenuItem>
+                <MenuItem onClick={handleGroupNew}>New Group</MenuItem>
+                <Divider />
                 <MenuItem onClick={handleMatch}>Match</MenuItem>
                 <MenuItem onClick={handleCaptain}>Captain</MenuItem>
                 <MenuItem onClick={handleAuction}>Auction</MenuItem>
@@ -340,43 +393,35 @@ export function CricDreamTabs() {
           <Button color="inherit" className={classes.statButton} onClick={handleStat}>Stats</Button>
           {/* <Button color="inherit" className={classes.statButton} onClick={handleAuction}>Auction</Button> */}
           <Button color="inherit" className={classes.teamButton} onClick={handleTeam}>Team</Button>
-          {/* <Typography variant="h6" className={classes.title}>
-            Photos
-          </Typography> */}
-          {grpAuth && (
-            <div>
-              <IconButton
-                aria-label="account of current group"
-                aria-controls="group-appbar"
-                aria-haspopup="true"
-                onClick={handleGrpMenu}
-                color="inherit"
-              >
-                <GroupIcon className={classes.icon}/>
-              </IconButton>
-              <Menu
-                id="group-appbar"
-                anchorEl={grpAnchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={grpOpen}
-                onClose={handleGrpClose}
-              >
-                <MenuItem onClick={handleGroup}>Group</MenuItem>
-                <MenuItem onClick={handleGroupDetails}>Group Details</MenuItem>
-                <MenuItem onClick={handleGroupJoin}>Join Group</MenuItem>
-                <MenuItem onClick={handleGroupNew}>New Group</MenuItem>
-              </Menu>
-            </div>
-          )}
-        </Toolbar>
+         {/* <div> */}
+          <IconButton
+            aria-label="account of current group"
+            aria-controls="group-appbar"
+            aria-haspopup="true"
+            onClick={handleGrpMenu}
+            color="inherit"
+          >
+            <GroupIcon className={classes.icon}/>
+          </IconButton>
+          <Menu
+            id="group-appbar"
+            anchorEl={grpAnchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={arunGroup}
+            onClose={handleGrpClose}
+          >
+            <DisplayGroupMenu />
+          </Menu>
+        {/* </div> */}
+       </Toolbar>
       </AppBar>
       <DisplayCdItems/>
       <DisplayUpgrade/>

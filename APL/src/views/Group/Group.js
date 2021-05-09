@@ -4,7 +4,15 @@ import { makeStyles } from '@material-ui/core/styles';
 // import { Switch, Route } from 'react-router-dom';
 import Link from '@material-ui/core/Link';
 import Button from '@material-ui/core/Button';
-import Table from "components/Table/Table.js";
+//import Table from "components/Table/Table.js";
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
+
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import Grid from "@material-ui/core/Grid";
@@ -20,7 +28,7 @@ import { useHistory } from "react-router-dom";
 import { UserContext } from "../../UserContext";
 import { cdCurrent, cdDefault, hasGroup, clearBackupData} from "views/functions.js"
 import {BlankArea, NothingToDisplay, DisplayBalance} from "CustomComponents/CustomComponents.js"
-import {red, blue, green } from '@material-ui/core/colors';
+import {red, blue, green, deepOrange } from '@material-ui/core/colors';
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 const rPrefix = "radio-";
 const curr =  "Curr - Current Group  / Def - Default Group";
@@ -57,6 +65,22 @@ const useStyles = makeStyles((theme) => ({
       fontSize: theme.typography.pxToRem(15),
       color: theme.palette.text.secondary,
     },
+    th: { 
+        spacing: 0,
+        align: "center",
+        padding: "none",
+        backgroundColor: '#EEEEEE', 
+        color: deepOrange[700], 
+        // border: "1px solid black",
+        fontWeight: theme.typography.fontWeightBold,
+      },
+      td : {
+        spacing: 0,
+        // border: 5,
+        align: "center",
+        padding: "none",
+        height: 10,
+      },        
   }));
 
 
@@ -188,6 +212,38 @@ export default function Group() {
     };
 
     function DisplayGroupData() {
+        return (
+            <Table>
+            <TableHead p={0}>
+                <TableRow align="center">
+                <TableCell className={classes.th} p={0} align="center">Group Name</TableCell>
+                <TableCell className={classes.th} p={0} align="center"></TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody p={0}>
+                {myGroupTableData.map(item => {
+                return (
+                    <TableRow key={item.groupName}>
+                    <TableCell  className={classes.td} p={0} align="center" >
+                        {item.groupName}
+                    </TableCell>
+                    <TableCell  className={classes.td} p={0} align="center" >
+                        <FormControlLabel 
+                        key={"Curr"+item.groupName}
+                        id={"Curr"+item.groupName}
+                        className={classes.td} 
+                        control={<Radio color="primary" defaultChecked={item.playerName === newCurrentGroup}/>}
+                        onClick={() => handleNewCurrentGroup(item.groupName)}
+                        checked={newCurrentGroup === item.groupName}
+                        />
+                    </TableCell>
+                    </TableRow>
+                )
+                })}
+            </TableBody> 
+            </Table>    
+        )
+
         // console.log(myGroupTableData);
         return (
         myGroupTableData.map( (x, index) => {
@@ -227,12 +283,7 @@ export default function Group() {
 
     function  ShowAllGroups() {
         return(
-        <Card key="c-group" profile>
-        <CardBody key="cb-group" profile>
-        <DisplayGroupHeader />
         <DisplayGroupData />
-        </CardBody>
-        </Card>
         );
     }
 
@@ -252,7 +303,8 @@ export default function Group() {
         <div className={classes.root} align="center" key="groupinfo">
             {/* <DisplayBalance balance={balance} /> */}
             <ShowPageHeader />
-            <ShowAllGroups />
+            {/* <ShowAllGroups /> */}
+            <DisplayGroupData />
         </div>
         );
     
