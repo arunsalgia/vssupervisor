@@ -293,7 +293,7 @@ export default function Stats() {
     } catch (e) {
       setCurrentGuide({guideNumber: 0});
       // myNum = 0;
-      console.log(e);
+      console.log(e.response);
     }
     return myGuide;
   }

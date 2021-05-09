@@ -494,7 +494,7 @@ export default function GroupDetails() {
       <BlankArea/>
       <Button 
         type="submit"
-        fullwith
+        // fullWidth
         variant="contained" 
         color="primary"
         disabled={disableEdit}  

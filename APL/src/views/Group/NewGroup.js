@@ -388,6 +388,20 @@ export default function CreateGroup() {
           Create New Group
         </Typography>
     <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
+      <Select labelId='tournament' id='tournament'
+          variant="outlined"
+          disabled={isDisabled}
+          required
+          fullWidth
+          label="Tournament Name"
+          name="tournamentName"
+          id="tournamentList"
+          value={selectedTournament}
+          displayEmpty onChange={handleSelectedTournament}>
+          {tournamentData.map(x =>
+          <MenuItem key={x.name} value={x.name}>{x.name}</MenuItem>)}
+        </Select>
+      <BlankArea/> 
       <TextValidator
           variant="outlined"
           required
@@ -447,20 +461,6 @@ export default function CreateGroup() {
       <SelectPrizeCount/>
       </div>
       <BlankArea/>
-      <Select labelId='tournament' id='tournament'
-        variant="outlined"
-        disabled={isDisabled}
-        required
-        fullWidth
-        label="Tournament Name"
-        name="tournamentName"
-        id="tournamentList"
-        value={selectedTournament}
-        displayEmpty onChange={handleSelectedTournament}>
-        {tournamentData.map(x =>
-        <MenuItem key={x.name} value={x.name}>{x.name}</MenuItem>)}
-      </Select>
-      <BlankArea/> 
       <ShowResisterStatus/>
       <BlankArea/>
       <div align="center">

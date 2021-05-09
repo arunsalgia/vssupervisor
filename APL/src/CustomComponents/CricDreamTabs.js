@@ -168,7 +168,7 @@ export function CricDreamTabs() {
       // console.log('Everything is awesome.');
       setArunGroup(true);
     }).catch((error) => {
-      console.warn('Not good man :(');
+      console.log('Not good man :(');
       console.log(error);
       setUserGroup([]);
       setArunGroup(true);
@@ -307,10 +307,10 @@ export function CricDreamTabs() {
   function DisplayGroupMenu() {
     // console.log("Group length", userGroup.length);
     return (
-      <div>
+      <div key="grouplist">
       {userGroup.map( (item, index) => {
         return (
-        <MenuItem onClick={() => handleGroupSelect(index)}>{item.groupName}</MenuItem>
+        <MenuItem key={item.groupName} onClick={() => handleGroupSelect(index)}>{item.groupName}</MenuItem>
         )
       })}
       </div>

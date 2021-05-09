@@ -19,7 +19,7 @@ import { UserContext } from "../../UserContext";
 import { NoGroup, DisplayPageHeader, MessageToUser, BlankArea, JumpButton } from 'CustomComponents/CustomComponents.js';
 import { hasGroup } from 'views/functions';
 import { red, blue } from '@material-ui/core/colors';
-import { updateLanguageServiceSourceFile } from 'typescript';
+// import { updateLanguageServiceSourceFile } from 'typescript';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -33,9 +33,6 @@ import Divider from '@material-ui/core/Divider';
 import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import IconButton from '@material-ui/core/IconButton';
-<IconButton aria-label="delete" disabled color="primary">
-  <ArrowLeftIcon />
-</IconButton>
 
 
 const useStyles = makeStyles((theme) => ({
@@ -130,13 +127,15 @@ export default function Home() {
     }
     
     function handleCreate() {
-      localStorage.setItem("cGroup", tournamentList[currentTournament].groupName);
-      setTab(1001);
+      // console.log(currentTournament);
+      // console.log(tournamentList[currentTournament]);
+      localStorage.setItem("cGroup", tournamentList[currentTournament].name);
+      setTab(process.env.REACT_APP_GROUPNEW);
     }
 
     function handleJoin() {
       //console.log("Join group");
-      setTab(1002);
+      setTab(process.env.REACT_APP_GROUPJOIN);
     }
 
     function handleLeft() {
@@ -149,34 +148,36 @@ export default function Home() {
         setCurrentTournament(currentTournament + 1);
     }
 
-    function ShowTournamentCards() {
+    function OrgShowTournamentCards() {
       if (tournamentList.length === 0) return null;
 
       let tmp = tournamentList[currentTournament];
       return (
         <Box paddingLeft={2} paddingRight={2} borderColor="primary" border={0}>
-      <Card m={2} raised variant="outlined" gutterBottom>
+      <Card m={2} raised variant="outlined">
       <CardContent>
       <Table>
         <TableBody p={0}>
           <TableRow key={tmp.name}>
-            <TableCell p={0} align="left" >
+            <TableCell p={0} m={0} align="left" >
             <IconButton 
+              // iconStyle={{width: '24px', height: '24px'}}
               onClick={handleLeft}
               disabled={currentTournament === 0}
               aria-label="left" color="primary">
-              <ArrowLeftIcon />
+              <ArrowLeftIcon fontSize="large" />
             </IconButton>
             </TableCell>
-            <TableCell p={0} align="center" >
+            <TableCell p={0} m={0} align="center" >
               <Typography className={classes.ngCard} align="center">{tmp.name}</Typography>
             </TableCell>
-            <TableCell p={0} align="right" >
+            <TableCell p={0} m={0} align="right" >
               <IconButton 
-                onClick={handleRight}
+              // iconStyle={{width: '24px', height: '24px'}}
+              onClick={handleRight}
                 disabled={currentTournament === (tournamentList.length-1)}
                 aria-label="right" color="primary">
-                <ArrowRightIcon />
+                <ArrowRightIcon fontSize="large" />
               </IconButton>
             </TableCell>
           </TableRow>
@@ -191,7 +192,7 @@ export default function Home() {
             variant="contained"
             size="small" color="primary"
             className={classes.submit}
-            onClick={() => handleCreate }>
+            onClick={handleCreate}>
             New Group
           </Button>
         </Grid>
@@ -213,6 +214,69 @@ export default function Home() {
       )
     }
 
+    function ShowTournamentCards() {
+      if (tournamentList.length === 0) return null;
+
+      let tmp = tournamentList[currentTournament];
+      return (
+        <Box paddingLeft={2} paddingRight={2} borderColor="primary" border={0}>
+      <Card m={2} raised variant="outlined">
+      <CardContent>
+      <Grid key="gr-groupname" container justify="center" alignItems="center" >
+        <Grid item xs={2} sm={2} md={2} lg={2} >
+        <IconButton 
+              // iconStyle={{width: '24px', height: '24px'}}
+              onClick={handleLeft}
+              disabled={currentTournament === 0}
+              aria-label="left" color="primary">
+              <ArrowLeftIcon fontSize="large" />
+            </IconButton>
+        </Grid>
+        <Grid align="center" item xs={8} sm={8} md={8} lg={8} >
+          <Typography className={classes.ngCard} align="center">{tmp.name}</Typography>
+        </Grid>
+        <Grid item xs={2} sm={2} md={2} lg={2} >
+        <IconButton 
+              // iconStyle={{width: '24px', height: '24px'}}
+              onClick={handleRight}
+                disabled={currentTournament === (tournamentList.length-1)}
+                aria-label="right" color="primary">
+                <ArrowRightIcon fontSize="large" />
+              </IconButton>
+        </Grid>
+      </Grid>
+      </CardContent>
+      <CardActions>
+      <Grid key="gr-group" container justify="center" alignItems="center" >
+        <Grid item xs={4} sm={4} md={4} lg={4} >
+          <Button  
+            align="left"
+            variant="contained"
+            size="small" color="primary"
+            className={classes.submit}
+            onClick={handleCreate}>
+            New Group
+          </Button>
+        </Grid>
+        <Grid item xs={4} sm={4} md={4} lg={4} />
+        <Grid item xs={4} sm={4} md={4} lg={4} >
+          <Button 
+            align="right"
+            variant="contained"
+            size="small" color="primary"
+            className={classes.submit}
+            onClick={handleJoin}>
+            Join Group
+          </Button>
+        </Grid>
+      </Grid>
+      </CardActions>
+      </Card>
+      </Box>
+      )
+    }
+
+  
     function ShowJumpButtons() {
       return (
         <div>
@@ -231,11 +295,12 @@ export default function Home() {
   
     return (
     <div className={classes.root} key="uctournament">
-    <BlankArea/>
-    <DisplayPageHeader headerName="Upcoming Tournament" groupName="" tournament=""/>
-    <BlankArea/>
-    <ShowTournamentCards/>
-    <ShowJumpButtons />
-</div>
+      {/* <BlankArea/> */}
+      <DisplayPageHeader headerName="Upcoming Tournament" groupName="" tournament=""/>
+      <BlankArea/>
+      <ShowTournamentCards/>
+      <BlankArea/>
+      <ShowJumpButtons />
+    </div>
     );
     }
