@@ -683,10 +683,10 @@ export default function GroupDetails() {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper} align="center">
-        <DisplayPageHeader headerName="Group Details" groupName={masterData.name} tournament={masterData.tournament}/>
-        {/* <BlankArea />
-        <SelectGroup /> */}
-        <BlankArea />
+        {/* <DisplayPageHeader headerName="Group Details" groupName={masterData.name} tournament={masterData.tournament}/> */}
+        {/* <BlankArea /> */}
+        <SelectGroup />
+        {/* <BlankArea /> */}
         <DisplayAccordian />
         <ShowResisterStatus/>
       </div>
