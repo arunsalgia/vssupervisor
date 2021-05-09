@@ -18,7 +18,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu'; 
 import {red, blue, green} from '@material-ui/core/colors';
 import Divider from '@material-ui/core/Divider';
-import {cdRefresh, specialSetPos, upGradeRequired} from "views/functions.js"
+import {cdRefresh, specialSetPos, upGradeRequired, clearBackupData} from "views/functions.js"
 /// cd items import
 import Dash from "views/Dashboard/Dashboard"
 import Stats from "views/Statistics/Statistics"
@@ -161,6 +161,7 @@ export function CricDreamTabs() {
           localStorage.setItem("groupName", tmp.groupName);
           localStorage.setItem("tournament", tmp.tournament);
           localStorage.setItem("admin", tmp.admin);
+          clearBackupData();
         }
       }
       setUserGroup(allGroups);
