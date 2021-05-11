@@ -173,13 +173,19 @@ export function CricDreamTabs() {
     })
   };
 
-  function handleGroupSelect(index) {
+  async function handleGroupSelect(index) {
     setArunGroup(false);
     let gRec = userGroup[index];
-    localStorage.setItem("gid", gRec.gid);
-    localStorage.setItem("groupName", gRec.groupName);
-    localStorage.setItem("tournament", gRec.tournament);
-    localStorage.setItem("admin", gRec.admin);
+    try {
+      await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setdefaultgroup/${localStorage.getItem("uid")}/${gRec.gid}`);
+      localStorage.setItem("gid", gRec.gid);
+      localStorage.setItem("groupName", gRec.groupName);
+      localStorage.setItem("tournament", gRec.tournament);
+      localStorage.setItem("admin", gRec.admin);
+    } catch (e) {
+      console.log(e);
+      console.log("error setting default group");
+    }
   }
   
   const handleClose = () => {
@@ -357,9 +363,9 @@ export function CricDreamTabs() {
               >
                 {/* <MenuItem onClick={handleGroup}>Group</MenuItem> */}
                 <MenuItem onClick={handleGroupDetails}>Group Details</MenuItem>
-                <MenuItem onClick={handleGroupJoin}>Join Group</MenuItem>
+                {/* <MenuItem onClick={handleGroupJoin}>Join Group</MenuItem>
                 <MenuItem onClick={handleGroupNew}>New Group</MenuItem>
-                <Divider />
+                <Divider /> */}
                 <MenuItem onClick={handleMatch}>Match</MenuItem>
                 <MenuItem onClick={handleCaptain}>Captain</MenuItem>
                 <MenuItem onClick={handleAuction}>Auction</MenuItem>

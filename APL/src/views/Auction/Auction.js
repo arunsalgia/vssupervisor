@@ -323,6 +323,12 @@ export default function Auction() {
                 }
                 //console.log("mycount", myCountdown);
                 setCountDown(myCountdown);
+                if (myCountdown > 0) {
+                    let countMp3 = `${process.env.PUBLIC_URL}/audio/${myCountdown}.MP3`;
+                    let audioClick = new Audio(countMp3);
+                    audioClick.play();
+        
+                }
                 //console.log("arun",countDown)
             });
 
@@ -542,9 +548,18 @@ export default function Auction() {
         var value = parseInt(newBid) + parseInt(bidAmount);
         let myURL=`${process.env.REACT_APP_AXIOS_BASEPATH}/auction/nextbid/${localStorage.getItem("gid")}/${localStorage.getItem("uid")}/${playerId}/${value}`;
         // console.log(myURL);
-        var resp = await axios(myURL);
-        // console.log(`Bid for value ${newBid}`)
-        // setBidAmount();
+        // var resp = await axios(myURL);
+        try {
+            let xxx = axios.get(myURL);
+            let clickMp3 = `${process.env.PUBLIC_URL}/audio/CLICK.MP3`;
+            let audioClick = new Audio(clickMp3);
+            audioClick.play();
+            // await xxx;
+            // console.log(`Bid for value ${newBid}`)
+            // setBidAmount();
+        } catch(e) {
+            console.log("Bid by same user");
+        }
     }
 
     function BidButton(props) {
@@ -761,7 +776,7 @@ export default function Auction() {
     }
     
     function ShowJumpButtons() {
-        console.log("Status", auctionStatus)
+        // console.log("Status", auctionStatus)
         if (auctionStatus === "OVER") {
             return (
             <div>

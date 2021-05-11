@@ -18,8 +18,7 @@ import Box from '@material-ui/core/Box';
 import { UserContext } from "../../UserContext";
 import { NoGroup, DisplayPageHeader, MessageToUser, BlankArea, JumpButton } from 'CustomComponents/CustomComponents.js';
 import { hasGroup } from 'views/functions';
-import { red, blue } from '@material-ui/core/colors';
-// import { updateLanguageServiceSourceFile } from 'typescript';
+import { red, blue, green, deepOrange } from '@material-ui/core/colors';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -33,6 +32,16 @@ import Divider from '@material-ui/core/Divider';
 import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import IconButton from '@material-ui/core/IconButton';
+// import { updateLanguageServiceSourceFile } from 'typescript';
+
+// import NEWTOURNAMENTIMAGE from `${process.env.PUBLIC_URL}/NEWTOURNAMENT.JPG`;
+
+const cardStyles = {
+  cardImage: {
+      backgroundImage: `url(${process.env.PUBLIC_URL}/NEWTOURNAMENT.JPG)`,
+      height: '80px'
+  }
+};
 
 
 const useStyles = makeStyles((theme) => ({
@@ -42,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
     ngCard: {
       fontSize: theme.typography.pxToRem(16),
       fontWeight: theme.typography.fontWeightBold,
+      color: deepOrange[900],
     },
     heading: {
       fontSize: theme.typography.pxToRem(15),
@@ -148,72 +158,6 @@ export default function Home() {
         setCurrentTournament(currentTournament + 1);
     }
 
-    function OrgShowTournamentCards() {
-      if (tournamentList.length === 0) return null;
-
-      let tmp = tournamentList[currentTournament];
-      return (
-        <Box paddingLeft={2} paddingRight={2} borderColor="primary" border={0}>
-      <Card m={2} raised variant="outlined">
-      <CardContent>
-      <Table>
-        <TableBody p={0}>
-          <TableRow key={tmp.name}>
-            <TableCell p={0} m={0} align="left" >
-            <IconButton 
-              // iconStyle={{width: '24px', height: '24px'}}
-              onClick={handleLeft}
-              disabled={currentTournament === 0}
-              aria-label="left" color="primary">
-              <ArrowLeftIcon fontSize="large" />
-            </IconButton>
-            </TableCell>
-            <TableCell p={0} m={0} align="center" >
-              <Typography className={classes.ngCard} align="center">{tmp.name}</Typography>
-            </TableCell>
-            <TableCell p={0} m={0} align="right" >
-              <IconButton 
-              // iconStyle={{width: '24px', height: '24px'}}
-              onClick={handleRight}
-                disabled={currentTournament === (tournamentList.length-1)}
-                aria-label="right" color="primary">
-                <ArrowRightIcon fontSize="large" />
-              </IconButton>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-      </CardContent>
-      <CardActions>
-      <Grid key="gr-group" container justify="center" alignItems="center" >
-        <Grid item xs={4} sm={4} md={4} lg={4} >
-          <Button  
-            align="left"
-            variant="contained"
-            size="small" color="primary"
-            className={classes.submit}
-            onClick={handleCreate}>
-            New Group
-          </Button>
-        </Grid>
-        <Grid item xs={4} sm={4} md={4} lg={4} />
-        <Grid item xs={4} sm={4} md={4} lg={4} >
-          <Button 
-            align="right"
-            variant="contained"
-            size="small" color="primary"
-            className={classes.submit}
-            onClick={handleJoin}>
-            Join Group
-          </Button>
-        </Grid>
-      </Grid>
-      </CardActions>
-      </Card>
-      </Box>
-      )
-    }
-
     function ShowTournamentCards() {
       if (tournamentList.length === 0) return null;
 
@@ -221,7 +165,7 @@ export default function Home() {
       return (
         <Box paddingLeft={2} paddingRight={2} borderColor="primary" border={0}>
       <Card m={2} raised variant="outlined">
-      <CardContent>
+      <CardContent style={cardStyles.cardImage} >
       <Grid key="gr-groupname" container justify="center" alignItems="center" >
         <Grid item xs={2} sm={2} md={2} lg={2} >
         <IconButton 
