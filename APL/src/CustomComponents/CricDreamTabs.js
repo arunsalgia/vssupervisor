@@ -18,7 +18,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu'; 
 import {red, blue, green} from '@material-ui/core/colors';
 import Divider from '@material-ui/core/Divider';
-import {cdRefresh, specialSetPos, upGradeRequired, clearBackupData} from "views/functions.js"
 /// cd items import
 import Dash from "views/Dashboard/Dashboard"
 import Stats from "views/Statistics/Statistics"
@@ -39,9 +38,10 @@ import SU_Image from "views/SuperUser/Image.js"
 import NewGroup from "views/Group/NewGroup.js"
 import JoinGroup from "views/Group/JoinGroup.js"
 import GroupDetails from "views/Group/GroupDetails.js"
-import { BlankArea } from './CustomComponents';
 import Modal from 'react-modal';
-//import {upGradeRequired} from "views/functions";
+// import download from 'js-file-downloader';
+import { BlankArea } from './CustomComponents';
+import {cdRefresh, specialSetPos, upGradeRequired, downloadApk, clearBackupData} from "views/functions.js"
 
 
 const customStyles = {
@@ -124,15 +124,13 @@ export function CricDreamTabs() {
   const [userGroup, setUserGroup] = React.useState([]);
 
   useEffect(() => {       
-    const testUpgrade = async () => {
+    const checkVersion = async () => {
       //console.log("about to call upgrade");
       let upg = await upGradeRequired();
-      //console.log("After chkupgrade");
       setUpgrade(upg);
-      //console.log(upg);
-      setIsOpen(true);
+      if (upg) setIsOpen(true);
     }
-    testUpgrade();
+    checkVersion();
 }, []);
 
 
@@ -265,9 +263,11 @@ export function CricDreamTabs() {
     }
   }
 
-  function handleUpgrade() {
+  async function handleUpgrade() {
     //console.log("upgrade requested");
     closeModal();
+    await downloadApk();
+    console.log("APK has to be downloaded");
   }
 
   function openModal() { setIsOpen(true); }
@@ -281,7 +281,7 @@ export function CricDreamTabs() {
 
   function DisplayUpgrade() {
     //console.log(`Upgrate: ${upgrade} Menu Item:   ${value}`)
-    if (upgrade && (value === 1))
+    if (upgrade)
       return(
         <Modal
         isOpen={modalIsOpen}

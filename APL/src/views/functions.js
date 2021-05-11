@@ -1,4 +1,9 @@
 import axios from "axios";
+import download from 'js-file-download';
+import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import CircularProgressWithLabel from '@material-ui/core/LinearProgress';
+
 var crypto = require("crypto");
 
 export function cdRefresh() {
@@ -275,14 +280,53 @@ export async function latestAPLVersion()  {
 export async function upGradeRequired() {
   let upGrade = false;
   if (process.env.REACT_APP_DEVICE === "MOBILE") {
-    let mycurrent = currentAPLVersion();
-    let mylatest = await latestAPLVersion();
-    // console.log(`Current ${mycurrent} and Latest: ${mylatest}`);
-    if (mylatest > mycurrent) upGrade = true;
+    let myName = process.env.REACT_APP_NAME;
+    let myVersion = process.env.REACT_APP_VERSION;
+    let myURL = `${process.env.REACT_APP_APLAXIOS}/apl/confirmlatest/${myName}/APK/${myVersion}`;
+    let response = await axios.get(myURL);
+    console.log("After axios call");
+    upGrade = (response.data.status) ? false : true;
   }
-  // console.log(`Latest upgrade: ${upGrade}`);
+  console.log(`Latest upgrade: ${upGrade}`);
   return (upGrade);
 }
+
+
+export async function downloadApk() {
+  let myName = process.env.REACT_APP_NAME;
+  let myURL = `${process.env.REACT_APP_APLAXIOS}/apl/downloadlatestbinary/${myName}/APK/`;
+  try {
+    axios({
+      method: 'get',
+      url: myURL,
+      responseType: 'arraybuffer',
+      // onDownloadProgress: (progressEvent) => {
+      //   // let newPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      //   // console.log("File download in progress ", newPercent);
+      // },
+      })
+      .then( (response) => {
+          let myFile = process.env.REACT_APP_NAME + ".APK";
+          console.log(myFile);
+          download(response.data, myFile);
+          console.log("download over");
+        }
+      )
+      .catch(
+          (error) => {
+            console.log(error);
+            console.log("in axios catch");
+          }
+      ); 
+  } catch (e) {
+    console.log(e);
+    console.log("in try catch");
+  } 
+  console.log("Debu complete");
+
+}
+
+
 
 export function clearBackupData() {
   /* Clear dash board items */

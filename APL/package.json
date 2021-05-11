@@ -18,6 +18,7 @@
     "crypto": "^1.0.1",
     "env-cmd": "^10.1.0",
     "history": "4.10.1",
+    "js-file-download": "^0.4.12",
     "lodah": "0.0.1-security",
     "lodash": "^4.17.20",
     "node-cron": "^2.0.3",
