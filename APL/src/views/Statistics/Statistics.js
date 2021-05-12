@@ -178,24 +178,23 @@ export default function Stats() {
 
   function generatePlayerList(statData) {
     //console.log("In generate");
-    let allPlayers = [];
-    let myseachList = [""]
+    
+    // let allPlayers = [];
+    let myseachList = [];
+
     for(let idx=0; idx < statData.length; ++idx) {
       let newPlayers = statData[idx].playerStat;      // franchisee.map(a => a.playerName);
-      let newPlayerNames = [];
       for(let p=0; p<newPlayers.length; ++p) {
-        //console.log(newPlayers[p].playerName);
-        newPlayerNames.push(newPlayers[p].playerName.toUpperCase());
-        myseachList.push(newPlayers[p].playerName);
+        myseachList.push({
+          userName: statData[idx].displayName,
+          playerName: newPlayers[p].playerName.toLowerCase()
+        });
       }
-      allPlayers.push({
-        userName: statData[idx].displayName,
-        playerNames: newPlayerNames
-      })
     }
     // console.log(allPlayers);
-    setPlayerList(allPlayers);
+    // setPlayerList(allPlayers);
     setSeachList(myseachList);
+    // console.log(myseachList);
   }
 
 
@@ -203,7 +202,7 @@ export default function Stats() {
     if (localStorage.getItem("statData")) {
       let sData = JSON.parse(localStorage.getItem("statData"))
       setTeamArray(sData);
-      // generatePlayerList(sData);
+      generatePlayerList(sData);
     }
     const makeconnection = async () => {
       await socket.connect();
@@ -224,7 +223,7 @@ export default function Stats() {
         if (gStat.length > 0) {
           setTeamArray(gStat)
           // console.log(first);
-          // if (first) generatePlayerList(gStat);
+          generatePlayerList(gStat);
           // first = false;
           localStorage.setItem("statData", JSON.stringify(gStat));
           // console.log(gStat);
@@ -405,9 +404,19 @@ export default function Stats() {
     )
   };
 
-  function handleSearchFieldOnChange(playerName) {
+  function handleSearchFieldOnChange() {
     // console.log("search presses");
-    // console.log(searchText);
+    let arun = searchText.toLowerCase();
+    console.log(arun);
+    // console.log(searchList);
+    let myData = searchList.filter(x  => x.playerName.includes(arun));
+    // console.log(myData);
+    if (myData.length > 0)
+      setExpandedPanel(myData[0].userName);
+    else 
+      setExpandedPanel("");
+    return;
+    /***
     console.log(playerName);
     setSearchText(playerName);
     let myText = playerName.toUpperCase()
@@ -419,13 +428,14 @@ export default function Stats() {
     let currUser = (userIdx >= 0) ? playerList[userIdx].userName : "";
     // console.log(currUser); 
     setExpandedPanel(currUser);
+    ***/
   }
 
   const handleChange = e => {
     setSearchText(e.target.value);
   };
 
-  function OldDisplayFilter() {
+  function DisplayFilter() {
     return (
       <div>
       <TextField
@@ -453,7 +463,7 @@ export default function Stats() {
     )
   }
 
-  function DisplayFilter() {
+  function selectDisplayFilter() {
     // console.log(searchList);
     return (
       <Select labelId='searchItem' id='searchItem'
@@ -501,7 +511,7 @@ export default function Stats() {
           <CardContent className={classes.cardContent}>
             <ShowCurrent />
             <Typography className={classes.cc2}>Updated as of {updTime}</Typography>
-            {/* <DisplayFilter /> */}
+            <DisplayFilter />
           </CardContent>
           {/* <CardBody key="db_cbody"> */}
             {/* <Table

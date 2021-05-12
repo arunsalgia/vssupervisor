@@ -329,7 +329,6 @@ export default function Auction() {
                     audioClick.play();
         
                 }
-                //console.log("arun",countDown)
             });
 
             sockConn.on("bidOver", (myrec) => {
@@ -344,6 +343,9 @@ export default function Auction() {
                 setBidAmount(grec.auctionBid);
                 setBidUser(grec.currentBidUser);
                 setBidUid(grec.currentBidUid);
+                let clickMp3 = `${process.env.PUBLIC_URL}/audio/CLICK.MP3`;
+                let audioClick = new Audio(clickMp3);
+                audioClick.play();    
             });
             sockConn.on("playerChange", async (newPlayerDetails, balanceDetails) => {
                 // console.log("Calling updatePlayerChange from socker");
@@ -551,9 +553,6 @@ export default function Auction() {
         // var resp = await axios(myURL);
         try {
             let xxx = axios.get(myURL);
-            let clickMp3 = `${process.env.PUBLIC_URL}/audio/CLICK.MP3`;
-            let audioClick = new Audio(clickMp3);
-            audioClick.play();
             // await xxx;
             // console.log(`Bid for value ${newBid}`)
             // setBidAmount();
