@@ -436,7 +436,7 @@ export default function Stats() {
     setSearchText(e.target.value);
   };
 
-  function OrgDisplayFilter() {
+  function DisplayFilter() {
     return (
       <div>
       <TextField
@@ -464,54 +464,7 @@ export default function Stats() {
     )
   }
 
-  function DisplayFilter() {
-    return (
-      <div>
-      <TextValidator
-        id="searchText"
-        variant="outlined"
-        fullWidth      
-        label="Search Player"
-        onChange={handleChange}
-        name="searchText"
-        value={searchText}
-        // InputProps={{
-        //   endAdornment: searchText && (
-        //     <IconButton
-        //       aria-label="toggle password visibility"
-        //       onClick={handleSearchFieldOnChange}
-        //     >
-        //       <SearchIcon />
-        //     </IconButton>
-        //   )
-        // }}
-        />
-
-      {/* <TextField
-        id="searchText"
-        placeholder="Search Player"
-        autoFocus
-        type="text"
-        variant="outlined"
-        fullWidth
-        size="small"
-        onChange={handleChange}
-        value={searchText}
-        InputProps={{
-          endAdornment: searchText && (
-            <IconButton
-              aria-label="toggle password visibility"
-              onClick={handleSearchFieldOnChange}
-            >
-              <SearchIcon />
-            </IconButton>
-          )
-        }}
-      /> */}
-      </div>
-    )
-  }
-
+  
   function ShowCurrent() {
     if (iplovers > 0)
       return (
