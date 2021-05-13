@@ -16,7 +16,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu'; 
-import {red, blue, green} from '@material-ui/core/colors';
+import {red, blue, green, deepOrange} from '@material-ui/core/colors';
 import Divider from '@material-ui/core/Divider';
 /// cd items import
 import Dash from "views/Dashboard/Dashboard"
@@ -27,7 +27,8 @@ import Captain from "views/Captain/Captain"
 import Match from "views/UpcomingMatch/UpcomingMatch"
 import Group from "views/Group/Group"
 import Wallet from "views/Wallet/Wallet.js"
-import Profile from "views/Profile/Profile.js"
+// import Profile from "views/Profile/Profile.js"
+import Profile from "views/Profile/UserProfile"
 import ChangePassword from "views/Login/ChangePassword.js"
 import About from "views/APL/About.js"
 import Home from "views/APL/Home.js"
@@ -100,7 +101,13 @@ const useStyles = makeStyles((theme) => ({
     // height: theme.spacing(10),
   
   },
-
+  avatar1: {
+    margin: theme.spacing(0),
+    backgroundColor: deepOrange[500],
+    color: theme.palette.getContrastText(deepOrange[500]), 
+    // width: theme.spacing(10),
+    // height: theme.spacing(10),  
+  },
 }));
 
 export function setTab(num) {
@@ -251,6 +258,7 @@ export function CricDreamTabs() {
         <MenuItem onClick={handleSuTournament}>SU Tournament</MenuItem>
         <MenuItem onClick={handleSuPlayer}>SU Player</MenuItem>
         {/* <MenuItem onClick={handleSuImage}>SU Load Image</MenuItem> */}
+        <Divider />
         </div>)
     } else {
       return (<div></div>)
@@ -337,6 +345,8 @@ export function CricDreamTabs() {
   }
     
   let mylogo = `${process.env.PUBLIC_URL}/APLLOGO1.ICO`;
+  let groupCharacter="G";
+  let myName = localStorage.getItem("userName");
   return (
     <div className={classes.root}>
       {/* <FormGroup>
@@ -374,6 +384,8 @@ export function CricDreamTabs() {
                 open={open}
                 onClose={handleClose}
               >
+                <MenuItem onClick={handleProfile}>{myName}</MenuItem>
+                <Divider/>
                 {/* <MenuItem onClick={handleGroup}>Group</MenuItem> */}
                 <MenuItem onClick={handleGroupDetails}>Group Details</MenuItem>
                 {/* <MenuItem onClick={handleGroupJoin}>Join Group</MenuItem>
@@ -385,11 +397,10 @@ export function CricDreamTabs() {
                 <Divider />
                 {/* <MenuItem onClick={handleGroup}>Group</MenuItem>
                 <Divider/> */}
-                <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                <MenuItem onClick={handlePassword}>Password</MenuItem>
-                <MenuItem onClick={handleWallet}>Wallet</MenuItem>
+                {/* <MenuItem onClick={handlePassword}>Password</MenuItem>
+                <MenuItem onClick={handleWallet}>Wallet</MenuItem> */}
                 <Show_Supervisor_Options/>
-                <Divider/>
+                {/* <Divider/> */}
                 <MenuItem onClick={handleHelpDesk}>How to play</MenuItem>
                 <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>       
                 <Divider/>
@@ -414,7 +425,7 @@ export function CricDreamTabs() {
           {/* <Button color="inherit" className={classes.statButton} onClick={handleAuction}>Auction</Button> */}
           <Button color="inherit" className={classes.teamButton} onClick={handleTeam}>Team</Button>
          {/* <div> */}
-          <IconButton
+          {/* <IconButton
             aria-label="account of current group"
             aria-controls="group-appbar"
             aria-haspopup="true"
@@ -422,7 +433,15 @@ export function CricDreamTabs() {
             color="inherit"
           >
             <GroupIcon className={classes.icon}/>
-          </IconButton>
+          </IconButton> */}
+          <Avatar 
+            aria-label="account of current user"
+            aria-controls="user-appbar"
+            aria-haspopup="true"
+            onClick={handleGrpMenu}
+            color="inherit"
+            variant="circle" className={classes.avatar1}>{groupCharacter}
+          </Avatar>
           <Menu
             id="group-appbar"
             anchorEl={grpAnchorEl}
