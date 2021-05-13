@@ -142,6 +142,10 @@ export default function Profile() {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
 
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+
   useEffect(() => {
     const profileInfo = async () => {
       try {
@@ -172,13 +176,19 @@ export default function Profile() {
   
   const handleProfileSubmit = async() => {
     // console.log("Submit command provided"); 
-    if ((profile.email !== email) || (profile.userName !== userName)) {
-      // console.log("New EMail or use name");
-      let tmp1 = encrypt(email)
-      let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricupdateprofile/${localStorage.getItem("uid")}/${userName}/${tmp1}`);
+    let myUserName = document.getElementById("username").value;
+    setUserName(myUserName);
+
+    let myEmail = document.getElementById("email").value;
+    setEmail(myEmail);
+
+    if ((profile.email !== myEmail) || (profile.userName !== userName)) {
+      // console.log("New EMail or user name");
+      let tmp1 = encrypt(myEmail)
+      let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricupdateprofile/${localStorage.getItem("uid")}/${myUserName}/${tmp1}`);
+      
+      localStorage.setItem("userName", myUserName);
       setRegisterStatus(response.status);
-      localStorage.setItem("userName", userName);
-      // console.log(`Status is ${response.status}`);
     }
   }
 
@@ -195,7 +205,16 @@ export default function Profile() {
       case 602:
         myMsg = "Email id already in use";
         break;
-      case 199:
+      case 701:
+        myMsg = "Incorrect current password";
+        break;
+      case 702:
+        myMsg = "New password and repeat password mismatch";
+        break;
+        case 703:
+          myMsg = "Curent and  new password are same";
+          break;
+        case 199:
         myMsg = ``;
         break;
       default:
@@ -306,9 +325,115 @@ export default function Profile() {
       </div>
     );
   }
+
+  const handlePasswordSubmit = async() => {
+    console.log("Submit command provided");
+
+    let origPassword = document.getElementById("currentPassword").value;
+    setCurrentPassword(origPassword)
+    let pass1 = document.getElementById("newPassword").value;
+    setNewPassword(pass1);
+    let pass2 = document.getElementById("repeatPassword").value;
+    setRepeatPassword(pass2);
+
+    if (pass1 !== pass2) {
+      setRegisterStatus(702);
+      return;
+    }
+
+    if (origPassword  === pass1) {
+      setRegisterStatus(703);
+      return;
+    }
+
+    let tmp1 = encrypt(origPassword);
+    let tmp2 = encrypt(pass1);
+
+    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricreset/${localStorage.getItem("uid")}/${tmp1}/${tmp2}`);
+    if (response.status === 200) {
+      setTab(0);
+    } else {
+      // error
+      setRegisterStatus(response.status);
+      console.log(`Status is ${response.status}`);
+    }
+  }
+
+  function ShowPassword() {
+    return (
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+        <Typography component="h1" variant="h5">Change Password</Typography>
+        <ValidatorForm className={classes.form} onSubmit={handlePasswordSubmit}>
+        <TextValidator
+            variant="outlined"
+            required
+            fullWidth      
+            label="Current Password"
+            id="currentPassword"
+            name="currentPassword"
+            type="password"
+            validators={['required', 'noSpecialCharacters']}
+            errorMessages={['Current Password to be provided', 'Special characters not permitted']}
+            defaultValue={currentPassword}
+            // value={currentPassword}
+            // onChange={(event) => setCurrentPassword(event.target.value)}
+        />
+        <BlankArea/>
+        <TextValidator
+            variant="outlined"
+            required
+            fullWidth      
+            label="New Password"
+            id="newPassword"
+            name="newPassword"
+            type="password"
+            validators={['required', 'minLength', 'noSpecialCharacters']}
+            errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+            defaultValue={newPassword}
+            // value={newPassword}
+            // onChange={(event) => setNewPassword(event.target.value)}
+        />
+        <BlankArea/>
+        <TextValidator
+            variant="outlined"
+            required
+            fullWidth      
+            label="Repeat password"
+            id="repeatPassword"
+            name="repeatPassword"
+            type="password"
+            // validators={['isPasswordMatch', 'required']}
+            // errorMessages={['password mismatch', 'this field is required']}
+            validators={['required', 'minLength', 'noSpecialCharacters']}
+            errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+            defaultValue={repeatPassword}
+            // value={repeatPassword}
+            // onChange={(event) => setRepeatPassword(event.target.value)}
+        />
+        <ShowResisterStatus/>
+        <BlankArea/>
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          color="primary"
+          className={classes.submit}
+        >
+          Update
+      </Button>
+      </ValidatorForm>
+      </div>
+      <ValidComp p1={newPassword}/>    
+      </Container>
+    );  
+  }
+
   const [expandedPanel, setExpandedPanel] = useState("");
   const handleAccordionChange = (panel) => (event, isExpanded) => {
     setExpandedPanel(isExpanded ? panel : false);
+    setRegisterStatus(0);
   };
 
 
@@ -340,7 +465,7 @@ export default function Profile() {
             <Typography className={classes.heading}>Change Password</Typography>
         </AccordionSummary>
         <AccordionDetails>
-        <UserProfile />
+        <ShowPassword />
       </AccordionDetails>
     </Accordion>
     <Typography align="left" className={classes.helpMessage}>Change Password</Typography>
