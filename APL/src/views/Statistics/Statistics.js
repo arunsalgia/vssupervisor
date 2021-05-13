@@ -436,18 +436,23 @@ export default function Stats() {
     setSearchText(e.target.value);
   };
 
+  function updateSearchText() {
+    let myText = document.getElementById("searchText").value.toLowerCase();
+    setSearchText(myText);
+  }
+
   function DisplayFilter() {
     return (
       <div>
       <TextField
         id="searchText"
         placeholder="Search Player"
-        autoFocus
-        type="text"
+        // autoFocus
+        // type="text"
         variant="outlined"
         fullWidth
         size="small"
-        onChange={handleChange}
+        onChange={updateSearchText}
         value={searchText}
         InputProps={{
           endAdornment: searchText && (
