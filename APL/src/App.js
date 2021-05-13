@@ -10,6 +10,9 @@ import SignIn from "views/Login/SignIn.js";
 import SignUp from "views/Login/SignUp.js";
 //import JoinGroup from "views/Group/JoinGroup.js"
 import ForgotPassword from "views/Login/ForgotPassword.js";
+import IdleTimer from 'react-idle-timer'
+import { setIdle }from "views/functions.js"
+
 
 const hist = createBrowserHistory();
 
@@ -47,17 +50,44 @@ function isUserLogged() {
 function AppRouter() {
 
   const [user, setUser] = useState(null);
-
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
+  var idleTimer = null;
+
+  async function handleOnActive (event) {
+    // console.log('user is active', event);
+  }
+
+  async function handleOnAction (event) {
+    // console.log(`Action from user ${sessionStorage.getItem("uid")}`);
+  }
+
+
+  async function handleOnIdle (event) {
+    // console.log('user is idle', event);
+    // console.log('last active', idleTimer.getLastActiveTime());
+    setIdle(true);
+  }
+
 
 
   function DispayTabs() {
-    // console.log(localStorage.getItem("uid"));
-    // console.log(`Status is ${isUserLogged()}`)
-
-    if (isUserLogged())
-      return (<CricDreamTabs/>)  
-    else {
+    if (isUserLogged()) {
+      // get time out value in milliseconds
+      let timeoutvalue = parseInt(process.env.REACT_APP_IDLETIMEOUT) * 1000;
+      return (
+        <div>
+          <CricDreamTabs/>
+          <IdleTimer
+            ref={ref => { idleTimer = ref }}
+            timeout={timeoutvalue}
+            // onAction={handleOnAction}
+            // onActive={handleOnActive}
+            onIdle={handleOnIdle}
+            debounce={250}
+          />
+        </div>
+      )  
+    } else {
       if (localStorage.getItem("currentLogin") === "SIGNUP")
         return (<SignUp/>)
       else if (localStorage.getItem("currentLogin") === "RESET")
@@ -66,22 +96,24 @@ function AppRouter() {
         return (<SignIn/>)
     }
   }
-  // localStorage.clear()
+
+  // logic before displaying component
+  localStorage.clear()
   window.onbeforeunload = () => Router.refresh();
   //console.log("in before unload");
   // localStorage.clear();
   // console.log("clearing local storage");
-    initCdParams();
-    //console.log("GTP "+window.location.pathname.toLowerCase());
-    let mypath = window.location.pathname.split("/");
-    if (checkJoinGroup(mypath)) {
-      //console.log("join group found");
-      localStorage.setItem("tabpos", 105);
-      //history.push("/")
-    } 
+  initCdParams();
+  //console.log("GTP "+window.location.pathname.toLowerCase());
+  let mypath = window.location.pathname.split("/");
+  if (checkJoinGroup(mypath)) {
+    //console.log("join group found");
+    localStorage.setItem("tabpos", 105);
+    //history.push("/")
+  } 
 
   // return (
-    // <Router history={hist}> 
+  // <Router history={hist}> 
   //     <UserContext.Provider value={value}>
   //       {!user && <Redirect from="/" to="/signIn" />}
         // <Route path="/joingroup" component={JoinGroup} />

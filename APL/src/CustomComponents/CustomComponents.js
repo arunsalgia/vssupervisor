@@ -408,4 +408,3 @@ export async function DisplayLatestAPLVersion() {
   let version = await latestAPLVersion();
   return <DisplayVersion text="Latest APL version" version={version}/>
 }
-  

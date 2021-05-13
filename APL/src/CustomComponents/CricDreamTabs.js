@@ -41,7 +41,10 @@ import GroupDetails from "views/Group/GroupDetails.js"
 import Modal from 'react-modal';
 // import download from 'js-file-downloader';
 import { BlankArea } from './CustomComponents';
-import {cdRefresh, specialSetPos, upGradeRequired, downloadApk, clearBackupData} from "views/functions.js"
+import {cdRefresh, specialSetPos, upGradeRequired, 
+  downloadApk, clearBackupData,
+  checkIdle, setIdle,
+} from "views/functions.js"
 
 
 const customStyles = {
@@ -130,6 +133,14 @@ export function CricDreamTabs() {
       setUpgrade(upg);
       if (upg) setIsOpen(true);
     }
+    console.log("About to eheck for idle")
+    if (checkIdle()) {
+      console.log("it was idle");
+      let newoption = parseInt(process.env.REACT_APP_HOME);
+      console.log(newoption)
+      setValue(newoption);
+      setIdle(false);
+    }
     checkVersion();
 }, []);
 
@@ -159,7 +170,7 @@ export function CricDreamTabs() {
           localStorage.setItem("groupName", tmp.groupName);
           localStorage.setItem("tournament", tmp.tournament);
           localStorage.setItem("admin", tmp.admin);
-          clearBackupData();
+          // clearBackupData();
         }
       }
       setUserGroup(allGroups);
@@ -182,6 +193,8 @@ export function CricDreamTabs() {
       localStorage.setItem("groupName", gRec.groupName);
       localStorage.setItem("tournament", gRec.tournament);
       localStorage.setItem("admin", gRec.admin);
+      clearBackupData();
+      cdRefresh();
     } catch (e) {
       console.log(e);
       console.log("error setting default group");

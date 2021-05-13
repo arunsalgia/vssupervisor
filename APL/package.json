@@ -33,6 +33,7 @@
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "16.13.1",
     "react-google-maps": "9.4.5",
+    "react-idle-timer": "^4.6.2",
     "react-lodash": "^0.1.2",
     "react-material-ui-form-validator": "^2.1.1",
     "react-modal": "^3.12.1",

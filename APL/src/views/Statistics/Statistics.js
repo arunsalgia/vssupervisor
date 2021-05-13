@@ -292,7 +292,7 @@ export default function Stats() {
     } catch (e) {
       setCurrentGuide({guideNumber: 0});
       // myNum = 0;
-      console.log(e.response);
+      // console.log(e.response);
     }
     return myGuide;
   }
@@ -407,7 +407,7 @@ export default function Stats() {
   function handleSearchFieldOnChange() {
     // console.log("search presses");
     let arun = searchText.toLowerCase();
-    console.log(arun);
+    // console.log(arun);
     // console.log(searchList);
     let myData = searchList.filter(x  => x.playerName.includes(arun));
     // console.log(myData);
@@ -440,7 +440,7 @@ export default function Stats() {
       <div>
       <TextField
         id="searchText"
-        placeholder="Search"
+        placeholder="Search Player"
         autoFocus
         type="text"
         variant="outlined"

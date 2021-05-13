@@ -345,3 +345,21 @@ export function clearBackupData() {
   localStorage.removeItem("viceCaptain");
   localStorage.removeItem("captainList");
 }
+
+
+export function checkIdle() {
+
+  let x = sessionStorage.getItem("notidle");
+  // console.log("Idle storage", x);
+  let sts = (x) ? false : true;
+  return sts;
+}
+
+export function setIdle(idle) {
+  if (idle) {
+    sessionStorage.removeItem("notidle");
+    cdRefresh()
+  } else {
+    sessionStorage.setItem("notidle", "user is working");
+  }
+}
