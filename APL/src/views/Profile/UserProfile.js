@@ -25,9 +25,12 @@ import axios from "axios";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {blue, red, deepOrange } from '@material-ui/core/colors';
 import { useHistory } from "react-router-dom";
-import { encrypt, decrypt} from "views/functions.js";
+import { 
+  encrypt, decrypt,
+  validateSpecialCharacters, validateEmail,
+} from "views/functions.js";
 import { BlankArea, ValidComp, DisplayPageHeader } from 'CustomComponents/CustomComponents.js';
-
+import { setTab } from "CustomComponents/CricDreamTabs.js"
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -177,10 +180,31 @@ export default function Profile() {
   const handleProfileSubmit = async() => {
     // console.log("Submit command provided"); 
     let myUserName = document.getElementById("username").value;
-    setUserName(myUserName);
-
     let myEmail = document.getElementById("email").value;
+    console.log(myUserName, myEmail);
+
+    setUserName(myUserName);
     setEmail(myEmail);
+
+    console.log(userName, email);
+
+    if (myUserName.length < 6) {
+      setRegisterStatus(1000);
+      return;
+    }
+
+    if (!validateSpecialCharacters(myUserName)) {
+      setRegisterStatus(1001);
+      return;
+    }
+
+
+    if (!validateEmail(myEmail)) {
+      setRegisterStatus(1002);
+      return;
+    }
+
+    // console.log(profile);
 
     if ((profile.email !== myEmail) || (profile.userName !== userName)) {
       // console.log("New EMail or user name");
@@ -196,8 +220,11 @@ export default function Profile() {
     // console.log(`Status is ${registerStatus}`);
     let myMsg;
     switch (registerStatus) {
+      case 0:
+        myMsg = "";
+        break;
       case 200:
-        myMsg = `User Profile successfully regisitered.`;
+        myMsg = `User details successfully regisitered.`;
         break;
       case 601:
         myMsg = "Invalid User Id";
@@ -211,10 +238,22 @@ export default function Profile() {
       case 702:
         myMsg = "New password and repeat password mismatch";
         break;
-        case 703:
+      case 703:
           myMsg = "Curent and  new password are same";
           break;
-        case 199:
+      case 1000:
+        myMsg = "Minimum 6 characters required";
+        break;
+      case 1001:
+        myMsg = "Special characters not permitted";
+        break;
+      case 1002:
+        myMsg = "Invalid Email id";
+        break;
+      case 1003:
+        myMsg = "Invalid current password";
+        break;
+      case 199:
         myMsg = ``;
         break;
       default:
@@ -242,9 +281,8 @@ export default function Profile() {
               // onChange={(event) => setUserName(event.target.value)}
               id="username"
               name="username"
-              // type=""
-              validators={['required', 'minLength', 'noSpecialCharacters']}
-              errorMessages={['User Name to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+              // validators={['required', 'minLength', 'noSpecialCharacters']}
+              // errorMessages={['User Name to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
               // value={userName}
               defaultValue={userName}
           />
@@ -258,8 +296,8 @@ export default function Profile() {
               id="email"
               name="email"
               type="email"
-              validators={['isEmailOK', 'required']}
-              errorMessages={['Invalid Email', 'Email to be provided']}
+              // validators={['isEmailOK', 'required']}
+              // errorMessages={['Invalid Email', 'Email to be provided']}
               // value={email}
               defaultValue={email}
           />
@@ -330,11 +368,30 @@ export default function Profile() {
     console.log("Submit command provided");
 
     let origPassword = document.getElementById("currentPassword").value;
-    setCurrentPassword(origPassword)
     let pass1 = document.getElementById("newPassword").value;
-    setNewPassword(pass1);
     let pass2 = document.getElementById("repeatPassword").value;
+    console.log(origPassword, pass1, pass2);
+
+    setCurrentPassword(origPassword)
+    setNewPassword(pass1);
     setRepeatPassword(pass2);
+    console.log(currentPassword, newPassword, repeatPassword);
+
+
+    if ( (origPassword.length < 6) ||
+      (pass1.length < 6) ||
+      (pass2.length < 6) ) {
+      setRegisterStatus(1000);
+      return;
+    }
+
+    if ( (!validateSpecialCharacters(origPassword)) ||
+      (!validateSpecialCharacters(pass1)) ||
+      (!validateSpecialCharacters(pass2))
+    ) {
+      setRegisterStatus(1001);
+      return;
+    }
 
     if (pass1 !== pass2) {
       setRegisterStatus(702);
@@ -346,12 +403,15 @@ export default function Profile() {
       return;
     }
 
+    setRegisterStatus(0);
+
     let tmp1 = encrypt(origPassword);
     let tmp2 = encrypt(pass1);
 
     let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricreset/${localStorage.getItem("uid")}/${tmp1}/${tmp2}`);
     if (response.status === 200) {
-      setTab(0);
+      // setTab(0);
+      setRegisterStatus(200);
     } else {
       // error
       setRegisterStatus(response.status);
@@ -374,8 +434,8 @@ export default function Profile() {
             id="currentPassword"
             name="currentPassword"
             type="password"
-            validators={['required', 'noSpecialCharacters']}
-            errorMessages={['Current Password to be provided', 'Special characters not permitted']}
+            // validators={['required', 'noSpecialCharacters']}
+            // errorMessages={['Current Password to be provided', 'Special characters not permitted']}
             defaultValue={currentPassword}
             // value={currentPassword}
             // onChange={(event) => setCurrentPassword(event.target.value)}
@@ -389,8 +449,8 @@ export default function Profile() {
             id="newPassword"
             name="newPassword"
             type="password"
-            validators={['required', 'minLength', 'noSpecialCharacters']}
-            errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+            // validators={['required', 'minLength', 'noSpecialCharacters']}
+            // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
             defaultValue={newPassword}
             // value={newPassword}
             // onChange={(event) => setNewPassword(event.target.value)}
@@ -406,8 +466,8 @@ export default function Profile() {
             type="password"
             // validators={['isPasswordMatch', 'required']}
             // errorMessages={['password mismatch', 'this field is required']}
-            validators={['required', 'minLength', 'noSpecialCharacters']}
-            errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+            // validators={['required', 'minLength', 'noSpecialCharacters']}
+            // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
             defaultValue={repeatPassword}
             // value={repeatPassword}
             // onChange={(event) => setRepeatPassword(event.target.value)}
