@@ -217,6 +217,7 @@ export default function Profile() {
           <TextValidator
               className={classes.textColor}
               variant="outlined"
+              autoFocus
               required
               fullWidth      
               label="User Name"
@@ -231,6 +232,7 @@ export default function Profile() {
           <TextValidator
               variant="outlined"
               required
+              autoFocus
               fullWidth      
               label="Email"
               onChange={(event) => setEmail(event.target.value)}

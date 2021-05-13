@@ -192,8 +192,6 @@ export default function Stats() {
         });
       }
     }
-    // console.log(allPlayers);
-    // setPlayerList(allPlayers);
     setSeachList(myseachList);
     // console.log(myseachList);
   }
@@ -203,7 +201,7 @@ export default function Stats() {
     if (localStorage.getItem("statData")) {
       let sData = JSON.parse(localStorage.getItem("statData"))
       setTeamArray(sData);
-      generatePlayerList(sData);
+      // generatePlayerList(sData);
     }
     const makeconnection = async () => {
       await socket.connect();
@@ -224,7 +222,7 @@ export default function Stats() {
         if (gStat.length > 0) {
           setTeamArray(gStat)
           // console.log(first);
-          generatePlayerList(gStat);
+          // generatePlayerList(gStat);
           // first = false;
           localStorage.setItem("statData", JSON.stringify(gStat));
           // console.log(gStat);
@@ -496,7 +494,7 @@ export default function Stats() {
           <CardContent className={classes.cardContent}>
             <ShowCurrent />
             <Typography className={classes.cc2}>Updated as of {updTime}</Typography>
-            <DisplayFilter />
+            {/* <DisplayFilter /> */}
           </CardContent>
           {/* <CardBody key="db_cbody"> */}
             {/* <Table
