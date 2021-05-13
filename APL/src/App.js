@@ -38,7 +38,7 @@ function initCdParams() {
 }
 
 function isUserLogged() {
-  //console.log(`User is ${localStorage.getItem("uid")}`)
+  // console.log(`User is ${localStorage.getItem("uid")}`)
   if ((localStorage.getItem("uid") === "") || 
       (localStorage.getItem("uid") === "0") ||
       (localStorage.getItem("uid") === null))
@@ -52,7 +52,9 @@ function AppRouter() {
   const [user, setUser] = useState(null);
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
   var idleTimer = null;
-
+  
+  // console.log(`000. User is ${localStorage.getItem("uid")}`)
+  
   async function handleOnActive (event) {
     // console.log('user is active', event);
   }
@@ -71,8 +73,11 @@ function AppRouter() {
 
 
   function DispayTabs() {
-    if (isUserLogged()) {
+    let isLogged = isUserLogged();
+    // console.log("Login status", isLogged)
+    if (isLogged) {
       // get time out value in milliseconds
+      // console.log("User is logged");
       let timeoutvalue = parseInt(process.env.REACT_APP_IDLETIMEOUT) * 1000;
       return (
         <div>
@@ -88,6 +93,7 @@ function AppRouter() {
         </div>
       )  
     } else {
+      console.log("New login requested");
       if (localStorage.getItem("currentLogin") === "SIGNUP")
         return (<SignUp/>)
       else if (localStorage.getItem("currentLogin") === "RESET")
@@ -98,13 +104,11 @@ function AppRouter() {
   }
 
   // logic before displaying component
-  localStorage.clear()
-  window.onbeforeunload = () => Router.refresh();
+  // window.onbeforeunload = () => Router.refresh();
   //console.log("in before unload");
-  // localStorage.clear();
-  // console.log("clearing local storage");
+
   initCdParams();
-  //console.log("GTP "+window.location.pathname.toLowerCase());
+
   let mypath = window.location.pathname.split("/");
   if (checkJoinGroup(mypath)) {
     //console.log("join group found");

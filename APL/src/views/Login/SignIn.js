@@ -101,12 +101,12 @@ export default function SignIn() {
     } catch (err) {
       setErrorMessage("Invalid Username / Password");
     }
-    //console.log(`Signin status ${response.status}`);
+    // console.log("Signinresponse", response.data);
     if (response.status === 200) {
       let myUID = response.data.uid;
       let userPlan = response.data.userPlan; 
       response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/default/${myUID}`);
-      // console.log(response.data);
+      // console.log("default respose", response.data);
       // SAMPLE OUTPUT
       // {"uid":"8","gid":2,"displayName":"Salgia Super Stars",
       // "groupName":"Happy Home Society Grp 2","tournament":"ENGAUST20","ismember":true,"admin":true}
@@ -121,12 +121,13 @@ export default function SignIn() {
       window.localStorage.setItem("SNG", "");
       window.localStorage.setItem("cGroup", "");
 
-      clearBackupData();
+      // clearBackupData();
       // setUser({ uid: myUID, admin: response.data.admin });
       // cdRefresh(true);
       //let newPos = specialSetPos();
       //if (newPos < 0) newPos = 0;
       let newPos = (response.data.gid > 0) ? process.env.REACT_APP_DASHBOARD : process.env.REACT_APP_GROUP;
+      // console.log(`User is ${localStorage.getItem("uid")}`)
       setTab(4);
     }
 

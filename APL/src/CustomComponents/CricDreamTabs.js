@@ -133,11 +133,11 @@ export function CricDreamTabs() {
       setUpgrade(upg);
       if (upg) setIsOpen(true);
     }
-    console.log("About to eheck for idle")
+    // console.log("About to eheck for idle")
     if (checkIdle()) {
-      console.log("it was idle");
+      // console.log("it was idle");
       let newoption = parseInt(process.env.REACT_APP_HOME);
-      console.log(newoption)
+      // console.log(newoption)
       setValue(newoption);
       setIdle(false);
     }
