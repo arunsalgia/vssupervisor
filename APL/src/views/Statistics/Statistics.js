@@ -20,6 +20,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
+import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import TextField from '@material-ui/core/TextField';
 import { InputAdornment } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
@@ -435,7 +436,7 @@ export default function Stats() {
     setSearchText(e.target.value);
   };
 
-  function DisplayFilter() {
+  function OrgDisplayFilter() {
     return (
       <div>
       <TextField
@@ -463,25 +464,51 @@ export default function Stats() {
     )
   }
 
-  function selectDisplayFilter() {
-    // console.log(searchList);
+  function DisplayFilter() {
     return (
-      <Select labelId='searchItem' id='searchItem'
+      <div>
+      <TextValidator
+        id="searchText"
         variant="outlined"
-        required
-        fullWidth
-        label="Serch Player"
-        name="searchItem"
+        fullWidth      
+        label="Search Player"
+        onChange={handleChange}
+        name="searchText"
         value={searchText}
-        inputProps={{
-          name: 'Group',
-          id: 'filled-age-native-simple',
+        // InputProps={{
+        //   endAdornment: searchText && (
+        //     <IconButton
+        //       aria-label="toggle password visibility"
+        //       onClick={handleSearchFieldOnChange}
+        //     >
+        //       <SearchIcon />
+        //     </IconButton>
+        //   )
+        // }}
+        />
+
+      {/* <TextField
+        id="searchText"
+        placeholder="Search Player"
+        autoFocus
+        type="text"
+        variant="outlined"
+        fullWidth
+        size="small"
+        onChange={handleChange}
+        value={searchText}
+        InputProps={{
+          endAdornment: searchText && (
+            <IconButton
+              aria-label="toggle password visibility"
+              onClick={handleSearchFieldOnChange}
+            >
+              <SearchIcon />
+            </IconButton>
+          )
         }}
-        onChange={(event) => setSearchText(event.target.value)}
-        >
-        {searchList.map(x =>
-          <MenuItem key={x} value={x}>{x}</MenuItem>)}
-      </Select>
+      /> */}
+      </div>
     )
   }
 
