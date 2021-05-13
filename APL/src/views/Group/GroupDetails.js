@@ -465,6 +465,7 @@ export default function GroupDetails() {
       <TextValidator
           variant="outlined"
           required
+          autoFocus
           fullWidth      
           // size="small"  
           label="Member Count"

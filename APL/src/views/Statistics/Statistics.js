@@ -447,7 +447,7 @@ export default function Stats() {
       <TextField
         id="searchText"
         placeholder="Search Player"
-        // autoFocus
+        autoFocus
         // type="text"
         variant="outlined"
         fullWidth
