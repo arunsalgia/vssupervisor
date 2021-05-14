@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import HomeIcon from '@material-ui/icons/Home';
@@ -45,6 +46,7 @@ import { BlankArea } from './CustomComponents';
 import {cdRefresh, specialSetPos, upGradeRequired, 
   downloadApk, clearBackupData,
   checkIdle, setIdle,
+  internalToText, textToInternal,
 } from "views/functions.js"
 
 
@@ -62,6 +64,11 @@ const customStyles = {
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+  },
+  whatIsNew: {
+    backgroundColor: '#B3E5FC',
+    color: '#000000',
+    fontWeight: theme.typography.fontWeightBold,
   },
   menuButton: {
     // marginRight: theme.spacing(2),
@@ -132,13 +139,17 @@ export function CricDreamTabs() {
   const [upgrade, setUpgrade] = React.useState(false);
   const [modalIsOpen,setIsOpen] = React.useState(true);
   const [userGroup, setUserGroup] = React.useState([]);
+  const [latestApk, setLatestApk] = React.useState(null);
 
   useEffect(() => {       
     const checkVersion = async () => {
       //console.log("about to call upgrade");
       let upg = await upGradeRequired();
-      setUpgrade(upg);
-      if (upg) setIsOpen(true);
+      // console.log(upg);
+      if (upg.latest) setLatestApk(upg.latest);
+
+      setUpgrade(upg.status);
+      if (upg.status) setIsOpen(true);
     }
     // console.log("About to eheck for idle")
     if (checkIdle()) {
@@ -308,6 +319,7 @@ export function CricDreamTabs() {
 
   function DisplayUpgrade() {
     //console.log(`Upgrate: ${upgrade} Menu Item:   ${value}`)
+    // console.log("Current",process.env.REACT_APP_VERSION);
     if (upgrade)
       return(
         <Modal
@@ -316,28 +328,38 @@ export function CricDreamTabs() {
         onRequestClose={closeModal}
         style={customStyles}
         contentLabel="Example Modal"
+        ariaHideApp={false}
       >
         <Typography className={classes.new} align="center">
-          Whats's New
+          Current Version {process.env.REACT_APP_VERSION}
+        </Typography>
+        <Typography className={classes.new} align="center">
+          Latest Version {latestApk.version}
         </Typography>
         <BlankArea/>
-        <Typography>Ver 2.0</Typography>
-        <Button key="upgrade" variant="contained" color="primary" size="small"
+        <TextField variant="outlined" multiline fullWidth disabled
+          id="producttext"
+          label="What is new" 
+          className={classes.whatIsNew}
+          defaultValue={latestApk.text} 
+        />
+        <BlankArea />
+        <Button align="center" key="upgrade" variant="contained" color="primary" size="medium"
         className={classes.dashButton} onClick={handleUpgrade}>Update Now
         </Button>
       </Modal>
       )
     else
-      return(<BlankArea/>)
+      return(null);
   }
 
   function DisplayGroupMenu() {
     // console.log("Group length", userGroup.length);
     return (
-      <div key="grouplist">
+      <div key="usergroups">
       {userGroup.map( (item, index) => {
         return (
-        <MenuItem key={item.groupName} onClick={() => handleGroupSelect(index)}>{item.groupName}</MenuItem>
+        <MenuItem key={index} onClick={() => handleGroupSelect(index)}>{item.groupName}</MenuItem>
         )
       })}
       </div>
@@ -349,15 +371,8 @@ export function CricDreamTabs() {
   let myName = localStorage.getItem("userName");
   return (
     <div className={classes.root}>
-      {/* <FormGroup>
-        <FormControlLabel
-          control={<Switch checked={auth} onChange={handleChange} aria-label="login switch" />}
-          label={auth ? 'Logout' : 'Login'}
-        />
-      </FormGroup> */}
       <AppBar position="static">
         <Toolbar>
-          {/* <Avatar variant="square" className={classes.avatar}  src={mylogo}/> */}
           {auth && (
             <div>
               <IconButton
@@ -376,7 +391,7 @@ export function CricDreamTabs() {
                   vertical: 'top',
                   horizontal: 'left',
                 }}
-                keepMounted
+                // keepMounted
                 transformOrigin={{
                   vertical: 'top',
                   horizontal: 'right',
@@ -440,7 +455,7 @@ export function CricDreamTabs() {
             aria-haspopup="true"
             onClick={handleGrpMenu}
             color="inherit"
-            variant="circle" className={classes.avatar1}>{groupCharacter}
+            variant="circular" className={classes.avatar1}>{groupCharacter}
           </Avatar>
           <Menu
             id="group-appbar"
@@ -449,7 +464,7 @@ export function CricDreamTabs() {
               vertical: 'top',
               horizontal: 'right',
             }}
-            keepMounted
+            // keepMounted
             transformOrigin={{
               vertical: 'top',
               horizontal: 'right',

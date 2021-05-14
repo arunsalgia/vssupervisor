@@ -279,16 +279,21 @@ export async function latestAPLVersion()  {
 
 export async function upGradeRequired() {
   let upGrade = false;
+  let upGradeRecord;
   if (process.env.REACT_APP_DEVICE === "MOBILE") {
     let myName = process.env.REACT_APP_NAME;
     let myVersion = process.env.REACT_APP_VERSION;
     let myURL = `${process.env.REACT_APP_APLAXIOS}/apl/confirmlatest/${myName}/APK/${myVersion}`;
+    // console.log(myURL);
     let response = await axios.get(myURL);
-    console.log("After axios call");
+    // console.log("After axios call", response.data);
     upGrade = (response.data.status) ? false : true;
+    upGradeRecord = response.data.latest;
+    upGradeRecord.text = internalToText(upGradeRecord.text);
+    // console.log(upGradeRecord);
   }
-  console.log(`Latest upgrade: ${upGrade}`);
-  return (upGrade);
+  console.log(`upgrade required: ${upGrade}`);
+  return ({status: upGrade, latest: upGradeRecord});
 }
 
 
@@ -362,4 +367,35 @@ export function setIdle(idle) {
   } else {
     sessionStorage.setItem("notidle", "user is working");
   }
+}
+
+
+const CR = String.fromCharCode(13);
+const LF = String.fromCharCode(10);
+const SP = String.fromCharCode(32);
+
+const IntCR = String.fromCharCode(128+13);
+const IntLF = String.fromCharCode(128+10);
+const IntSP = String.fromCharCode(128+32);
+
+export function textToInternal(txt) {
+  let txt1 = txt;
+  let x = txt1.split(CR);
+  txt1 = x.join(IntCR);
+  x = txt1.split(LF);
+  txt1 = x.join(IntLF);
+  x = txt1.split(SP);
+  txt1 = x.join(IntSP);
+  return txt1;
+}
+
+export function internalToText(txt) {
+  let txt1 = txt;
+  let x = txt1.split(IntCR);
+  txt1 = x.join(CR);
+  x = txt1.split(IntLF);
+  txt1 = x.join(LF);
+  x = txt1.split(IntSP);
+  txt1 = x.join(SP);
+  return txt1;
 }

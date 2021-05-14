@@ -87,50 +87,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "none",
     height: 10,
   },    
-
 }));
-
-/***
-class ChildComp extends React.Component {
-
-  componentDidMount()  {
-    // custom rule will have name 'isPasswordMatch'
-    ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
-      return (value === this.props.p1)
-    });
-
-    ValidatorForm.addValidationRule('minLength', (value) => {
-      return (value.length >= 6)
-    });
-
-    ValidatorForm.addValidationRule('noSpecialCharacters', (value) => {
-      return validateSpecialCharacters(value);
-    });
-
-    ValidatorForm.addValidationRule('isEmailOK', (value) => {
-      return validateEmail(value);
-    });
-  }
-
-  
-  componentWillUnmount() {
-    // remove rule when it is not needed
-    ValidatorForm.removeValidationRule('isPasswordMatch');
-    ValidatorForm.removeValidationRule('isEmailOK');
-    ValidatorForm.removeValidationRule('minLength');
-    ValidatorForm.removeValidationRule('noSpecialCharacters');   
-  }
-
-  render() {
-    return <br/>;
-  }
-
-}
-***/
-// const handleSubmit = e => {
-//   e.preventDefault();
-// };
-
 
 
 export default function Profile() {
@@ -149,6 +106,10 @@ export default function Profile() {
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
 
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [emptyRows, setEmptyRows] = React.useState(0);
+  const [page, setPage] = React.useState(0);
+
   useEffect(() => {
     const profileInfo = async () => {
       try {
@@ -163,6 +124,9 @@ export default function Profile() {
         // get wallet transaction and also calculate balance
         let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
         setTransactions(response.data);
+        let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
+        setEmptyRows(myempty);
+
         let myBalance = response.data.reduce((accum,item) => accum + item.amount, 0);
         setBalance(myBalance);
 
@@ -224,10 +188,10 @@ export default function Profile() {
         myMsg = "";
         break;
       case 200:
-        myMsg = `User details successfully regisitered.`;
+        myMsg = `User details successfully updated`;
         break;
       case 601:
-        myMsg = "Invalid User Id";
+        myMsg = "Invalid current password";
         break;
       case 602:
         myMsg = "Email id already in use";
@@ -236,10 +200,10 @@ export default function Profile() {
         myMsg = "Incorrect current password";
         break;
       case 702:
-        myMsg = "New password and repeat password mismatch";
+        myMsg = "New and repeat password mismatch";
         break;
       case 703:
-          myMsg = "Curent and  new password are same";
+          myMsg = "Curent and  new password are identical";
           break;
       case 1000:
         myMsg = "Minimum 6 characters required";
@@ -330,7 +294,7 @@ export default function Profile() {
     );
   }   
 
-  function ShowWallet() {
+  function ShowAllWallet() {
     return (
       <div className={classes.paper}>
         <Typography component="h1" variant="h5">Wallet Details (Balance: {balance})</Typography>
@@ -363,6 +327,61 @@ export default function Profile() {
       </div>
     );
   }
+
+  const handleChangePage = (event, newPage) => {
+    event.preventDefault();
+    setPage(newPage);
+    let myempty = rowsPerPage - Math.min(rowsPerPage, transactions.length - newPage * rowsPerPage);
+    setEmptyRows(myempty);
+
+  };
+
+  function ShowWallet() {
+    return (
+      <div className={classes.paper}>
+        <Typography component="h1" variant="h5">Wallet Details (Balance: {balance})</Typography>
+        <TableContainer>
+        <Table>
+        <TableHead p={0}>
+            <TableRow align="center">
+            <TableCell className={classes.th} p={0} align="center">Date</TableCell>      
+            <TableCell className={classes.th} p={0} align="center">Type</TableCell>
+            <TableCell className={classes.th} p={0} align="center">Amount</TableCell>
+            </TableRow>
+        </TableHead>
+        < TableBody>
+            {transactions.slice(page * rowsPerPage, (page + 1) * rowsPerPage )
+            .map( (item, index) => {
+              return (
+                <TableRow key={index}>
+                  <TableCell  className={classes.td} p={0} align="center" >
+                    {item.date}
+                  </TableCell>
+                  <TableCell  className={classes.td} p={0} align="center" >
+                    {item.type}
+                  </TableCell>
+                  <TableCell  className={classes.td} p={0} align="center" >
+                    {item.amount}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+        </TableBody> 
+        </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5]}
+          component="div"
+          count={transactions.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          // onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
+      </div>
+    );
+  }
+
 
   const handlePasswordSubmit = async() => {
     console.log("Submit command provided");
@@ -501,30 +520,30 @@ export default function Profile() {
   return (
     <div>
     <Accordion expanded={expandedPanel === "userprofile"} onChange={handleAccordionChange("userprofile")}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-            <Typography className={classes.heading}>View/Edit Profile</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <UserProfile />
-        </AccordionDetails>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+        <Typography className={classes.heading}>View/Edit Profile</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <UserProfile />
+      </AccordionDetails>
     </Accordion>
     <Typography align="left" className={classes.helpMessage}>Update Profile</Typography>
     <BlankArea />
     <Accordion expanded={expandedPanel === "wallet"} onChange={handleAccordionChange("wallet")}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-            <Typography className={classes.heading}>Wallet Details</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <ShowWallet />
-        </AccordionDetails>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+          <Typography className={classes.heading}>Wallet Details</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <ShowWallet />
+      </AccordionDetails>
     </Accordion>
     <Typography align="left" className={classes.helpMessage}>View Wallet details</Typography>
     <BlankArea />
     <Accordion expanded={expandedPanel === "password"} onChange={handleAccordionChange("password")}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-            <Typography className={classes.heading}>Change Password</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+        <Typography className={classes.heading}>Change Password</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
         <ShowPassword />
       </AccordionDetails>
     </Accordion>
@@ -543,7 +562,7 @@ export default function Profile() {
       <DisplayPageHeader headerName={headerText} groupName="" tournament=""/>
       <BlankArea />
       <DisplayAccordian />
-      <ShowResisterStatus/>
+      {/* <ShowResisterStatus/> */}
     </Container>
   );
 

@@ -98,13 +98,21 @@ const useStyles = makeStyles((theme) => ({
     marginTop: '0px',
 },
 error:  {
-      // right: 0,
-      fontSize: '12px',
-      color: red[700],
-      // position: 'absolute',
-      alignItems: 'center',
-      marginTop: '0px',
-  },
+  // right: 0,
+  fontSize: '12px',
+  color: red[700],
+  // position: 'absolute',
+  alignItems: 'center',
+  marginTop: '0px',
+},
+success:  {
+  // right: 0,
+  fontSize: '12px',
+  color: blue[700],
+  // position: 'absolute',
+  alignItems: 'center',
+  marginTop: '0px',
+},
   th: { 
     spacing: 0,
     align: "center",
@@ -137,7 +145,7 @@ export default function GroupDetails() {
   const [prizeTable, setPrizeTable] = useState([]);
   const [memberCountUpdated, setMemberCountUpdated] = useState(0);
   const [memberFeeUpdated, setMemberFeeUpdated] = useState(50);
-
+  const [existingMembers, setExistingMembers] = useState(1);
   const [groupCode, setGroupCode] = useState("");
   const [copyState, setCopyState] = useState({value: '', copied: false});
 
@@ -145,6 +153,7 @@ export default function GroupDetails() {
   const [expandedPanel, setExpandedPanel] = useState("");
   const handleAccordionChange = (panel) => (event, isExpanded) => {
     setExpandedPanel(isExpanded ? panel : false);
+    setRegisterStatus(0);
   };
 
   // const { setUser } = useContext(UserContext);
@@ -172,6 +181,7 @@ export default function GroupDetails() {
   useEffect(() => {
 
     const updateGroupDetailData = async () => { 
+      /***
       const listResponse = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/memberof/${localStorage.getItem("uid")}`);
       // console.log(listResponse);
       setGroupList(listResponse.data[0].groups);
@@ -182,6 +192,10 @@ export default function GroupDetails() {
       } else {
         setCurrGroup(0);
       }
+    ***/
+      let myGid = parseInt(localStorage.getItem("gid"));
+      handleGroupbyRec(myGid);
+      setCurrGroup(myGid);
     }
       
     updateGroupDetailData();    
@@ -260,7 +274,8 @@ export default function GroupDetails() {
             </Button>
             </Grid>
         </Grid>
-        <MessageToUser mtuOpen={backDropOpen} mtuClose={setBackDropOpen} mtuMessage={userMessage} />
+        <ShowResisterStatus />
+        {/* <MessageToUser mtuOpen={backDropOpen} mtuClose={setBackDropOpen} mtuMessage={userMessage} /> */}
       </div>
     );
   }
@@ -334,24 +349,39 @@ export default function GroupDetails() {
       setEditButtonText("Update");
       setRegisterStatus(0);
     } else {
-      // console.log("in update mode")
+      console.log("in update mode");
+
+      // check if number membercount is valid
+      let newCount = parseInt(document.getElementById("membercount").value);
+      // console.log(memberCount, newCount);
+      if ((newCount < existingMembers) || (newCount > 25)) {
+        setRegisterStatus(1001);
+        return;
+      }
+
       try {
         // use need to be owner of the group.
-        let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/group/updatewithoutfee/${currGroup}/${localStorage.getItem("uid")}/${memberCount}`;
+        console.log("prize", prizeCount, newCount)
+        let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/group/updatewithoutfee/${currGroup}/${localStorage.getItem("uid")}/${newCount}`;
         let resp = await axios.get(myURL);
-        setMemberCountUpdated(memberCount);
+        setMemberCount(newCount);
+        setMemberCountUpdated(newCount);
+        console.log("prize", prizeCount, newCount)
         // is this IF required *************************
-        if (prizeCount > memberCount) {
-          await writePrizeCount(memberCount);
+        let newPrizeCount = prizeCount;
+        if (prizeCount > newCount) {
+          await writePrizeCount(newCount);
+          setPrizeCount(newCount);
+          newPrizeCount = prizeCount;
         }
-        let myTable = await getAllPrizeTable(memberCount * memberFee);
+        let myTable = await getAllPrizeTable(newCount * memberFee);
         //console.log(myTable);
         setMasterPrizeTable(myTable);
-        setPrizeTable(myTable[prizeCount-1]);
+        setPrizeTable(myTable[newPrizeCount-1]);
 
         setRegisterStatus(2000);
         setEditNotStarted(true);
-        setExpandedPanel(false);
+        // setExpandedPanel(false);
       } catch (e) {
         console.log(e)
         setRegisterStatus(2001);
@@ -368,11 +398,18 @@ export default function GroupDetails() {
         myMsg = "Group Details Update not yet implemneted";
         break;
       case 1000:
-        myMsg = "Successfully updated Franchisee details";
+        myMsg = "Successfully updated Franchise details";
         isError = false;
         break;
-        case 2000:
-        myMsg = "Successfully update group details";
+      case 1001:
+        myMsg = `Member count should be in the range ${existingMembers} - 25`;
+        break;
+      case 1111:
+        myMsg = `All Okay`;
+        isError = false;
+        break;
+      case 2000:
+        myMsg = "Successfully updated group details";
         isError = false;
         break;
       case 0:
@@ -383,7 +420,7 @@ export default function GroupDetails() {
         myMsg = "Error updating group details";
         break;
       case 3000:
-        myMsg = "Successfully update Prize Count";
+        myMsg = "Successfully updates Prize Count";
         isError = false;
         break;
       case 3001:
@@ -403,7 +440,7 @@ export default function GroupDetails() {
           break;
     }
     return(
-        <Typography className={(isError) ? classes.error : classes.root}>{myMsg}</Typography>
+        <Typography className={(isError) ? classes.error : classes.success}>{myMsg}</Typography>
     )
   }
 
@@ -469,14 +506,16 @@ export default function GroupDetails() {
           fullWidth      
           // size="small"  
           label="Member Count"
-          onChange={(event) => setMemberCount(event.target.value)}
+          id="membercount"
           name="membercount"
           type="number"
-          validators={['required', minNumber, 'maxNumber:25']}
-          errorMessages={['Member count to be provided', minMessage, 'Group members cannot be more than 25']}
+          // validators={['required', minNumber, 'maxNumber:25']}
+          // errorMessages={['Member count to be provided', minMessage, 'Group members cannot be more than 25']}
           disabled={editNotStarted}
-          value={memberCount}
-      />
+          defaultValue={memberCountUpdated}
+          // value={memberCount}
+          // onChange={(event) => setMemberCount(event.target.value)}
+          />
       <BlankArea/>
       <TextValidator
           variant="outlined"
@@ -492,6 +531,7 @@ export default function GroupDetails() {
           disabled
           value={memberFee}
       />
+      <ShowResisterStatus/>
       <BlankArea/>
       <Button 
         type="submit"
@@ -570,16 +610,18 @@ export default function GroupDetails() {
   }
 }
 
-  async function handleGroupbyRec(gRec) {
-    // console.log(gRec);
-    const grpResponse = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/info/${gRec.gid}`);
+
+  async function handleGroupbyRec(myGid) {
+    const grpResponse = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/info/${myGid}`);
     //console.log(grpResponse.data.info);
-    setGroupName(gRec.groupName);
+    setGroupName(localStorage.getItem("groupName"));
     setMasterData(grpResponse.data.info);
     // console.log(grpResponse.data.info);
     setMemberCount(grpResponse.data.info.memberCount);
     setMemberFee(grpResponse.data.info.memberFee);
     setMemberCountUpdated(grpResponse.data.info.memberCount);
+    setExistingMembers(grpResponse.data.currentCount);
+    console.log("MC from backend", grpResponse.data.info.memberCount);
     setMemberFeeUpdated(grpResponse.data.info.memberFee);
     setPrizeCount(grpResponse.data.info.prizeCount);
     //console.log(grpResponse.data.info._id);
@@ -617,11 +659,11 @@ export default function GroupDetails() {
     if (grpResponse.data.tournamentStarted === false)
       myDisable = false;				// allow group edit. Thus not disableEdit
     setDisableEdit(myDisable);
-    
-    const sts = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/getfranchisename/${localStorage.getItem("uid")}/${gRec.gid}`);
+    let ggid = localStorage.getItem("gid");
+    const sts = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/getfranchisename/${localStorage.getItem("uid")}/${ggid}`);
     setFranchiseeName(sts.data);
     //setMasterDisplayName(sts.data);
-    let memResponse = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/group/${gRec.gid}`);
+    let memResponse = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/group/${ggid}`);
     // console.log(memResponse);
     setMemberArray(memResponse.data);
   }
@@ -689,7 +731,6 @@ export default function GroupDetails() {
         <SelectGroup />
         {/* <BlankArea /> */}
         <DisplayAccordian />
-        <ShowResisterStatus/>
       </div>
     </Container>
     <ShowJumpButtons />
