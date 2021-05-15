@@ -357,7 +357,7 @@ export default function Captain() {
         return (
         <div>
             <BlankArea />
-            <JumpButton page={process.env.REACT_APP_TEAM} text="My Team" />
+            <JumpButton page={process.env.REACT_APP_HOME} text="Home" />
         </div>
         )
     }

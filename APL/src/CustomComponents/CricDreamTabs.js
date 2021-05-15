@@ -31,9 +31,10 @@ import Wallet from "views/Wallet/Wallet.js"
 // import Profile from "views/Profile/Profile.js"
 import Profile from "views/Profile/UserProfile"
 import ChangePassword from "views/Login/ChangePassword.js"
-import About from "views/APL/About.js"
-import Home from "views/APL/Home.js"
-import ContactUs from "views/APL/ContactUs.js"
+import About from "views/APL/About.js";
+import Home from "views/APL/Home.js";
+import ContactUs from "views/APL/ContactUs.js";
+import PointSystem from "views/APL/PointSystem.js";
 import SU_Tournament from "views/SuperUser/Tournament.js" 
 import SU_Player from "views/SuperUser/Player.js" 
 import SU_Image from "views/SuperUser/Image.js" 
@@ -57,18 +58,15 @@ const customStyles = {
     right                 : 'auto',
     bottom                : 'auto',
     marginRight           : '-50%',
-    transform             : 'translate(-50%, -50%)'
+    transform             : 'translate(-50%, -50%)',
+    backgroundColor       : '#000000',
+    color                 : '#FFFFFF',
   }
 };
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-  },
-  whatIsNew: {
-    backgroundColor: '#B3E5FC',
-    color: '#000000',
-    fontWeight: theme.typography.fontWeightBold,
   },
   menuButton: {
     // marginRight: theme.spacing(2),
@@ -82,10 +80,6 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(0),
     marginLeft: theme.spacing(0),
   },
-  dashButton: {
-    // marginRight: theme.spacing(2),
-    marginLeft: theme.spacing(2),
-  },
   statButton: {
     //marginRight: theme.spacing(2),
     marginLeft: theme.spacing(2),
@@ -94,8 +88,18 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(0),
     marginLeft: theme.spacing(0),
   },
+  dashButton: {
+    // marginRight: theme.spacing(2),
+    marginLeft: theme.spacing(2),
+  },
   new: {
     fontSize: theme.typography.pxToRem(20),
+    fontWeight: theme.typography.fontWeightBold,
+    color: '#FFFFFF'
+  },
+  whatIsNew: {
+    backgroundColor: '#B3E5FC',
+    color: '#000000',
     fontWeight: theme.typography.fontWeightBold,
   },
   title: {
@@ -159,7 +163,8 @@ export function CricDreamTabs() {
       setValue(newoption);
       setIdle(false);
     }
-    checkVersion();
+    // if (value === parseInt(process.env.REACT_APP_HOME))
+    //   checkVersion();
 }, []);
 
 
@@ -291,6 +296,7 @@ export function CricDreamTabs() {
       case 107: return <ChangePassword />;
       case 201: return <About />;
       case 202: return <ContactUs />;
+      case 203: return <PointSystem />;
       case 301: return <SU_Tournament />;
       case 302: return <SU_Player />;
       case 303: return <SU_Image />;
@@ -330,16 +336,19 @@ export function CricDreamTabs() {
         contentLabel="Example Modal"
         ariaHideApp={false}
       >
-        <Typography className={classes.new} align="center">
+        {/* <Typography className={classes.new} align="center">
           Current Version {process.env.REACT_APP_VERSION}
-        </Typography>
+        </Typography> */}
         <Typography className={classes.new} align="center">
           Latest Version {latestApk.version}
         </Typography>
         <BlankArea/>
+        <Typography className={classes.new} align="center">
+          What is new
+        </Typography>
         <TextField variant="outlined" multiline fullWidth disabled
           id="producttext"
-          label="What is new" 
+          // label="What is new" 
           className={classes.whatIsNew}
           defaultValue={latestApk.text} 
         />
@@ -407,7 +416,7 @@ export function CricDreamTabs() {
                 <MenuItem onClick={handleGroupNew}>New Group</MenuItem>
                 <Divider /> */}
                 <MenuItem onClick={handleMatch}>Match</MenuItem>
-                <MenuItem onClick={handleCaptain}>Captain</MenuItem>
+                {/* <MenuItem onClick={handleCaptain}>Captain</MenuItem> */}
                 <MenuItem onClick={handleAuction}>Auction</MenuItem>
                 <Divider />
                 {/* <MenuItem onClick={handleGroup}>Group</MenuItem>
@@ -416,7 +425,7 @@ export function CricDreamTabs() {
                 <MenuItem onClick={handleWallet}>Wallet</MenuItem> */}
                 <Show_Supervisor_Options/>
                 {/* <Divider/> */}
-                <MenuItem onClick={handleHelpDesk}>How to play</MenuItem>
+                {/* <MenuItem onClick={handleHelpDesk}>How to play</MenuItem> */}
                 <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>       
                 <Divider/>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
@@ -478,7 +487,7 @@ export function CricDreamTabs() {
        </Toolbar>
       </AppBar>
       <DisplayCdItems/>
-      <DisplayUpgrade/>
+      {/* <DisplayUpgrade/> */}
     </div>
   );
 }

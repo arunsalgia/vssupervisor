@@ -4,21 +4,22 @@ import axios from "axios";
 import { makeStyles } from '@material-ui/core/styles';
 // import { Switch, Route, Link } from 'react-router-dom';
 // import Table from "components/Table/Table.js";
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
+// import Table from '@material-ui/core/Table';
+// import TableBody from '@material-ui/core/TableBody';
+// import TableCell from '@material-ui/core/TableCell';
+// import TableContainer from '@material-ui/core/TableContainer';
+// import TableHead from '@material-ui/core/TableHead';
+// import TablePagination from '@material-ui/core/TablePagination';
+// import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Radio from '@material-ui/core/Radio';
+import TextField from '@material-ui/core/TextField';
+// import FormControlLabel from '@material-ui/core/FormControlLabel';
+// import Radio from '@material-ui/core/Radio';
 import Box from '@material-ui/core/Box';
 import { UserContext } from "../../UserContext";
 import { NoGroup, DisplayPageHeader, MessageToUser, BlankArea, JumpButton } from 'CustomComponents/CustomComponents.js';
-import { hasGroup } from 'views/functions';
-import { red, blue, green, deepOrange } from '@material-ui/core/colors';
+import { upGradeRequired, downloadApk } from 'views/functions';
+import { red, blue, green, deepOrange, brown } from '@material-ui/core/colors';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -32,14 +33,28 @@ import Divider from '@material-ui/core/Divider';
 import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import IconButton from '@material-ui/core/IconButton';
-// import { updateLanguageServiceSourceFile } from 'typescript';
+import Modal from 'react-modal';
+
 
 // import NEWTOURNAMENTIMAGE from `${process.env.PUBLIC_URL}/NEWTOURNAMENT.JPG`;
 
 const cardStyles = {
   cardImage: {
-      backgroundImage: `url(${process.env.PUBLIC_URL}/NEWTOURNAMENT.JPG)`,
-      height: '80px'
+      // backgroundImage: `url(${process.env.PUBLIC_URL}/NEWTOURNAMENT.JPG)`,
+      height: '30px'
+  }
+};
+
+const customStyles = {
+  content : {
+    top                   : '50%',
+    left                  : '50%',
+    right                 : 'auto',
+    bottom                : 'auto',
+    marginRight           : '-50%',
+    transform             : 'translate(-50%, -50%)',
+    backgroundColor       : '#000000',
+    color                 : '#FFFFFF',
   }
 };
 
@@ -48,6 +63,20 @@ const useStyles = makeStyles((theme) => ({
     root: {
       width: '100%',
     },
+    dashButton: {
+      // marginRight: theme.spacing(2),
+      marginLeft: theme.spacing(2),
+    },
+    new: {
+      fontSize: theme.typography.pxToRem(20),
+      fontWeight: theme.typography.fontWeightBold,
+      color: '#FFFFFF'
+    },
+    whatIsNew: {
+      backgroundColor: '#B3E5FC',
+      color: '#000000',
+      fontWeight: theme.typography.fontWeightBold,
+    },  
     ngCard: {
       fontSize: theme.typography.pxToRem(16),
       fontWeight: theme.typography.fontWeightBold,
@@ -61,6 +90,11 @@ const useStyles = makeStyles((theme) => ({
     secondaryHeading: {
       fontSize: theme.typography.pxToRem(15),
       color: theme.palette.text.secondary,
+    },
+    groupName: {
+      fontSize: theme.typography.pxToRem(16),
+      fontWeight: theme.typography.fontWeightBold,
+      color: deepOrange[900],
     },
     error:  {
         // right: 0,
@@ -99,16 +133,29 @@ export default function Home() {
     const [tournamentList, setTournamentList] = useState([]);
     const [registerStatus, setRegisterStatus] = useState(0);
     const [currentTournament, setCurrentTournament] = useState(0);
-
+    const [upgrade, setUpgrade] = React.useState(false);
+    const [modalIsOpen,setIsOpen] = React.useState(true);
+    const [latestApk, setLatestApk] = React.useState(null);
+``  
     useEffect(() => {
-        const a = async () => {
-            var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`); 
-            setTournamentList(response.data);
-            if (response.data.length > 0) {
-              setCurrentTournament(0);
-            }
+      const checkVersion = async () => {
+        //console.log("about to call upgrade");
+        let upg = await upGradeRequired();
+        // console.log(upg);
+        if (upg.latest) setLatestApk(upg.latest);
+  
+        setUpgrade(upg.status);
+        if (upg.status) setIsOpen(true);
+      }
+      const a = async () => {
+        var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`); 
+        setTournamentList(response.data);
+        if (response.data.length > 0) {
+          setCurrentTournament(0);
         }
-        a();
+      }
+      a();
+      checkVersion();
     }, [])
 
     function ShowResisterStatus() {
@@ -149,13 +196,16 @@ export default function Home() {
     }
 
     function handleLeft() {
-      if (currentTournament > 0)  
-        setCurrentTournament(currentTournament - 1);
+      let newLeft = currentTournament - 1;
+      if (newLeft < 0) newLeft = tournamentList.length - 1
+      setCurrentTournament(newLeft);
     }
 
     function handleRight() {
-      if (currentTournament < (tournamentList.length-1))
-        setCurrentTournament(currentTournament + 1);
+      let newRight = currentTournament + 1;
+      if (newRight >= tournamentList.length)
+        newRight = 0;
+      setCurrentTournament(newRight);
     }
 
     function ShowTournamentCards() {
@@ -163,7 +213,7 @@ export default function Home() {
 
       let tmp = tournamentList[currentTournament];
       return (
-        <Box paddingLeft={2} paddingRight={2} borderColor="primary" border={0}>
+        <Box paddingLeft={0} paddingRight={0} borderColor="primary" border={1}>
       <Card m={2} raised variant="outlined">
       <CardContent style={cardStyles.cardImage} >
       <Grid key="gr-groupname" container justify="center" alignItems="center" >
@@ -171,7 +221,7 @@ export default function Home() {
         <IconButton 
               // iconStyle={{width: '24px', height: '24px'}}
               onClick={handleLeft}
-              disabled={currentTournament === 0}
+              // disabled={currentTournament === 0}
               aria-label="left" color="primary">
               <ArrowLeftIcon fontSize="large" />
             </IconButton>
@@ -183,7 +233,7 @@ export default function Home() {
         <IconButton 
               // iconStyle={{width: '24px', height: '24px'}}
               onClick={handleRight}
-                disabled={currentTournament === (tournamentList.length-1)}
+                // disabled={currentTournament === (tournamentList.length-1)}
                 aria-label="right" color="primary">
                 <ArrowRightIcon fontSize="large" />
               </IconButton>
@@ -220,23 +270,86 @@ export default function Home() {
       )
     }
 
-  
+    function ShowCurrentGroup() {
+      return (
+        <Typography align="center" className={classes.groupName}>Current group: {localStorage.getItem("groupName")}</Typography>
+      )
+    }
+
     function ShowJumpButtons() {
       return (
         <div>
           <BlankArea />
+          <JumpButton page={process.env.REACT_APP_HOWTOPLAY} text="How to Play" />
+          <BlankArea />
+          <ShowCurrentGroup />
+          <BlankArea />
           <JumpButton page={process.env.REACT_APP_DASHBOARD} text="DashBoard" />
           <BlankArea />
           <JumpButton page={process.env.REACT_APP_STAT} text="Statistics" />
-          <BlankArea />
-          <JumpButton page={process.env.REACT_APP_TEAM} text="My Team" />
+          {/* <BlankArea />
+          <JumpButton page={process.env.REACT_APP_TEAM} text="My Team" /> */}
           <BlankArea />
           <JumpButton page={process.env.REACT_APP_CAPTAIN} text="Captain and ViceCaptain" />
+          <BlankArea />
+          <JumpButton page={process.env.REACT_APP_POINTSYSTEM} text="Point System" />
         </div>
       )
     }
   
+    async function handleUpgrade() {
+      //console.log("upgrade requested");
+      closeModal();
+      await downloadApk();
+      console.log("APK has to be downloaded");
+    }
   
+    function openModal() { setIsOpen(true); }
+   
+    function afterOpenModal() {
+      // references are now sync'd and can be accessed.
+      //subtitle.style.color = '#f00';
+    }
+   
+    function closeModal(){ setIsOpen(false); }
+  
+    function DisplayUpgrade() {
+      //console.log(`Upgrate: ${upgrade} Menu Item:   ${value}`)
+    // console.log("Current",process.env.REACT_APP_VERSION);
+      if (upgrade)
+        return(
+          <Modal
+            isOpen={modalIsOpen}
+            onAfterOpen={afterOpenModal}
+            onRequestClose={closeModal}
+            style={customStyles}
+            contentLabel="Example Modal"
+            ariaHideApp={false}
+          >
+          <Typography className={classes.new} align="center">
+            Latest Version {latestApk.version}
+          </Typography>
+          <BlankArea/>
+          <Typography className={classes.new} align="center">
+            What is new
+          </Typography>
+          <TextField variant="outlined" multiline fullWidth disabled
+            id="producttext"
+            // label="What is new" 
+            className={classes.whatIsNew}
+            defaultValue={latestApk.text} 
+          />
+          <BlankArea />
+          <Button align="center" key="upgrade" variant="contained" color="primary" size="medium"
+            className={classes.dashButton} onClick={handleUpgrade}>Update Now
+          </Button>
+        </Modal>
+        )
+      else
+        return(null);
+    }
+  
+   
     return (
     <div className={classes.root} key="uctournament">
       {/* <BlankArea/> */}
@@ -245,6 +358,7 @@ export default function Home() {
       <ShowTournamentCards/>
       <BlankArea/>
       <ShowJumpButtons />
+      <DisplayUpgrade/>
     </div>
     );
     }

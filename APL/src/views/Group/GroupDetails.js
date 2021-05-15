@@ -715,7 +715,7 @@ export default function GroupDetails() {
     return (
       <div>
         <BlankArea />
-        <JumpButton page={process.env.REACT_APP_AUCTION} text="Auction" />
+        <JumpButton page={process.env.REACT_APP_AUCTION} text="Home (Auction)" />
       </div>
     )
   }
@@ -729,7 +729,7 @@ export default function GroupDetails() {
         {/* <DisplayPageHeader headerName="Group Details" groupName={masterData.name} tournament={masterData.tournament}/> */}
         {/* <BlankArea /> */}
         <SelectGroup />
-        {/* <BlankArea /> */}
+        <BlankArea />
         <DisplayAccordian />
       </div>
     </Container>

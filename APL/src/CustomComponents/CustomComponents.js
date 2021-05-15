@@ -49,9 +49,18 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(0, 1, 0),
   },
+  jumpButton: {
+    margin: theme.spacing(0, 1, 0),
+    backgroundColor: '#FFFFFF',
+    color: '#1A237E',
+    fontWeight: theme.typography.fontWeightBold,
+    fontSize: '16px',
+    width: theme.spacing(40),
+  },
   groupName:  {
     // right: 0,
-    fontSize: '12px',
+    fontSize: '14px',
+    fontWeight: theme.typography.fontWeightBold,
     color: blue[700],
     // position: 'absolute',
     alignItems: 'center',
@@ -370,13 +379,43 @@ export class Copyright extends React.Component {
   }
 }
 
-export function JumpButton(props) {
+export function OrigJumpButton(props) {
   const classes = useStyles();
   return (
     <div>
       <Divider className={classes.divider} />
       <BlankArea />
       <Button variant="contained" fullWidth color="primary" align="center"
+        onClick={() => setTab(props.page) }>
+        {props.text}
+      </Button>
+  </div>
+  )
+}
+
+
+export function JumpButton(props) {
+  const classes = useStyles();
+  return (
+    <div align="center">
+      {/* <Divider className={classes.divider} /> */}
+      <BlankArea />
+      <Button variant="outlined" size="medium" color="primary"
+        className={classes.jumpButton}
+        onClick={() => setTab(props.page) }>
+        {props.text}
+      </Button>
+  </div>
+  )
+}
+
+export function JumpButtonOnly(props) {
+  const classes = useStyles();
+  return (
+    <div align="center">
+      <BlankArea />
+      <Button variant="outlined" size="medium" color="primary"
+        className={classes.jumpButton}
         onClick={() => setTab(props.page) }>
         {props.text}
       </Button>

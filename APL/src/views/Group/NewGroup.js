@@ -166,6 +166,8 @@ export default function CreateGroup() {
         setTournamentData(response.data);
         let selTournament = (response.data.length > 0) ? response.data[0].name : "";
         let myDisable = false;
+        let myGroup = localStorage.getItem("cGroup");
+        // console.log("Selected Group", myGroup);
         if (localStorage.getItem("cGroup").length > 0) {
           selTournament = localStorage.getItem("cGroup");
           localStorage.setItem("cGroup", "");
@@ -239,9 +241,12 @@ export default function CreateGroup() {
 
   function DisplayPrizeRadio(props) {
     let inumber = parseInt(props.number);
+    let rDisabled = false;
+      if (inumber > memberCount) rDisabled = true;
+      if (groupCode !== "") rDisabled = true;
     return(
       <FormControlLabel
-      value={props.number} label={props.number} labelPlacement="start" disabled={inumber > memberCount} checked={prizeCount === inumber}
+      value={props.number} label={props.number} labelPlacement="start" disabled={rDisabled} checked={prizeCount === inumber}
       control={<Radio color="primary" />}
       />
     );
@@ -371,7 +376,7 @@ export default function CreateGroup() {
       return (
         <div>
           <BlankArea />
-          <JumpButton page={process.env.REACT_APP_GROUPDETAILS} text="Group Details" />
+          <JumpButton page={process.env.REACT_APP_GROUPDETAILS} text="Home (Group Details)" />
         </div>
       )
     } else
@@ -403,59 +408,63 @@ export default function CreateGroup() {
         </Select>
       <BlankArea/> 
       <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="Group Name"
-          onChange={(event) => setGroupName(event.target.value)}
-          name="groupname"
-          // type=""
-          validators={['required', 'minLength', 'noSpecialCharacters']}
-          errorMessages={['Group Name to be provided', 'Group Name should be of minimum 6 characters', 'Special characters not permitted']}
-          value={groupName}
+        disabled={groupCode !== ""}
+        variant="outlined"
+        required
+        fullWidth      
+        label="Group Name"
+        onChange={(event) => setGroupName(event.target.value)}
+        name="groupname"
+        // type=""
+        validators={['required', 'minLength', 'noSpecialCharacters']}
+        errorMessages={['Group Name to be provided', 'Group Name should be of minimum 6 characters', 'Special characters not permitted']}
+        value={groupName}
       />
       <BlankArea/>
       <div>
       <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          // size="small"  
-          label="MemberCount"
-          onChange={(event) => changeMemberCount(event.target.value)}
-          name="membercount"
-          type="number"
-          validators={['required', 'minNumber:2', 'maxNumber:25']}
-          errorMessages={['Member count to be provided', 'Group members cannot be less than 2', 'Group members cannot be more than 25']}
-          value={memberCount}
+        disabled={groupCode !== ""}
+        variant="outlined"
+        required
+        fullWidth      
+        // size="small"  
+        label="MemberCount"
+        onChange={(event) => changeMemberCount(event.target.value)}
+        name="membercount"
+        type="number"
+        validators={['required', 'minNumber:2', 'maxNumber:25']}
+        errorMessages={['Member count to be provided', 'Group members cannot be less than 2', 'Group members cannot be more than 25']}
+        value={memberCount}
       />
       <BlankArea/>
       <TextValidator
-          variant="outlined"
-          required
-          fullWidth    
-          // size="small"  
-          label="MemberFee"
-          onChange={(event) => changeMemberFee(event.target.value)}
-          name="membercount"
-          type="number"
-          validators={['required', 'minNumber:50', 'lessthanbalance']}
-          errorMessages={['Member count to be provided', 'Member fee cannot be less than 50', 'Insufficient Balance']}
-          value={memberFee}
+        disabled={groupCode !== ""}
+        variant="outlined"
+        required
+        fullWidth    
+        // size="small"  
+        label="MemberFee"
+        onChange={(event) => changeMemberFee(event.target.value)}
+        name="membercount"
+        type="number"
+        validators={['required', 'minNumber:50', 'lessthanbalance']}
+        errorMessages={['Member count to be provided', 'Member fee cannot be less than 50', 'Insufficient Balance']}
+        value={memberFee}
       />
       <BlankArea/>
       <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          // size="small"  
-          label="Auction Coins"
-          onChange={(event) => setBidAmount(event.target.value)}
-          name="auctioncoins"
-          type="number"
-          validators={['required', 'minNumber:1000', 'maxNumber:10000']}
-          errorMessages={['Member count to be provided', 'Auction Coins cannot be less than 1000', 'Auction Coins cannot be more than 10000']}
-          value={bidAmount}
+        disabled={groupCode !== ""}
+        variant="outlined"
+        required
+        fullWidth      
+        // size="small"  
+        label="Auction Coins"
+        onChange={(event) => setBidAmount(event.target.value)}
+        name="auctioncoins"
+        type="number"
+        validators={['required', 'minNumber:1000', 'maxNumber:10000']}
+        errorMessages={['Member count to be provided', 'Auction Coins cannot be less than 1000', 'Auction Coins cannot be more than 10000']}
+        value={bidAmount}
       />
       <BlankArea/>
       <SelectPrizeCount/>

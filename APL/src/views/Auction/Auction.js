@@ -763,15 +763,18 @@ export default function Auction() {
         */ 
         if (localStorage.getItem("admin") === "true")
             return ( 
-                <Button variant="contained"
-                color="primary"
-                size="small"
-                className={classes.button}
-                onClick={() => startAuction("PENDING")}>Start Auction
-                </Button>
+                <div>
+                    <DisplayPendingOver message="Auction will start only after all members have joined."/>
+                    <Button variant="contained"
+                        color="primary"
+                        size="small"
+                        className={classes.button}
+                        onClick={() => startAuction("PENDING")}>Start Auction
+                    </Button>
+                </div>
             );
         else
-            return <div></div>;
+            return <DisplayPendingOver message="Auction has not yet started"/>
     }
     
     function ShowJumpButtons() {
@@ -808,7 +811,7 @@ export default function Auction() {
             if ( auctionStatus === "PENDING") {
                 return (
                     <div align="center">
-                        <DisplayPendingOver message="Auction has not yet started"/>
+                        {/* <DisplayPendingOver message="Auction has not yet started"/> */}
                         <DisplayPendingButton/>
                         <MessageToUser mtuOpen={backDropOpen} mtuClose={setBackDropOpen} mtuMessage={playerStatus} />
                     </div>);
