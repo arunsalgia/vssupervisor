@@ -734,7 +734,7 @@ export default function GroupDetails() {
       </div>
     </Container>
     <ShowJumpButtons />
+    <BlankArea />
     </div>
   );
 }
-

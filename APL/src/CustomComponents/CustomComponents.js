@@ -395,12 +395,15 @@ export function OrigJumpButton(props) {
 
 
 export function JumpButton(props) {
+  let myDisabled = false;
+  if (props.disabled) myDisabled = props.disabled;
   const classes = useStyles();
   return (
     <div align="center">
       {/* <Divider className={classes.divider} /> */}
       <BlankArea />
       <Button variant="outlined" size="medium" color="primary"
+        disabled={myDisabled}
         className={classes.jumpButton}
         onClick={() => setTab(props.page) }>
         {props.text}
@@ -410,11 +413,14 @@ export function JumpButton(props) {
 }
 
 export function JumpButtonOnly(props) {
+  let myDisabled = false;
+  if (props.disabled) myDisabled = props.disabled;
   const classes = useStyles();
   return (
     <div align="center">
-      <BlankArea />
+      {/* <BlankArea /> */}
       <Button variant="outlined" size="medium" color="primary"
+        disabled={myDisabled}
         className={classes.jumpButton}
         onClick={() => setTab(props.page) }>
         {props.text}

@@ -377,6 +377,7 @@ export default function Captain() {
             <BlankArea/>
             <DisplayCaptainSelectButton/>
             <ShowJumpButtons />
+            <BlankArea />
             {/* <MessageToUser mtuOpen={backDropOpen} mtuClose={setBackDropOpen} mtuMessage={userMessage} /> */}
         </div>
         );

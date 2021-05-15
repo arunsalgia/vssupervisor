@@ -297,7 +297,7 @@ export default function Profile() {
   function ShowAllWallet() {
     return (
       <div className={classes.paper}>
-        <Typography component="h1" variant="h5">Wallet Details (Balance: {balance})</Typography>
+        <Typography component="h1" variant="h5">Wallet Balance: {balance}</Typography>
         <Table>
         <TableHead p={0}>
             <TableRow align="center">
@@ -339,7 +339,7 @@ export default function Profile() {
   function ShowWallet() {
     return (
       <div className={classes.paper}>
-        <Typography component="h1" variant="h5">Wallet Details (Balance: {balance})</Typography>
+        <Typography component="h1" variant="h5">Wallet Balance: {balance}</Typography>
         <TableContainer>
         <Table>
         <TableHead p={0}>

@@ -17,9 +17,9 @@ import TextField from '@material-ui/core/TextField';
 // import Radio from '@material-ui/core/Radio';
 import Box from '@material-ui/core/Box';
 import { UserContext } from "../../UserContext";
-import { NoGroup, DisplayPageHeader, MessageToUser, BlankArea, JumpButton } from 'CustomComponents/CustomComponents.js';
-import { cdRefresh, clearBackupData, hasGroup, upGradeRequired, downloadApk } from 'views/functions';
-import { red, blue, green, deepOrange, brown } from '@material-ui/core/colors';
+import { DisplayPageHeader, BlankArea, JumpButton } from 'CustomComponents/CustomComponents.js';
+import { clearBackupData, hasGroup, upGradeRequired, downloadApk } from 'views/functions';
+import { red, blue, deepOrange } from '@material-ui/core/colors';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -100,10 +100,13 @@ const useStyles = makeStyles((theme) => ({
       fontSize: theme.typography.pxToRem(15),
       color: theme.palette.text.secondary,
     },
-    groupName: {
-      fontSize: theme.typography.pxToRem(16),
+    groupName:  {
+      // right: 0,
+      fontSize: '16px',
       fontWeight: theme.typography.fontWeightBold,
-      color: '#000000',     //   deepOrange[900],
+      color: deepOrange[700],
+      alignItems: 'center',
+      marginTop: '0px',
     },
     error:  {
         // right: 0,
@@ -147,7 +150,7 @@ export default function Home() {
     const [latestApk, setLatestApk] = React.useState(null);
 
     const [userGroup, setUserGroup] = React.useState([]);
-    // const [arunGroup, setArunGroup] = React.useState(false);
+    const [noGroup, setNoGroup] = React.useState(true);
     const [currentGroup, setCurrentGroup] = useState(0);
 
     useEffect(() => {
@@ -168,11 +171,8 @@ export default function Home() {
         }
       }
       const getGroups = async () => {
-        if (!hasGroup()) {
-          setUserGroup([]);
-          // setArunGroup(true);
-          return;
-        }
+
+        if (!hasGroup()) return;
 
         let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/group/memberof/${localStorage.getItem("uid")}`;
         axios.get(myUrl).then((response) => {
@@ -190,13 +190,10 @@ export default function Home() {
             }
           }
           setUserGroup(allGroups);
-          // console.log('Everything is awesome.');
-          // setArunGroup(true);
+          setNoGroup(false);
         }).catch((error) => {
           console.log('Not good man :(');
           console.log(error);
-          setUserGroup([]);
-          // setArunGroup(true);
         })        
       }
       a();
@@ -346,8 +343,8 @@ export default function Home() {
       }
     }
 
-    function ShowGroupCards() {
-      if (userGroup.length <= 1) return null;
+    function OrgShowGroupCards() {
+      if (userGroup.length <= 0) return null;
 
       let tmp = userGroup[currentGroup];
       return (
@@ -391,10 +388,75 @@ export default function Home() {
       )
     }
 
-    function ShowCurrentGroup() {
+    function ShowGroupCards() {
+      if (noGroup) return null;
+
+      let tmp = userGroup[currentGroup];
       return (
-        <Typography align="center" component="h1" variant="h5">Current group: {localStorage.getItem("groupName")}</Typography>
+      <Box paddingLeft={0} paddingRight={0} borderColor="primary" border={1}>
+        <Card m={2} raised variant="outlined">
+          <CardContent style={cardStyles.cardImage} >
+            <Grid key="gr-groupname" container justify="center" alignItems="center" >
+              <Grid item xs={2} sm={2} md={2} lg={2} >
+              <IconButton 
+                    // iconStyle={{width: '24px', height: '24px'}}
+                    onClick={handlePrevGroup}
+                    // disabled={currentTournament === 0}
+                    aria-label="left" color="primary">
+                    <ArrowLeftIcon fontSize="large" />
+                  </IconButton>
+              </Grid>
+              <Grid align="center" item xs={8} sm={8} md={8} lg={8} >
+                <Typography className={classes.ngCard} align="center">{tmp.groupName}</Typography>
+              </Grid>
+              <Grid item xs={2} sm={2} md={2} lg={2} >
+              <IconButton 
+                    // iconStyle={{width: '24px', height: '24px'}}
+                    onClick={handleNextGroup}
+                      // disabled={currentTournament === (tournamentList.length-1)}
+                      aria-label="right" color="primary">
+                      <ArrowRightIcon fontSize="large" />
+                    </IconButton>
+              </Grid>
+            </Grid>
+          </CardContent>
+          <CardActions>
+            <Grid key="gr-groupbutton" container justify="center" alignItems="center" >
+              {/* <Grid item xs={3} sm={3} md={4} lg={4} /> */}
+              <Grid align="center" item >
+              <Button  
+                variant="contained"
+                size="small" color="primary"
+                className={classes.submit}
+                onClick={handleGroupSelect}>
+                Select Group
+              </Button>
+              </Grid>
+              {/* <Grid item xs={4} sm={4} md={4} lg={4} /> */}
+            </Grid>
+            <div align="center">
+            </div>
+          </CardActions>
+        </Card>
+      </Box>
       )
+    }
+
+    function ShowCurrentGroup() {
+      if (noGroup) {
+        return (
+          <div align='center'>
+          <Typography component="h1" variant="h5">Create new Group from Upcoming tournament</Typography>
+          </div>
+        )
+      } else {
+        return (
+          <div align="center">
+          <Typography component="h1" variant="h5">Current group</Typography>
+          <Typography className={classes.groupName}>{localStorage.getItem("groupName")}</Typography>
+          </div>
+        )
+      }
     }
 
     function ShowJumpButtons() {
@@ -407,13 +469,13 @@ export default function Home() {
           <BlankArea />
           <ShowCurrentGroup />
           {/* <BlankArea /> */}
-          <JumpButton page={process.env.REACT_APP_DASHBOARD} text="DashBoard" />
+          <JumpButton page={process.env.REACT_APP_DASHBOARD} disabled={noGroup} text="DashBoard" />
           {/* <BlankArea /> */}
-          <JumpButton page={process.env.REACT_APP_STAT} text="Statistics" />
+          <JumpButton page={process.env.REACT_APP_STAT} disabled={noGroup} text="Statistics" />
           {/* <BlankArea />
-          <JumpButton page={process.env.REACT_APP_TEAM} text="My Team" /> */}
+          <JumpButton page={process.env.REACT_APP_TEAM} disabled={noGroup} text="My Team" /> */}
           {/* <BlankArea /> */}
-          <JumpButton page={process.env.REACT_APP_CAPTAIN} text="Captain and ViceCaptain" />
+          <JumpButton page={process.env.REACT_APP_CAPTAIN} disabled={noGroup} text="Captain and ViceCaptain" />
         </div>
       )
     }
@@ -481,7 +543,9 @@ export default function Home() {
       <ShowJumpButtons />
       <BlankArea/>
       <ShowGroupCards/>
+      <BlankArea />
       <DisplayUpgrade/>
+      <BlankArea />
     </div>
     );
     }

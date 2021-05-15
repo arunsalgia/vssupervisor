@@ -150,7 +150,7 @@ export default function MyTeam() {
         <DisplayPageHeader headerName="My Team" groupName={localStorage.getItem("groupName")} tournament={localStorage.getItem("tournament")}/>
         <Table>
         <TableHead p={0}>
-            <TableRow align="center">
+            <TableRow key="header" align="center">
             <TableCell className={classes.th} p={0} align="center">Player Name</TableCell>
             <TableCell className={classes.th} p={0} align="center">Team</TableCell>
             <TableCell className={classes.th} p={0} align="center">Bid Amount</TableCell>      
@@ -176,6 +176,7 @@ export default function MyTeam() {
         </Table>
         <Divider />
         <ShowJumpButtons />
+        <BlankArea />
       </div>
       )
     )

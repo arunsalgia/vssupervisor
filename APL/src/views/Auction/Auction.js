@@ -820,6 +820,7 @@ export default function Auction() {
                 </Modal> */}
             {/* </div> */}
             <ShowJumpButtons />
+            <BlankArea />
         </div>
     );
 

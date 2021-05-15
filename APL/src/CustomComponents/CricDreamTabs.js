@@ -408,16 +408,16 @@ export function CricDreamTabs() {
                 open={open}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleProfile}>{myName}</MenuItem>
+                <MenuItem onClick={handleProfile}>Profile</MenuItem>
                 <Divider/>
-                {/* <MenuItem onClick={handleGroup}>Group</MenuItem> */}
+                <MenuItem onClick={handleAuction}>Auction</MenuItem>
                 <MenuItem onClick={handleGroupDetails}>Group Details</MenuItem>
+                <MenuItem onClick={handleMatch}>Match</MenuItem>
+                {/* <MenuItem onClick={handleGroup}>Group</MenuItem> */}
                 {/* <MenuItem onClick={handleGroupJoin}>Join Group</MenuItem>
                 <MenuItem onClick={handleGroupNew}>New Group</MenuItem>
                 <Divider /> */}
-                <MenuItem onClick={handleMatch}>Match</MenuItem>
                 {/* <MenuItem onClick={handleCaptain}>Captain</MenuItem> */}
-                <MenuItem onClick={handleAuction}>Auction</MenuItem>
                 <Divider />
                 {/* <MenuItem onClick={handleGroup}>Group</MenuItem>
                 <Divider/> */}
