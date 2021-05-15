@@ -701,50 +701,6 @@ export default function Auction() {
             return(<div></div>);
     }
 
-    // function OrgShowDialog() {
-    //     return (
-    //     <Dialog aria-labelledby="simple-dialog-title" open={backDropOpen}
-    //         onClose={() => setBackDropOpen(false)} >
-    //         <DialogTitle id="simple-dialog-title" className={classes.sold}>{playerStatus}</DialogTitle>
-    //     </Dialog>
-    //     );
-    // }
-
-    // function ShowDialog() {
-    //     return (<MessageToUser mtuOpen={backDropOpen} mtuClose={setBackDropOpen} mtuMessage={playerStatus} />);
-    // }
-
-    // function SelctNewOwner() {
-    //     return (
-    //     <Select labelId="demo-simple-select-label" id="demo-simple-select"
-    //         value={selectedOwner}
-    //         displayEmpty
-    //         onChange={handleOwnerChange}>
-    //         {AuctionTableData.map(item => <MenuItem key={item.uid} value={item.uid}>{item.userName}</MenuItem>)}
-    //     </Select>
-    //     );
-    // }
-
-    // function ShowGroupName() {
-    //     return(
-    //         <div>
-    //             <h3 align="center">Auction ({localStorage.getItem("groupName")})</h3>
-    //             <br/>
-    //         </div>
-    //     );
-    // }
-
-    // function UserAuction() {
-    //     return (
-    //     <Grid container justify="center" alignItems="center" >
-    //     <ShowGroupName/>
-    //     <GridItem xs={12} sm={12} md={4} >
-    //         <ShowPlayerAvatar pName={playerName} pImage={playerImage} pTeamLogo={team} /> 
-    //         <ShowBalance/>
-    //     </GridItem>
-    //     </Grid>
-    //     );
-    // }
 
     const startAuction = async () => {
         try {
@@ -783,7 +739,7 @@ export default function Auction() {
             return (
             <div>
                 <BlankArea />
-                <JumpButton page={process.env.REACT_APP_CAPTAIN} text="Captain and ViceCaptain" />
+                <JumpButton page={process.env.REACT_APP_CAPTAIN} text="Next (Captain and ViceCaptain)" />
             </div>
             )
         } else

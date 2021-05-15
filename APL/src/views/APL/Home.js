@@ -18,7 +18,7 @@ import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import { UserContext } from "../../UserContext";
 import { NoGroup, DisplayPageHeader, MessageToUser, BlankArea, JumpButton } from 'CustomComponents/CustomComponents.js';
-import { upGradeRequired, downloadApk } from 'views/functions';
+import { cdRefresh, clearBackupData, hasGroup, upGradeRequired, downloadApk } from 'views/functions';
 import { red, blue, green, deepOrange, brown } from '@material-ui/core/colors';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -41,7 +41,7 @@ import Modal from 'react-modal';
 const cardStyles = {
   cardImage: {
       // backgroundImage: `url(${process.env.PUBLIC_URL}/NEWTOURNAMENT.JPG)`,
-      height: '30px'
+      height: '20px'
   }
 };
 
@@ -63,6 +63,15 @@ const useStyles = makeStyles((theme) => ({
     root: {
       width: '100%',
     },
+    jumpButton: {
+      margin: theme.spacing(0, 1, 0),
+      backgroundColor: '#FFFFFF',
+      color: deepOrange[700],
+      fontWeight: theme.typography.fontWeightBold,
+      fontSize: '16px',
+      width: theme.spacing(40),
+    },
+  
     dashButton: {
       // marginRight: theme.spacing(2),
       marginLeft: theme.spacing(2),
@@ -94,7 +103,7 @@ const useStyles = makeStyles((theme) => ({
     groupName: {
       fontSize: theme.typography.pxToRem(16),
       fontWeight: theme.typography.fontWeightBold,
-      color: deepOrange[900],
+      color: '#000000',     //   deepOrange[900],
     },
     error:  {
         // right: 0,
@@ -136,7 +145,11 @@ export default function Home() {
     const [upgrade, setUpgrade] = React.useState(false);
     const [modalIsOpen,setIsOpen] = React.useState(true);
     const [latestApk, setLatestApk] = React.useState(null);
-``  
+
+    const [userGroup, setUserGroup] = React.useState([]);
+    // const [arunGroup, setArunGroup] = React.useState(false);
+    const [currentGroup, setCurrentGroup] = useState(0);
+
     useEffect(() => {
       const checkVersion = async () => {
         //console.log("about to call upgrade");
@@ -154,7 +167,40 @@ export default function Home() {
           setCurrentTournament(0);
         }
       }
+      const getGroups = async () => {
+        if (!hasGroup()) {
+          setUserGroup([]);
+          // setArunGroup(true);
+          return;
+        }
+
+        let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/group/memberof/${localStorage.getItem("uid")}`;
+        axios.get(myUrl).then((response) => {
+          let allGroups = response.data[0].groups;
+          if (allGroups.length > 0) {
+            let tmp = allGroups.find(x => x.defaultGroup == true);
+            if (!tmp) {
+              tmp = allGroups[0];
+              tmp.defaultGroup = true;
+              localStorage.setItem("gid", tmp.gid.toString());
+              localStorage.setItem("groupName", tmp.groupName);
+              localStorage.setItem("tournament", tmp.tournament);
+              localStorage.setItem("admin", tmp.admin);
+              clearBackupData();
+            }
+          }
+          setUserGroup(allGroups);
+          // console.log('Everything is awesome.');
+          // setArunGroup(true);
+        }).catch((error) => {
+          console.log('Not good man :(');
+          console.log(error);
+          setUserGroup([]);
+          // setArunGroup(true);
+        })        
+      }
       a();
+      getGroups();
       checkVersion();
     }, [])
 
@@ -270,29 +316,104 @@ export default function Home() {
       )
     }
 
+    function handlePrevGroup() {
+      let newLeft = currentGroup - 1;
+      if (newLeft < 0) newLeft = userGroup.length - 1
+      setCurrentGroup(newLeft);
+    }
+
+    function handleNextGroup() {
+      let newRight = currentGroup + 1;
+      if (newRight >= userGroup.length)
+        newRight = 0;
+      setCurrentGroup(newRight);
+    }
+
+    async function handleGroupSelect() {
+      let gRec = userGroup[currentGroup];
+      try {
+        await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setdefaultgroup/${localStorage.getItem("uid")}/${gRec.gid}`);
+        localStorage.setItem("gid", gRec.gid);
+        localStorage.setItem("groupName", gRec.groupName);
+        localStorage.setItem("tournament", gRec.tournament);
+        localStorage.setItem("admin", gRec.admin);
+        clearBackupData();
+        setTab(process.env.REACT_APP_DASHBOARD);
+        // cdRefresh();
+      } catch (e) {
+        console.log(e);
+        console.log("error setting default group");
+      }
+    }
+
+    function ShowGroupCards() {
+      if (userGroup.length <= 1) return null;
+
+      let tmp = userGroup[currentGroup];
+      return (
+        <div align="center">
+        <Typography align="center" component="h1" variant="h5">Select Group</Typography>
+        <Box paddingLeft={0} paddingRight={0} borderColor="primary" border={1}>
+        {/* <BlankArea /> */}
+        <Card m={2} raised variant="outlined">
+        <CardContent style={cardStyles.cardImage} >
+        <Grid key="gr-groupname" container justify="center" alignItems="center" >
+          <Grid item xs={1} sm={1} md={1} lg={1} >
+        <IconButton 
+              // iconStyle={{width: '24px', height: '24px'}}
+              onClick={handlePrevGroup}
+              // disabled={currentTournament === 0}
+              aria-label="left" color="primary">
+              <ArrowLeftIcon fontSize="large" />
+            </IconButton>
+        </Grid>
+          <Grid align="center" item xs={10} sm={10} md={10} lg={10} >
+            <Button variant="outlined" size="medium" color="primary"
+              className={classes.jumpButton}
+              onClick={handleGroupSelect}>
+              {tmp.groupName}
+            </Button>
+          </Grid>
+          <Grid item xs={1} sm={1} md={1} lg={1} >
+        <IconButton 
+              // iconStyle={{width: '24px', height: '24px'}}
+              onClick={handleNextGroup}
+                // disabled={currentTournament === (tournamentList.length-1)}
+                aria-label="right" color="primary">
+                <ArrowRightIcon fontSize="large" />
+              </IconButton>
+        </Grid>
+        </Grid>
+        </CardContent>
+        </Card>
+        </Box>
+        </div>
+      )
+    }
+
     function ShowCurrentGroup() {
       return (
-        <Typography align="center" className={classes.groupName}>Current group: {localStorage.getItem("groupName")}</Typography>
+        <Typography align="center" component="h1" variant="h5">Current group: {localStorage.getItem("groupName")}</Typography>
       )
     }
 
     function ShowJumpButtons() {
       return (
         <div>
-          <BlankArea />
+          {/* <BlankArea /> */}
           <JumpButton page={process.env.REACT_APP_HOWTOPLAY} text="How to Play" />
+          {/* <BlankArea /> */}
+          <JumpButton page={process.env.REACT_APP_POINTSYSTEM} text="Point System" />
           <BlankArea />
           <ShowCurrentGroup />
-          <BlankArea />
+          {/* <BlankArea /> */}
           <JumpButton page={process.env.REACT_APP_DASHBOARD} text="DashBoard" />
-          <BlankArea />
+          {/* <BlankArea /> */}
           <JumpButton page={process.env.REACT_APP_STAT} text="Statistics" />
           {/* <BlankArea />
           <JumpButton page={process.env.REACT_APP_TEAM} text="My Team" /> */}
-          <BlankArea />
+          {/* <BlankArea /> */}
           <JumpButton page={process.env.REACT_APP_CAPTAIN} text="Captain and ViceCaptain" />
-          <BlankArea />
-          <JumpButton page={process.env.REACT_APP_POINTSYSTEM} text="Point System" />
         </div>
       )
     }
@@ -352,12 +473,14 @@ export default function Home() {
    
     return (
     <div className={classes.root} key="uctournament">
-      {/* <BlankArea/> */}
+      <BlankArea/>
       <DisplayPageHeader headerName="Upcoming Tournament" groupName="" tournament=""/>
-      <BlankArea/>
+      {/* <BlankArea/> */}
       <ShowTournamentCards/>
-      <BlankArea/>
+      {/* <BlankArea/> */}
       <ShowJumpButtons />
+      <BlankArea/>
+      <ShowGroupCards/>
       <DisplayUpgrade/>
     </div>
     );

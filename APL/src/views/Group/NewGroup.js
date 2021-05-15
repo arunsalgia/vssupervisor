@@ -376,7 +376,7 @@ export default function CreateGroup() {
       return (
         <div>
           <BlankArea />
-          <JumpButton page={process.env.REACT_APP_GROUPDETAILS} text="Home (Group Details)" />
+          <JumpButton page={process.env.REACT_APP_GROUPDETAILS} text="Next (Group Details)" />
         </div>
       )
     } else

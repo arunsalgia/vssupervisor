@@ -715,7 +715,7 @@ export default function GroupDetails() {
     return (
       <div>
         <BlankArea />
-        <JumpButton page={process.env.REACT_APP_AUCTION} text="Home (Auction)" />
+        <JumpButton page={process.env.REACT_APP_AUCTION} text="Next (Auction)" />
       </div>
     )
   }

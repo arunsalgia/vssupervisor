@@ -94,8 +94,8 @@ export default function PointSystem() {
   return (
     <div className={classes.root}>
       <DisplayPageHeader headerName="Point System" groupName="" tournament=""/>
-      <JumpButtonOnly page={process.env.REACT_APP_HOME} text="Home" />
-      <BlankArea />
+      {/* <JumpButtonOnly page={process.env.REACT_APP_HOME} text="Home" />
+      <BlankArea /> */}
       <PsPage />
     </div>
   );

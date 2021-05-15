@@ -458,15 +458,15 @@ export function CricDreamTabs() {
           >
             <GroupIcon className={classes.icon}/>
           </IconButton> */}
-          <Avatar 
+          {/* <Avatar 
             aria-label="account of current user"
             aria-controls="user-appbar"
             aria-haspopup="true"
             onClick={handleGrpMenu}
             color="inherit"
             variant="circular" className={classes.avatar1}>{groupCharacter}
-          </Avatar>
-          <Menu
+          </Avatar> */}
+          {/* <Menu
             id="group-appbar"
             anchorEl={grpAnchorEl}
             anchorOrigin={{
@@ -482,7 +482,7 @@ export function CricDreamTabs() {
             onClose={handleGrpClose}
           >
             <DisplayGroupMenu />
-          </Menu>
+          </Menu> */}
         {/* </div> */}
        </Toolbar>
       </AppBar>

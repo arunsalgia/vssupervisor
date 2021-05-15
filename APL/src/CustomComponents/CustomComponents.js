@@ -264,7 +264,7 @@ export function NoGroup() {
 
 
 export class BlankArea extends React.Component {
-  render() {return <h3></h3>;}
+  render() {return <h5></h5>;}
 }
 
 export class NothingToDisplay extends React.Component {
