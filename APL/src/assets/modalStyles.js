@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@material-ui/styles";
 
 
 const modalStyles = {
@@ -9,8 +10,8 @@ const modalStyles = {
       marginRight           : '-50%',
       marginBottom          : '-50%',
       transform             : 'translate(-50%, -50%)',
-      background            : '#000000',
-      color                 : '#FFFFFF',
+      background            : '#E0E0E0',
+      color                 : '#000000',
       transparent           : false,   
     }
   };

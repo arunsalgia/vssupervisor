@@ -63,9 +63,14 @@ const cardStyles = {
 const useStyles = makeStyles((theme) => ({
     root: {
       width: '100%',
+      // backgroundColor: '#84FFFF'
+      // backgroundColor: '#A1887F'
+    },
+    withTopSpacing: {
+      marginTop: theme.spacing(1),
     },
     jumpButton: {
-      margin: theme.spacing(0, 1, 0),
+      marginTop: theme.spacing(1),
       backgroundColor: '#FFFFFF',
       color: deepOrange[700],
       fontWeight: theme.typography.fontWeightBold,
@@ -139,9 +144,8 @@ const useStyles = makeStyles((theme) => ({
 
 
 export default function Home() {
-
-    window.onbeforeunload = () => setUser("")
     // const { setUser } = useContext(UserContext);
+    // window.onbeforeunload = () => setUser("")
     const classes = useStyles();
     const [tournamentList, setTournamentList] = useState([]);
     const [registerStatus, setRegisterStatus] = useState(0);
@@ -219,7 +223,7 @@ export default function Home() {
             myMsg = "Error updating Captain / ViceCaptain details";
             break;
         }
-        let myClass = (errmsg) ? classes.error : classes.root;
+        let myClass = (errmsg) ? classes.error : classes.nonerror;
         return(
           <div>
             <Typography align="center" className={myClass}>{myMsg}</Typography>
@@ -394,7 +398,7 @@ export default function Home() {
 
       let tmp = userGroup[currentGroup];
       return (
-      <Box paddingLeft={0} paddingRight={0} borderColor="primary" border={1}>
+      <Box className={classes.withTopSpacing} paddingLeft={0} paddingRight={0} borderColor="primary" border={1}>
         <Card m={2} raised variant="outlined">
           <CardContent style={cardStyles.cardImage} >
             <Grid key="gr-groupname" container justify="center" alignItems="center" >
@@ -447,13 +451,13 @@ export default function Home() {
       if (noGroup) {
         return (
           <div align='center'>
-          <Typography component="h1" variant="h5">Create new Group from Upcoming tournament</Typography>
+          <Typography className={classes.withTopSpacing} component="h1" variant="h5">Create new Group from Upcoming tournament</Typography>
           </div>
         )
       } else {
         return (
           <div align="center">
-          <Typography component="h1" variant="h5">Current group</Typography>
+          <Typography className={classes.withTopSpacing} component="h1" variant="h5">Current group</Typography>
           <Typography className={classes.groupName}>{localStorage.getItem("groupName")}</Typography>
           </div>
         )
@@ -463,20 +467,39 @@ export default function Home() {
     function ShowJumpButtons() {
       return (
         <div>
-          {/* <BlankArea /> */}
-          <JumpButton page={process.env.REACT_APP_HOWTOPLAY} text="How to Play" />
-          {/* <BlankArea /> */}
-          <JumpButton page={process.env.REACT_APP_POINTSYSTEM} text="Point System" />
-          <BlankArea />
+          <Grid key="jp1" container >
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+              <JumpButton page={process.env.REACT_APP_HOWTOPLAY} text="How to Play" />
+            </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+              <JumpButton page={process.env.REACT_APP_POINTSYSTEM} text="Point System" />
+            </Grid>
+          </Grid>
           <ShowCurrentGroup />
-          {/* <BlankArea /> */}
-          <JumpButton page={process.env.REACT_APP_DASHBOARD} disabled={noGroup} text="DashBoard" />
-          {/* <BlankArea /> */}
-          <JumpButton page={process.env.REACT_APP_STAT} disabled={noGroup} text="Statistics" />
-          {/* <BlankArea />
-          <JumpButton page={process.env.REACT_APP_TEAM} disabled={noGroup} text="My Team" /> */}
-          {/* <BlankArea /> */}
-          <JumpButton page={process.env.REACT_APP_CAPTAIN} disabled={noGroup} text="Captain and ViceCaptain" />
+          <Grid key="jp2" container >
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_DASHBOARD} disabled={noGroup} text="DashBoard" />
+            </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_STAT} disabled={noGroup} text="Statistics" />
+            </Grid>
+          </Grid>
+          <Grid key="jp3" container >
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_CAPTAIN} disabled={noGroup} text="Captain" />
+            </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_TEAM} disabled={noGroup} text="My Team" />
+            </Grid>
+          </Grid>
+          <Grid key="jp4" container >
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_GROUPDETAILS} disabled={noGroup} text="GroupDetails" />
+            </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_PLAYERINFO} disabled={true} text="Player Info" />
+          </Grid>
+          </Grid>
         </div>
       )
     }
@@ -535,16 +558,17 @@ export default function Home() {
   
    
     return (
-    <div className={classes.root} key="uctournament">
-      <BlankArea/>
+    <div className={classes.root} key="uctournament" align="center">
+      {/* <BlankArea/> */}
       <DisplayPageHeader headerName="Upcoming Tournament" groupName="" tournament=""/>
       {/* <BlankArea/> */}
       <ShowTournamentCards/>
       {/* <BlankArea/> */}
       <ShowJumpButtons />
-      <BlankArea/>
+      {/* <BlankArea/> */}
+      <Typography className={classes.withTopSpacing} component="h1" variant="h5">My groups</Typography>
       <ShowGroupCards/>
-      <BlankArea />
+      {/* <BlankArea /> */}
       <DisplayUpgrade/>
       <BlankArea />
     </div>

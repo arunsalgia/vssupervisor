@@ -74,6 +74,10 @@ const useStyles = makeStyles((theme) => ({
     fontSize: theme.typography.pxToRem(15),
     fontWeight: theme.typography.fontWeightRegular,
   },
+  modalCb: {
+    color: '#000000',
+    fontWeight: theme.typography.fontWeightBold,
+  },
   th: { 
     backgroundColor: '#EEEEEE', 
     color: deepOrange[700], 
@@ -576,7 +580,7 @@ export default function Stats() {
           className={gClasses.modalbutton} onClick={handleNextGuide}>Next
       </Button>
       <BlankArea />
-      <FormControlLabel
+      <FormControlLabel className={classes.modalCb}
         control={
           <BlueCheckbox
             checked={false}
@@ -594,11 +598,11 @@ export default function Stats() {
 
   if (localStorage.getItem("tournament").length > 0)
   return (
-    <div className={classes.root}>
+    <div className={gClasses.root}>
       <DisplayPageHeader headerName="Statistics" groupName={localStorage.getItem("groupName")} tournament={localStorage.getItem("tournament")}/>
       <ShowStatCard />
       <ShowStats/>
-      <div className={classes.modalContainer} >
+      <div className={gClasses.modalContainer} >
         <Modal
           isOpen={modalIsOpen}
           onAfterOpen={afterOpenModal}

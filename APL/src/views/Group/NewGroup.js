@@ -9,6 +9,7 @@ import { Switch, Route } from 'react-router-dom';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import globalStyles from "assets/globalStyles";
 // import Table from '@material-ui/core/Table';
 // import TableBody from '@material-ui/core/TableBody';
 // import TableCell from '@material-ui/core/TableCell';
@@ -39,49 +40,13 @@ import { DisplayPageHeader, JumpButton } from 'CustomComponents/CustomComponents
 import { getAllPrizeTable } from 'views/functions';
 
 const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
   groupCode: {
     fontSize: theme.typography.pxToRem(20),
     fontWeight: theme.typography.fontWeightBold,
     color: yellow[900]
   },
-  groupMessage: {
-    fontSize: theme.typography.pxToRem(10),
-    fontWeight: theme.typography.fontWeightBold,
-    // color: yellow[900]
-  },
   submit: {
     margin: theme.spacing(3, 0, 2),
-  },
-  jump: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  button: {
-    margin: theme.spacing(0, 1, 0),
-  },
- error:  {
-      // right: 0,
-      fontSize: '12px',
-      color: red[700],
-      // position: 'absolute',
-      alignItems: 'center',
-      marginTop: '0px',
-  },
-  table: {
-    // minWidth: 650,
   },
 }));
 
@@ -126,6 +91,7 @@ const STARTPRIZECOUNT = 1;
 
 export default function CreateGroup() {
   const classes = useStyles();
+  const gClasses = globalStyles();
   const history = useHistory();
   const [groupName, setGroupName] = useState("");
   // const [displayName, setDisplayName] = useState("");
@@ -146,6 +112,7 @@ export default function CreateGroup() {
   const [masterPrizeTable, setMasterPrizeTable] = useState([]);
   const [newGid, setNewGid] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [createDisable, setCreateDisable] = useState(false);
   // state = {
   //   value: 'arunsalgia',
   //   copied: false,
@@ -190,6 +157,8 @@ export default function CreateGroup() {
   // }
 
   const handleSubmit = async() => {
+    setCreateDisable(true)
+    setRegisterStatus(1001);
     //console.log("Submit command provided");
     //  /group/create/TeSt/8/1250/AUSINDT20
     // groupName  bidAmount selectedTournament
@@ -205,29 +174,22 @@ export default function CreateGroup() {
       localStorage.setItem("tournament", response.data.tournament);
       localStorage.setItem("admin", true);
 
-      let myBalance = await getUserBalance();
-      setBalance(myBalance);
-
-      // SET PRIZE is not required here since create by default will set it to 1
-      // let myURL=`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setprize/${response.data.gid}/1`;
-      // console.log(myURL);
-      // let xxx = await axios.get(myURL);
-      // let totprize = memberFee*memberCount;
-      // var prizeres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/all/${totprize}`)
-      // setMasterPrizeTable(prizeres.data)
-      // setPrizeTable(prizeres.data[prizeCount-1]);
+      // let myBalance = await getUserBalance();
+      // setBalance(myBalance);
 
       let xxx = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setprize/${myGid}/${prizeCount}`);
-      // setPrizeTable(masterPrizeTable[idx-1])
-      // setPrizeCount(idx);
-      // await xxx;
 
-      setCopyState({value: response.data._id})
-      setGroupCode(response.data._id);
-      setRegisterStatus(200);
+      // setCopyState({value: response.data._id})
+      // setGroupCode(response.data._id);
+      // setRegisterStatus(200);
+
+      // jump to group detail
+      setTab(process.env.REACT_APP_GROUPDETAILS);
+
     } catch (err) {
-      console.log(`error code is ${err.response.status}`)
+      setCreateDisable(false);
       setRegisterStatus(err.response.status);
+      console.log(`error code is ${err.response.status}`)
     }
   }
 
@@ -288,7 +250,7 @@ export default function CreateGroup() {
       <div align="center">
         <DisplayPageHeader headerName="Group Code" groupName="" tournament=""/>
         <BlankArea/>
-        <Typography className={classes.groupMessage}>Share this code with your friends to join your group</Typography>
+        <Typography className={gClasses.message10}>Share this code with your friends to join your group</Typography>
         <BlankArea/>
         <Typography className={classes.groupCode}>{groupCode}</Typography>
         <BlankArea/>
@@ -314,11 +276,11 @@ export default function CreateGroup() {
         myMsg = `Successfully copied code to clipboard.`;
         errmsg = false;
         break;      
-      case 200:
-        // setGroupName("");
-        // setPassword("");
-        // setRepeatPassword("");
-        // setEmail("");
+      case 1001:
+        myMsg = `You group is being created. Please wait ...`;
+        errmsg = false;
+        break;      
+        case 200:
         myMsg = `Successfully created group ${groupName}`;
         errmsg = false;
         break;
@@ -345,7 +307,7 @@ export default function CreateGroup() {
         myMsg = "unknown error";
         break;
     }
-    let myClass = (errmsg) ? classes.error : classes.root;
+    let myClass = (errmsg) ? gClasses.error : gClasses.nonerror;
     return(
       <div>
         <Typography className={myClass}>{myMsg}</Typography>
@@ -388,11 +350,11 @@ export default function CreateGroup() {
     <Container component="main" maxWidth="xs">
       <DisplayBalance balance={balance} />
       <CssBaseline />
-      <div className={classes.paper}>
+      <div align="center" className={gClasses.paper}>
         <Typography component="h1" variant="h5">
           Create New Group
         </Typography>
-    <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
+    <ValidatorForm className={gClasses.form} onSubmit={handleSubmit}>
       <Select labelId='tournament' id='tournament'
           variant="outlined"
           disabled={isDisabled}
@@ -475,22 +437,22 @@ export default function CreateGroup() {
       <div align="center">
         <Button type="submit" key={"create"} variant="contained" color="primary" size="small"
             disabled={groupCode !== ""}
-            className={classes.button}>Create
+            className={gClasses.button}>Create
         </Button>
         {/* <Button key={"members"} variant="contained" color="primary" size="small"
-            className={classes.button} onClick={handleCancel}>Cancel
+            className={gClasses.button} onClick={handleCancel}>Cancel
         </Button> */}
       </div>
     </ValidatorForm>
     </div>
     <ChildComp p1={balance} p3={selectedTournament}/>   
-    <BlankArea />
-    <DisplayGroupCode/>
+    {/* <BlankArea />
+    <DisplayGroupCode/> */}
     {/* <Switch>
       <Route  path='/admin/signin' component={SignIn} key="MemberList"/>
     </Switch> */}
-    <ShowJumpButtons />
-    <BlankArea />
+    {/* <ShowJumpButtons />
+    <BlankArea /> */}
     </Container>
   );
 }

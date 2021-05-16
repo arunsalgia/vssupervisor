@@ -3,6 +3,7 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
+import Grid from '@material-ui/core/Grid';
 import Link from '@material-ui/core/Link';
 import { Switch, Route } from 'react-router-dom';
 // import Dialog from '@material-ui/core/Dialog';
@@ -10,6 +11,7 @@ import { Switch, Route } from 'react-router-dom';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 // import SignUp from "../Login/SignUp.js";
 // import ForgotPassword from "./ForgotPassword.js";
@@ -32,13 +34,17 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   android: {
-    marginRight: theme.spacing(2),
+    marginRight: theme.spacing(1),
   },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
   },
-
+  download: {
+    fontSize: theme.typography.pxToRem(16),
+    fontWeight: theme.typography.fontWeightBold,
+    // color: yellow[900]
+  },
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -153,11 +159,17 @@ export default function SignIn() {
     let iosImage = `${process.env.PUBLIC_URL}/image/IOS.JPG`;
     if (process.env.REACT_APP_DEVICE === "WEB") {
       return (
-        <div>
+        <div align="center">
           <BlankArea />
-          <BlankArea />
-          <button className={classes.android} ><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
-          <button disabled><img src={iosImage}  alt="my image" onClick={handleIos} /></button>
+          <Typography className={classes.download}>Download the offical app</Typography>
+          <Grid key="jp1" container align="center">
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <button><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
+            </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <button disabled><img src={iosImage}  alt="my image" onClick={handleIos} /></button>
+            </Grid>
+          </Grid>
         </div>
       )  
     } else {

@@ -36,7 +36,7 @@ import Avatar from "@material-ui/core/Avatar"
 import Card from "components/Card/Card.js";
 import CardAvatar from "components/Card/CardAvatar.js";
 import CardBody from "components/Card/CardBody.js";
-import { BlankArea, NoGroup, JumpButton, DisplayPageHeader, MessageToUser } from 'CustomComponents/CustomComponents.js';
+import { BlankArea, NoGroup, JumpButtonFull, DisplayPageHeader, MessageToUser } from 'CustomComponents/CustomComponents.js';
 import { UserContext } from "../../UserContext";
 import socketIOClient from "socket.io-client";
 import { hasGroup } from 'views/functions';
@@ -739,7 +739,7 @@ export default function Auction() {
             return (
             <div>
                 <BlankArea />
-                <JumpButton page={process.env.REACT_APP_CAPTAIN} text="Next (Captain and ViceCaptain)" />
+                <JumpButtonFull page={process.env.REACT_APP_CAPTAIN} text="Next (Captain)" />
             </div>
             )
         } else

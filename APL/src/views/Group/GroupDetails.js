@@ -43,6 +43,7 @@ import { SettingsPowerSharp } from '@material-ui/icons';
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { getAllPrizeTable, getUserBalance} from "views/functions.js"
 import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { JumpButtonFull } from 'CustomComponents/CustomComponents';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -715,7 +716,7 @@ export default function GroupDetails() {
     return (
       <div>
         <BlankArea />
-        <JumpButton page={process.env.REACT_APP_AUCTION} text="Next (Auction)" />
+        <JumpButtonFull page={process.env.REACT_APP_AUCTION} text="Next (Auction)" />
       </div>
     )
   }

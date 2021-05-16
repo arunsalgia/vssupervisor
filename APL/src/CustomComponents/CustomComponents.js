@@ -50,7 +50,19 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(0, 1, 0),
   },
   jumpButton: {
-    margin: theme.spacing(0, 1, 0),
+    // margin: theme.spacing(0, 1, 0),
+    marginTop: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    backgroundColor: '#FFFFFF',
+    color: '#1A237E',
+    fontWeight: theme.typography.fontWeightBold,
+    fontSize: '16px',
+    width: theme.spacing(20),
+  },
+  jumpButtonFull: {
+    // margin: theme.spacing(0, 1, 0),
+    marginTop: theme.spacing(1),
+    marginRight: theme.spacing(1),
     backgroundColor: '#FFFFFF',
     color: '#1A237E',
     fontWeight: theme.typography.fontWeightBold,
@@ -401,10 +413,28 @@ export function JumpButton(props) {
   return (
     <div align="center">
       {/* <Divider className={classes.divider} /> */}
-      <BlankArea />
+      {/* <BlankArea /> */}
       <Button variant="outlined" size="medium" color="primary"
         disabled={myDisabled}
         className={classes.jumpButton}
+        onClick={() => setTab(props.page) }>
+        {props.text}
+      </Button>
+  </div>
+  )
+}
+
+export function JumpButtonFull(props) {
+  let myDisabled = false;
+  if (props.disabled) myDisabled = props.disabled;
+  const classes = useStyles();
+  return (
+    <div align="center">
+      {/* <Divider className={classes.divider} /> */}
+      {/* <BlankArea /> */}
+      <Button variant="outlined" size="medium" color="primary"
+        disabled={myDisabled}
+        className={classes.jumpButtonFull}
         onClick={() => setTab(props.page) }>
         {props.text}
       </Button>

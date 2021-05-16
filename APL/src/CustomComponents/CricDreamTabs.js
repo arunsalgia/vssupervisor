@@ -28,6 +28,7 @@ import Captain from "views/Captain/Captain"
 import Match from "views/UpcomingMatch/UpcomingMatch"
 import Group from "views/Group/Group"
 import Wallet from "views/Wallet/Wallet.js"
+import PlayerInfo from "views/APL/PlayerInfo";
 // import Profile from "views/Profile/Profile.js"
 import Profile from "views/Profile/UserProfile"
 import ChangePassword from "views/Login/ChangePassword.js"
@@ -67,6 +68,12 @@ const customStyles = {
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+  },
+  noSpacing: { 
+    marginTop: theme.spacing(0),
+    marginBottom: theme.spacing(0),
+    marginLeft: theme.spacing(0),
+    marginRight: theme.spacing(1),
   },
   menuButton: {
     // marginRight: theme.spacing(2),
@@ -259,6 +266,7 @@ export function CricDreamTabs() {
   const handleGroupNew = () => { handleGrpClose(); setMenuValue(1001);}
   const handleGroupJoin = () => { handleGrpClose(); setMenuValue(1002);}
   const handleGroupDetails = () => { handleGrpClose(); setMenuValue(1003);}
+  const handlePlayerInfo = () => { handleGrpClose(); setMenuValue(1004);}
 
   const handleLogout = () => {
     handleClose();
@@ -303,7 +311,8 @@ export function CricDreamTabs() {
       case 1001: return <NewGroup />;
       case 1002: return <JoinGroup />;
       case 1003: return <GroupDetails />;
-      default: return  <div></div>;
+      case 1004: return <PlayerInfo />;
+      default: return  null;
     }
   }
 
@@ -381,7 +390,7 @@ export function CricDreamTabs() {
   return (
     <div className={classes.root}>
       <AppBar position="static">
-        <Toolbar>
+        <Toolbar className={classes.noSpacing}>
           {auth && (
             <div>
               <IconButton

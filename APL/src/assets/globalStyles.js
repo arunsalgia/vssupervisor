@@ -12,6 +12,16 @@ const globalStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
   },
+  form: {
+    width: '100%', // Fix IE 11 issue.
+    marginTop: theme.spacing(1),
+  },
+  paper: {
+    marginTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
   heading: {
     fontSize: theme.typography.pxToRem(15),
     flexBasis: '33.33%',
@@ -20,6 +30,24 @@ const globalStyles = makeStyles((theme) => ({
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
     color: theme.palette.text.secondary,
+  },
+  message14: {
+    fontSize: theme.typography.pxToRem(14),
+    fontWeight: theme.typography.fontWeightBold,
+    // color: yellow[900]
+  },
+  message12: {
+    fontSize: theme.typography.pxToRem(12),
+    fontWeight: theme.typography.fontWeightBold,
+    // color: yellow[900]
+  },
+  message10: {
+    fontSize: theme.typography.pxToRem(10),
+    fontWeight: theme.typography.fontWeightBold,
+    // color: yellow[900]
+  },
+  button: {
+    margin: theme.spacing(0, 1, 0),
   },
   error:  {
     fontSize: '12px',
