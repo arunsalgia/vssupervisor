@@ -43,6 +43,7 @@ import CardFooter from "components/Card/CardFooter.js";
 
 import socketIOClient from "socket.io-client";
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
+import globalStyles from "assets/globalStyles";
 import {hasGroup} from "views/functions.js";
 import { NoGroup, BlankArea } from 'CustomComponents/CustomComponents.js';
 import { blue, orange, deepOrange}  from '@material-ui/core/colors';
@@ -183,6 +184,7 @@ function leavingDashboard(myConn) {
 let first =  true;
 
 export default function Dashboard() {
+  const gClasses = globalStyles();
 
   const [rankArray, setRankArray] = useState([]);
   const [rank, setRank] = useState();
@@ -514,26 +516,23 @@ export default function Dashboard() {
       <Table>
         <TableHead p={0}>
         <TableRow align="center">
-          <TableCell className={dashClasses.th} p={0} align="center">Rank</TableCell>
-          <TableCell className={dashClasses.th} p={0} align="center">Franchise (Owner)</TableCell>
+          <TableCell className={gClasses.th} p={0} align="center">Rank</TableCell>
+          <TableCell className={gClasses.th} p={0} align="center">Franchise (Owner)</TableCell>
           {/* <TableCell className={dashClasses.th} p={0} align="center">Owner</TableCell> */}
-          <TableCell className={dashClasses.th} p={0} align="center">Score</TableCell>      
+          <TableCell className={gClasses.th} p={0} align="center">Score</TableCell>      
         </TableRow>
       </TableHead>
       < TableBody p={0}>
         {rankArray.map(item => {
           return (
             <TableRow key={item.userName}>
-              <TableCell  className={dashClasses.td} p={0} align="center" >
+              <TableCell  className={gClasses.td} p={0} align="center" >
                 {item.rank}
               </TableCell>
-              <TableCell  className={dashClasses.td} p={0} align="center" >
+              <TableCell  className={gClasses.td} p={0} align="center" >
                 {item.displayName+" ("+item.userName+")"}
               </TableCell>
-              {/* <TableCell  className={dashClasses.td} p={0} align="center" >
-                {item.userName}
-              </TableCell> */}
-              <TableCell className={dashClasses.td} p={0} align="center" >
+              <TableCell className={gClasses.td} p={0} align="center" >
                 {item.grandScore}
               </TableCell>
             </TableRow>

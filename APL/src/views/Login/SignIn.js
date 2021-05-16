@@ -18,7 +18,7 @@ import { UserContext } from "../../UserContext";
 import axios from "axios";
 import red from '@material-ui/core/colors/red';
 import { DesktopWindows } from '@material-ui/icons';
-import { cdRefresh, specialSetPos, encrypt, clearBackupData } from "views/functions.js"
+import { cdRefresh, specialSetPos, encrypt, clearBackupData, downloadApk } from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { CricDreamLogo } from 'CustomComponents/CustomComponents.js';
 import { BlankArea } from 'CustomComponents/CustomComponents';
@@ -31,10 +31,14 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     alignItems: 'center',
   },
+  android: {
+    marginRight: theme.spacing(2),
+  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
   },
+
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -133,6 +137,34 @@ export default function SignIn() {
 
   }
   
+  async function handleAndroid() {
+    console.log("Download Android app");
+    await downloadApk();
+    console.log("APK has to be downloaded");
+  }
+
+  function handleIos() {
+    console.log("Download IOS app");
+  }
+
+
+  function DisplayDownload() {
+    let androidImage = `${process.env.PUBLIC_URL}/image/ANDROID.JPG`;
+    let iosImage = `${process.env.PUBLIC_URL}/image/IOS.JPG`;
+    if (process.env.REACT_APP_DEVICE === "WEB") {
+      return (
+        <div>
+          <BlankArea />
+          <BlankArea />
+          <button className={classes.android} ><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
+          <button disabled><img src={iosImage}  alt="my image" onClick={handleIos} /></button>
+        </div>
+      )  
+    } else {
+      return null;
+    }
+  } 
+
   return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -198,6 +230,7 @@ export default function SignIn() {
               Sign Up
           </Button>
           </form>
+          <DisplayDownload />
         </div>
         {/* <Route  path='/admin/emailpassword' component={Reset} key="MemberList"/>
         <Route  path='/admin/register' component={SignUp} key="NewGroup"></Route> */}

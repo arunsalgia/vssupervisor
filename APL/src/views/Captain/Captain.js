@@ -24,6 +24,8 @@ import { hasGroup } from 'views/functions';
 import { red, blue, green, deepOrange, deepPurple } from '@material-ui/core/colors';
 // import { updateLanguageServiceSourceFile } from 'typescript';
 import { BlankArea } from 'CustomComponents/CustomComponents';
+import globalStyles from "assets/globalStyles";
+
 const vcPrefix = "vicecaptain-"
 const cPrefix = "captain-"
 
@@ -95,11 +97,13 @@ const useStyles = makeStyles((theme) => ({
 
 
 
+
 export default function Captain() {
+    const classes = useStyles();
+    const gClasses = globalStyles();
 
     window.onbeforeunload = () => setUser("")
     // const { setUser } = useContext(UserContext);
-    const classes = useStyles();
     const [selectedViceCaptain, SetSelectedViceCaptain] = useState("");
     const [selectedCaptain, SetSelectedCaptain] = useState("");
     const [myTeamTableData, setMyTeamTableData] = useState([]);
@@ -181,13 +185,12 @@ export default function Captain() {
             break;
           case 0:
             myMsg = "";
-            errmsg = false;
             break;
           default:
             myMsg = "Error updating Captain / ViceCaptain details";
             break;
         }
-        let myClass = (errmsg) ? classes.error : classes.root;
+        let myClass = (errmsg) ? gClasses.error : gClasses.nonerror;
         return(
           <div>
             <Typography align="center" className={myClass}>{myMsg}</Typography>
@@ -284,20 +287,20 @@ export default function Captain() {
         return(
             <Table>
             <TableHead p={0}>
-                <TableRow align="center">
-                <TableCell className={classes.th} p={0} align="center">Player Name</TableCell>
-                <TableCell className={classes.th} p={0} align="center">Captain</TableCell>
-                <TableCell className={classes.th} p={0} align="center">Vice Captain</TableCell>
+                <TableRow key="header" align="center">
+                <TableCell className={gClasses.th} p={0} align="center">Player Name</TableCell>
+                <TableCell className={gClasses.th} p={0} align="center">Captain</TableCell>
+                <TableCell className={gClasses.th} p={0} align="center">Vice Captain</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody p={0}>
                 {myTeamTableData.map(x => {
                 return (
                     <TableRow key={x.playerName} align="center">
-                    <TableCell  className={classes.td} p={0} align="center" >
+                    <TableCell  className={gClasses.td} p={0} align="center" >
                         {x.playerName}
                     </TableCell>
-                    <TableCell  className={classes.td} p={0} align="center" >
+                    <TableCell  className={gClasses.td} p={0} align="center" >
                         <FormControlLabel
                             key={cPrefix+x.playerName}
                             id={cPrefix+x.playerName}
@@ -309,7 +312,7 @@ export default function Captain() {
                             disabled={tournamentStated}
                         />
                     </TableCell>
-                    <TableCell className={classes.td} p={0} align="center" >
+                    <TableCell className={gClasses.td} p={0} align="center" >
                         <FormControlLabel
                             key={vcPrefix+x.playerName}
                             id={vcPrefix+x.playerName}

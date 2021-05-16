@@ -34,6 +34,7 @@ import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import IconButton from '@material-ui/core/IconButton';
 import Modal from 'react-modal';
+import modalStyles from 'assets/modalStyles';
 
 
 // import NEWTOURNAMENTIMAGE from `${process.env.PUBLIC_URL}/NEWTOURNAMENT.JPG`;
@@ -45,18 +46,18 @@ const cardStyles = {
   }
 };
 
-const customStyles = {
-  content : {
-    top                   : '50%',
-    left                  : '50%',
-    right                 : 'auto',
-    bottom                : 'auto',
-    marginRight           : '-50%',
-    transform             : 'translate(-50%, -50%)',
-    backgroundColor       : '#000000',
-    color                 : '#FFFFFF',
-  }
-};
+// const customStyles = {
+//   content : {
+//     top                   : '50%',
+//     left                  : '50%',
+//     right                 : 'auto',
+//     bottom                : 'auto',
+//     marginRight           : '-50%',
+//     transform             : 'translate(-50%, -50%)',
+//     backgroundColor       : '#000000',
+//     color                 : '#FFFFFF',
+//   }
+// };
 
 
 const useStyles = makeStyles((theme) => ({
@@ -505,7 +506,7 @@ export default function Home() {
             isOpen={modalIsOpen}
             onAfterOpen={afterOpenModal}
             onRequestClose={closeModal}
-            style={customStyles}
+            style={modalStyles}
             contentLabel="Example Modal"
             ariaHideApp={false}
           >

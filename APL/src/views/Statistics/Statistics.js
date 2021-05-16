@@ -20,6 +20,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
+import globalStyles from "assets/globalStyles";
+import modalStyles from "assets/modalStyles";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import TextField from '@material-ui/core/TextField';
 import { InputAdornment } from '@material-ui/core';
@@ -32,6 +34,7 @@ import axios from "axios";
 import Button from '@material-ui/core/Button';
 import Modal from 'react-modal';
 import Checkbox from '@material-ui/core/Checkbox';
+import BlueCheckbox from "components/CheckBox/BlueCheckBox";
 // import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 // import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -46,20 +49,20 @@ import { NoGroup, DisplayPageHeader,
 } from 'CustomComponents/CustomComponents.js';
 // import {socketPoint} from "views/functions.js";
 
-const modalStyles = {
-  content : {
-    top                   : '50%',
-    left                  : '50%',
-    right                 : 'auto',
-    bottom                : 'auto',
-    marginRight           : '-50%',
-    marginBottom          : '-50%',
-    transform             : 'translate(-50%, -50%)',
-    background            : '#000000',
-    color                 : '#FFFFFF',
-    transparent           : false,   
-  }
-};
+// const modalStyles = {
+//   content : {
+//     top                   : '50%',
+//     left                  : '50%',
+//     right                 : 'auto',
+//     bottom                : 'auto',
+//     marginRight           : '-50%',
+//     marginBottom          : '-50%',
+//     transform             : 'translate(-50%, -50%)',
+//     background            : '#000000',
+//     color                 : '#FFFFFF',
+//     transparent           : false,   
+//   }
+// };
 
 const dashStyles = makeStyles(styles);
 
@@ -112,46 +115,17 @@ const useStyles = makeStyles((theme) => ({
     // color: theme.palette.getContrastText(deepOrange[500]),
     // fontWeight: theme.typography.fontWeightBold,
   },
-  modalContainer: {
-    content: "",
-    opacity: 0.8,
-    // background: rgb(26, 31, 41) url("your picture") no-repeat fixed top;
-    // background-blend-mode: luminosity;
-    /* also change the blend mode to what suits you, from darken, to other 
-    many options as you deem fit*/
-    // background-size: cover;
-    // top: 0;
-    // left: 0;
-    // right: 0;
-    // bottom: 0;
-    // position: absolute;
-    // z-index: -1;
-    // height: 500px;
-  },
-  modalTitle: {
-    color: blue[700],
-    fontSize: theme.typography.pxToRem(20),
-    fontWeight: theme.typography.fontWeightBold,
-  },
-  modalMessage: {
-    //color: blue[700],
-    fontSize: theme.typography.pxToRem(14),
-    //fontWeight: theme.typography.fontWeightBold,
-  },
-  modalbutton: {
-    margin: theme.spacing(2, 2, 2),
-  },
 })); 
   
-const BlueCheckbox = withStyles({
-  root: {
-    color: blue[700],
-    '&$checked': {
-      color: blue[700],
-    },
-  },
-  checked: {},
-})((props) => <Checkbox color="default" {...props} />);
+// const BlueCheckbox = withStyles({
+//   root: {
+//     color: blue[700],
+//     '&$checked': {
+//       color: blue[700],
+//     },
+//   },
+//   checked: {},
+// })((props) => <Checkbox color="default" {...props} />);
 
 function leavingStatistics(myConn) {
   console.log("Leaving Statistics wah wah ");
@@ -162,6 +136,8 @@ let first = true;
 export default function Stats() { 
   const classes = useStyles();
   const dashClasses = dashStyles();
+  const gClasses = globalStyles();
+
 
   const [teamArray, setTeamArray] = useState([]);
   const [iplovers, setIPLOvers] = useState(0);
@@ -514,18 +490,18 @@ export default function Stats() {
       <Table>
         <TableHead>
           <TableRow align="center">
-            <TableCell className={classes.th} align="center">Player Name</TableCell>
-            <TableCell className={classes.th} align="center">Score</TableCell>      
+            <TableCell className={gClasses.th} align="center">Player Name</TableCell>
+            <TableCell className={gClasses.th} align="center">Score</TableCell>      
           </TableRow>
         </TableHead>
         <TableBody>
           {props.franchisee.map(item => {
             return (
               <TableRow key={item.playerName}>
-                <TableCell  className={classes.td} align="center" >
+                <TableCell  className={gClasses.td} align="center" >
                   {item.playerName}
                 </TableCell>
-                <TableCell className={classes.td} align="center" >
+                <TableCell className={gClasses.td} align="center" >
                   {item.playerScore}
                 </TableCell>
               </TableRow>
@@ -586,18 +562,18 @@ export default function Stats() {
   function ShowGuide() {
     return (
     <form>
-      <Typography id="modalTitle" className={classes.modalTitle} align="center">{currentGuide.guideTitle}</Typography>
+      <Typography id="modalTitle" className={gClasses.modalTitle} align="center">{currentGuide.guideTitle}</Typography>
       <BlankArea />
-      <p align="center" className={classes.modalMessage}>{currentGuide.guideText}</p>
+      <p align="center" className={gClasses.modalMessage}>{currentGuide.guideText}</p>
       <BlankArea />
       <div align="center" >
         <Button key="prevGuide" variant="contained" color="primary" size="small"
           disabled={currentGuide.guideNumber === 1}
-          className={classes.modalbutton} onClick={handlePrevGuide}>Prev
+          className={gClasses.modalbutton} onClick={handlePrevGuide}>Prev
         </Button>
         <Button key="nextGuide" variant="contained" color="primary" size="small"
           disabled={currentGuide.guideNumber === maxGuide}        
-          className={classes.modalbutton} onClick={handleNextGuide}>Next
+          className={gClasses.modalbutton} onClick={handleNextGuide}>Next
       </Button>
       <BlankArea />
       <FormControlLabel
@@ -631,6 +607,7 @@ export default function Stats() {
           contentLabel="Example Modal"
           aria-labelledby="modalTitle"
           aria-describedby="modalDescription"
+          ariaHideApp={false}
         >
           <ShowGuide />
         </Modal>
