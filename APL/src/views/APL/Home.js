@@ -497,7 +497,7 @@ export default function Home() {
             <JumpButton page={process.env.REACT_APP_GROUPDETAILS} disabled={noGroup} text="GroupDetails" />
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_PLAYERINFO} disabled={true} text="Player Info" />
+            <JumpButton page={process.env.REACT_APP_PLAYERINFO} disabled={false} text="Player Info" />
           </Grid>
           </Grid>
         </div>
