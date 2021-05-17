@@ -375,8 +375,7 @@ export default function PlayerInfo() {
     return (
     <div className={classes.playerInfo} key="playerInfo">
       <BlankArea />
-      <h3>-</h3>
-      <h3>-</h3>
+      <h3 align="center">Player {currPlayer}</h3>
       <Card className={classes.playerInfo} profile>                    
         <CardAvatar profile>
           <img src={playerImage} alt="..." />
