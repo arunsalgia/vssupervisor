@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.secondary.main,
   },
   playerInfo: {
-    marginTop: theme.spacing(3),
+    marginTop: theme.spacing(8),
   },
   value: {
     marginTop: theme.spacing(0),
@@ -296,8 +296,8 @@ export default function PlayerInfo() {
           <TableCell align="center" className={classes.th}>Runs</TableCell>
           <TableCell align="center" className={classes.th}>100</TableCell>
           <TableCell align="center" className={classes.th}>50</TableCell>
-          <TableCell align="center" className={classes.th}>6</TableCell>
-          <TableCell align="center" className={classes.th}>4</TableCell>
+          {/* <TableCell align="center" className={classes.th}>6</TableCell>
+          <TableCell align="center" className={classes.th}>4</TableCell> */}
           <TableCell align="center" className={classes.th}>Ave</TableCell>
           <TableCell align="center" className={classes.th}>SR</TableCell>
         </TableRow>
@@ -312,8 +312,8 @@ export default function PlayerInfo() {
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data.Runs}</Typography></TableCell>
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["100"]}</Typography></TableCell>
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["50"]}</Typography></TableCell>
-            <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["6s"]}</Typography></TableCell>
-            <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["4s"]}</Typography></TableCell>
+            {/* <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["6s"]}</Typography></TableCell>
+            <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["4s"]}</Typography></TableCell> */}
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["Ave"]}</Typography></TableCell>
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["SR"]}</Typography></TableCell>
             </TableRow>
@@ -337,9 +337,9 @@ export default function PlayerInfo() {
           <TableCell align="center" className={classes.th}>Type</TableCell>
           <TableCell align="center" className={classes.th}>Match</TableCell>
           <TableCell align="center" className={classes.th}>Wickets</TableCell>
-          <TableCell align="center" className={classes.th}>10W</TableCell>
-          <TableCell align="center" className={classes.th}>5W</TableCell>
-          <TableCell align="center" className={classes.th}>4W</TableCell>
+          {/* <TableCell align="center" className={classes.th}>10W</TableCell> */}
+          {/* <TableCell align="center" className={classes.th}>5W</TableCell> */}
+          {/* <TableCell align="center" className={classes.th}>4W</TableCell> */}
           <TableCell align="center" className={classes.th}>Econ</TableCell>
           <TableCell align="center" className={classes.th}>Ave</TableCell>
           <TableCell align="center" className={classes.th}>SR</TableCell>
@@ -353,9 +353,9 @@ export default function PlayerInfo() {
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.type}</Typography></TableCell>
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data.Mat}</Typography></TableCell>
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data.Wkts}</Typography></TableCell>
-            <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["10"]}</Typography></TableCell>
-            <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["5w"]}</Typography></TableCell>
-            <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["4w"]}</Typography></TableCell>
+            {/* <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["10"]}</Typography></TableCell> */}
+            {/* <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["5w"]}</Typography></TableCell> */}
+            {/* <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["4w"]}</Typography></TableCell> */}
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["Econ"]}</Typography></TableCell>
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["Ave"]}</Typography></TableCell>
             <TableCell align="center" className={classes.td}><Typography className={classes.value}>{row.data["SR"]}</Typography></TableCell>
@@ -375,6 +375,8 @@ export default function PlayerInfo() {
     return (
     <div className={classes.playerInfo} key="playerInfo">
       <BlankArea />
+      <h3>-</h3>
+      <h3>-</h3>
       <Card className={classes.playerInfo} profile>                    
         <CardAvatar profile>
           <img src={playerImage} alt="..." />
