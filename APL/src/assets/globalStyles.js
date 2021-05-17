@@ -175,6 +175,34 @@ const globalStyles = makeStyles((theme) => ({
   modalbutton: {
     margin: theme.spacing(2, 2, 2),
   },
+  jumpButton: {
+    // margin: theme.spacing(0, 1, 0),
+    marginTop: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    backgroundColor: '#FFFFFF',
+    color: '#1A237E',
+    fontWeight: theme.typography.fontWeightBold,
+    fontSize: '16px',
+    width: theme.spacing(20),
+  },
+  jumpButtonFull: {
+    // margin: theme.spacing(0, 1, 0),
+    marginTop: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    backgroundColor: '#FFFFFF',
+    color: '#1A237E',
+    fontWeight: theme.typography.fontWeightBold,
+    fontSize: '16px',
+    width: theme.spacing(40),
+  },
+  noSpace: {
+    // margin: theme.spacing(0, 1, 0),
+    marginTop: theme.spacing(0),
+    marginRight: theme.spacing(0),
+    marginBottom: theme.spacing(0),
+    marginLeft: theme.spacing(0),
+  },
+
 }));
 
 export default globalStyles;
