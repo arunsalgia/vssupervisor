@@ -457,7 +457,7 @@ export default function Home() {
       } else {
         return (
           <div align="center">
-          <Typography className={classes.withTopSpacing} component="h1" variant="h5">Current group</Typography>
+          <Typography className={classes.withTopSpacing} component="h1" variant="h5">Current Group</Typography>
           <Typography className={classes.groupName}>{localStorage.getItem("groupName")}</Typography>
           </div>
         )
@@ -498,6 +498,14 @@ export default function Home() {
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} >
             <JumpButton page={process.env.REACT_APP_PLAYERINFO} disabled={false} text="Player Info" />
+          </Grid>
+          </Grid>
+          <Grid key="jp5" container >
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_AUCTION} disabled={noGroup} text="Auction" />
+            </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_MATCH} disabled={noGroup} text="Match" />
           </Grid>
           </Grid>
         </div>
@@ -566,7 +574,7 @@ export default function Home() {
       {/* <BlankArea/> */}
       <ShowJumpButtons />
       {/* <BlankArea/> */}
-      <Typography className={classes.withTopSpacing} component="h1" variant="h5">My groups</Typography>
+      <Typography className={classes.withTopSpacing} component="h1" variant="h5">My Groups</Typography>
       <ShowGroupCards/>
       {/* <BlankArea /> */}
       <DisplayUpgrade/>

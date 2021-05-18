@@ -10,6 +10,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { makeStyles } from '@material-ui/core/styles';
+import globalStyles from 'assets/globalStyles';
 import GridItem from "components/Grid/GridItem.js";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -17,7 +18,7 @@ import Avatar from "@material-ui/core/Avatar";
 import Paper from "@material-ui/core/Paper";
 import Typography from '@material-ui/core/Typography';
 import {red, blue, deepOrange} from '@material-ui/core/colors';
-import { NothingToDisplay, NoGroup, DisplayPageHeader } from 'CustomComponents/CustomComponents.js';
+import { BlankArea, NothingToDisplay, NoGroup, DisplayPageHeader, JumpButton } from 'CustomComponents/CustomComponents.js';
 import {hasGroup} from 'views/functions'
 
 const drawerWidth = 100;
@@ -111,6 +112,8 @@ export default function MatchInfo() {
     // const { user } = useContext(UserContext);
 
     const classes = useStyles(); 
+    const gClasses = globalStyles();
+
     const [currentArray, setCurrentArray] = useState([]);
     const [upcomingArray, setUpcomingArray] = useState([]);
 
@@ -188,18 +191,18 @@ export default function MatchInfo() {
             <Table>
             <TableHead p={0}>
                 <TableRow align="center">
-                <TableCell className={classes.th} p={0} align="center">Teams</TableCell>
-                <TableCell className={classes.th} p={0} align="center">Time</TableCell>
+                <TableCell className={gClasses.th} p={0} align="center">Teams</TableCell>
+                <TableCell className={gClasses.th} p={0} align="center">Time</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody p={0}>
                 {props.myTable.map(x => {
                     return (
                         <TableRow key={x.matchTime} align="center">
-                        <TableCell  className={classes.td} p={0} align="center" >
+                        <TableCell  className={gClasses.td} p={0} align="center" >
                             {x.team1 + " Vs. " + x.team2}
                         </TableCell>
-                        <TableCell  className={classes.td} p={0} align="center" >
+                        <TableCell  className={gClasses.td} p={0} align="center" >
                             {x.matchTime}
                         </TableCell>
                         </TableRow>
@@ -212,15 +215,12 @@ export default function MatchInfo() {
             return <NothingToDisplay />
     }
 
-    /***
-
-     */
     function ShowCurrentMatch() {
         var myHeader = "Match running just now";    // : "Currently No Matches running";
         return(
             <Card profile>
             <CardBody profile>
-                <h4 className={classes.cardTitle}>{myHeader}</h4>
+                <h4 className={gClasses.cardTitle}>{myHeader}</h4>
                 <MatchTable myTable={currentArray}/>
             </CardBody>
             </Card>
@@ -232,11 +232,20 @@ export default function MatchInfo() {
         return(
             <Card profile>
             <CardBody profile>
-                <h4 className={classes.cardTitle}>{myHeader}</h4>
+                <h4 className={gClasses.cardTitle}>{myHeader}</h4>
                 <MatchTable myTable={upcomingArray}/>
             </CardBody>
             </Card>
         );
+    }
+
+    function ShowJumpButtons() {
+        return (
+        <div>
+            <BlankArea />
+            <JumpButton page={process.env.REACT_APP_HOME} text="Home" />
+        </div>
+        )
     }
 
     if (localStorage.getItem("tournament").length > 0)
@@ -245,6 +254,7 @@ export default function MatchInfo() {
             <DisplayPageHeader headerName="Matches" groupName={localStorage.getItem("groupName")} tournament={localStorage.getItem("tournament")}/>
             <ShowCurrentMatch/>
             <ShowUpcomingMatch/>
+            <ShowJumpButtons />
             </div>
         );
     else

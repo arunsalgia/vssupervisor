@@ -41,10 +41,13 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.secondary.main,
   },
   download: {
-    fontSize: theme.typography.pxToRem(16),
+    fontSize: theme.typography.pxToRem(18),
     fontWeight: theme.typography.fontWeightBold,
     // color: yellow[900]
   },
+  downloadButon: {
+  },
+
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -155,97 +158,96 @@ export default function SignIn() {
 
 
   function DisplayDownload() {
+    if (process.env.REACT_APP_DEVICE !== "WEB") return null;
+
     let androidImage = `${process.env.PUBLIC_URL}/image/ANDROID.JPG`;
     let iosImage = `${process.env.PUBLIC_URL}/image/IOS.JPG`;
-    if (process.env.REACT_APP_DEVICE === "WEB") {
-      return (
-        <div align="center">
-          <BlankArea />
-          <Typography className={classes.download}>Download the offical app</Typography>
-          <Grid key="jp1" container align="center">
-            <Grid item xs={6} sm={6} md={6} lg={6} >
-            <button><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
-            </Grid>
-            <Grid item xs={6} sm={6} md={6} lg={6} >
-            <button disabled><img src={iosImage}  alt="my image" onClick={handleIos} /></button>
-            </Grid>
-          </Grid>
-        </div>
-      )  
-    } else {
-      return null;
-    }
+    return (
+      <div align="center">
+      <Typography className={classes.download}>Download the offical app</Typography>
+      <BlankArea />
+      <Grid key="jp1" container align="center">
+        <Grid item className={classes.downloadButon} xs={6} sm={6} md={6} lg={6} >
+        <button><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
+        </Grid>
+        <Grid item className={classes.downloadButon} xs={6} sm={6} md={6} lg={6} >
+        <button disabled><img src={iosImage}  alt="my image" onClick={handleIos} /></button>
+        </Grid>
+      </Grid>
+      </div>
+    )  
   } 
 
   return (
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          <CricDreamLogo />        
-          <Typography component="h1" variant="h5">Sign in</Typography>
-          <form className={classes.form} onSubmit={handleSubmit} noValidate>
-            <TextField
-              autoComplete="fname"
-              name="userName"
-              variant="outlined"
-              required
-              fullWidth
-              id="userName"
-              label="User Name"
-              autoFocus
-              onChange={(event) => setUserName(event.target.value)}
-            />
-            <h3></h3>
-            <TextField
-              variant="outlined"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              onChange={(event) => setPassword(event.target.value)}
-            />
-            <div>
-            <Typography className={classes.error} align="left">{errorMessage}</Typography>
-            <Typography className={classes.root}>
-              <Link href="#" onClick={handleForgot} variant="body2">
-              Forgot password
-            </Link>
-          </Typography>
-            </div>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-              onClick={handleClick}
-            >
-              Sign In
-          </Button>
-          {/* <Typography className={classes.root}>
-              <Link href="#" onClick={handleRegister} variant="body2">
-              Register
-            </Link>
-          </Typography> */}
-            {/* <BlankArea /> */}
-            <Button
-              //type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              //className={classes.submit}
-              onClick={handleRegister}
-            >
-              Sign Up
-          </Button>
-          </form>
-          <DisplayDownload />
-        </div>
-        {/* <Route  path='/admin/emailpassword' component={Reset} key="MemberList"/>
-        <Route  path='/admin/register' component={SignUp} key="NewGroup"></Route> */}
-      </Container>
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <CricDreamLogo />        
+        <Typography component="h1" variant="h5">Sign in</Typography>
+        <form className={classes.form} onSubmit={handleSubmit} noValidate>
+          <TextField
+            autoComplete="fname"
+            name="userName"
+            variant="outlined"
+            required
+            fullWidth
+            id="userName"
+            label="User Name"
+            autoFocus
+            onChange={(event) => setUserName(event.target.value)}
+          />
+          <h3></h3>
+          <TextField
+            variant="outlined"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          <div>
+          <Typography className={classes.error} align="left">{errorMessage}</Typography>
+          <Typography className={classes.root}>
+            <Link href="#" onClick={handleForgot} variant="body2">
+            Forgot password
+          </Link>
+        </Typography>
+          </div>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+            onClick={handleClick}
+          >
+            Sign In
+        </Button>
+        {/* <Typography className={classes.root}>
+            <Link href="#" onClick={handleRegister} variant="body2">
+            Register
+          </Link>
+        </Typography> */}
+          {/* <BlankArea /> */}
+          <Button
+            //type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            //className={classes.submit}
+            onClick={handleRegister}
+          >
+            Sign Up
+        </Button>
+        </form>
+        <BlankArea />
+        <DisplayDownload />
+      </div>
+      {/* <Route  path='/admin/emailpassword' component={Reset} key="MemberList"/>
+      <Route  path='/admin/register' component={SignUp} key="NewGroup"></Route> */}
+    </Container>
   );
 }

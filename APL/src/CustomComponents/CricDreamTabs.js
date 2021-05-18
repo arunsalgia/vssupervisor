@@ -285,7 +285,7 @@ export function CricDreamTabs() {
         <Divider />
         </div>)
     } else {
-      return (<div></div>)
+      return null;
     }
   }
 
@@ -419,10 +419,10 @@ export function CricDreamTabs() {
               >
                 <MenuItem onClick={handleProfile}>Profile</MenuItem>
                 <Divider/>
-                <MenuItem onClick={handleAuction}>Auction</MenuItem>
+                {/* <MenuItem onClick={handleAuction}>Auction</MenuItem>
                 <MenuItem onClick={handleGroupDetails}>Group Details</MenuItem>
                 <MenuItem onClick={handleMatch}>Match</MenuItem>
-                {/* <MenuItem onClick={handleGroup}>Group</MenuItem> */}
+                <MenuItem onClick={handleGroup}>Group</MenuItem> */}
                 {/* <MenuItem onClick={handleGroupJoin}>Join Group</MenuItem>
                 <MenuItem onClick={handleGroupNew}>New Group</MenuItem>
                 <Divider /> */}
