@@ -567,13 +567,13 @@ export default function Home() {
    
     return (
     <div className={classes.root} key="uctournament" align="center">
-      {/* <BlankArea/> */}
+      <BlankArea/>
       <DisplayPageHeader headerName="Upcoming Tournament" groupName="" tournament=""/>
       {/* <BlankArea/> */}
       <ShowTournamentCards/>
       {/* <BlankArea/> */}
       <ShowJumpButtons />
-      {/* <BlankArea/> */}
+      <BlankArea/>
       <Typography className={classes.withTopSpacing} component="h1" variant="h5">My Groups</Typography>
       <ShowGroupCards/>
       {/* <BlankArea /> */}

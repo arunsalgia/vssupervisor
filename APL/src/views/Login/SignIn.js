@@ -167,12 +167,12 @@ export default function SignIn() {
       <Typography className={classes.download}>Download the offical app</Typography>
       <BlankArea />
       <Grid key="jp1" container align="center">
-        <Grid item className={classes.downloadButon} xs={6} sm={6} md={6} lg={6} >
+        <Grid item className={classes.downloadButon} xs={12} sm={12} md={12} lg={12} >
         <button><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
         </Grid>
-        <Grid item className={classes.downloadButon} xs={6} sm={6} md={6} lg={6} >
+        {/* <Grid item className={classes.downloadButon} xs={6} sm={6} md={6} lg={6} >
         <button disabled><img src={iosImage}  alt="my image" onClick={handleIos} /></button>
-        </Grid>
+        </Grid> */}
       </Grid>
       </div>
     )  
