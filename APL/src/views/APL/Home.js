@@ -162,8 +162,8 @@ export default function Home() {
         //   setCurrentTournament(0);
         // }
       }
-      const getTournamentList = async () => {
-        let myURl = `${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`;
+      const getTournamentList = () => {
+        let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`;
         axios.get(myUrl).then((response) => {
           setTournamentList(response.data);
         }).catch((error) => {
@@ -171,7 +171,7 @@ export default function Home() {
           console.log(error);
         })        
       }
-      const getGroups = async () => {
+      const getGroups = () => {
 
         if (!hasGroup()) return;
 
@@ -199,7 +199,7 @@ export default function Home() {
         })        
       }
 
-      if (hasGroup()) setDefaultGroup(parseInt(localStorage.getItem("groupName")));
+      if (hasGroup()) setDefaultGroup(localStorage.getItem("groupName"));
       getTournamentList();
       getGroups();
       checkVersion();
