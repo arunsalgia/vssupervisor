@@ -46,19 +46,6 @@ const cardStyles = {
   }
 };
 
-// const customStyles = {
-//   content : {
-//     top                   : '50%',
-//     left                  : '50%',
-//     right                 : 'auto',
-//     bottom                : 'auto',
-//     marginRight           : '-50%',
-//     transform             : 'translate(-50%, -50%)',
-//     backgroundColor       : '#000000',
-//     color                 : '#FFFFFF',
-//   }
-// };
-
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -155,7 +142,7 @@ export default function Home() {
     const [latestApk, setLatestApk] = React.useState(null);
 
     const [userGroup, setUserGroup] = React.useState([]);
-    const [noGroup, setNoGroup] = React.useState(true);
+    const [defaultGroup, setDefaultGroup] = React.useState("");
     const [currentGroup, setCurrentGroup] = useState(0);
 
     useEffect(() => {
@@ -168,14 +155,23 @@ export default function Home() {
         setUpgrade(upg.status);
         if (upg.status) setIsOpen(true);
       }
-      const a = async () => {
+      const origgetTournamentList = async () => {
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`); 
         setTournamentList(response.data);
-        if (response.data.length > 0) {
-          setCurrentTournament(0);
-        }
+        // if (response.data.length > 0) {
+        //   setCurrentTournament(0);
+        // }
       }
-      const getGroups = async () => {
+      const getTournamentList = () => {
+        let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`;
+        axios.get(myUrl).then((response) => {
+          setTournamentList(response.data);
+        }).catch((error) => {
+          console.log('Tournamnet fetch Not good man :(');
+          console.log(error);
+        })        
+      }
+      const getGroups = () => {
 
         if (!hasGroup()) return;
 
@@ -192,16 +188,19 @@ export default function Home() {
               localStorage.setItem("tournament", tmp.tournament);
               localStorage.setItem("admin", tmp.admin);
               clearBackupData();
+              setDefaultGroup(tmp.groupName);
             }
           }
           setUserGroup(allGroups);
-          setNoGroup(false);
+          // setDefaultGroup(localStorage,getItem("groupName"));
         }).catch((error) => {
-          console.log('Not good man :(');
+          console.log('Group Not good man :(');
           console.log(error);
         })        
       }
-      a();
+
+      if (hasGroup()) setDefaultGroup(localStorage.getItem("groupName"));
+      getTournamentList();
       getGroups();
       checkVersion();
     }, [])
@@ -394,7 +393,7 @@ export default function Home() {
     }
 
     function ShowGroupCards() {
-      if (noGroup) return null;
+      if (userGroup.length === 0) return null;
 
       let tmp = userGroup[currentGroup];
       return (
@@ -448,7 +447,7 @@ export default function Home() {
     }
 
     function ShowCurrentGroup() {
-      if (noGroup) {
+      if (defaultGroup === "") {
         return (
           <div align='center'>
           <Typography className={classes.withTopSpacing} component="h1" variant="h5">Create new Group from Upcoming tournament</Typography>
@@ -457,8 +456,8 @@ export default function Home() {
       } else {
         return (
           <div align="center">
-          <Typography className={classes.withTopSpacing} component="h1" variant="h5">Current group</Typography>
-          <Typography className={classes.groupName}>{localStorage.getItem("groupName")}</Typography>
+          <Typography className={classes.withTopSpacing} component="h1" variant="h5">Current Group</Typography>
+          <Typography className={classes.groupName}>{defaultGroup}</Typography>
           </div>
         )
       }
@@ -478,26 +477,34 @@ export default function Home() {
           <ShowCurrentGroup />
           <Grid key="jp2" container >
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_DASHBOARD} disabled={noGroup} text="DashBoard" />
+            <JumpButton page={process.env.REACT_APP_DASHBOARD} disabled={userGroup.length === 0} text="DashBoard" />
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_STAT} disabled={noGroup} text="Statistics" />
+            <JumpButton page={process.env.REACT_APP_STAT} disabled={userGroup.length === 0} text="Statistics" />
             </Grid>
           </Grid>
           <Grid key="jp3" container >
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_CAPTAIN} disabled={noGroup} text="Captain" />
+            <JumpButton page={process.env.REACT_APP_CAPTAIN} disabled={userGroup.length === 0} text="Captain" />
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_TEAM} disabled={noGroup} text="My Team" />
+            <JumpButton page={process.env.REACT_APP_TEAM} disabled={userGroup.length === 0} text="My Team" />
             </Grid>
           </Grid>
           <Grid key="jp4" container >
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_GROUPDETAILS} disabled={noGroup} text="GroupDetails" />
+            <JumpButton page={process.env.REACT_APP_GROUPDETAILS} disabled={userGroup.length === 0} text="GroupDetails" />
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} >
             <JumpButton page={process.env.REACT_APP_PLAYERINFO} disabled={false} text="Player Info" />
+          </Grid>
+          </Grid>
+          <Grid key="jp5" container >
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_AUCTION} disabled={userGroup.length === 0} text="Auction" />
+            </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} >
+            <JumpButton page={process.env.REACT_APP_MATCH} disabled={userGroup.length === 0} text="Match" />
           </Grid>
           </Grid>
         </div>
@@ -559,14 +566,14 @@ export default function Home() {
    
     return (
     <div className={classes.root} key="uctournament" align="center">
-      {/* <BlankArea/> */}
+      <BlankArea/>
       <DisplayPageHeader headerName="Upcoming Tournament" groupName="" tournament=""/>
       {/* <BlankArea/> */}
       <ShowTournamentCards/>
       {/* <BlankArea/> */}
       <ShowJumpButtons />
-      {/* <BlankArea/> */}
-      <Typography className={classes.withTopSpacing} component="h1" variant="h5">My groups</Typography>
+      <BlankArea/>
+      <Typography className={classes.withTopSpacing} component="h1" variant="h5">My Groups</Typography>
       <ShowGroupCards/>
       {/* <BlankArea /> */}
       <DisplayUpgrade/>

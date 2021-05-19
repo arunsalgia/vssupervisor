@@ -16,6 +16,8 @@ const globalStyles = makeStyles((theme) => ({
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
   },
+  page: {
+  },
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',

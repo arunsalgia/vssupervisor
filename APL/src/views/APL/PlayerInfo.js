@@ -330,7 +330,7 @@ export default function PlayerInfo() {
     // console.log(battingStats);
     return (
       <div align="center">
-        <Typography>Bowliing Stats</Typography>
+        <Typography>Bowling Stats</Typography>
         <Table>
         <TableHead p={0}>
         <TableRow key="bowlingheader" align="center">
