@@ -18,7 +18,7 @@ import Container from '@material-ui/core/Container';
 import { useHistory } from "react-router-dom";
 import { UserContext } from "../../UserContext";
 import axios from "axios";
-import red from '@material-ui/core/colors/red';
+import {red, green, blue } from '@material-ui/core/colors';
 import { DesktopWindows } from '@material-ui/icons';
 import { cdRefresh, specialSetPos, encrypt, clearBackupData, downloadApk } from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
@@ -47,7 +47,6 @@ const useStyles = makeStyles((theme) => ({
   },
   downloadButon: {
   },
-
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -63,6 +62,14 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
       marginTop: '0px',
   },
+  error:  {
+    // right: 0,
+    fontSize: '12px',
+    color: blue[700],
+    // position: 'absolute',
+    alignItems: 'center',
+    marginTop: '0px',
+},
 }));
 
 const handleSubmit = e => {
@@ -71,13 +78,15 @@ const handleSubmit = e => {
 
 export default function SignIn() {
   const classes = useStyles();
+  const gClasses = globalStyles();
   const history = useHistory();
   const [userName, setUserName] = useState();
   const [password, setPassword] = useState();
   // const [showPage, setShowPage] = useState(true);
   // const [open, setOpen] = useState(true)
   // const { setUser } = useContext(UserContext);
-  const [ errorMessage, setErrorMessage ] = useState("");
+  const [ errorMessage, setErrorMessage ] = useState({msg: "", isError: false });
+  // const [errorFound, setErrorFound] = useState(false);
 
   useEffect(() => {
     if (window.localStorage.getItem("logout")) {
@@ -90,6 +99,10 @@ export default function SignIn() {
       // setShowPage(true)
     }
   });
+
+  function setError(msg, isError) {
+    setErrorMessage({msg: msg, isError: isError});
+  }
 
   function handleForgot() {
     //console.log("Call forgot password here")
@@ -110,9 +123,9 @@ export default function SignIn() {
     try { 
       let enPassword = encrypt(password);
       response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/criclogin/${userName}/${enPassword}`); 
-      setErrorMessage("");
+      setError("", false);
     } catch (err) {
-      setErrorMessage("Invalid Username / Password");
+      setError("Invalid Username / Password", true);
     }
     // console.log("Signinresponse", response.data);
     if (response.status === 200) {
@@ -133,8 +146,8 @@ export default function SignIn() {
       window.localStorage.setItem("userPlan", userPlan);
       window.localStorage.setItem("SNG", "");
       window.localStorage.setItem("cGroup", "");
+      clearBackupData();
 
-      // clearBackupData();
       // setUser({ uid: myUID, admin: response.data.admin });
       // cdRefresh(true);
       //let newPos = specialSetPos();
@@ -147,9 +160,15 @@ export default function SignIn() {
   }
   
   async function handleAndroid() {
-    console.log("Download Android app");
-    await downloadApk();
-    console.log("APK has to be downloaded");
+    try {
+      setError("APL Android app download started.", false)
+      // console.log("Download Android app");
+      await downloadApk();
+      setError("APL Android app download completed.", false)
+      // console.log("APK has to be downloaded");
+    } catch (e) {
+      setError("Error encountred while downloading APL Android app", true)
+    }
   }
 
   function handleIos() {
@@ -164,10 +183,10 @@ export default function SignIn() {
     let iosImage = `${process.env.PUBLIC_URL}/image/IOS.JPG`;
     return (
       <div align="center">
-      <Typography className={classes.download}>Download the offical app</Typography>
+      <Typography className={gClasses.message18}>Download the offical app</Typography>
       <BlankArea />
       <Grid key="jp1" container align="center">
-        <Grid item className={classes.downloadButon} xs={12} sm={12} md={12} lg={12} >
+        <Grid item xs={12} sm={12} md={12} lg={12} >
         <button><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
         </Grid>
         {/* <Grid item className={classes.downloadButon} xs={6} sm={6} md={6} lg={6} >
@@ -181,10 +200,10 @@ export default function SignIn() {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
+      <div className={gClasses.paper}>
         <CricDreamLogo />        
         <Typography component="h1" variant="h5">Sign in</Typography>
-        <form className={classes.form} onSubmit={handleSubmit} noValidate>
+        <form className={gClasses.form} onSubmit={handleSubmit} noValidate>
           <TextField
             autoComplete="fname"
             name="userName"
@@ -209,8 +228,8 @@ export default function SignIn() {
             onChange={(event) => setPassword(event.target.value)}
           />
           <div>
-          <Typography className={classes.error} align="left">{errorMessage}</Typography>
-          <Typography className={classes.root}>
+          <Typography className={(errorMessage.isError) ? gClasses.error : gClasses.nonerror} align="left">{errorMessage.msg}</Typography>
+          <Typography className={gClasses.root}>
             <Link href="#" onClick={handleForgot} variant="body2">
             Forgot password
           </Link>
@@ -226,7 +245,7 @@ export default function SignIn() {
           >
             Sign In
         </Button>
-        {/* <Typography className={classes.root}>
+        {/* <Typography className={gClasses.root}>
             <Link href="#" onClick={handleRegister} variant="body2">
             Register
           </Link>

@@ -22,6 +22,7 @@
     "nodemailer": "^6.4.15",
     "nodemon": "^2.0.6",
     "socket.io": "^2.3.0",
-    "tz-offset": "0.0.2"
+    "tz-offset": "0.0.2",
+    "video-player": "0.0.1"
   }
 }

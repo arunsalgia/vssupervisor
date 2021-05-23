@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import clsx from 'clsx';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -7,7 +7,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Collapse from '@material-ui/core/Collapse';
 import Avatar from '@material-ui/core/Avatar';
-import { Player } from 'video-react';
+// import { Player } from 'video-react';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Grid from "@material-ui/core/Grid";
@@ -26,6 +26,7 @@ import { DisplayPageHeader, DisplayVersion } from 'CustomComponents/CustomCompon
 import {currentAPLVersion, latestAPLVersion} from "views/functions.js";
 import { blue, red } from '@material-ui/core/colors';
 import PsPage from "views/APL/PSPage";
+// import MyPlayer from './VideoPlayer';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -78,8 +79,12 @@ const useStyles = makeStyles((theme) => ({
 }));
   
 
+export function PlayVideo() {
+
+}
 export default function About() { 
   const classes = useStyles();
+  const videoPlayer = useRef();
   // const [expanded, setExpanded] = React.useState(false);
    const [matchType, setMatchType] = useState("T20");
    const [currentVersion, setCurrentVersion] = useState(9.9);
@@ -306,6 +311,7 @@ export default function About() {
   
   return (
     <div className={classes.root}>
+      {/* <MyPlayer /> */}
       {/* <DIsplayGif gif="SAMPLE.GIF"/> */}
       <DisplayPageHeader headerName="Help Desk" groupName="" tournament=""/>
       <BlankArea/>
