@@ -164,7 +164,7 @@ export default function SignIn() {
       setError("APL Android app download started.", false)
       // console.log("Download Android app");
       await downloadApk();
-      setError("APL Android app download completed.", false)
+      setError("APL Android app sent to client.", false)
       // console.log("APK has to be downloaded");
     } catch (e) {
       setError("Error encountred while downloading APL Android app", true)
