@@ -1733,8 +1733,7 @@ cron.schedule('*/1 * * * *', () => {
     return;
   }  else {
     let x = new Date();
-    console.log(x);
-    let junk = MasterData.find({});
+    console.log("Hello");
   }
 
   if (!PRODUCTION) {
