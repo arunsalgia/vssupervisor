@@ -26,7 +26,7 @@ import { DisplayPageHeader, DisplayVersion } from 'CustomComponents/CustomCompon
 import {currentAPLVersion, latestAPLVersion} from "views/functions.js";
 import { blue, red } from '@material-ui/core/colors';
 import PsPage from "views/APL/PSPage";
-// import MyPlayer from './VideoPlayer';
+import APLPlayer from './VideoPlayer';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -309,15 +309,22 @@ export default function About() {
       </Card>
     )}
   
+    let myVideo = `${process.env.PUBLIC_URL}/video/DEMO.MP4`;
+    // let myVideo = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
   return (
     <div className={classes.root}>
-      {/* <MyPlayer /> */}
-      {/* <DIsplayGif gif="SAMPLE.GIF"/> */}
       <DisplayPageHeader headerName="Help Desk" groupName="" tournament=""/>
       <BlankArea/>
       {/* <DisplayVersion text="Current APL Version" version={currentVersion}/>
       <DisplayVersion text="Latest APL  Version" version={latestVersion}/>
       <BlankArea/> */}
+      <Accordion expanded={expandedPanel === "demo"} onChange={handleAccordionChange("demo")}>
+        <DisplayHeader header="How to Play demo"/>
+        <AccordionDetails>
+        <APLPlayer video={myVideo} />
+        {/* <DIsplayGif gif="SAMPLE.GIF"/> */}
+        </AccordionDetails>
+      </Accordion>
       <Accordion expanded={expandedPanel === "about"} onChange={handleAccordionChange("about")}>
         <DisplayHeader header="Auction Permier League"/>
         <AccordionDetails>
