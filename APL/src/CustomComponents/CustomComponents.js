@@ -297,6 +297,7 @@ export class ValidComp extends React.Component {
     });
 
     ValidatorForm.addValidationRule('noSpecialCharacters', (value) => {
+      console.log("Special chars test for: ", value);
       return validateSpecialCharacters(value);
     });
 

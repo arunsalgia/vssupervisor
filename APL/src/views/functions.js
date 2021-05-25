@@ -352,6 +352,10 @@ export function clearBackupData() {
 }
 
 
+export function isMobile() {
+  return (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone/i.test(navigator.userAgent)) ? true : false;
+}
+
 export function checkIdle() {
 
   let x = sessionStorage.getItem("notidle");

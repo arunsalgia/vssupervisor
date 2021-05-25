@@ -418,6 +418,7 @@ export function CricDreamTabs() {
                 onClose={handleClose}
               >
                 <MenuItem onClick={handleProfile}>Profile</MenuItem>
+                <MenuItem onClick={handleWallet}>Wallet</MenuItem>
                 <Divider/>
                 {/* <MenuItem onClick={handleAuction}>Auction</MenuItem>
                 <MenuItem onClick={handleGroupDetails}>Group Details</MenuItem>
@@ -427,13 +428,11 @@ export function CricDreamTabs() {
                 <MenuItem onClick={handleGroupNew}>New Group</MenuItem>
                 <Divider /> */}
                 {/* <MenuItem onClick={handleCaptain}>Captain</MenuItem> */}
-                <Divider />
+                {/* <Divider /> */}
                 {/* <MenuItem onClick={handleGroup}>Group</MenuItem>
                 <Divider/> */}
-                {/* <MenuItem onClick={handlePassword}>Password</MenuItem>
-                <MenuItem onClick={handleWallet}>Wallet</MenuItem> */}
+                {/* <MenuItem onClick={handlePassword}>Password</MenuItem> */}
                 <Show_Supervisor_Options/>
-                {/* <Divider/> */}
                 {/* <MenuItem onClick={handleHelpDesk}>How to play</MenuItem> */}
                 <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>       
                 <Divider/>

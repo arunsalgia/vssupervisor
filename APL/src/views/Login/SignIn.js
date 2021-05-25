@@ -21,7 +21,7 @@ import { UserContext } from "../../UserContext";
 import axios from "axios";
 import {red, green, blue } from '@material-ui/core/colors';
 import { DesktopWindows } from '@material-ui/icons';
-import { cdRefresh, specialSetPos, encrypt, clearBackupData, downloadApk } from "views/functions.js"
+import { isMobile, cdRefresh, specialSetPos, encrypt, clearBackupData, downloadApk } from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { CricDreamLogo } from 'CustomComponents/CustomComponents.js';
 import { BlankArea } from 'CustomComponents/CustomComponents';
@@ -122,10 +122,15 @@ export default function SignIn() {
   }
 
   const handleClick = async () => {
+    let myUserName = document.getElementById("userName").value;
+    let myPassword = document.getElementById("password").value;
+    setUserName(myUserName);
+    setPassword(myPassword);
+
     let response = ""
     try { 
-      let enPassword = encrypt(password);
-      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/criclogin/${userName}/${enPassword}`); 
+      let enPassword = encrypt(myPassword);
+      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/criclogin/${myUserName}/${enPassword}`); 
       setError("", false);
     } catch (err) {
       setError("Invalid Username / Password", true);
@@ -155,9 +160,9 @@ export default function SignIn() {
       // cdRefresh(true);
       //let newPos = specialSetPos();
       //if (newPos < 0) newPos = 0;
-      let newPos = (response.data.gid > 0) ? process.env.REACT_APP_DASHBOARD : process.env.REACT_APP_GROUP;
+      // let newPos = (response.data.gid > 0) ? process.env.REACT_APP_DASHBOARD : process.env.REACT_APP_GROUP;
       // console.log(`User is ${localStorage.getItem("uid")}`)
-      setTab(4);
+      setTab(process.env.REACT_APP_HOME);
     }
 
   }
@@ -200,115 +205,8 @@ export default function SignIn() {
     )  
   } 
 
-  function UserPassword() {
-    var isMobile = (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone/i.test(navigator.userAgent)) ? true : false;
-    console.log("Mobile", isMobile)
-    if (isMobile) {
-      return (
-        <TextField
-          variant="outlined"
-          required
-          fullWidth
-          name="password"
-          label="Password"
-          type="password"
-          id="password"
-          autoComplete="current-password"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <VisibilityIcon />
-              </InputAdornment>
-            ),
-            // endAdornment: (
-            //   <InputAdornment position="end">
-            //     <ExpandMore />
-            //   </InputAdornment>
-            // )
-          }}
-          onChange={(event) => setPassword(event.target.value)}
-        />
-      )
-    } else {
-      return (
-      <TextField
-        variant="outlined"
-        required
-        fullWidth
-        name="password"
-        label="Password"
-        type="password"
-        id="password"
-        autoComplete="current-password"
-        // InputProps={{
-        //   endAdornment: (
-        //     <InputAdornment position="end">
-        //       <VisibilityIcon />
-        //     </InputAdornment>
-        //   ),
-          // endAdornment: (
-          //   <InputAdornment position="end">
-          //     <ExpandMore />
-          //   </InputAdornment>
-          // )
-        // }}
-        onChange={(event) => setPassword(event.target.value)}
-      />
-      )
-    } 
-  } 
-
-  let test = true
-
+  
   const [showPassword, setShowPassword] = useState(false);
-
-  function NonMobile() {
-    return (
-      <form className={gClasses.form} onSubmit={handleSubmit} noValidate>
-      <TextField
-        autoComplete="fname"
-        name="userName"
-        variant="outlined"
-        required
-        fullWidth
-        id="userName"
-        label="User Name"
-        autoFocus
-        onChange={(event) => setUserName(event.target.value)}
-      />
-      <h3></h3>
-      <TextField
-        variant="outlined"
-        required
-        fullWidth
-        name="password"
-        label="Password"
-        type="password"
-        id="password"
-        autoComplete="current-password"
-        onChange={(event) => setPassword(event.target.value)}
-      />
-      <div>
-      <Typography className={(errorMessage.isError) ? gClasses.error : gClasses.nonerror} align="left">{errorMessage.msg}</Typography>
-      <Typography className={gClasses.root}>
-        <Link href="#" onClick={handleForgot} variant="body2">
-        Forgot password
-      </Link>
-    </Typography>
-      </div>
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        className={classes.submit}
-        onClick={handleClick}
-      >
-        Sign In
-    </Button>
-    </form>
-    )
-  }
 
   function handleVisibility(visible) {
     let myName = document.getElementById("userName").value;
@@ -318,33 +216,22 @@ export default function SignIn() {
     setShowPassword(visible);
   }
 
+  function NonMobile() {
+    return (
+      <TextField variant="outlined" required fullWidth
+        id="password" label="Password" type="password"
+        defaultValue={password}
+        // onChange={(event) => setPassword(event.target.value)}
+      />
+    )
+  }
+
+  
   function PwdVisible() {
     console.log("IN visisble");
     return (
-      <form className={gClasses.form} onSubmit={handleSubmit} noValidate>
-      <TextField
-        autoComplete="fname"
-        name="userName"
-        variant="outlined"
-        required
-        fullWidth
-        id="userName"
-        label="User Name"
-        // autoFocus
-        defaultValue={userName}
-        // onChange={(event) => setUserName(event.target.value)}
-      />
-      <h3></h3>
-      {/* <UserPassword /> */}
-      <TextField
-        variant="outlined"
-        required
-        fullWidth
-        name="password"
-        label="Password"
-        type="text"
-        id="password"
-        autoComplete="current-password"
+      <TextField variant="outlined" required fullWidth
+        id="password" label="Password" type="text"
         defaultValue={password}
         InputProps={{
           endAdornment: (
@@ -353,58 +240,15 @@ export default function SignIn() {
             </InputAdornment>
           ),
         }}
-        defaultValue={password}
-        // onChange={(event) => setPassword(event.target.value)}
       />
-      <div>
-      <Typography className={(errorMessage.isError) ? gClasses.error : gClasses.nonerror} align="left">{errorMessage.msg}</Typography>
-      <Typography className={gClasses.root}>
-        <Link href="#" onClick={handleForgot} variant="body2">
-        Forgot password
-      </Link>
-    </Typography>
-      </div>
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        className={classes.submit}
-        onClick={handleClick}
-      >
-        Sign In
-    </Button>
-    </form>
     )
   }
 
   function PwdNotVisible() {
     console.log("In non visisble")
     return (
-      <form className={gClasses.form} onSubmit={handleSubmit} noValidate>
-      <TextField
-        autoComplete="fname"
-        name="userName"
-        variant="outlined"
-        required
-        fullWidth
-        id="userName"
-        label="User Name"
-        defaultValue={userName}
-        // autoFocus
-        // onChange={(event) => setUserName(event.target.value)}
-      />
-      <h3></h3>
-      {/* <UserPassword /> */}
-      <TextField
-        variant="outlined"
-        required
-        fullWidth
-        name="password"
-        label="Password"
-        type="password"
-        id="password"
-        autoComplete="current-password"
+      <TextField variant="outlined" required fullWidth
+        id="password" label="Password" type="password"
         defaultValue={password}
         InputProps={{
           endAdornment: (
@@ -413,35 +257,15 @@ export default function SignIn() {
             </InputAdornment>
           ),
         }}
-        // onChange={(event) => setPassword(event.target.value)}
       />
-      <div>
-      <Typography className={(errorMessage.isError) ? gClasses.error : gClasses.nonerror} align="left">{errorMessage.msg}</Typography>
-      <Typography className={gClasses.root}>
-        <Link href="#" onClick={handleForgot} variant="body2">
-        Forgot password
-      </Link>
-    </Typography>
-      </div>
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        className={classes.submit}
-        onClick={handleClick}
-      >
-        Sign In
-    </Button>
-    </form>
     )
 
   }
 
-  function GetInput() {
-    var isMobile = (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone/i.test(navigator.userAgent)) ? true : false;
-    console.log("Mobile", isMobile)
-    if (isMobile) {
+  function GetPassword() {
+    let itIsMobile = isMobile();
+    console.log("Mobile", itIsMobile)
+    if (itIsMobile) {
       if (showPassword) 
         return <PwdVisible />
       else
@@ -458,7 +282,51 @@ export default function SignIn() {
       <div className={gClasses.paper}>
         <CricDreamLogo />        
         <Typography component="h1" variant="h5">Sign in</Typography>
-        <GetInput />
+        <form className={gClasses.form} onSubmit={handleSubmit} noValidate>
+          <TextField
+            // autoComplete="fname"
+            id="userName"
+            label="User Name"
+            // name="userName"
+            variant="outlined"
+            required
+            fullWidth
+            defaultValue={userName}
+            // autoFocus
+            // onChange={(event) => setUserName(event.target.value)}
+          />
+          <h3></h3>
+          <GetPassword />
+          {/* <TextField
+            variant="outlined"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            onChange={(event) => setPassword(event.target.value)}
+          /> */}
+          <div>
+            <Typography className={(errorMessage.isError) ? gClasses.error : gClasses.nonerror} align="left">{errorMessage.msg}</Typography>
+            <Typography className={gClasses.root}>
+              <Link href="#" onClick={handleForgot} variant="body2">
+              Forgot password
+              </Link>
+            </Typography>
+          </div>
+          <Button 
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+            onClick={handleClick}
+          >
+            Sign In
+          </Button>
+        </form>
         {/* <Typography className={gClasses.root}>
             <Link href="#" onClick={handleRegister} variant="body2">
             Register

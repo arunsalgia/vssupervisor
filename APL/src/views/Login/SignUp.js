@@ -14,11 +14,16 @@ import Container from '@material-ui/core/Container';
 //import { UserContext } from "../../UserContext";
 //import axios from "axios";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+import { TextField, InputAdornment } from "@material-ui/core";
 import red from '@material-ui/core/colors/red';
 // import { useHistory } from "react-router-dom";
 // import SignIn from "./SignIn.js";
-import { cdRefresh, encrypt, decrypt} from "views/functions.js";
+import { cdRefresh, encrypt, decrypt, isMobile,
+  validateSpecialCharacters, validateMobile, validateEmail,
+} from "views/functions.js";
 import { CricDreamLogo, BlankArea, ValidComp } from 'CustomComponents/CustomComponents.js';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -49,48 +54,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-/*** 
-class ChildComp extends React.Component {
-
-  componentDidMount()  {
-    // custom rule will have name 'isPasswordMatch'
-    ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
-      return (value === this.props.p1)
-    });
-
-    ValidatorForm.addValidationRule('minLength', (value) => {
-      return (value.length >= 6)
-    });
-
-    ValidatorForm.addValidationRule('noSpecialCharacters', (value) => {
-      return validateSpecialCharacters(value);
-    });
-
-    ValidatorForm.addValidationRule('isEmailOK', (value) => {
-      return validateEmail(value);
-    });
-  }
-
-  
-  componentWillUnmount() {
-    // remove rule when it is not needed
-    ValidatorForm.removeValidationRule('isPasswordMatch');
-    ValidatorForm.removeValidationRule('isEmailOK');
-    ValidatorForm.removeValidationRule('minLength');
-    ValidatorForm.removeValidationRule('noSpecialCharacters');   
-  }
-
-  render() {
-    return <br/>;
-  }
-
-}
-***/
-// const handleSubmit = e => {
-//   e.preventDefault();
-// };
-
-
 
 export default function SignUp() {
   const classes = useStyles();
@@ -103,14 +66,15 @@ export default function SignUp() {
   const [mobile, setMobile] = useState("");
   // const { setUser } = useContext(UserContext);
 
-  // const handleChange = (event) => {
-  //   const { user } = this.state;
-  //   user[event.target.name] = event.target.value;
-  //   this.setState({ user });
-  // }
-
   const handleSubmit = async() => {
     console.log("Submit command provided");
+    let x = getInput();
+    if (validate("userName")) return;
+    if (validate("password")) return;
+    if (validate("repeatPassword", "password")) return;
+
+    console.log("fetched value", x);
+    return;
     let tmp1 = encrypt(password);
     let tmp2 = encrypt(email);
     let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricsignup/${userName}/${tmp1}/${tmp2}/${mobile}`);
@@ -167,6 +131,242 @@ export default function SignUp() {
   }
 
 
+  const [error, setError] = useState({});
+  const [helperText, setHelperText] = useState({});
+  function validate(eid, eid2) {
+    getInput();
+    let e = document.getElementById(eid);
+    let myValue = e.value; 
+    // console.log(eid, myValue);
+    let newError=false;
+    let newText = "";
+    
+    switch (eid) {
+      case "userName":
+        if (!validateSpecialCharacters(myValue)) {
+          newError = true;
+          newText = 'Special characters not permitted';
+        } else if (myValue.length < 6) {
+          newError = true;
+          newText = "Mimumum 6 characters required";
+        }
+      break;
+      case "password":
+        // console.log("Setting password as ", myValue);
+        // setPassword(myValue);
+        if (!validateSpecialCharacters(myValue)) {
+          newError = true;
+          newText = 'Special characters not permitted';
+        } else if (myValue.length < 6) {
+          newError = true;
+          newText = "Mimumum 6 characters required";
+        }
+      break;
+      case "repeatPassword":
+        let myValue2 = document.getElementById(eid2).value;
+        setRepeatPassword(myValue2);
+        if (myValue !== myValue2) {
+          newError = true;
+          newText = 'Password mismatch';
+        } 
+      break;
+    }
+    
+    let x = {};
+    x[eid] = newError;
+    setError(x);
+    
+    x = {};
+    x[eid] = newText;
+    setHelperText(x);
+
+    e.focus();
+    return newError;
+  }
+
+  function getInput() {
+    let myName = document.getElementById("userName").value;
+    let myPass1 = document.getElementById("password").value;
+    let myPass2 = document.getElementById("repeatPassword").value;
+    // console.log(myName, myPass1, myPass2);
+
+    setUserName(myName);
+    setPassword(myPass1);
+    setRepeatPassword(myPass2);
+    return {
+      userName: myName,
+      password: myPass1,
+      repeatPassword: myPass2
+    }
+  }
+
+  const [showPass1, setShowPass1] = useState(false);
+  const [showPass2, setShowPass2] = useState(false);
+
+  function handleVisibility1(isVisible) {
+    console.log("In visisble 1", isVisible);
+    getInput();
+    setShowPass1(isVisible);
+    let e = document.getElementById('password');
+    e.focus();
+  }
+
+  function handleVisibility2(isVisible) {
+    console.log("In visisble 2", isVisible);
+    getInput();
+    setShowPass2(isVisible);
+    let e = document.getElementById('repeatPassword');
+    e.focus();
+  }
+
+  function Password1NonMobile() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="password" label="Password" type="password"
+      defaultValue={password}
+      // onChange={(event) => validate("password")}
+      error={error.password}
+      helperText={helperText.password}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password2NonMobile() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="repeatPassword" label="Repeat Password" type="password"
+      defaultValue={repeatPassword}
+      // onChange={(event) => validate("repeatPassword", "password")}
+      error={error.repeatPassword}
+      helperText={helperText.repeatPassword}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password1Text() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="password" label="Password" type="text"
+      defaultValue={password}
+      // onChange={(event) => validate("password")}
+      error={error.password}
+      helperText={helperText.password}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityOffIcon onClick={() => { handleVisibility1(false); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password2Text() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="repeatPassword" label="Repeat Password" type="text"
+      defaultValue={repeatPassword}
+      // onChange={(event) => validate("password")}
+      error={error.repeatPassword}
+      helperText={helperText.repeatPassword}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityOffIcon onClick={() => { handleVisibility2(false); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password1Password() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="password" label="Password" type="password"
+      defaultValue={password}
+      // onChange={(event) => validate("password")}
+      error={error.password}
+      helperText={helperText.password}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityIcon onClick={() => { handleVisibility1(true); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password2Password() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="repeatPassword" label="Repeat Password" type="password"
+      defaultValue={repeatPassword}
+      // onChange={(event) => validate("password")}
+      error={error.repeatPassword}
+      helperText={helperText.repeatPassword}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityIcon onClick={() => { handleVisibility2(true); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+
+  function DisplayPassword1() {
+    // let tmp = isMobile();
+    // console.log("is mobile2", tmp);
+    if (isMobile()) {
+      if (showPass1) {
+        return <Password1Text />
+      } else {
+        return <Password1Password />
+      }
+    } else {
+      return <Password1NonMobile />
+    }
+  }
+
+  function DisplayPassword2() {
+    // let tmp = isMobile();
+    // console.log("is mobile2", tmp);
+    if (isMobile()) {
+      if (showPass2) {
+        return <Password2Text />
+      } else {
+        return <Password2Password />
+      }
+    } else {
+      return <Password2NonMobile />
+    }
+  }
+
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -179,17 +379,15 @@ export default function SignUp() {
           Register New User
         </Typography>
     <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
-      <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="User Name"
-          onChange={(event) => setUserName(event.target.value)}
-          name="username"
-          // type=""
-          validators={['required', 'minLength', 'noSpecialCharacters']}
-          errorMessages={['User Name to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
-          value={userName}
+      <TextValidator variant="outlined" required fullWidth
+          id="userName" label="User Name" name="username"
+          defaultValue={userName}
+          onChange={(event) => validate('userName')}
+          // validators={['required', 'minLength', 'noSpecialCharacters']}
+          // errorMessages={['User Name to be provided', 'Mimumum 6 characters required', ]}
+          error={error.userName}
+          helperText={helperText.userName}
+          // value={userName}
       />
       <BlankArea/>
       <TextValidator
@@ -218,31 +416,9 @@ export default function SignUp() {
           value={mobile}
       />
       <BlankArea/>
-      <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="Password"
-          onChange={(event) => setPassword(event.target.value)}
-          name="password"
-          type="password"
-          validators={['required', 'minLength', 'noSpecialCharacters']}
-          errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
-          value={password}
-      />
+      <DisplayPassword1 />
       <BlankArea/>
-      <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="Repeat password"
-          onChange={(event) => setRepeatPassword(event.target.value)}
-          name="repeatPassword"
-          type="password"
-          validators={['isPasswordMatch', 'required']}
-          errorMessages={['password mismatch', 'this field is required']}
-          value={repeatPassword}
-      />
+      <DisplayPassword2 />
       <BlankArea/>
       <Button
         type="submit"
@@ -259,7 +435,7 @@ export default function SignUp() {
     <ValidComp p1={password}/>    
     <Typography className={classes.root}>
       <Link href="#" onClick={handleLogin} variant="body2">
-        Already have an account? Sign in
+        Already have an account? Sign in 
       </Link>
     </Typography>
     {/* <Switch>
