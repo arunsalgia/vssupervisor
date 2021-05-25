@@ -23,7 +23,7 @@ import { red, deepOrange } from '@material-ui/core/colors';
 // import { useHistory } from "react-router-dom";
 // import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
 
-const COUNTPERPAGE=20;
+const COUNTPERPAGE=10;
 // const useStyles = makeStyles((theme) => ({
 //   paper: {
 //     marginTop: theme.spacing(8),

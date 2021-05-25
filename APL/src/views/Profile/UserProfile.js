@@ -27,10 +27,14 @@ import {blue, red, deepOrange } from '@material-ui/core/colors';
 import { useHistory } from "react-router-dom";
 import { 
   encrypt, decrypt,
-  validateSpecialCharacters, validateEmail,
+  validateSpecialCharacters, validateEmail, isMobile,
 } from "views/functions.js";
 import { BlankArea, ValidComp, DisplayPageHeader } from 'CustomComponents/CustomComponents.js';
 import { setTab } from "CustomComponents/CricDreamTabs.js"
+import { TextField, InputAdornment } from "@material-ui/core";
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -142,11 +146,10 @@ export default function Profile() {
 
   
   const handleProfileSubmit = async() => {
-    // console.log("Submit command provided"); 
+    console.log("Submit command provided"); 
     let myUserName = document.getElementById("username").value;
     let myEmail = document.getElementById("email").value;
     console.log(myUserName, myEmail);
-
     setUserName(myUserName);
     setEmail(myEmail);
 
@@ -385,56 +388,341 @@ export default function Profile() {
 
   const handlePasswordSubmit = async() => {
     console.log("Submit command provided");
+    // let origPassword = document.getElementById("currentPassword").value;
+    // let pass1 = document.getElementById("newPassword").value;
+    // let pass2 = document.getElementById("repeatPassword").value;
+    // console.log(origPassword, pass1, pass2);
+    // console.log(currentPassword, newPassword, repeatPassword);
 
-    let origPassword = document.getElementById("currentPassword").value;
-    let pass1 = document.getElementById("newPassword").value;
-    let pass2 = document.getElementById("repeatPassword").value;
-    console.log(origPassword, pass1, pass2);
+    // setCurrentPassword(origPassword)
+    // setNewPassword(pass1);
+    // setRepeatPassword(pass2);
 
-    setCurrentPassword(origPassword)
-    setNewPassword(pass1);
-    setRepeatPassword(pass2);
-    console.log(currentPassword, newPassword, repeatPassword);
-
-
-    if ( (origPassword.length < 6) ||
-      (pass1.length < 6) ||
-      (pass2.length < 6) ) {
-      setRegisterStatus(1000);
-      return;
-    }
-
-    if ( (!validateSpecialCharacters(origPassword)) ||
-      (!validateSpecialCharacters(pass1)) ||
-      (!validateSpecialCharacters(pass2))
-    ) {
-      setRegisterStatus(1001);
-      return;
-    }
-
-    if (pass1 !== pass2) {
-      setRegisterStatus(702);
-      return;
-    }
-
-    if (origPassword  === pass1) {
-      setRegisterStatus(703);
-      return;
-    }
-
+    let x = getInput();
+    if (validate("currentPassword")) return;
+    if (validate("newPassword")) return;
+    if (validate("repeatPassword", "newPassword")) return;
     setRegisterStatus(0);
 
-    let tmp1 = encrypt(origPassword);
-    let tmp2 = encrypt(pass1);
+    let tmp1 = encrypt(x.currentPassword);
+    let tmp2 = encrypt(x.newPassword);
 
     let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricreset/${localStorage.getItem("uid")}/${tmp1}/${tmp2}`);
     if (response.status === 200) {
-      // setTab(0);
       setRegisterStatus(200);
     } else {
       // error
       setRegisterStatus(response.status);
       console.log(`Status is ${response.status}`);
+    }
+  }
+
+  const [error, setError] = useState({});
+  const [helperText, setHelperText] = useState({});
+  function validate(eid, eid2) {
+    getInput();
+    let e = document.getElementById(eid);
+    let myValue = e.value; 
+    // console.log(eid, myValue);
+    let newError=false;
+    let newText = "";
+    
+    switch (eid) {
+      case "currentPassword":
+      case "newPassword":
+        if (!validateSpecialCharacters(myValue)) {
+          newError = true;
+          newText = 'Special characters not permitted';
+        } else if (myValue.length < 6) {
+          newError = true;
+          newText = "Mimumum 6 characters required";
+        }
+      break;
+      case "repeatPassword":
+        let myValue2 = document.getElementById(eid2).value;
+        // setRepeatPassword(myValue);
+        if (myValue !== myValue2) {
+          newError = true;
+          newText = 'Password mismatch';
+        } 
+      break;
+    }
+    
+    let x = {};
+    x[eid] = newError;
+    setError(x);
+    
+    x = {};
+    x[eid] = newText;
+    setHelperText(x);
+
+    // e.focus();
+    return newError;
+  }
+
+
+  function getInput() {
+    let myName = document.getElementById("currentPassword").value;
+    let myPass1 = document.getElementById("newPassword").value;
+    let myPass2 = document.getElementById("repeatPassword").value;
+    // console.log(myName, myPass1, myPass2);
+
+    setCurrentPassword(myName);
+    setNewPassword(myPass1);
+    setRepeatPassword(myPass2);
+    return {
+      currentPassword: myName,
+      newPassword: myPass1,
+      repeatPassword: myPass2
+    }
+  }
+
+  const [showPass0, setShowPass0] = useState(false);
+  const [showPass1, setShowPass1] = useState(false);
+  const [showPass2, setShowPass2] = useState(false);
+
+  function handleVisibility0(isVisible) {
+    // console.log("In visisble 0", isVisible);
+    getInput();
+    setShowPass0(isVisible);
+    // let e = document.getElementById('password');
+    // e.focus();
+  }
+
+  function handleVisibility1(isVisible) {
+    // console.log("In visisble 1", isVisible);
+    getInput();
+    setShowPass1(isVisible);
+    // let e = document.getElementById('password');
+    // e.focus();
+  }
+
+  function handleVisibility2(isVisible) {
+    // console.log("In visisble 1", isVisible);
+    getInput();
+    setShowPass2(isVisible);
+    // let e = document.getElementById('password');
+    // e.focus();
+  }
+
+  function Password0NonMobile() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="currentPassword" label="Current Password" type="password"
+      defaultValue={currentPassword}
+      // onChange={(event) => validate("password")}
+      error={error.currentPassword}
+      helperText={helperText.currentPassword}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+
+  function Password1NonMobile() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="newPassword" label="New Password" type="password"
+      defaultValue={newPassword}
+      // onChange={(event) => validate("newPassword")}
+      error={error.newPassword}
+      helperText={helperText.newPassword}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password2NonMobile() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="repeatPassword" label="New Password" type="password"
+      defaultValue={repeatPassword}
+      // onChange={(event) => validate("repeatPassword")}
+      error={error.repeatPassword}
+      helperText={helperText.repeatPassword}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password0Text() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="currentPassword" label="Current Password" type="text"
+      defaultValue={currentPassword}
+      // onChange={(event) => validate("currentPassword")}
+      error={error.currentPassword}
+      helperText={helperText.currentPassword}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityOffIcon onClick={() => { handleVisibility0(false); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+
+  function Password1Text() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="newPassword" label="New Password" type="text"
+      defaultValue={newPassword}
+      // onChange={(event) => validate("newPassword")}
+      error={error.newPassword}
+      helperText={helperText.newPassword}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityOffIcon onClick={() => { handleVisibility1(false); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password2Text() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="repeatPassword" label="New Password" type="text"
+      defaultValue={repeatPassword}
+      // onChange={(event) => validate("repeatPassword")}
+      error={error.repeatPassword}
+      helperText={helperText.repeatPassword}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityOffIcon onClick={() => { handleVisibility2(false); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password0Password() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="currentPassword" label="Current Password" type="password"
+      defaultValue={currentPassword}
+      // onChange={(event) => validate("currentPassword")}
+      error={error.currentPassword}
+      helperText={helperText.currentPassword}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityIcon onClick={() => { handleVisibility0(true); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password1Password() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="newPassword" label="New Password" type="password"
+      defaultValue={newPassword}
+      // onChange={(event) => validate("newPassword")}
+      error={error.newPassword}
+      helperText={helperText.newPassword}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityIcon onClick={() => { handleVisibility1(true); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function Password2Password() {
+    return (
+      <TextValidator variant="outlined" required fullWidth
+      id="repeatPassword" label="Repeat Password" type="password"
+      defaultValue={repeatPassword}
+      // onChange={(event) => validate("repeatPassword")}
+      error={error.repeatPassword}
+      helperText={helperText.repeatPassword}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <VisibilityIcon onClick={() => { handleVisibility2(true); }} />
+          </InputAdornment>
+        ),
+      }}
+      // validators={['required', 'minLength', 'noSpecialCharacters']}
+      // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+      // value={password}
+    />
+    );
+  }
+
+  function DisplayPassword0() {
+    // let tmp = isMobile();
+    // console.log("is mobile0", tmp);
+    if (isMobile()) {
+      if (showPass0) {
+        return <Password0Text />
+      } else {
+        return <Password0Password />
+      }
+    } else {
+      return <Password0NonMobile />
+    }
+  }
+
+  function DisplayPassword1() {
+    // let tmp = isMobile();
+    // console.log("is mobile1", tmp);
+    if (isMobile()) {
+      if (showPass1) {
+        return <Password1Text />
+      } else {
+        return <Password1Password />
+      }
+    } else {
+      return <Password1NonMobile />
+    }
+  }
+
+  function DisplayPassword2() {
+    // let tmp = isMobile();
+    // console.log("is mobile2", tmp);
+    if (isMobile()) {
+      if (showPass2) {
+        return <Password2Text />
+      } else {
+        return <Password2Password />
+      }
+    } else {
+      return <Password2NonMobile />
     }
   }
 
@@ -445,52 +733,11 @@ export default function Profile() {
         <div className={classes.paper}>
         <Typography component="h1" variant="h5">Change Password</Typography>
         <ValidatorForm className={classes.form} onSubmit={handlePasswordSubmit}>
-        <TextValidator
-            variant="outlined"
-            required
-            fullWidth      
-            label="Current Password"
-            id="currentPassword"
-            name="currentPassword"
-            type="password"
-            // validators={['required', 'noSpecialCharacters']}
-            // errorMessages={['Current Password to be provided', 'Special characters not permitted']}
-            defaultValue={currentPassword}
-            // value={currentPassword}
-            // onChange={(event) => setCurrentPassword(event.target.value)}
-        />
+        <DisplayPassword0 />
         <BlankArea/>
-        <TextValidator
-            variant="outlined"
-            required
-            fullWidth      
-            label="New Password"
-            id="newPassword"
-            name="newPassword"
-            type="password"
-            // validators={['required', 'minLength', 'noSpecialCharacters']}
-            // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
-            defaultValue={newPassword}
-            // value={newPassword}
-            // onChange={(event) => setNewPassword(event.target.value)}
-        />
+        <DisplayPassword1 />
         <BlankArea/>
-        <TextValidator
-            variant="outlined"
-            required
-            fullWidth      
-            label="Repeat password"
-            id="repeatPassword"
-            name="repeatPassword"
-            type="password"
-            // validators={['isPasswordMatch', 'required']}
-            // errorMessages={['password mismatch', 'this field is required']}
-            // validators={['required', 'minLength', 'noSpecialCharacters']}
-            // errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
-            defaultValue={repeatPassword}
-            // value={repeatPassword}
-            // onChange={(event) => setRepeatPassword(event.target.value)}
-        />
+        <DisplayPassword2 />
         <ShowResisterStatus/>
         <BlankArea/>
         <Button

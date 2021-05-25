@@ -73,11 +73,11 @@ export default function SignUp() {
     if (validate("userName")) return;
     if (validate("password")) return;
     if (validate("repeatPassword", "password")) return;
-    console.log("All okay");
-    return;
-    let tmp1 = encrypt(password);
+    // console.log("All okay");
+
+    let tmp1 = encrypt(x.password);
     let tmp2 = encrypt(email);
-    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricsignup/${userName}/${tmp1}/${tmp2}/${mobile}`);
+    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricsignup/${x.userName}/${tmp1}/${tmp2}/${mobile}`);
     if (response.status === 200) {
       let setemailresp = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricemailwelcome/${tmp2}`);
       // history.push("/signin");
