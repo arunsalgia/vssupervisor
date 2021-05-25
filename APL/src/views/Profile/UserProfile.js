@@ -120,17 +120,17 @@ export default function Profile() {
         setUserName(userRes.data.userName);
         setGroupName(userRes.data.defaultGroup);
         let tmp = decrypt(userRes.data.email);
+        setEmail(tmp);
 
         // get wallet transaction and also calculate balance
-        let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
-        setTransactions(response.data);
-        let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
-        setEmptyRows(myempty);
+        // let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
+        // setTransactions(response.data);
+        // let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
+        // setEmptyRows(myempty);
 
-        let myBalance = response.data.reduce((accum,item) => accum + item.amount, 0);
-        setBalance(myBalance);
+        // let myBalance = response.data.reduce((accum,item) => accum + item.amount, 0);
+        // setBalance(myBalance);
 
-        setEmail(tmp);
       } catch (e) {
           console.log(e)
       }
@@ -529,7 +529,7 @@ export default function Profile() {
     </Accordion>
     <Typography align="left" className={classes.helpMessage}>Update Profile</Typography>
     <BlankArea />
-    <Accordion expanded={expandedPanel === "wallet"} onChange={handleAccordionChange("wallet")}>
+    {/* <Accordion expanded={expandedPanel === "wallet"} onChange={handleAccordionChange("wallet")}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
           <Typography className={classes.heading}>Wallet Details</Typography>
       </AccordionSummary>
@@ -538,7 +538,7 @@ export default function Profile() {
       </AccordionDetails>
     </Accordion>
     <Typography align="left" className={classes.helpMessage}>View Wallet details</Typography>
-    <BlankArea />
+    <BlankArea /> */}
     <Accordion expanded={expandedPanel === "password"} onChange={handleAccordionChange("password")}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
         <Typography className={classes.heading}>Change Password</Typography>

@@ -69,11 +69,11 @@ export default function SignUp() {
   const handleSubmit = async() => {
     console.log("Submit command provided");
     let x = getInput();
+    console.log("fetched value", x);
     if (validate("userName")) return;
     if (validate("password")) return;
     if (validate("repeatPassword", "password")) return;
-
-    console.log("fetched value", x);
+    console.log("All okay");
     return;
     let tmp1 = encrypt(password);
     let tmp2 = encrypt(email);
@@ -164,7 +164,7 @@ export default function SignUp() {
       break;
       case "repeatPassword":
         let myValue2 = document.getElementById(eid2).value;
-        setRepeatPassword(myValue2);
+        // setRepeatPassword(myValue);
         if (myValue !== myValue2) {
           newError = true;
           newText = 'Password mismatch';
@@ -204,7 +204,7 @@ export default function SignUp() {
   const [showPass2, setShowPass2] = useState(false);
 
   function handleVisibility1(isVisible) {
-    console.log("In visisble 1", isVisible);
+    // console.log("In visisble 1", isVisible);
     getInput();
     setShowPass1(isVisible);
     let e = document.getElementById('password');
@@ -212,7 +212,7 @@ export default function SignUp() {
   }
 
   function handleVisibility2(isVisible) {
-    console.log("In visisble 2", isVisible);
+    // console.log("In visisble 2", isVisible);
     getInput();
     setShowPass2(isVisible);
     let e = document.getElementById('repeatPassword');
@@ -381,13 +381,13 @@ export default function SignUp() {
     <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
       <TextValidator variant="outlined" required fullWidth
           id="userName" label="User Name" name="username"
-          defaultValue={userName}
-          onChange={(event) => validate('userName')}
-          // validators={['required', 'minLength', 'noSpecialCharacters']}
-          // errorMessages={['User Name to be provided', 'Mimumum 6 characters required', ]}
-          error={error.userName}
-          helperText={helperText.userName}
-          // value={userName}
+          // defaultValue={userName}
+          onChange={(event) => setUserName(event.target.value)}
+          validators={['required', 'minLength', 'noSpecialCharacters']}
+          errorMessages={['User Name to be provided', 'Mimumum 6 characters required', ]}
+          // error={error.userName}
+          // helperText={helperText.userName}
+          value={userName}
       />
       <BlankArea/>
       <TextValidator

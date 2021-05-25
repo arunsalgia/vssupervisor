@@ -14,6 +14,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import { makeStyles } from '@material-ui/core/styles';
+import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 // import { UserContext } from "../../UserContext";
 import axios from "axios";
@@ -22,58 +23,64 @@ import { red, deepOrange } from '@material-ui/core/colors';
 // import { useHistory } from "react-router-dom";
 // import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
 
-
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  error:  {
-      // right: 0,
-      fontSize: '12px',
-      color: red[700],
-      // position: 'absolute',
-      alignItems: 'center',
-      marginTop: '0px',
-  },
-  th: { 
-    spacing: 0,
-    align: "center",
-    padding: "none",
-    backgroundColor: '#EEEEEE', 
-    color: deepOrange[700], 
-    // border: "1px solid black",
-    fontWeight: theme.typography.fontWeightBold,
-  },
-  td : {
-    spacing: 0,
-    // border: 5,
-    align: "center",
-    padding: "none",
-    height: 10,
-  },    
-}));
+const COUNTPERPAGE=20;
+// const useStyles = makeStyles((theme) => ({
+//   paper: {
+//     marginTop: theme.spacing(8),
+//     display: 'flex',
+//     flexDirection: 'column',
+//     alignItems: 'center',
+//   },
+//   avatar: {
+//     margin: theme.spacing(1),
+//     backgroundColor: theme.palette.secondary.main,
+//   },
+//   form: {
+//     width: '100%', // Fix IE 11 issue.
+//     marginTop: theme.spacing(1),
+//   },
+//   submit: {
+//     margin: theme.spacing(3, 0, 2),
+//   },
+//   error:  {
+//       // right: 0,
+//       fontSize: '12px',
+//       color: red[700],
+//       // position: 'absolute',
+//       alignItems: 'center',
+//       marginTop: '0px',
+//   },
+//   th: { 
+//     spacing: 0,
+//     align: "center",
+//     padding: "none",
+//     backgroundColor: '#EEEEEE', 
+//     color: deepOrange[700], 
+//     // border: "1px solid black",
+//     fontWeight: theme.typography.fontWeightBold,
+//   },
+//   td : {
+//     spacing: 0,
+//     // border: 5,
+//     align: "center",
+//     padding: "none",
+//     height: 10,
+//   },    
+// }));
 
 
 export default function Wallet() {
-  const classes = useStyles();
+  // const classes = useStyles();
+  const gClasses = globalStyles();
+
   // const history = useHistory();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   // const [registerStatus, setRegisterStatus] = useState(0);
+
+  const [rowsPerPage, setRowsPerPage] = React.useState(COUNTPERPAGE);
+  const [emptyRows, setEmptyRows] = React.useState(0);
+  const [page, setPage] = React.useState(0);
 
   useEffect(() => {
     const WalletInfo = async () => {
@@ -82,6 +89,9 @@ export default function Wallet() {
         // get wallet transaction and also calculate balance
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
         setTransactions(response.data);
+        let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
+        setEmptyRows(myempty);
+
         let myBalance = response.data.reduce((accum,item) => accum + item.amount, 0);
         setBalance(myBalance);
       } catch (e) {
@@ -91,31 +101,40 @@ export default function Wallet() {
     WalletInfo();
   }, []);
 
+  const handleChangePage = (event, newPage) => {
+    event.preventDefault();
+    setPage(newPage);
+    let myempty = rowsPerPage - Math.min(rowsPerPage, transactions.length - newPage * rowsPerPage);
+    setEmptyRows(myempty);
+
+  };
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
-        <Typography component="h1" variant="h5">Wallet Details (Balance: {balance})</Typography>
+      <div className={gClasses.paper}>
+      <Typography component="h1" variant="h5">Wallet Balance: {balance}</Typography>
+        <TableContainer>
         <Table>
         <TableHead p={0}>
             <TableRow align="center">
-            <TableCell className={classes.th} p={0} align="center">Date</TableCell>      
-            <TableCell className={classes.th} p={0} align="center">Type</TableCell>
-            <TableCell className={classes.th} p={0} align="center">Amount</TableCell>
+            <TableCell className={gClasses.th} p={0} align="center">Date</TableCell>      
+            <TableCell className={gClasses.th} p={0} align="center">Type</TableCell>
+            <TableCell className={gClasses.th} p={0} align="center">Amount</TableCell>
             </TableRow>
         </TableHead>
-        < TableBody p={0}>
-            {transactions.map( (item, index) => {
+        < TableBody>
+            {transactions.slice(page * rowsPerPage, (page + 1) * rowsPerPage )
+            .map( (item, index) => {
               return (
                 <TableRow key={index}>
-                  <TableCell  className={classes.td} p={0} align="center" >
+                  <TableCell  className={gClasses.td} p={0} align="center" >
                     {item.date}
                   </TableCell>
-                  <TableCell  className={classes.td} p={0} align="center" >
+                  <TableCell  className={gClasses.td} p={0} align="center" >
                     {item.type}
                   </TableCell>
-                  <TableCell  className={classes.td} p={0} align="center" >
+                  <TableCell  className={gClasses.td} p={0} align="center" >
                     {item.amount}
                   </TableCell>
                 </TableRow>
@@ -123,6 +142,16 @@ export default function Wallet() {
             })}
         </TableBody> 
         </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[COUNTPERPAGE]}
+          component="div"
+          count={transactions.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          // onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
       </div>
     </Container>
   );
