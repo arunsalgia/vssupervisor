@@ -309,7 +309,7 @@ export default function About() {
       </Card>
     )}
   
-    let myVideo = `${process.env.PUBLIC_URL}/video/TRIALDEMO.MP4`;
+    let myVideo = `${process.env.PUBLIC_URL}/video/DEMO_org.MP4`;
     // let myVideo = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
     // let myVideo= "https://www.youtube.com/watch?v=GwFsx5F3dGk";
     return (
