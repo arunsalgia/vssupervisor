@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-// import Button from '@material-ui/core/Button';
+import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 // import TextField from '@material-ui/core/TextField';
 // import Grid from '@material-ui/core/Grid';
@@ -18,12 +18,30 @@ import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 // import { UserContext } from "../../UserContext";
 import axios from "axios";
+import useScript from './useScript';
+var request= require('request');
 // import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import { red, deepOrange } from '@material-ui/core/colors';
 // import { useHistory } from "react-router-dom";
 // import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
+//include();
+// var Insta = require('instamojo-nodejs');
 
-const COUNTPERPAGE=10;
+const API_KEY = "test_122c89dd87b24c3977474e3e82f";
+const AUTH_KEY = "test_4c814766fd46608724119f04929";
+const headers = { 
+  'X-Api-Key': API_KEY, 'X-Auth-Token': AUTH_KEY,
+  "Content-Type": "application/json",
+  'Access-Control-Allow-Origin': '*',
+  "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+};
+
+
+const INSTAMOJOSCRIPT="https://js.instamojo.com/v1/checkout.js";
+const COUNTPERPAGE=5;
+
+
 // const useStyles = makeStyles((theme) => ({
 //   paper: {
 //     marginTop: theme.spacing(8),
@@ -70,14 +88,15 @@ const COUNTPERPAGE=10;
 
 
 export default function Wallet() {
+  useScript(INSTAMOJOSCRIPT);
   // const classes = useStyles();
   const gClasses = globalStyles();
 
   // const history = useHistory();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
-  // const [registerStatus, setRegisterStatus] = useState(0);
-
+  const [registerStatus, setRegisterStatus] = useState(0);
+  const [message, setMessage] = useState("");
   const [rowsPerPage, setRowsPerPage] = React.useState(COUNTPERPAGE);
   const [emptyRows, setEmptyRows] = React.useState(0);
   const [page, setPage] = React.useState(0);
@@ -101,6 +120,33 @@ export default function Wallet() {
     WalletInfo();
   }, []);
 
+  function ShowResisterStatus() {
+    //console.log(`Status is ${registerStatus}`);
+    let myMsg;
+    let errmsg = true;
+    switch (registerStatus) {
+      case 1001:
+        myMsg = message;
+        errmsg = false;
+      break;
+      case 1002:
+        myMsg = message;
+      break;
+      case 0:
+        myMsg = ``;
+        errmsg = false;
+      break;      
+      default:
+        myMsg = `Unknown error code ${registerStatus}`;
+        break;
+    }
+    let myClass = (errmsg) ? gClasses.error : gClasses.nonerror;
+    return(
+      <div>
+        <Typography className={myClass}>{myMsg}</Typography>
+      </div>
+    );
+  }
   const handleChangePage = (event, newPage) => {
     event.preventDefault();
     setPage(newPage);
@@ -109,11 +155,126 @@ export default function Wallet() {
 
   };
 
+  function handleOpen() {
+    console.log("Connection Opened");
+  }
+
+  function handleClose() {
+    console.log("Connection Closed");
+  }
+
+  function handleSucces(response) {
+    console.log("Success", response);
+    setMessage(`Transaction ${response.paymentId} Success`);
+    setRegisterStatus(1001);
+  }
+
+  function handleFailure(response) {
+    console.log("Failure", response);
+    setMessage(`Transaction ${response.paymentId} Failed`);
+    setRegisterStatus(1002);
+  }
+  
+  function org_handleSubmit() {
+    try {
+      Insta.setKeys(API_KEY, AUTH_KEY);
+      Insta.isSandboxMode(true);
+      console.log(Insta);
+      
+      var data = new Insta.PaymentData();
+      //data.setRedirectUrl(REDIRECT_URL);
+      console.log("before", data);
+      data.purpose = "Test";            // REQUIRED
+      data.amount = 9;                  // REQUIRED
+      // data.currency                = 'INR';
+      // data.buyer_name              = 'Arun Salgia';
+      // data.email                   = 'arunsalgia@gmail.com';
+      // data.phone                   = 1234567890;
+      // data.send_sms                = 'False';
+      // data.send_email              = 'True';
+      // data.allow_repeated_payments = 'False';
+      // data.webhook                 = 'Your endpoint to capture POST data from a payment';
+      // data.redirect_url            = 'Your endpoint where instamojo redirects user to after payment';
+      console.log("after", data);
+
+      Insta.createPayment(data, function(error, response) {
+        if (error) {
+          console.log(error);
+        } else {
+          // Payment redirection link at response.payment_request.longurl
+          console.log(response);
+        }
+      });
+    } catch (e) {
+      console.log(e);
+      console.log("Error tyring InstaMojo pay");
+    }
+  }
+
+  function handleSubmit() {
+    try {
+      Instamojo.configure({
+        handlers: {
+          onOpen: handleOpen,
+          onClose: handleClose,
+          onSuccess: handleSucces,
+          onFailure: handleFailure
+        }
+      });
+
+      Instamojo.open('https://test.instamojo.com/@arun_salgia/ -data "allow_repeated_payments=False&amount=2500&buyer_name=John+Doe&purpose=FIFA+16&phone=9999999999&send_email=True&send_sms=False&email=arunsalgia%40gmail.com"');
+
+    } catch (e) {
+      console.log(e);
+      console.log("Error tyring InstaMojo pay");
+    }
+  }
+
+  function viamail_handleSubmit() {
+    try {
+      var payload = {
+        purpose: 'FIFA 16',
+        amount: '2500',
+        phone: '9999999999',
+        buyer_name: 'John Doe',
+        redirect_url: '',
+        send_email: true,
+        webhook: '',
+        send_sms: false,
+        email: 'arunsalgi@gmail.com',
+        allow_repeated_payments: false
+      };
+      
+      request.post('https://www.instamojo.com/api/1.1/payment-requests/', 
+        {form: payload,  headers: headers}, 
+        function(error, response, body) {
+        if(!error && response.statusCode == 201){
+          console.log(body);
+        }
+      })
+    } catch (e) {
+      console.log(e);
+      console.log("Error tyring InstaMojo pay");
+    }
+  }
+
+  function AddToWallet() {
+    return (
+      <Button type="submit" variant="contained" color="primary" 
+        onClick={handleSubmit}
+        className={gClasses.button}>Add to Wallet
+    </Button>
+
+    )
+  }
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={gClasses.paper}>
-      <Typography component="h1" variant="h5">Wallet Balance: {balance}</Typography>
+        <Typography component="h1" variant="h5">Wallet Balance: {balance}</Typography>
+        {/* <AddToWallet />
+        <ShowResisterStatus /> */}
         <TableContainer>
         <Table>
         <TableHead p={0}>
