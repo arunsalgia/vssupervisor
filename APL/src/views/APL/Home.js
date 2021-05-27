@@ -464,6 +464,7 @@ export default function Home() {
     }
 
     function ShowJumpButtons() {
+	  let myDisable = (defaultGroup === "");
       return (
         <div>
           <Grid key="jp1" container >
@@ -477,23 +478,23 @@ export default function Home() {
           <ShowCurrentGroup />
           <Grid key="jp2" container >
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_DASHBOARD} disabled={userGroup.length === 0} text="DashBoard" />
+            <JumpButton page={process.env.REACT_APP_DASHBOARD} disabled={myDisable} text="DashBoard" />
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_STAT} disabled={userGroup.length === 0} text="Statistics" />
+            <JumpButton page={process.env.REACT_APP_STAT} disabled={myDisable} text="Statistics" />
             </Grid>
           </Grid>
           <Grid key="jp3" container >
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_CAPTAIN} disabled={userGroup.length === 0} text="Captain" />
+            <JumpButton page={process.env.REACT_APP_CAPTAIN} disabled={myDisable} text="Captain" />
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_TEAM} disabled={userGroup.length === 0} text="My Team" />
+            <JumpButton page={process.env.REACT_APP_TEAM} disabled={myDisable} text="My Team" />
             </Grid>
           </Grid>
           <Grid key="jp4" container >
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_GROUPDETAILS} disabled={userGroup.length === 0} text="GroupDetails" />
+            <JumpButton page={process.env.REACT_APP_GROUPDETAILS} disabled={myDisable} text="GroupDetails" />
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} >
             <JumpButton page={process.env.REACT_APP_PLAYERINFO} disabled={false} text="Player Info" />
@@ -501,10 +502,10 @@ export default function Home() {
           </Grid>
           <Grid key="jp5" container >
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_AUCTION} disabled={userGroup.length === 0} text="Auction" />
+            <JumpButton page={process.env.REACT_APP_AUCTION} disabled={myDisable} text="Auction" />
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} >
-            <JumpButton page={process.env.REACT_APP_MATCH} disabled={userGroup.length === 0} text="Match" />
+            <JumpButton page={process.env.REACT_APP_MATCH} disabled={myDisable} text="Match" />
           </Grid>
           </Grid>
         </div>
