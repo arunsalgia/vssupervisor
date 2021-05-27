@@ -165,13 +165,13 @@ export default function Wallet() {
 
   function handleSucces(response) {
     console.log("Success", response);
-    setMessage(`Transaction ${response.paymentId} Success`);
+    setMessage(`Transaction ${response} Success`);
     setRegisterStatus(1001);
   }
 
   function handleFailure(response) {
     console.log("Failure", response);
-    setMessage(`Transaction ${response.paymentId} Failed`);
+    setMessage(`Transaction ${response} Failed`);
     setRegisterStatus(1002);
   }
   
@@ -212,6 +212,7 @@ export default function Wallet() {
   }
 
   function handleSubmit() {
+    setRegisterStatus(0);
     try {
       Instamojo.configure({
         handlers: {
@@ -222,8 +223,8 @@ export default function Wallet() {
         }
       });
 
-      Instamojo.open('https://test.instamojo.com/@arun_salgia/ -data "allow_repeated_payments=False&amount=2500&buyer_name=John+Doe&purpose=FIFA+16&phone=9999999999&send_email=True&send_sms=False&email=arunsalgia%40gmail.com"');
-
+      // Instamojo.open('https://test.instamojo.com/@arun_salgia?allow_repeated_payments=False&amount=2500&buyer_name=John+Doe&purpose=FIFA+16&phone=9999999999&send_email=True&send_sms=False&email=arunsalgia%40gmail.com');
+      Instamojo.open('https://test.instamojo.com/@arun_salgia?purpose=FIFA+16&amount=1200&buyer_name=John+Doe&email=arunsalgia%40gmail.com&phone=9999999999&send_email=true&send_sms=false&allow_repeated_payments=false');
     } catch (e) {
       console.log(e);
       console.log("Error tyring InstaMojo pay");
@@ -231,6 +232,7 @@ export default function Wallet() {
   }
 
   function viamail_handleSubmit() {
+
     try {
       var payload = {
         purpose: 'FIFA 16',
@@ -273,8 +275,8 @@ export default function Wallet() {
       <CssBaseline />
       <div className={gClasses.paper}>
         <Typography component="h1" variant="h5">Wallet Balance: {balance}</Typography>
-        {/* <AddToWallet />
-        <ShowResisterStatus /> */}
+        <AddToWallet />
+        <ShowResisterStatus />
         <TableContainer>
         <Table>
         <TableHead p={0}>
