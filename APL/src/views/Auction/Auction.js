@@ -43,6 +43,9 @@ import { hasGroup } from 'views/functions';
 import {blue, green, orange, deepOrange}  from '@material-ui/core/colors';
 import Modal from 'react-modal';
 
+const PLAYCOUNTDOWNAUDIO=false;
+const PLAYCLICKAUDIO=true;
+
 const modalStyles = {
     content : {
       top                   : '50%',
@@ -323,11 +326,12 @@ export default function Auction() {
                 }
                 //console.log("mycount", myCountdown);
                 setCountDown(myCountdown);
-                if (myCountdown > 0) {
-                    let countMp3 = `${process.env.PUBLIC_URL}/audio/${myCountdown}.MP3`;
-                    let audioClick = new Audio(countMp3);
-                    audioClick.play();
-        
+                if (PLAYCOUNTDOWNAUDIO) {
+                    if (myCountdown > 0) {
+                        let countMp3 = `${process.env.PUBLIC_URL}/audio/${myCountdown}.MP3`;
+                        let audioClick = new Audio(countMp3);
+                        audioClick.play();
+                    }
                 }
             });
 
@@ -343,9 +347,11 @@ export default function Auction() {
                 setBidAmount(grec.auctionBid);
                 setBidUser(grec.currentBidUser);
                 setBidUid(grec.currentBidUid);
-                let clickMp3 = `${process.env.PUBLIC_URL}/audio/CLICK.MP3`;
-                let audioClick = new Audio(clickMp3);
-                audioClick.play();    
+                if (PLAYCLICKAUDIO) {
+                    let clickMp3 = `${process.env.PUBLIC_URL}/audio/CLICK.MP3`;
+                    let audioClick = new Audio(clickMp3);
+                    audioClick.play();    
+                }
             });
             sockConn.on("playerChange", async (newPlayerDetails, balanceDetails) => {
                 // console.log("Calling updatePlayerChange from socker");
@@ -504,11 +510,13 @@ export default function Auction() {
                             {/* <Avatar variant="square" src={`${process.env.PUBLIC_URL}/${props.pTeamLogo}.JPG`} className={classes.medium} /> */}
                             <Avatar variant="square" src={myTeam} className={classes.medium} />
                         </Grid>
-                        <div align="center"><h6 className={classes.hdrText} align="center">
+                        <div align="center">
+                            <h6 className={classes.hdrText} align="center">
                             {role}<br/>
                             {battingStyle}<br />
                             {bowlingStyle}
-                        </h6></div>
+                        </h6>
+                        </div>
                     </CardBody>
                 </Card>
             </div>

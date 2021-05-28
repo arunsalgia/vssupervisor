@@ -374,6 +374,9 @@ export function clearBackupData() {
   localStorage.removeItem("captain");
   localStorage.removeItem("viceCaptain");
   localStorage.removeItem("captainList");
+  /* clear home */
+  localStorage.removeItem("home_tournamentList");
+  localStorage.removeItem("home_groupList");
 }
 
 

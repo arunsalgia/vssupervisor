@@ -145,7 +145,20 @@ export default function Home() {
     const [defaultGroup, setDefaultGroup] = React.useState("");
     const [currentGroup, setCurrentGroup] = useState(0);
 
+    const [firstTime, setFirstTime] = useState(true);
+
     useEffect(() => {
+
+      if (firstTime) {
+        if (localStorage.getItem("home_tournamentList"))
+            setTournamentList(JSON.parse(localStorage.getItem("home_tournamentList")));
+
+        if (localStorage.getItem("home_groupList"))
+            setUserGroup(JSON.parse(localStorage.getItem("home_groupList")));
+
+        setFirstTime(false);
+      }
+
       const checkVersion = async () => {
         //console.log("about to call upgrade");
         let upg = await upGradeRequired();
@@ -166,6 +179,7 @@ export default function Home() {
         let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`;
         axios.get(myUrl).then((response) => {
           setTournamentList(response.data);
+          localStorage.setItem("home_tournamentList", JSON.stringify(response.data));
         }).catch((error) => {
           console.log('Tournamnet fetch Not good man :(');
           console.log(error);
@@ -178,6 +192,9 @@ export default function Home() {
         let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/group/memberof/${localStorage.getItem("uid")}`;
         axios.get(myUrl).then((response) => {
           let allGroups = response.data[0].groups;
+          setUserGroup(allGroups);
+          localStorage.setItem("home_groupList", JSON.stringify(allGroups));
+
           if (allGroups.length > 0) {
             let tmp = allGroups.find(x => x.defaultGroup == true);
             if (!tmp) {
@@ -191,7 +208,6 @@ export default function Home() {
               setDefaultGroup(tmp.groupName);
             }
           }
-          setUserGroup(allGroups);
           // setDefaultGroup(localStorage,getItem("groupName"));
         }).catch((error) => {
           console.log('Group Not good man :(');
