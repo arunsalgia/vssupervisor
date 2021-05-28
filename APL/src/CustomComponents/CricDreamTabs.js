@@ -146,7 +146,7 @@ export function CricDreamTabs() {
   const [grpAnchorEl, setGrpAnchorEl] = React.useState(null);
   const grpOpen = Boolean(grpAnchorEl);
   const [arunGroup, setArunGroup] = React.useState(false);
-  const [value, setValue] = React.useState(parseInt(localStorage.getItem("menuValue")));
+  const [value, setValue] = React.useState(0);
   const [upgrade, setUpgrade] = React.useState(false);
   const [modalIsOpen,setIsOpen] = React.useState(true);
   const [userGroup, setUserGroup] = React.useState([]);
@@ -163,13 +163,9 @@ export function CricDreamTabs() {
       if (upg.status) setIsOpen(true);
     }
     // console.log("About to eheck for idle")
-    if (checkIdle()) {
-      // console.log("it was idle");
-      let newoption = parseInt(process.env.REACT_APP_HOME);
-      // console.log(newoption)
-      setValue(newoption);
-      setIdle(false);
-    }
+    let newoption = (checkIdle()) ? process.env.REACT_APP_HOME : localStorage.getItem("menuValue");
+    setValue(parseInt(newoption));
+    setIdle(false);
     // if (value === parseInt(process.env.REACT_APP_HOME))
     //   checkVersion();
 }, []);
