@@ -123,7 +123,7 @@ export default function APLPlayer(props) {
   }
 
   // let myVideo = `url(${process.env.PUBLIC_URL}/video/DEMO.MP4)`;
-  // console.log("Play video", props.video);
+  console.log("Play video", props.video);
   return (
     <div className="App">
       <video
@@ -136,6 +136,7 @@ export default function APLPlayer(props) {
       >
         <source                
           // src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
+          // src='https://www.youtube.com/watch?v=rnwlWn603g4'
           src={props.video}
           type="video/mp4"
         />

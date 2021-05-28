@@ -26,6 +26,7 @@ import { DisplayPageHeader, DisplayVersion } from 'CustomComponents/CustomCompon
 import {currentAPLVersion, latestAPLVersion} from "views/functions.js";
 import { blue, red } from '@material-ui/core/colors';
 import PsPage from "views/APL/PSPage";
+// import DisplayDemo from "views/APL/DisplayDemo"
 import APLPlayer from './VideoPlayer';
 
 
@@ -86,7 +87,7 @@ export default function About() {
   const classes = useStyles();
   const videoPlayer = useRef();
   // const [expanded, setExpanded] = React.useState(false);
-   const [matchType, setMatchType] = useState("T20");
+   const [demoType, setDemoType] = useState("new");
    const [currentVersion, setCurrentVersion] = useState(9.9);
    const [latestVersion, setLatestVersion] = useState(8.8);
 
@@ -309,9 +310,10 @@ export default function About() {
       </Card>
     )}
   
-    let myVideo = `${process.env.PUBLIC_URL}/video/DEMO_org.MP4`;
     // let myVideo = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
     // let myVideo= "https://www.youtube.com/watch?v=GwFsx5F3dGk";
+    let myVideo = `${process.env.PUBLIC_URL}/video/AUCTION.MP4`;
+    
     return (
     <div className={classes.root}>
       <DisplayPageHeader headerName="Help Desk" groupName="" tournament=""/>
@@ -322,6 +324,7 @@ export default function About() {
       <Accordion expanded={expandedPanel === "demo"} onChange={handleAccordionChange("demo")}>
         <DisplayHeader header="How to Play demo"/>
         <AccordionDetails>
+        {/* <DisplayDemo /> */}
         <APLPlayer video={myVideo} />
         {/* <DIsplayGif gif="SAMPLE.GIF"/> */}
         </AccordionDetails>

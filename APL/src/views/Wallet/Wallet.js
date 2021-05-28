@@ -13,18 +13,17 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-import { makeStyles } from '@material-ui/core/styles';
+// import { makeStyles } from '@material-ui/core/styles';
 import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
-// import { UserContext } from "../../UserContext";
 import axios from "axios";
 import useScript from './useScript';
 var request= require('request');
+// import { UserContext } from "../../UserContext";
 // import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import { red, deepOrange } from '@material-ui/core/colors';
 // import { useHistory } from "react-router-dom";
 // import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
-//include();
+// import { red, deepOrange } from '@material-ui/core/colors';
 // var Insta = require('instamojo-nodejs');
 
 const API_KEY = "test_122c89dd87b24c3977474e3e82f";
@@ -42,57 +41,15 @@ const INSTAMOJOSCRIPT="https://js.instamojo.com/v1/checkout.js";
 const COUNTPERPAGE=5;
 
 
-// const useStyles = makeStyles((theme) => ({
-//   paper: {
-//     marginTop: theme.spacing(8),
-//     display: 'flex',
-//     flexDirection: 'column',
-//     alignItems: 'center',
-//   },
-//   avatar: {
-//     margin: theme.spacing(1),
-//     backgroundColor: theme.palette.secondary.main,
-//   },
-//   form: {
-//     width: '100%', // Fix IE 11 issue.
-//     marginTop: theme.spacing(1),
-//   },
-//   submit: {
-//     margin: theme.spacing(3, 0, 2),
-//   },
-//   error:  {
-//       // right: 0,
-//       fontSize: '12px',
-//       color: red[700],
-//       // position: 'absolute',
-//       alignItems: 'center',
-//       marginTop: '0px',
-//   },
-//   th: { 
-//     spacing: 0,
-//     align: "center",
-//     padding: "none",
-//     backgroundColor: '#EEEEEE', 
-//     color: deepOrange[700], 
-//     // border: "1px solid black",
-//     fontWeight: theme.typography.fontWeightBold,
-//   },
-//   td : {
-//     spacing: 0,
-//     // border: 5,
-//     align: "center",
-//     padding: "none",
-//     height: 10,
-//   },    
-// }));
 
 
 export default function Wallet() {
   useScript(INSTAMOJOSCRIPT);
+
+  // const history = useHistory();
   // const classes = useStyles();
   const gClasses = globalStyles();
 
-  // const history = useHistory();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [registerStatus, setRegisterStatus] = useState(0);
@@ -121,7 +78,6 @@ export default function Wallet() {
   }, []);
 
   function ShowResisterStatus() {
-    //console.log(`Status is ${registerStatus}`);
     let myMsg;
     let errmsg = true;
     switch (registerStatus) {
@@ -165,52 +121,16 @@ export default function Wallet() {
 
   function handleSucces(response) {
     console.log("Success", response);
-    setMessage(`Transaction ${response} Success`);
+    setMessage(`Transaction Success`, respose);
     setRegisterStatus(1001);
   }
 
   function handleFailure(response) {
     console.log("Failure", response);
-    setMessage(`Transaction ${response} Failed`);
+    setMessage(`Transaction Failed`, response);
     setRegisterStatus(1002);
   }
   
-  function org_handleSubmit() {
-    try {
-      Insta.setKeys(API_KEY, AUTH_KEY);
-      Insta.isSandboxMode(true);
-      console.log(Insta);
-      
-      var data = new Insta.PaymentData();
-      //data.setRedirectUrl(REDIRECT_URL);
-      console.log("before", data);
-      data.purpose = "Test";            // REQUIRED
-      data.amount = 9;                  // REQUIRED
-      // data.currency                = 'INR';
-      // data.buyer_name              = 'Arun Salgia';
-      // data.email                   = 'arunsalgia@gmail.com';
-      // data.phone                   = 1234567890;
-      // data.send_sms                = 'False';
-      // data.send_email              = 'True';
-      // data.allow_repeated_payments = 'False';
-      // data.webhook                 = 'Your endpoint to capture POST data from a payment';
-      // data.redirect_url            = 'Your endpoint where instamojo redirects user to after payment';
-      console.log("after", data);
-
-      Insta.createPayment(data, function(error, response) {
-        if (error) {
-          console.log(error);
-        } else {
-          // Payment redirection link at response.payment_request.longurl
-          console.log(response);
-        }
-      });
-    } catch (e) {
-      console.log(e);
-      console.log("Error tyring InstaMojo pay");
-    }
-  }
-
   function handleSubmit() {
     setRegisterStatus(0);
     try {
@@ -227,7 +147,7 @@ export default function Wallet() {
       Instamojo.open('https://test.instamojo.com/@arun_salgia?purpose=FIFA+16&amount=1200&buyer_name=John+Doe&email=arunsalgia%40gmail.com&phone=9999999999&send_email=true&send_sms=false&allow_repeated_payments=false');
     } catch (e) {
       console.log(e);
-      console.log("Error tyring InstaMojo pay");
+      console.log("Error calling InstaMojo pay");
     }
   }
 

@@ -313,18 +313,21 @@ export default function PsPage() {
   function ShowPointSystem() {
   //console.log("In Point System");
   if (matchType === "TEST") {
-    return (<div><DisplayMatchType /><TEST_PointSystem /></div>); 
+    return (<div><TEST_PointSystem /></div>); 
   } else if (matchType === "ODI") {
-    return (<div><DisplayMatchType /><ODI_PointSystem /></div>); 
+    return (<div><ODI_PointSystem /></div>); 
   } else if (matchType === "T20") {
-    return (<div><DisplayMatchType /><T20_PointSystem /></div>); 
+    return (<div><T20_PointSystem /></div>); 
   } else {
     return (<h5>Unknown match type</h5>); 
   }}
   
   
   return (
+    <div>
+    <DisplayMatchType />
     <ShowPointSystem />
+    </div>
   );
 }
 
