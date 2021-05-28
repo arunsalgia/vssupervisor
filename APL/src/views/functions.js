@@ -353,6 +353,7 @@ export async function downloadApk() {
     console.log(e);
     console.log("in try catch");
   } 
+  
   console.log("Debu complete");
 
 }
