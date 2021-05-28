@@ -89,6 +89,7 @@ export default function SignIn() {
   // const [open, setOpen] = useState(true)
   // const { setUser } = useContext(UserContext);
   const [ errorMessage, setErrorMessage ] = useState({msg: "", isError: false });
+  const [ downloadMessage, setDownloadMessage ] = useState("");
   // const [errorFound, setErrorFound] = useState(false);
 
   useEffect(() => {
@@ -169,13 +170,13 @@ export default function SignIn() {
   
   async function handleAndroid() {
     try {
-      setError("APL Android app download started.", false)
+      setDownloadMessage("APL Android app download started. Please wait...")
       // console.log("Download Android app");
       await downloadApk();
-      setError("APL Android app sent to client.", false)
+      setDownloadMessage("APL Android app download complete.")
       // console.log("APK has to be downloaded");
     } catch (e) {
-      setError("Error encountred while downloading APL Android app", true)
+      setDownloadMessage("Error encountred while downloading APL Android app", true)
     }
   }
 
@@ -193,6 +194,7 @@ export default function SignIn() {
       <div align="center">
       <Typography className={gClasses.message18}>Download the offical app</Typography>
       <BlankArea />
+      <Typography className={gClasses.nonerror} align="center">{downloadMessage}</Typography>
       <Grid key="jp1" container align="center">
         <Grid item xs={12} sm={12} md={12} lg={12} >
         <button><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
