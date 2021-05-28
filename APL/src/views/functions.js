@@ -297,7 +297,7 @@ export async function upGradeRequired() {
 }
 
 
-export async function downloadApk() {
+export async function org_downloadApk() {
   let myName = process.env.REACT_APP_NAME;
   let myURL = `${process.env.REACT_APP_APLAXIOS}/apl/downloadlatestbinary/${myName}/APK/`;
   try {
@@ -332,6 +332,30 @@ export async function downloadApk() {
 }
 
 
+export async function downloadApk() {
+  let myName = process.env.REACT_APP_NAME;
+  let myURL = `${process.env.REACT_APP_APLAXIOS}/apl/downloadlatestbinary/${myName}/APK/`;
+  try {
+    let response = await axios({
+      method: 'get',
+      url: myURL,
+      responseType: 'arraybuffer',
+      // onDownloadProgress: (progressEvent) => {
+      //   // let newPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      //   // console.log("File download in progress ", newPercent);
+      // },
+      });
+    let myFile = process.env.REACT_APP_NAME + ".APK";
+    console.log(myFile);
+    download(response.data, myFile);
+    console.log("download over");
+  } catch (e) {
+    console.log(e);
+    console.log("in try catch");
+  } 
+  console.log("Debu complete");
+
+}
 
 export function clearBackupData() {
   /* Clear dash board items */
