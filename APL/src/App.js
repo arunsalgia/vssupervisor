@@ -134,7 +134,7 @@ return (
       <Router history={hist}> 
       <UserContext.Provider value={value}>
       <Route path="/apl/walletdetails" component={Dummy} />
-      <Route path="/apl/walletadd" component={Dummy} />
+      {/* <Route path="/apl/walletadd" component={Dummy} /> */}
       </UserContext.Provider>
       <DispayTabs />
       </Router>

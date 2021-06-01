@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+//import { createBrowserHistory } from "history";
+//import { useHistory } from "react-router-dom";
 import axios from "axios";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -130,6 +132,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export function setTab(num) {
+  
   //myTabPosition = num;
   //console.log(`Menu pos ${num}`);
   localStorage.setItem("menuValue", num);

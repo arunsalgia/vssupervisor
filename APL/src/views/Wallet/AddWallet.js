@@ -35,15 +35,7 @@ export default function AddWallet() {
   const [emptyRows, setEmptyRows] = React.useState(0);
   const [page, setPage] = React.useState(0);
 
-  // havew we comw via route
-  if (localStorage.getItem("menuValue") !== process.env.REACT_APP_ADDWALLET)
-    setTab(process.env.REACT_APP_ADDWALLET)
-  else
-    console.log("No Chnage required. IN add wallet");
-    
-  useEffect(() => {
-  }, []);
-
+  
   function ShowResisterStatus() {
     let myMsg;
     let errmsg = true;

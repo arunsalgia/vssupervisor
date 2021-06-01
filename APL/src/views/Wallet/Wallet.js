@@ -1,4 +1,5 @@
 import React, { useState, useEffect} from 'react';
+import { useHistory } from "react-router-dom";
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 // import TextField from '@material-ui/core/TextField';
@@ -37,10 +38,10 @@ const COUNTPERPAGE=5;
 
 
 
-export default function Wallet() {
+export default function Wallet(props) {
   //useScript(INSTAMOJOSCRIPT);
 
-  // const history = useHistory();
+  //const history = useHistory();
   // const classes = useStyles();
   const gClasses = globalStyles();
 
@@ -54,11 +55,11 @@ export default function Wallet() {
 
   // havew we comw via route
   console.log("Wallter", localStorage.getItem("menuValue"));
-  if (localStorage.getItem("menuValue") !== process.env.REACT_APP_WALLET)
-    setTab(process.env.REACT_APP_WALLET)
-  else
-    console.log("No Chnage required");
-    
+  console.log("dateils from Insta",
+  sessionStorage.setItem("payment_id"),
+  sessionStorage.setItem("payment_status"),
+  sessionStorage.setItem("payment_request_id")
+  );
   useEffect(() => {
     const WalletInfo = async () => {
       try {
@@ -112,74 +113,6 @@ export default function Wallet() {
 
   };
 
-  function handleOpen() {
-    console.log("Connection Opened");
-  }
-
-  function handleClose() {
-    console.log("Connection Closed");
-  }
-
-  function handleSucces(response) {
-    console.log("Success", response);
-    setMessage(`Transaction Success`, respose);
-    setRegisterStatus(1001);
-  }
-
-  function handleFailure(response) {
-    console.log("Failure", response);
-    setMessage(`Transaction Failed`, response);
-    setRegisterStatus(1002);
-  }
-  
-  function handleSubmit() {
-    setRegisterStatus(0);
-    try {
-      Instamojo.configure({
-        handlers: {
-          onOpen: handleOpen,
-          onClose: handleClose,
-          onSuccess: handleSucces,
-          onFailure: handleFailure
-        }
-      });
-
-      // Instamojo.open('https://test.instamojo.com/@arun_salgia?allow_repeated_payments=False&amount=2500&buyer_name=John+Doe&purpose=FIFA+16&phone=9999999999&send_email=True&send_sms=False&email=arunsalgia%40gmail.com');
-      Instamojo.open('https://test.instamojo.com/@arun_salgia?purpose=FIFA+16&amount=1200&buyer_name=John+Doe&email=arunsalgia%40gmail.com&phone=9999999999&send_email=true&send_sms=false&allow_repeated_payments=false');
-    } catch (e) {
-      console.log(e);
-      console.log("Error calling InstaMojo pay");
-    }
-  }
-
-  function viamail_handleSubmit() {
-
-    try {
-      var payload = {
-        purpose: 'FIFA 16',
-        amount: '2500',
-        phone: '9999999999',
-        buyer_name: 'John Doe',
-        redirect_url: '',
-        send_email: true,
-        webhook: '',
-        send_sms: false,
-        email: 'arunsalgi@gmail.com',
-        allow_repeated_payments: false
-      };
-      
-      request.post('https://www.instamojo.com/api/1.1/payment-requests/', 
-        {form: payload,  headers: headers}, 
-        function(error, response, body) {
-        if(!error && response.statusCode == 201){
-          console.log(body);
-        }
-      })
-    } catch (e) {
-      console.log(e);
-      console.log("Error tyring InstaMojo pay");
-    }
-  }
 
   function handleAddWallet() {
     setTab(process.env.REACT_APP_ADDWALLET);
@@ -191,7 +124,6 @@ export default function Wallet() {
         onClick={handleAddWallet}
         className={gClasses.button}>Add to Wallet
     </Button>
-
     )
   }
 
