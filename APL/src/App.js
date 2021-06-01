@@ -12,6 +12,9 @@ import SignUp from "views/Login/SignUp.js";
 import ForgotPassword from "views/Login/ForgotPassword.js";
 import IdleTimer from 'react-idle-timer'
 import { setIdle }from "views/functions.js"
+import Wallet from "views/Wallet/Wallet";
+import Dummy from "views/APL/Dummy";
+import { PinDropSharp } from "@material-ui/icons";
 
 
 const hist = createBrowserHistory();
@@ -120,16 +123,18 @@ function AppRouter() {
   // <Router history={hist}> 
   //     <UserContext.Provider value={value}>
   //       {!user && <Redirect from="/" to="/signIn" />}
-        // <Route path="/joingroup" component={JoinGroup} />
+  //       <Route path="/joingroup" component={JoinGroup} />
   //       <Route path="/admin" component={value ? Admin : SignIn} />
   //       <Redirect from="/" to="/signIn" />
   //     </UserContext.Provider>
-    // </Router>
+  //   </Router>
   // );
 
 return (
       <Router history={hist}> 
       <UserContext.Provider value={value}>
+      <Route path="/apl/walletdetails" component={Dummy} />
+      <Route path="/apl/walletadd" component={Dummy} />
       </UserContext.Provider>
       <DispayTabs />
       </Router>

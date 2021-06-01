@@ -18,6 +18,8 @@ import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 import axios from "axios";
 import useScript from './useScript';
+import { setTab }from "CustomComponents/CricDreamTabs";
+import { BlankArea } from 'CustomComponents/CustomComponents';
 var request= require('request');
 // import { UserContext } from "../../UserContext";
 // import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
@@ -26,25 +28,17 @@ var request= require('request');
 // import { red, deepOrange } from '@material-ui/core/colors';
 // var Insta = require('instamojo-nodejs');
 
-const API_KEY = "test_122c89dd87b24c3977474e3e82f";
-const AUTH_KEY = "test_4c814766fd46608724119f04929";
-const headers = { 
-  'X-Api-Key': API_KEY, 'X-Auth-Token': AUTH_KEY,
-  "Content-Type": "application/json",
-  'Access-Control-Allow-Origin': '*',
-  "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
-};
 
 
-const INSTAMOJOSCRIPT="https://js.instamojo.com/v1/checkout.js";
+
+//const INSTAMOJOSCRIPT="https://js.instamojo.com/v1/checkout.js";
 const COUNTPERPAGE=5;
 
 
 
 
 export default function Wallet() {
-  useScript(INSTAMOJOSCRIPT);
+  //useScript(INSTAMOJOSCRIPT);
 
   // const history = useHistory();
   // const classes = useStyles();
@@ -58,6 +52,13 @@ export default function Wallet() {
   const [emptyRows, setEmptyRows] = React.useState(0);
   const [page, setPage] = React.useState(0);
 
+  // havew we comw via route
+  console.log("Wallter", localStorage.getItem("menuValue"));
+  if (localStorage.getItem("menuValue") !== process.env.REACT_APP_WALLET)
+    setTab(process.env.REACT_APP_WALLET)
+  else
+    console.log("No Chnage required");
+    
   useEffect(() => {
     const WalletInfo = async () => {
       try {
@@ -180,10 +181,14 @@ export default function Wallet() {
     }
   }
 
+  function handleAddWallet() {
+    setTab(process.env.REACT_APP_ADDWALLET);
+  }
+
   function AddToWallet() {
     return (
       <Button type="submit" variant="contained" color="primary" 
-        onClick={handleSubmit}
+        onClick={handleAddWallet}
         className={gClasses.button}>Add to Wallet
     </Button>
 
@@ -195,7 +200,6 @@ export default function Wallet() {
       <CssBaseline />
       <div className={gClasses.paper}>
         <Typography component="h1" variant="h5">Wallet Balance: {balance}</Typography>
-        <AddToWallet />
         <ShowResisterStatus />
         <TableContainer>
         <Table>
@@ -235,6 +239,8 @@ export default function Wallet() {
           onChangePage={handleChangePage}
           // onChangeRowsPerPage={handleChangeRowsPerPage}
         />
+        <BlankArea />
+        <AddToWallet />
       </div>
     </Container>
   );

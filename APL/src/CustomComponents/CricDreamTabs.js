@@ -28,6 +28,7 @@ import Captain from "views/Captain/Captain"
 import Match from "views/UpcomingMatch/UpcomingMatch"
 import Group from "views/Group/Group"
 import Wallet from "views/Wallet/Wallet.js"
+import AddWallet from "views/Wallet/AddWallet";
 import PlayerInfo from "views/APL/PlayerInfo";
 // import Profile from "views/Profile/Profile.js"
 import Profile from "views/Profile/UserProfile"
@@ -253,6 +254,7 @@ export function CricDreamTabs() {
   const handleWallet = () => { handleClose(); setMenuValue(105);}
   const handleProfile = () => { handleClose(); setMenuValue(106);}
   const handlePassword = () => { handleClose(); setMenuValue(107);}
+  // 108 for add wallet
   const handleHelpDesk = () => { handleClose(); setMenuValue(201);}
   const handleContactUs = () => { handleClose(); setMenuValue(202);}
   const handleSuTournament = () => { handleClose(); setMenuValue(301);}
@@ -298,6 +300,7 @@ export function CricDreamTabs() {
       case 105: return <Wallet />;
       case 106: return <Profile />;
       case 107: return <ChangePassword />;
+      case 108: return <AddWallet />
       case 201: return <About />;
       case 202: return <ContactUs />;
       case 203: return <PointSystem />;

@@ -145,6 +145,7 @@ export default function Home() {
     const [defaultGroup, setDefaultGroup] = React.useState("");
     const [currentGroup, setCurrentGroup] = useState(0);
 
+    const [startDownload, setStartDownload] = useState(false);
     const [firstTime, setFirstTime] = useState(true);
 
     useEffect(() => {
@@ -530,6 +531,7 @@ export default function Home() {
   
     async function handleUpgrade() {
       //console.log("upgrade requested");
+      setStartDownload(true);
       closeModal();
       await downloadApk();
       console.log("APK has to be downloaded");
@@ -572,7 +574,7 @@ export default function Home() {
           />
           <BlankArea />
           <Button align="center" key="upgrade" variant="contained" color="primary" size="medium"
-            className={classes.dashButton} onClick={handleUpgrade}>Update Now
+            className={classes.dashButton} disabled={startDownload} onClick={handleUpgrade}>Update Now
           </Button>
         </Modal>
         )
