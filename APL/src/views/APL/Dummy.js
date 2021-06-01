@@ -53,7 +53,7 @@ import { useParams } from 'react-router-dom'
 
 
 export default function Dummy(props) {
-  const classes = useStyles();
+  //const classes = useStyles();
   const history = useHistory();
   console.log("in dummy");
   console.log(props.location);
