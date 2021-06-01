@@ -98,8 +98,12 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'APL/build/')));
+//app.use(express.static(path.join(__dirname, 'APL/build/')));
 app.use(express.json());
+app.use(express.static('APL/build'));
+app.get('*', (request, response) => {
+	response.sendFile(path.resolve(__dirname, 'APL', 'build', 'index.html'));
+});
 
 
 app.use((req, res, next) => {
