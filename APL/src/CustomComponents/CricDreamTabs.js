@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 //import { createBrowserHistory } from "history";
-//import { useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
+import { useParams } from 'react-router-dom'
 import axios from "axios";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -53,6 +54,7 @@ import {cdRefresh, specialSetPos, upGradeRequired,
   checkIdle, setIdle,
   internalToText, textToInternal,
 } from "views/functions.js"
+import { LocalSee } from '@material-ui/icons';
 
 
 const customStyles = {
@@ -140,6 +142,7 @@ export function setTab(num) {
 }
 
 export function CricDreamTabs() {
+  const history = useHistory();
   const classes = useStyles();
   // for menu 
   const [auth, setAuth] = React.useState(true);
@@ -156,6 +159,8 @@ export function CricDreamTabs() {
   const [userGroup, setUserGroup] = React.useState([]);
   const [latestApk, setLatestApk] = React.useState(null);
 
+  //console.log(location.pathname);
+
   useEffect(() => {       
     const checkVersion = async () => {
       //console.log("about to call upgrade");
@@ -166,12 +171,46 @@ export function CricDreamTabs() {
       setUpgrade(upg.status);
       if (upg.status) setIsOpen(true);
     }
-    // console.log("About to eheck for idle")
-    let newoption = (checkIdle()) ? process.env.REACT_APP_HOME : localStorage.getItem("menuValue");
-    setValue(parseInt(newoption));
-    setIdle(false);
+    function setMenuValue() {
+
+      // check url
+      let walletRouting = false;
+      let x = location.pathname.split("/");
+      if (x.length >= 3)
+      if (x[1] === "apl")
+      if (x[2] === "walletdetails") {
+        walletRouting = true;
+        // const { payment_id, payment_status,  payment_request_id} = useParams();
+        //console.log("URLDATA", payment_id, payment_status, payment_request_id);
+        let param = (x.length >= 4) ? x[3] : "";
+        sessionStorage.setItem("payment_id", param)
+        param = (x.length >= 5) ? x[4] : "";
+        sessionStorage.setItem("payment_status", param)
+        param = (x.length >= 6) ? x[5] : "";
+        sessionStorage.setItem("payment_request_id", param)
+      }
+      
+      if (walletRouting) {
+        localStorage.setItem("menuValue", process.env.REACT_APP_WALLET);
+        history.push("/");
+      } else if (checkIdle()) {
+        localStorage.setItem("menuValue", process.env.REACT_APP_HOME);
+      } 
+      setValue(parseInt(localStorage.getItem("menuValue")));
+      setIdle(false);
+    }
+    // Version check is now done in Home component
     // if (value === parseInt(process.env.REACT_APP_HOME))
-    //   checkVersion();
+    //   checkVersion();  
+    
+    setMenuValue();
+
+    // console.log("Params",
+    //   sessionStorage.getItem("param1"),
+    //   sessionStorage.getItem("param2"),
+    //   sessionStorage.getItem("param3")
+    // );
+
 }, []);
 
 

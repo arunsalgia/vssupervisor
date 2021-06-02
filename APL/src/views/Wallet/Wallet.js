@@ -54,12 +54,12 @@ export default function Wallet(props) {
   const [page, setPage] = React.useState(0);
 
   // havew we comw via route
-  console.log("Wallter", localStorage.getItem("menuValue"));
-  console.log("dateils from Insta",
-  sessionStorage.getItem("payment_id"),
-  sessionStorage.getItem("payment_status"),
-  sessionStorage.getItem("payment_request_id")
-  );
+  console.log("Wallet", localStorage.getItem("menuValue"));
+  // console.log("dateils from Insta",
+  // sessionStorage.getItem("payment_id"),
+  // sessionStorage.getItem("payment_status"),
+  // sessionStorage.getItem("payment_request_id")
+  // );
   useEffect(() => {
     const WalletInfo = async () => {
       try {

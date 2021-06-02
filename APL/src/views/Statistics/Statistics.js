@@ -252,7 +252,7 @@ export default function Stats() {
         closeModal();
       }
     }
-    getGuide();
+    //getGuide();
 
     return () => {
       // componentwillunmount in functional component.
