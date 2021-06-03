@@ -1735,6 +1735,7 @@ cron.schedule('*/1 * * * *', () => {
 
   if ((WEB) && (PRODUCTION)) {   // not to be done in APK
     if (++pingTimer >= PINGUPDATEINTERVAL) {
+      console.log("Pinging Server");
       pingTimer = 0;
       pingServer();
     }
