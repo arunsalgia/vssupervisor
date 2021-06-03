@@ -9,7 +9,9 @@ _ = require("lodash");
 cron = require('node-cron');
 nodemailer = require('nodemailer');
 app = express();
-PRODUCTION=true;  
+PRODUCTION=true; 
+WEB=true;
+PINGURL="https://ankitipl.herokuapp.com/apl/master/list";
 PRIZEPORTION=1.0
 
 
@@ -51,6 +53,9 @@ CLIENTUPDATEINTERVAL=10;
 clientUpdateCount=0;
 CRICUPDATEINTERVAL = 15;    // in seconds. Interval after seconds fetch cricket match data from cricapi
 cricTimer = 0;
+PINGUPDATEINTERVAL=20;   // 20 minutes
+pingTimer = 0;
+
 // maintain list of runnning matches
 runningMatchArray = [];
 clentData = [];

@@ -1726,15 +1726,24 @@ async function checkallover() {
   }
 }
 
+async function pingServer() {
+  let junk = await fetch(PINGURL);
+}
+
 // schedule task 
 cron.schedule('*/1 * * * *', () => {
-  if (!db_connection) {
-    console.log("============= No mongoose connection");
-    return;
-  }  else {
-    let x = new Date();
-    console.log("Hello");
+
+  if ((WEB) && (PRODUCTION)) {   // not to be done in APK
+    if (++pingTimer >= PINGUPDATEINTERVAL) {
+      pingTimer = 0;
+      pingServer();
+    }
   }
+
+  if (!db_connection) {
+    //console.log("============= No mongoose connection");
+    return;
+  }  
 
   if (!PRODUCTION) {
     if (++cricTimer >= CRICUPDATEINTERVAL) {
