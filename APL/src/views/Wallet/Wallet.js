@@ -118,12 +118,23 @@ export default function Wallet(props) {
     setTab(process.env.REACT_APP_ADDWALLET);
   }
 
-  function AddToWallet() {
+  function handleWithdraw() {
+    setTab(process.env.REACT_APP_WITHDRAWWALLET);
+  }
+
+
+  function WalletButton() {
     return (
-      <Button type="submit" variant="contained" color="primary" 
+      <div>
+      <Button type="submit" variant="contained" color="primary"
         onClick={handleAddWallet}
         className={gClasses.button}>Add to Wallet
-    </Button>
+      </Button>
+      <Button type="submit" variant="contained" color="primary" 
+       onClick={handleWithdraw}
+        className={gClasses.button}>Withdraw
+     </Button>
+     </div>
     )
   }
 
@@ -172,7 +183,7 @@ export default function Wallet(props) {
           // onChangeRowsPerPage={handleChangeRowsPerPage}
         />
         <BlankArea />
-        <AddToWallet />
+        <WalletButton />
       </div>
     </Container>
   );

@@ -5,6 +5,8 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import CircularProgressWithLabel from '@material-ui/core/LinearProgress';
 
 var crypto = require("crypto");
+var ifscsystem = require('ifsc-finder');
+var aadhar = require('aadhaar-validator')
 
 export function cdRefresh() {
   window.location.reload();
@@ -430,4 +432,42 @@ export function internalToText(txt) {
   x = txt1.split(IntSP);
   txt1 = x.join(SP);
   return txt1;
+}
+
+
+export async function ifscBank(code) {
+  let mybank = await ifscsystem.getBankName(code.toUpperCase());
+  //console.log(mybank.substring(0,3));
+  if (mybank.substring(0,3) === "Not") 
+    mybank = "";
+  return mybank;
+}
+
+export async function ifscBranch(code) {
+  let mybank = await ifscsystem.getBranchName(code.toUpperCase());
+  //console.log(mybank.substring(0,3));
+  if (mybank.substring(0,3) === "Not") 
+    mybank = "";
+  return mybank;
+}
+
+export async function ifscCity(code) {
+  let mybank = await ifscsystem.getCity(code.toUpperCase());
+  //console.log(mybank.substring(0,3));
+  if (mybank.substring(0,3) === "Not") 
+    mybank = "";
+  return mybank;
+}
+
+export async function ifscNeft(code) {
+  let mybank = await ifscsystem.getCity(code.toUpperCase());
+  // console.log(mybank.substring(0,3));
+  if (mybank.substring(0,3) === "Not") 
+    mybank = false;
+  return mybank;
+}
+
+export async function validateAadhar(code) {
+  let sts = await aadhar.isValidNumber(code)
+  return sts;
 }

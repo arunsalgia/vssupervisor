@@ -30,8 +30,13 @@ import Auction from "views/Auction/Auction"
 import Captain from "views/Captain/Captain"
 import Match from "views/UpcomingMatch/UpcomingMatch"
 import Group from "views/Group/Group"
+
 import Wallet from "views/Wallet/Wallet.js"
 import AddWallet from "views/Wallet/AddWallet";
+import WithdrawWallet from "views/Wallet/WithdrawWallet";
+import KycBank from "views/Wallet/KycBank";
+import KycDocs from "views/Wallet/KycDocs";
+
 import PlayerInfo from "views/APL/PlayerInfo";
 // import Profile from "views/Profile/Profile.js"
 import Profile from "views/Profile/UserProfile"
@@ -343,6 +348,9 @@ export function CricDreamTabs() {
       case 106: return <Profile />;
       case 107: return <ChangePassword />;
       case 108: return <AddWallet />
+      case 109: return <WithdrawWallet />
+      case 110: return <KycBank />;
+      case 111: return <KycDocs />
       case 201: return <About />;
       case 202: return <ContactUs />;
       case 203: return <PointSystem />;
