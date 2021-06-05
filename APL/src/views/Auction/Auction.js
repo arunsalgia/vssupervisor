@@ -39,7 +39,7 @@ import CardBody from "components/Card/CardBody.js";
 import { BlankArea, NoGroup, JumpButtonFull, DisplayPageHeader, MessageToUser } from 'CustomComponents/CustomComponents.js';
 import { UserContext } from "../../UserContext";
 import socketIOClient from "socket.io-client";
-import { hasGroup } from 'views/functions';
+import { hasGroup, getAuctionCountDown } from 'views/functions';
 import {blue, green, orange, deepOrange}  from '@material-ui/core/colors';
 import Modal from 'react-modal';
 
@@ -211,7 +211,7 @@ function leavingAuction(myConn) {
   
   
 let arunCancel = false;
-const MAXCOUNTDOWN = parseInt(process.env.REACT_APP_AUCTIONCOUNTDOWN);
+let MAXCOUNTDOWN = parseInt(process.env.REACT_APP_AUCTIONCOUNTDOWN);
 
 
 export default function Auction() {
@@ -381,6 +381,8 @@ export default function Auction() {
                     setBidUid(response1.data.currentBidUid);            
                 }
             }
+
+            MAXCOUNTDOWN = await getAuctionCountDown();
         }
         a();
 

@@ -3,6 +3,7 @@ import download from 'js-file-download';
 import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import CircularProgressWithLabel from '@material-ui/core/LinearProgress';
+import { func } from "prop-types";
 
 var crypto = require("crypto");
 var ifscsystem = require('ifsc-finder');
@@ -166,7 +167,7 @@ async function getSinglePrizeDetails(count) {
 } 
 
 async function getPrizePortion() {
-  let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/prizeportion`);
+  let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getprizeportion`);
   let prizePortion = resp.data.prizeportion;
   // console.log("prize portion", prizePortion);
   return prizePortion;
@@ -471,3 +472,42 @@ export async function validateAadhar(code) {
   let sts = await aadhar.isValidNumber(code)
   return sts;
 }
+
+
+export async function getMinimumBalance() {
+  try {
+    let minimumBalance = process.env.REACT_APP_MINBALANCE;
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/MINBALANCE`);
+    minimumBalance = response.data;
+  } catch(err)  {
+    console.log("---------minimum balance error");
+    console.log(err);
+  }
+  return parseInt(minimumBalance);
+}
+
+
+export async function getAuctionCountDown() {
+  try {
+    let temp = process.env.AUCTIONCOUNTDOWN;
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/AUCTIONCOUNTDOWN`);
+    temp = response.data;
+  } catch(err)  {
+    console.log("---------auction count down error");
+    console.log(err);
+  }
+  return parseInt(temp);
+}
+
+export async function getIdleTimeout() {
+  try {
+    let temp = process.env.REACT_APP_IDLETIMEOUT;
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/IDLETIMEOUT`);
+    temp = response.data;
+  } catch(err)  {
+    console.log("---------idle time out error");
+    console.log(err);
+  }
+  return parseInt(temp);
+}
+

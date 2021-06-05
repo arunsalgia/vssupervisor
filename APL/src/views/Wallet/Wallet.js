@@ -18,9 +18,10 @@ import TableRow from '@material-ui/core/TableRow';
 import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 import axios from "axios";
-import useScript from './useScript';
+//import useScript from './useScript';
 import { setTab }from "CustomComponents/CricDreamTabs";
 import { BlankArea } from 'CustomComponents/CustomComponents';
+import { getMinimumBalance } from 'views/functions';
 var request= require('request');
 // import { UserContext } from "../../UserContext";
 // import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
@@ -45,9 +46,9 @@ export default function Wallet(props) {
   const [transactions, setTransactions] = useState([]);
   const [registerStatus, setRegisterStatus] = useState(0);
   const [message, setMessage] = useState("");
-  const [rowsPerPage, setRowsPerPage] = React.useState(COUNTPERPAGE);
-  const [emptyRows, setEmptyRows] = React.useState(0);
-  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(COUNTPERPAGE);
+  const [emptyRows, setEmptyRows] = useState(0);
+  const [page, setPage] = useState(0);
   const [minMessage, setMinMessage] = useState(`Minimum balance of  ${process.env.REACT_APP_MINBALANCE} is required for withdrawal.`)
   
   // havew we comw via route
@@ -58,6 +59,11 @@ export default function Wallet(props) {
   // sessionStorage.getItem("payment_request_id")
   // );
   useEffect(() => {
+    const minimumAmount = async () => {
+      let amt = await getMinimumBalance();
+      setMinBalance(amt); 
+      setMinMessage(`Minimum balance of  ${amt} is required for withdrawal.`);
+    }
     const WalletInfo = async () => {
       try {
         // get user details
@@ -74,6 +80,7 @@ export default function Wallet(props) {
       }
     }
     WalletInfo();
+    minimumAmount()
   }, []);
 
   function ShowResisterStatus() {

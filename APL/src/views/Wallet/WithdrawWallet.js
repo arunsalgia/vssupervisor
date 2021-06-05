@@ -26,8 +26,10 @@ import { setTab }from "CustomComponents/CricDreamTabs";
 import { BlankArea, JumpButton2 } from 'CustomComponents/CustomComponents';
 import Modal from 'react-modal';
 import modalStyles from 'assets/modalStyles';
-import {validateSpecialCharacters, validateEmail, cdRefresh,
-  ifscBank, ifscBranch, ifscCity, ifscNeft, validateAadhar
+import {validateSpecialCharacters, validateEmail, cdRefresh, 
+  encrypt,
+  ifscBank, ifscBranch, ifscCity, ifscNeft, 
+  validateAadhar
 } from "views/functions.js";
 import { Divider } from '@material-ui/core';
 import { blue, red, deepOrange } from '@material-ui/core/colors';
@@ -372,7 +374,8 @@ export default function WithdrawWallet(props) {
     // alert("Confirmed by user. Refund to be initiated")
     try {
       // set withdraw
-      await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/withdraw/${localStorage.getItem("uid")}/${amount}`);
+      let details = encrypt(`${name}/${account}/${ifsc}`);
+      await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/withdraw/${localStorage.getItem("uid")}/${amount}/${details}`);
       setBalance(balance-amount);
       setRegisterStatus(200);
 
@@ -380,8 +383,11 @@ export default function WithdrawWallet(props) {
       if (saveData) {
         await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/kyc/updatebank/${localStorage.getItem("uid")}/${account}/${ifsc}/${name}`);
       }
-    } catch (e) {
 
+      setTab(process.env.REACT_APP_WALLET)
+    } catch (e) {
+      console.log("error updating details")
+      console.log(e)
     }
     //setSaveData(false);
   }
