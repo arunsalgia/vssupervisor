@@ -1,90 +1,213 @@
 import React, { useState, useEffect} from 'react';
+import { useHistory } from "react-router-dom";
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 // import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 // import Box from '@material-ui/core/Box';
+import BlueCheckbox from 'components/CheckBox/BlueCheckbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Typography from '@material-ui/core/Typography';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+// import Table from "components/Table/Table.js";
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
 import { makeStyles } from '@material-ui/core/styles';
 import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 import axios from "axios";
 import useScript from './useScript';
 import { setTab }from "CustomComponents/CricDreamTabs";
-import { BlankArea, ValidComp, JumpButton } from 'CustomComponents/CustomComponents.js';
-var request= require('request');
-// import { UserContext } from "../../UserContext";
-// import { useHistory } from "react-router-dom";
-// import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
-import { red, deepOrange, yellow, blue, green } from '@material-ui/core/colors';
-// var Insta = require('instamojo-nodejs');
+import { BlankArea, JumpButton2 } from 'CustomComponents/CustomComponents';
+import Modal from 'react-modal';
+import modalStyles from 'assets/modalStyles';
+import {validateSpecialCharacters, validateEmail, cdRefresh,
+  ifscBank, ifscBranch, ifscCity, ifscNeft, validateAadhar
+} from "views/functions.js";
+import { Divider } from '@material-ui/core';
+import { blue, red, deepOrange } from '@material-ui/core/colors';
+
+const Number = /^[0-9]+$/;
 
 const useStyles = makeStyles((theme) => ({
-  pending : {
-   fontSize: theme.typography.pxToRem(16),
-   fontWeight: theme.typography.fontWeightBold,
-   color: red[700],
+  saveText: {
+    color: blue[900],
+    fontWeight: theme.typography.fontWeightBold,
   },
-  docpending : {
+  root: {
+    width: '100%',
+    // backgroundColor: '#84FFFF'
+    // backgroundColor: '#A1887F'
+  },
+  withTopSpacing: {
+    marginTop: theme.spacing(1),
+  },
+  jumpButton: {
+    marginTop: theme.spacing(1),
+    backgroundColor: '#FFFFFF',
+    color: deepOrange[700],
+    fontWeight: theme.typography.fontWeightBold,
+    fontSize: '16px',
+    width: theme.spacing(40),
+  },
+
+  dashButton: {
+    // marginRight: theme.spacing(2),
+    //marginLeft: theme.spacing(2),
+  },
+  new: {
+    fontSize: theme.typography.pxToRem(20),
+    fontWeight: theme.typography.fontWeightBold,
+    color: blue[900],
+  },
+  text: {
+    backgroundColor: '#FFFF00',
+    color: '#000000',
+    fontWeight: theme.typography.fontWeightBold,
+  },  
+  data: {
+    backgroundColor: '#FFFF00',
+    color: '#000000',
+    fontWeight: theme.typography.fontWeightBold,
+  },  
+  ngCard: {
     fontSize: theme.typography.pxToRem(16),
     fontWeight: theme.typography.fontWeightBold,
-    color: yellow[700],
+    color: deepOrange[900],
   },
-  submitted : {
-    fontSize: theme.typography.pxToRem(16),
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    flexBasis: '33.33%',
+    flexShrink: 0,
+  },
+  secondaryHeading: {
+    fontSize: theme.typography.pxToRem(15),
+    color: theme.palette.text.secondary,
+  },
+  groupName:  {
+    // right: 0,
+    fontSize: '16px',
     fontWeight: theme.typography.fontWeightBold,
-    color: blue[700],
+    color: deepOrange[700],
+    alignItems: 'center',
+    marginTop: '0px',
   },
-  verified : {
-    fontSize: theme.typography.pxToRem(16),
-    fontWeight: theme.typography.fontWeightBold,
-    color: green[700],
+  error:  {
+      // right: 0,
+      fontSize: '12px',
+      color: red[700],
+      alignItems: 'center',
+      marginTop: '0px',
   },
- 
+  updatemsg:  {
+      // right: 0,
+      fontSize: '12px',
+      color: blue[700],
+      // position: 'absolute',
+      alignItems: 'center',
+      marginTop: '0px',
+  },
+  hdrText:  {
+      // right: 0,
+      // fontSize: '12px',
+      // color: red[700],
+      // // position: 'absolute',
+      align: 'center',
+      marginTop: '0px',
+      marginBottom: '0px',
+  },
+
 }));
 
-export default function WithdrawWallet() {
-  //useScript(INSTAMOJOSCRIPT);
 
-  // const history = useHistory();
+export default function WithdrawWallet(props) {
+
+  //const history = useHistory();
   const classes = useStyles();
   const gClasses = globalStyles();
-  const [amount, setAmount] = React.useState(100);
-  const [registerStatus, setRegisterStatus] = useState(0);
-  const [kycId, setKycId] = useState("PENDING");
-  const [kycBank, setKycBank] = useState("PENDING");
-  const [balance, setBalance] = useState(0);
-  const [withdrawDisable, setWidthrawDisable] = useState(true);
+
+  const [error, setError] = useState({});
+  const [helperText, setHelperText] = useState({});
+  const [modalIsOpen,setIsOpen] = useState(false);
+
+  const [balance, setBalance] = useState(500);
   const [transactions, setTransactions] = useState([]);
+
+  const [amount, setAmount] = useState(1);
+  const [account, setAccount] = useState("");
+	const [repeatAccount, setRepeatAccount] = useState("");
+	const [ifsc, setIfsc] = useState("");
+
+  const [name, setName] = useState("");
+  const [aadhar, setAadhar] = useState("")
+	const [bank, setBank] = useState("");
+	const [branch, setBranch] = useState("");
+	const [city, setCity] = useState("");
+  const [saveData, setSaveData] = useState(false);
+
+  const [kycPending, setKycPending]  = useState(false);
+  const [submitText, setSubmitText] = useState("Submit")
+  const [registerStatus, setRegisterStatus] = useState(0);
   const [message, setMessage] = useState("");
-  const [emptyRows, setEmptyRows] = React.useState(0);
-  const [page, setPage] = React.useState(0);
 
   useEffect(() => {
-    const WalletInfo = async () => {
+    const walletInfo = async () => {
       try {
         // get user details
         // get wallet transaction and also calculate balance
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
         let myBalance = response.data.reduce((accum,item) => accum + item.amount, 0);
         setBalance(myBalance);
-        if (balance > 300)
-          setWidthrawDisable(false)
+
+
       } catch (e) {
           console.log(e)
       }
     }
-    WalletInfo();
+    const bankDetails = async () => {
+      try {
+        // get user details
+        // get wallet transaction and also calculate balance
+        var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/kyc/details/${localStorage.getItem("uid")}`);
+        console.log(response.data);
+        console.log(response.data.userName, response.data.bankAccount, response.data.bankIFSC);
+        setName(response.data.userName)
+        setAccount(response.data.bankAccount);
+        setRepeatAccount(response.data.bankAccount);
+        setIfsc(response.data.bankIFSC)
+      } catch (e) {
+          console.log(e)
+      }
+    }
+    walletInfo();
+    bankDetails();
   }, []);
 
-  
+
+  function openModal() { setIsOpen(true); }
+   
+  function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    //subtitle.style.color = '#f00';
+  }
+ 
+  function closeModal(){ setIsOpen(false); }
+
   function ShowResisterStatus() {
     let myMsg;
     let errmsg = true;
     switch (registerStatus) {
       case 1001:
-        myMsg = 'Error connecting to Payment gateway';
+        myMsg = 'Error regsitering withdrawal';
+      break;
+      case 200:
+        myMsg = `Successfully registered withdrawal of amount ${amount}`;
+        errmsg = false;
       break;
       case 0:
         myMsg = ``;
@@ -101,112 +224,302 @@ export default function WithdrawWallet() {
       </div>
     );
   }
- 
+  
+  function getInput() {
+    //let aadStr =  document.getElementById("aadhar").value;
+    let namStr = document.getElementById("name").value;
+		let accStr = document.getElementById("account").value;
+    let repAccStr = document.getElementById("repeatAccount").value;
+		let ifscStr = document.getElementById("ifsc").value.toUpperCase();
+		
+    //setAadhar(aadStr);
+    setName(namStr);
+		setAccount(accStr);
+    setRepeatAccount(repAccStr);
+		setIfsc(ifscStr);
+		return {
+      //aadhar: aadStr,
+      name: namStr,
+		  account: accStr,
+      repeatAccount: repAccStr,
+		  ifsc: ifscStr,
+		};
+  }
+	
+  async function validate(eid, eid2) {
+    getInput();
+    let e = document.getElementById(eid);
+    let myValue = e.value; 
+    //console.log(eid, myValue);
+    let newError=false;
+    let newText = "";
+
+    // eslint-disable-next-line default-case
+    switch (eid) {
+      case "amount":
+        let amt = parseInt(myValue);
+        if (!myValue.match(Number)) {
+          newError = true;
+          newText = 'Amount should in multiple of Rupees';
+        } else if (amt <= 0) {
+          newError = true;
+          newText = 'Withdrawal amount should be greater than 0';
+        } else if (amt > balance) {
+          newError = true;
+          newText = `Withdrawal amount  cannot exceed ${balance}`;
+        }
+      break;
+      case "aadhar":
+        let sts = await validateAadhar(myValue);
+        //console.log("Aadhar Check:", sts);
+        if (!sts) {
+          newError = true;
+          newText = 'Invalid Aadhar Number';
+        } 
+      break;
+      case "name":
+        if (!validateSpecialCharacters(myValue)) {
+          newError = true;
+          newText = 'Special characters not permitted';
+        } 
+      break;
+      case "account":
+        if (!myValue.match(Number)) {
+          newError = true;
+          newText = "Account Number has to be numberic";
+        }
+      break;
+      case "repeatAccount":
+        let orgAcc = document.getElementById(eid2).value;
+        if (myValue !== orgAcc) {
+          newError = true;
+          newText = "Account Number mismatch";
+        }
+      break;
+      case "ifsc":
+      //console.log("Setting ifsc as ", myValue);
+      // setPassword(myValue);
+      let mybank = await ifscBank(myValue);
+      if (mybank === "") {
+        newError = true;
+        newText = 'Invalid IFSC Code';
+      } else if (!ifscNeft(myValue)) {
+        newError = true;
+        newText = 'Neft not enabled';
+      }
+      break;
+    }
+  
+    let x = {};
+    x[eid] = newError;
+    setError(x);
     
-  async function handleSubmit() {
+    x = {};
+    x[eid] = newText;
+    setHelperText(x);
+    //console.log(x);
+
+    e.focus();
+    // console.log("Iserror",newError)
+    return newError;
+  }
+	
+	const handleSubmit = async() => {
+		//let x = getInput();
+		let sts;
     setRegisterStatus(0);
-    try {
-      var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/generatepaymentrequest/${localStorage.getItem("uid")}/${amount}`);
-      //let myrequestid = response.data;
-      let resp = await window.open(`${process.env.REACT_APP_GATEWAYURL}/${response.data}`, '_parent');
-    } catch (e) {
-      setRegisterStatus(1001);
-      console.log(e);
-      console.log("Error calling wallet");
-    }
-  }
+    // sts = await validate("aadhar");
+    // if (sts) return;
+    sts = await validate("amount")
+		if (sts) return;
+    sts = await validate("account")
+		if (sts) return;
+    sts = await validate("repeatAccount", "account")
+		if (sts) return;
+		sts = await validate("ifsc")
+		if (sts) return;
+    sts = await validate("name")
+    if (sts) return;
+	
+		let code = ifsc.toUpperCase();
+    let tmp = await ifscBank(code);
+		setBank(tmp);
+    tmp = await ifscBranch(code);
+		setBranch(tmp);
+    tmp = await ifscCity(code)
+    setCity(tmp);
 
-  function IdKYC() {
-    let myClass;
-    switch (kycId) {
-      case "DOCPENDING": myClass = classes.docpending; break;
-      case "SUBMITTED" : myClass = classes.submitted; break;
-      case "VERIFIED"  : myClass = classes.verified; break;
-      default:           myClass = classes.pending; break; 
-    }
+    setMessage( (saveData) ?
+      "Bank details to be saved" :
+      "Do not save Bank details"
+    )
+		//alert("All Ok");
+    openModal();
+  }
+	
+
+  function WalletButton() {
     return (
-      <Typography align="left">
-        <span>ID Proof KYC </span><span className={myClass}>{kycId}</span>
-      </Typography>
-    );
-  }
-
-  function BankKYC() {
-    let myClass;
-    switch (kycBank) {
-      case "DOCPENDING": myClass = classes.docpending; break;
-      case "SUBMITTED" : myClass = classes.submitted; break;
-      case "VERIFIED"  : myClass = classes.verified; break;
-      default:           myClass = classes.pending; break; 
-    }
-    return (
-      <Typography align="left">
-        <span>Bank Proof KYC </span><span className={myClass}>{kycBank}</span>
-      </Typography>
-    );
-  }
-
-  function handleKyc() {
-    setTab(process.env.REACT_APP_KYCBANK);
-  }
-
-  function KycForm() {
-    return (
-      <div>
-        <Typography component="h1" variant="h5">KYC Status</Typography>
-        <IdKYC/>
-        <BankKYC />
-        <Button variant="contained" color="primary" className={gClasses.submit}
-        onClick={handleKyc}
-        >
-        Submit Kyc
-        </Button>
-      </div>
+      <JumpButton2 
+        page1={process.env.REACT_APP_HOME} text1="Home"
+        page2={process.env.REACT_APP_WALLET} text2="Wallet" 
+      />
     )
   }
-  
+
+  async function handleConfirm() {
+    closeModal();
+    // alert("Confirmed by user. Refund to be initiated")
+    try {
+      // set withdraw
+      await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/withdraw/${localStorage.getItem("uid")}/${amount}`);
+      setBalance(balance-amount);
+      setRegisterStatus(200);
+
+      // save bank details
+      if (saveData) {
+        await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/kyc/updatebank/${localStorage.getItem("uid")}/${account}/${ifsc}/${name}`);
+      }
+    } catch (e) {
+
+    }
+    //setSaveData(false);
+  }
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div align="center" className={gClasses.paper}>
-      <KycForm />
-      <BlankArea />
-      <Typography component="h1" variant="h5">
-        Withdraw from Wallet
-      </Typography>
-      
-      <ValidatorForm className={gClasses.form} onSubmit={handleSubmit}>
-      <TextValidator variant="outlined" required       
-          label="Amount to add"
-          onChange={(event) => setAmount(event.target.value)}
-          type="number"
-          validators={['required', 'minNumber:100',]}
-          errorMessages={['Amount to be provided', 'Minimum amount 100']}
+      <div className={gClasses.paper} align="center">
+        <Typography component="h1" variant="h5">
+        Withdraw (Balance: {balance})
+        </Typography>
+        <ValidatorForm className={gClasses.form} onSubmit={handleSubmit}>
+        {/* <TextValidator variant="outlined" required fullWidth
+          id="aadhar" label="Aadhar NUmber" name="aadhar"
+          defaultValue={aadhar}
+          onChange={(event) => setAadhar(event.target.value)}
+          error={error.aadhar}
+          helperText={helperText.aadhar}
+        />
+        <Divider /> */}
+        <TextValidator variant="outlined" required fullWidth type="number" min="1" step="1" 
+          id="amount" label="Withdrawal Amount" name="amount"
+          //defaultValue={amount}
           value={amount}
-      />
-      <BlankArea/>
-      <ShowResisterStatus/>
-      <BlankArea/>
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        className={gClasses.submit}
-      >
-        Add
-    </Button>
-    </ValidatorForm>
-    <BlankArea/>
-    <Grid key="jp1" container >
-      <Grid item xs={6} sm={6} md={6} lg={6} >
-        <JumpButton page={process.env.REACT_APP_HOME} text="Home" />
-      </Grid>
-      <Grid item xs={6} sm={6} md={6} lg={6} >
-        <JumpButton page={process.env.REACT_APP_WALLET} text="Wallet" />
-      </Grid>
-    </Grid>
-    </div>
-    <ValidComp/>    
+          onChange={(event) => setAmount(event.target.value)}
+          error={error.amount}
+          helperText={helperText.amount}
+        />    
+		    <BlankArea/>
+        <TextValidator variant="outlined" required fullWidth
+          id="name" label="User Name" name="name"
+          //defaultValue={name}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          error={error.name}
+          helperText={helperText.name}
+        />
+		    <BlankArea/>
+        <TextValidator variant="outlined" required fullWidth  type="password"
+          id="account" label="Bank Account Number" name="account"
+          //defaultValue={account}
+          value={account}
+          onChange={(event) => setAccount(event.target.value)}
+          error={error.account}
+          helperText={helperText.account}
+        />
+		    <BlankArea/>
+        <TextValidator variant="outlined" required fullWidth
+          id="repeatAccount" label="Bank Account Number" name="repeatAccount"
+          //defaultValue={repeatAccount}
+          value={repeatAccount}
+          onChange={(event) => setRepeatAccount(event.target.value)}
+          error={error.repeatAccount}
+          helperText={helperText.repeatAccount}
+        />
+		    <BlankArea/>
+        <TextValidator variant="outlined" required fullWidth
+          id="ifsc" label="Bank IFSC Code" name="ifsc"
+          //defaultValue={ifsc}
+          value={ifsc}
+          onChange={(event) => setIfsc(event.target.value.toUpperCase())}
+          error={error.ifsc}
+          helperText={helperText.ifsc}
+        />
+	      <ShowResisterStatus/>
+		    <BlankArea/>
+        <FormControlLabel align="left" className={classes.saveText} 
+          control={
+            <BlueCheckbox 
+              checked={saveData}
+              onClick={() => setSaveData(event.target.checked)} 
+              name="saveDetails"  
+            />
+          }
+          label="Save Bank details for future transactions"
+        />
+		    <BlankArea/>
+        <Button  type="submit" variant="contained" color="primary" className={gClasses.submit}
+        >
+        Withdraw
+        </Button>
+	      </ValidatorForm>
+        <Modal
+            isOpen={modalIsOpen}
+            onAfterOpen={afterOpenModal}
+            onRequestClose={closeModal}
+            style={modalStyles}
+            contentLabel="Example Modal"
+            ariaHideApp={false}
+          >
+          <Typography className={classes.new} align="center">
+            Confirm Details
+          </Typography>
+          <BlankArea/>
+          {/* <Typography >
+            <span className={classes.text}>Aaadhar Number: </span>
+            <span className={classes.data}>{aadhar}</span>
+          </Typography> */}
+          <Typography >
+            <span className={classes.text}>Amount: </span>
+            <span className={classes.data}>{amount}</span>
+          </Typography>
+          <Typography >
+            <span className={classes.text}>Name: </span>
+            <span className={classes.data}>{name}</span>
+          </Typography>
+          <Typography >
+            <span className={classes.text}>Account Number: </span>
+            <span className={classes.data}>{account}</span>
+          </Typography>
+          <Typography >
+            <span className={classes.text}>IFSC Code: </span>
+            <span className={classes.data}>{ifsc}</span>
+          </Typography>
+          <Typography>
+            <span className={classes.text}>Bank Name: </span>
+            <span className={classes.data}>{bank}</span>
+          </Typography>
+          <Typography >
+            <span className={classes.text}>Branch: </span>
+            <span className={classes.data}>{branch}</span>
+          </Typography>
+          <Typography >
+            <span className={classes.text}>City: </span>
+            <span className={classes.data}>{city}</span>
+          </Typography>
+          <Typography >
+            <span className={classes.data}>{message}</span>
+          </Typography>
+          <BlankArea/>
+          <Button align="center" variant="contained" color="primary" size="medium"
+            // className={classes.dashButton} 
+            onClick={handleConfirm}>Confirm
+          </Button>
+        </Modal>
+        <BlankArea />
+        <WalletButton />
+      </div>
     </Container>
   );
 }

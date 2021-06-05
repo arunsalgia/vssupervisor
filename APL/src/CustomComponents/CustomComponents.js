@@ -7,6 +7,7 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -392,19 +393,6 @@ export class Copyright extends React.Component {
   }
 }
 
-export function OrigJumpButton(props) {
-  const classes = useStyles();
-  return (
-    <div>
-      <Divider className={classes.divider} />
-      <BlankArea />
-      <Button variant="contained" fullWidth color="primary" align="center"
-        onClick={() => setTab(props.page) }>
-        {props.text}
-      </Button>
-  </div>
-  )
-}
 
 
 export function JumpButton(props) {
@@ -422,6 +410,22 @@ export function JumpButton(props) {
         {props.text}
       </Button>
   </div>
+  )
+}
+
+export function JumpButton2(props) {
+  let myDisabled1 = (props.disabled1) ? props.disabled1 : false;
+  let myDisabled2 = (props.disabled2) ? props.disabled2 : false;
+  //const classes = useStyles();
+  return (
+    <Grid container >
+      <Grid item xs={6} sm={6} md={6} lg={6} >
+        <JumpButton page={props.page1} text={props.text1} disabled={myDisabled1}/>
+      </Grid>
+      <Grid item xs={6} sm={6} md={6} lg={6} >
+        <JumpButton page={props.page2} text={props.text2} disabled={myDisabled2}/>
+      </Grid>
+    </Grid>
   )
 }
 

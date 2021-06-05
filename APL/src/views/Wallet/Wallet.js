@@ -30,13 +30,8 @@ var request= require('request');
 // var Insta = require('instamojo-nodejs');
 
 
-
-
 //const INSTAMOJOSCRIPT="https://js.instamojo.com/v1/checkout.js";
 const COUNTPERPAGE=5;
-
-
-
 
 export default function Wallet(props) {
   //useScript(INSTAMOJOSCRIPT);
@@ -45,6 +40,7 @@ export default function Wallet(props) {
   // const classes = useStyles();
   const gClasses = globalStyles();
 
+  const [minBalance, setMinBalance] = useState(parseInt(process.env.REACT_APP_MINBALANCE));
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [registerStatus, setRegisterStatus] = useState(0);
@@ -52,7 +48,8 @@ export default function Wallet(props) {
   const [rowsPerPage, setRowsPerPage] = React.useState(COUNTPERPAGE);
   const [emptyRows, setEmptyRows] = React.useState(0);
   const [page, setPage] = React.useState(0);
-
+  const [minMessage, setMinMessage] = useState(`Minimum balance of  ${process.env.REACT_APP_MINBALANCE} is required for withdrawal.`)
+  
   // havew we comw via route
   console.log("Wallet", localStorage.getItem("menuValue"));
   // console.log("dateils from Insta",
@@ -119,7 +116,10 @@ export default function Wallet(props) {
   }
 
   function handleWithdraw() {
-    setTab(process.env.REACT_APP_WITHDRAWWALLET);
+    if (balance <= minBalance)
+      alert(minMessage);
+    else
+      setTab(process.env.REACT_APP_WITHDRAWWALLET);
   }
 
 
