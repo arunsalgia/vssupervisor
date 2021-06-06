@@ -383,6 +383,7 @@ export default function Auction() {
             }
 
             MAXCOUNTDOWN = await getAuctionCountDown();
+            console.log("Max Countdown value", MAXCOUNTDOWN);
         }
         a();
 

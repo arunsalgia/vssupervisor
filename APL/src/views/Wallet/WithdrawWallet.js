@@ -165,8 +165,6 @@ export default function WithdrawWallet(props) {
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
         let myBalance = response.data.reduce((accum,item) => accum + item.amount, 0);
         setBalance(myBalance);
-
-
       } catch (e) {
           console.log(e)
       }
@@ -176,8 +174,8 @@ export default function WithdrawWallet(props) {
         // get user details
         // get wallet transaction and also calculate balance
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/kyc/details/${localStorage.getItem("uid")}`);
-        console.log(response.data);
-        console.log(response.data.userName, response.data.bankAccount, response.data.bankIFSC);
+        //console.log(response.data);
+        //console.log(response.data.userName, response.data.bankAccount, response.data.bankIFSC);
         setName(response.data.userName)
         setAccount(response.data.bankAccount);
         setRepeatAccount(response.data.bankAccount);

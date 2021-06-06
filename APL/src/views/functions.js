@@ -475,8 +475,8 @@ export async function validateAadhar(code) {
 
 
 export async function getMinimumBalance() {
+  let minimumBalance = process.env.REACT_APP_MINBALANCE;
   try {
-    let minimumBalance = process.env.REACT_APP_MINBALANCE;
     let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/MINBALANCE`);
     minimumBalance = response.data;
   } catch(err)  {
@@ -488,8 +488,8 @@ export async function getMinimumBalance() {
 
 
 export async function getAuctionCountDown() {
+  let temp = process.env.AUCTIONCOUNTDOWN;
   try {
-    let temp = process.env.AUCTIONCOUNTDOWN;
     let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/AUCTIONCOUNTDOWN`);
     temp = response.data;
   } catch(err)  {
@@ -500,8 +500,8 @@ export async function getAuctionCountDown() {
 }
 
 export async function getIdleTimeout() {
+  let temp = process.env.REACT_APP_IDLETIMEOUT;
   try {
-    let temp = process.env.REACT_APP_IDLETIMEOUT;
     let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/IDLETIMEOUT`);
     temp = response.data;
   } catch(err)  {

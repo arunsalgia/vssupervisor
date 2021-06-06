@@ -52,7 +52,7 @@ export default function Wallet(props) {
   const [minMessage, setMinMessage] = useState(`Minimum balance of  ${process.env.REACT_APP_MINBALANCE} is required for withdrawal.`)
   
   // havew we comw via route
-  console.log("Wallet", localStorage.getItem("menuValue"));
+  //console.log("Wallet", localStorage.getItem("menuValue"));
   // console.log("dateils from Insta",
   // sessionStorage.getItem("payment_id"),
   // sessionStorage.getItem("payment_status"),
@@ -62,6 +62,7 @@ export default function Wallet(props) {
     const minimumAmount = async () => {
       let amt = await getMinimumBalance();
       setMinBalance(amt); 
+      console.log("Min Balance ", amt);
       setMinMessage(`Minimum balance of  ${amt} is required for withdrawal.`);
     }
     const WalletInfo = async () => {
