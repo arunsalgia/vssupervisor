@@ -26,15 +26,15 @@ import { setTab }from "CustomComponents/CricDreamTabs";
 import { BlankArea, JumpButton2 } from 'CustomComponents/CustomComponents';
 import Modal from 'react-modal';
 import modalStyles from 'assets/modalStyles';
-import {validateSpecialCharacters, validateEmail, cdRefresh, 
-  encrypt,
+import {validateSpecialCharacters, validateEmail, cdRefresh, validateInteger,
+  encrypt, decrypt,
   ifscBank, ifscBranch, ifscCity, ifscNeft, 
   validateAadhar
 } from "views/functions.js";
 import { Divider } from '@material-ui/core';
 import { blue, red, deepOrange } from '@material-ui/core/colors';
 
-const Number = /^[0-9]+$/;
+
 
 const useStyles = makeStyles((theme) => ({
   saveText: {
@@ -176,10 +176,12 @@ export default function WithdrawWallet(props) {
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/kyc/details/${localStorage.getItem("uid")}`);
         //console.log(response.data);
         //console.log(response.data.userName, response.data.bankAccount, response.data.bankIFSC);
-        setName(response.data.userName)
-        setAccount(response.data.bankAccount);
-        setRepeatAccount(response.data.bankAccount);
-        setIfsc(response.data.bankIFSC)
+        
+        let tmp = decrypt(response.data.bank).split("-");
+        setName(tmp[0]);
+        setAccount(tmp[1]);
+        setRepeatAccount(tmp[1]);
+        setIfsc(tmp[2])
       } catch (e) {
           console.log(e)
       }
@@ -258,7 +260,7 @@ export default function WithdrawWallet(props) {
     switch (eid) {
       case "amount":
         let amt = parseInt(myValue);
-        if (!myValue.match(Number)) {
+        if (!validateInteger(myValue)) {
           newError = true;
           newText = 'Amount should in multiple of Rupees';
         } else if (amt <= 0) {
@@ -284,7 +286,7 @@ export default function WithdrawWallet(props) {
         } 
       break;
       case "account":
-        if (!myValue.match(Number)) {
+        if (!validateInteger(myValue)) {
           newError = true;
           newText = "Account Number has to be numberic";
         }
@@ -372,14 +374,15 @@ export default function WithdrawWallet(props) {
     // alert("Confirmed by user. Refund to be initiated")
     try {
       // set withdraw
-      let details = encrypt(`${name}/${account}/${ifsc}`);
+      let details = encrypt(`${name}-${account}-${ifsc}`);
+
       await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/withdraw/${localStorage.getItem("uid")}/${amount}/${details}`);
       setBalance(balance-amount);
       setRegisterStatus(200);
 
       // save bank details
       if (saveData) {
-        await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/kyc/updatebank/${localStorage.getItem("uid")}/${account}/${ifsc}/${name}`);
+        await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/kyc/updatebank/${localStorage.getItem("uid")}/${details}`);
       }
 
       setTab(process.env.REACT_APP_WALLET)

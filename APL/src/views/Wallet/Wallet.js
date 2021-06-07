@@ -140,7 +140,7 @@ export default function Wallet(props) {
       </Button>
       <Button type="submit" variant="contained" color="primary" 
        onClick={handleWithdraw}
-        className={gClasses.button}>Withdraw
+        className={gClasses.button}>Withdraw from Wallet
      </Button>
      </div>
     )

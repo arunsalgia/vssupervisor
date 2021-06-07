@@ -68,6 +68,12 @@ export function validateEmail(sss) {
     return sts;
 }
 
+const Number = /^[0-9]+$/;
+export function validateInteger(sss) {
+  let sts = sss.match(Number);
+  return sts;
+}
+
 
 export function hasGroup() {
   //console.log(`current gis is ${localStorage.getItem("gid")}`)
@@ -478,6 +484,7 @@ export async function getMinimumBalance() {
   let minimumBalance = process.env.REACT_APP_MINBALANCE;
   try {
     let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/MINBALANCE`);
+    //console.log(response.data);
     minimumBalance = response.data;
   } catch(err)  {
     console.log("---------minimum balance error");
@@ -486,6 +493,18 @@ export async function getMinimumBalance() {
   return parseInt(minimumBalance);
 }
 
+export async function getMinimumAdd() {
+  let minimumBalance = process.env.REACT_APP_MINADDWALLET;
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/MINADDWALLET`);
+    //console.log(response.data);
+    minimumBalance = response.data;
+  } catch(err)  {
+    console.log("---------minimum add error");
+    console.log(err);
+  }
+  return parseInt(minimumBalance);
+}
 
 export async function getAuctionCountDown() {
   let temp = process.env.AUCTIONCOUNTDOWN;

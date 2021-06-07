@@ -13,6 +13,9 @@ import axios from "axios";
 import useScript from './useScript';
 import { setTab }from "CustomComponents/CricDreamTabs";
 import { BlankArea, ValidComp, JumpButton } from 'CustomComponents/CustomComponents.js';
+import { validateSpecialCharacters, validateEmail, cdRefresh, validateInteger,
+  getMinimumAdd,
+} from "views/functions.js";
 var request= require('request');
 // import { UserContext } from "../../UserContext";
 // import { useHistory } from "react-router-dom";
@@ -26,7 +29,14 @@ export default function AddWallet() {
   // const history = useHistory();
   // const classes = useStyles();
   const gClasses = globalStyles();
-  const [amount, setAmount] = React.useState(100);
+
+  const [error, setError] = useState({});
+  const [helperText, setHelperText] = useState({});
+
+  const [minBalance, setMinBalance] = useState(parseInt(process.env.REACT_APP_MINADDWALLET));
+  const [minMessage, setMinMessage] = useState("");
+
+  const [amount, setAmount] = React.useState(parseInt(process.env.REACT_APP_MINADDWALLET));
   const [registerStatus, setRegisterStatus] = useState(0);
 
   const [balance, setBalance] = useState(0);
@@ -34,6 +44,52 @@ export default function AddWallet() {
   const [message, setMessage] = useState("");
   const [emptyRows, setEmptyRows] = React.useState(0);
   const [page, setPage] = React.useState(0);
+
+  useEffect(() => {
+  const minimumAmount = async () => {
+    let amt = await getMinimumAdd();
+    setMinBalance(amt); 
+    setAmount(amt);
+    console.log("Min add ", amt);
+    setMinMessage(`Minimum amount of  Rupees ${amt} to be added.`);
+  }
+    
+    minimumAmount()
+  }, []);
+
+  function ShowResisterStatus() {
+    let myMsg;
+    let errmsg = true;
+    switch (registerStatus) {
+      case 1001:
+        myMsg = message;
+        errmsg = false;
+      break;
+      case 1002:
+        myMsg = message;
+      break;
+      case 0:
+        myMsg = ``;
+        errmsg = false;
+      break;      
+      default:
+        myMsg = `Unknown error code ${registerStatus}`;
+        break;
+    }
+    let myClass = (errmsg) ? gClasses.error : gClasses.nonerror;
+    return(
+      <div>
+        <Typography className={myClass}>{myMsg}</Typography>
+      </div>
+    );
+  }
+  const handleChangePage = (event, newPage) => {
+    event.preventDefault();
+    setPage(newPage);
+    let myempty = rowsPerPage - Math.min(rowsPerPage, transactions.length - newPage * rowsPerPage);
+    setEmptyRows(myempty);
+
+  };
 
   
   function ShowResisterStatus() {
@@ -62,6 +118,11 @@ export default function AddWallet() {
     
   async function handleSubmit() {
     setRegisterStatus(0);
+    let sts;
+
+    sts = await validate("amount")
+		if (sts) return;
+
     try {
       var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/generatepaymentrequest/${localStorage.getItem("uid")}/${amount}`);
       //let myrequestid = response.data;
@@ -73,7 +134,41 @@ export default function AddWallet() {
     }
   }
 
+  async function validate(eid, eid2) {
+    let e = document.getElementById(eid);
+    let myValue = e.value; 
+    //console.log(eid, myValue);
+    let newError=false;
+    let newText = "";
+
+    // eslint-disable-next-line default-case
+    switch (eid) {
+      case "amount":
+        let amt = parseInt(myValue);
+        if (!validateInteger(myValue)) {
+          newError = true;
+          newText = 'Amount should in multiple of Rupees';
+        } else if (amt < minBalance) {
+          newError = true;
+          newText = minMessage;
+        } 
+      break;
+    }
   
+    let x = {};
+    x[eid] = newError;
+    setError(x);
+    
+    x = {};
+    x[eid] = newText;
+    setHelperText(x);
+    //console.log(x);
+
+    e.focus();
+    // console.log("Iserror",newError)
+    return newError;
+  }
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -82,13 +177,13 @@ export default function AddWallet() {
         Add to Wallet
       </Typography>
       <ValidatorForm className={gClasses.form} onSubmit={handleSubmit}>
-      <TextValidator variant="outlined" required       
-          label="Amount to add"
-          onChange={(event) => setAmount(event.target.value)}
-          type="number"
-          validators={['required', 'minNumber:100',]}
-          errorMessages={['Amount to be provided', 'Minimum amount 100']}
-          value={amount}
+      <TextValidator variant="outlined" required type="number" min={minBalance} step="1" 
+        id="amount" label="Add amount" name="amount"
+        //defaultValue={amount}
+        value={amount}
+        onChange={(event) => setAmount(event.target.value)}
+        error={error.amount}
+        helperText={helperText.amount}
       />
       <BlankArea/>
       <ShowResisterStatus/>
