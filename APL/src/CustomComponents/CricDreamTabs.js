@@ -435,6 +435,7 @@ export function CricDreamTabs() {
     
   let mylogo = `${process.env.PUBLIC_URL}/APLLOGO1.ICO`;
   let groupCharacter="G";
+  let currencyChar = '₹';
   let myName = localStorage.getItem("userName");
   return (
     <div className={classes.root}>
@@ -505,6 +506,15 @@ export function CricDreamTabs() {
           <Button color="inherit" className={classes.statButton} onClick={handleStat}>Stats</Button>
           {/* <Button color="inherit" className={classes.statButton} onClick={handleAuction}>Auction</Button> */}
           <Button color="inherit" className={classes.teamButton} onClick={handleTeam}>Team</Button>
+            <Avatar 
+            aria-label="account of current user"
+            aria-controls="user-appbar"
+            aria-haspopup="true"
+            onClick={handleWallet}
+            color="inherit"
+            variant="circular" className={classes.avatar1}>{currencyChar}
+          </Avatar>
+
          {/* <div> */}
           {/* <IconButton
             aria-label="account of current group"
