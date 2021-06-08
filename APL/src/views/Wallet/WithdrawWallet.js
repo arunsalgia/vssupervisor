@@ -151,6 +151,7 @@ export default function WithdrawWallet(props) {
 	const [branch, setBranch] = useState("");
 	const [city, setCity] = useState("");
   const [saveData, setSaveData] = useState(false);
+  const [uip, setUip] = useState(false);      // update in progress 
 
   const [kycPending, setKycPending]  = useState(false);
   const [submitText, setSubmitText] = useState("Submit")
@@ -208,7 +209,15 @@ export default function WithdrawWallet(props) {
         myMsg = 'Error regsitering withdrawal';
       break;
       case 200:
-        myMsg = `Successfully registered withdrawal of amount ${amount}`;
+        myMsg = `Successfully updated withdrawal of amount ${amount}`;
+        errmsg = false;
+      break;
+      case 1100:
+        myMsg = `Updating Withdrawal details.`;
+        errmsg = false;
+      break;
+      case 1101:
+        myMsg = `Saving Bank details for future transaction.`;
         errmsg = false;
       break;
       case 0:
@@ -370,10 +379,12 @@ export default function WithdrawWallet(props) {
   }
 
   async function handleConfirm() {
+    setUip(true);
     closeModal();
     // alert("Confirmed by user. Refund to be initiated")
     try {
       // set withdraw
+      setRegisterStatus(1100);
       let details = encrypt(`${name}-${account}-${ifsc}`);
 
       await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/withdraw/${localStorage.getItem("uid")}/${amount}/${details}`);
@@ -381,12 +392,15 @@ export default function WithdrawWallet(props) {
       setRegisterStatus(200);
 
       // save bank details
+      //NOTE:  updatebakn has been rename to "bdata" for security reasons
       if (saveData) {
-        await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/kyc/updatebank/${localStorage.getItem("uid")}/${details}`);
+        setRegisterStatus(1101);
+        await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/kyc/bdata/${localStorage.getItem("uid")}/${details}`);
       }
 
       setTab(process.env.REACT_APP_WALLET)
     } catch (e) {
+      setUip(false);
       console.log("error updating details")
       console.log(e)
     }
@@ -416,6 +430,7 @@ export default function WithdrawWallet(props) {
           onChange={(event) => setAmount(event.target.value)}
           error={error.amount}
           helperText={helperText.amount}
+          disabled={uip}
         />    
 		    <BlankArea/>
         <TextValidator variant="outlined" required fullWidth
@@ -425,6 +440,7 @@ export default function WithdrawWallet(props) {
           onChange={(event) => setName(event.target.value)}
           error={error.name}
           helperText={helperText.name}
+          disabled={uip}
         />
 		    <BlankArea/>
         <TextValidator variant="outlined" required fullWidth  type="password"
@@ -434,6 +450,7 @@ export default function WithdrawWallet(props) {
           onChange={(event) => setAccount(event.target.value)}
           error={error.account}
           helperText={helperText.account}
+          disabled={uip}
         />
 		    <BlankArea/>
         <TextValidator variant="outlined" required fullWidth
@@ -443,6 +460,7 @@ export default function WithdrawWallet(props) {
           onChange={(event) => setRepeatAccount(event.target.value)}
           error={error.repeatAccount}
           helperText={helperText.repeatAccount}
+          disabled={uip}
         />
 		    <BlankArea/>
         <TextValidator variant="outlined" required fullWidth
@@ -452,6 +470,7 @@ export default function WithdrawWallet(props) {
           onChange={(event) => setIfsc(event.target.value.toUpperCase())}
           error={error.ifsc}
           helperText={helperText.ifsc}
+          disabled={uip}
         />
 	      <ShowResisterStatus/>
 		    <BlankArea/>
@@ -460,6 +479,7 @@ export default function WithdrawWallet(props) {
             <BlueCheckbox 
               checked={saveData}
               onClick={() => setSaveData(event.target.checked)} 
+              disabled={uip}
               name="saveDetails"  
             />
           }
@@ -467,6 +487,7 @@ export default function WithdrawWallet(props) {
         />
 		    <BlankArea/>
         <Button  type="submit" variant="contained" color="primary" className={gClasses.submit}
+          disabled={uip}
         >
         Withdraw
         </Button>
