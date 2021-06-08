@@ -1,5 +1,6 @@
 import React, { useState ,useContex, useEffect} from 'react';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import CssBaseline from '@material-ui/core/CssBaseline';
 // import TextField from '@material-ui/core/TextField';
 // import Grid from '@material-ui/core/Grid';
@@ -22,8 +23,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { UserContext } from "../../UserContext";
 import axios from "axios";
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import {blue, red, deepOrange } from '@material-ui/core/colors';
+import {blue, red, deepOrange, yellow } from '@material-ui/core/colors';
 import { useHistory } from "react-router-dom";
 import { 
   encrypt, decrypt,
@@ -34,9 +36,25 @@ import { setTab } from "CustomComponents/CricDreamTabs.js"
 import { TextField, InputAdornment } from "@material-ui/core";
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 
 const useStyles = makeStyles((theme) => ({
+  icon : {
+    color: blue[900],
+    marginRight: theme.spacing(0),
+    marginLeft: theme.spacing(0),
+  },
+  userMessage: {
+    fontSize: theme.typography.pxToRem(10),
+    fontWeight: theme.typography.fontWeightBold,
+    // color: yellow[900]
+  },
+  userCode: {
+    fontSize: theme.typography.pxToRem(20),
+    fontWeight: theme.typography.fontWeightBold,
+    color: yellow[900]
+  },
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -97,6 +115,8 @@ const useStyles = makeStyles((theme) => ({
 export default function Profile() {
   const classes = useStyles();
   const history = useHistory();
+
+  const [userCode, setUserCode] = useState("");
   const [userName, setUserName] = useState("");
   const [groupName, setGroupName] = useState("");
   const [email, setEmail] = useState("");
@@ -114,6 +134,8 @@ export default function Profile() {
   const [emptyRows, setEmptyRows] = React.useState(0);
   const [page, setPage] = React.useState(0);
 
+  const [copyState, setCopyState] = useState({value: '', copied: false});
+
   useEffect(() => {
     const profileInfo = async () => {
       try {
@@ -121,6 +143,9 @@ export default function Profile() {
         var userRes = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricprofile/${localStorage.getItem("uid")}`);
         setProfile(userRes.data); // master data for comparision if changed by user
         // setLoginName(userRes.data.loginName);
+        setUserCode(userRes.data.userCode);
+        setCopyState({value: userRes.data.userCode})
+        //setUserCode("ArunCode123456");
         setUserName(userRes.data.userName);
         setGroupName(userRes.data.defaultGroup);
         let tmp = decrypt(userRes.data.email);
@@ -417,6 +442,7 @@ export default function Profile() {
     }
   }
 
+   
   const [error, setError] = useState({});
   const [helperText, setHelperText] = useState({});
   function validate(eid, eid2) {
@@ -762,6 +788,28 @@ export default function Profile() {
     setRegisterStatus(0);
   };
 
+  function DisplayUserCode() {
+    let myText = copyState.value
+    //console.log("in user code");
+    return (
+        <div>
+          {/* <BlankArea/> */}
+          <Typography><span className={classes.userMessage}>Share Referral code with your friends and earn bonus </span></Typography>
+          <BlankArea/>
+          <Typography className={classes.userCode}>{userCode}</Typography>
+          <BlankArea/>
+          <CopyToClipboard text={myText}
+              onCopy={() => setCopyState({copied: true})}>
+              <button>Copy to clipboard</button>
+          </CopyToClipboard>
+          {copyState.copied ? <span style={{color: 'blue'}}>Copied.</span> : null}
+        </div>       
+      )
+  }
+  
+  function handleInfo() {
+    alert("scheme info to be displayed");
+  }
 
   function DisplayAccordian() {
   return (
@@ -796,6 +844,26 @@ export default function Profile() {
     </Accordion>
     <Typography align="left" className={classes.helpMessage}>Change Password</Typography>
     <BlankArea />
+    <Accordion expanded={expandedPanel === "code"} onChange={handleAccordionChange("code")}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+            <Typography className={classes.heading}>Referral Code</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+        <DisplayUserCode />
+      </AccordionDetails>
+    </Accordion>
+    
+    <IconButton
+      aria-label="account of current group"
+      aria-controls="group-appbar"
+      aria-haspopup="true"
+      onClick={handleInfo}
+      color="inherit"
+      align="left"
+    >
+      <Typography align="left" className={classes.helpMessage}>Share Referral Code and earn Bonus </Typography>
+      <InfoOutlinedIcon className={classes.icon}/>
+    </IconButton>
     </div>
   )
   }

@@ -58,6 +58,7 @@ const useStyles = makeStyles((theme) => ({
 export default function SignUp() {
   const classes = useStyles();
   // const history = useHistory();
+  const [referalCode, setReferalCode] = useState("");
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -77,7 +78,8 @@ export default function SignUp() {
 
     let tmp1 = encrypt(x.password);
     let tmp2 = encrypt(email);
-    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricsignup/${x.userName}/${tmp1}/${tmp2}/${mobile}`);
+    let tmp = (referalCode !== "") ? referalCode : "NA";
+    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricsignup/${x.userName}/${tmp1}/${tmp2}/${mobile}/${referalCode}`);
     if (response.status === 200) {
       let setemailresp = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricemailwelcome/${tmp2}`);
       // history.push("/signin");
@@ -379,6 +381,17 @@ export default function SignUp() {
           Register New User
         </Typography>
     <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
+      <TextValidator variant="outlined" fullWidth
+          id="referal" label="Referral Code" name="referal"
+          // defaultValue={userName}
+          onChange={(event) => setReferalCode(event.target.value)}
+          validators={['noSpecialCharacters']}
+          errorMessages={[`Special Characters not permitted`]}
+          // error={error.userName}
+          // helperText={helperText.userName}
+          value={referalCode}
+        />
+      <BlankArea/>
       <TextValidator variant="outlined" required fullWidth
           id="userName" label="User Name" name="username"
           // defaultValue={userName}
