@@ -23,7 +23,9 @@ import Container from '@material-ui/core/Container';
 import axios from "axios";
 import useScript from './useScript';
 import { setTab }from "CustomComponents/CricDreamTabs";
-import { BlankArea, JumpButton2 } from 'CustomComponents/CustomComponents';
+import { BlankArea, JumpButton2, 
+  DisplayCancel,
+} from 'CustomComponents/CustomComponents';
 import Modal from 'react-modal';
 import modalStyles from 'assets/modalStyles';
 import {validateSpecialCharacters, validateEmail, cdRefresh, validateInteger,
@@ -68,13 +70,13 @@ const useStyles = makeStyles((theme) => ({
     color: blue[900],
   },
   text: {
-    backgroundColor: '#FFFF00',
-    color: '#000000',
+    //backgroundColor: '#FFFF00',
+    color: '#FFFFFF',
     fontWeight: theme.typography.fontWeightBold,
   },  
   data: {
-    backgroundColor: '#FFFF00',
-    color: '#000000',
+    // backgroundColor: '#FFFF00',
+    color: '#FFFFFF',
     fontWeight: theme.typography.fontWeightBold,
   },  
   ngCard: {
@@ -500,6 +502,7 @@ export default function WithdrawWallet(props) {
             contentLabel="Example Modal"
             ariaHideApp={false}
           >
+          <DisplayCancel onCancel={closeModal} />
           <Typography className={classes.new} align="center">
             Confirm Details
           </Typography>
@@ -512,20 +515,23 @@ export default function WithdrawWallet(props) {
             <span className={classes.text}>Amount: </span>
             <span className={classes.data}>{amount}</span>
           </Typography>
+          {/* <BlankArea /> */}
           <Typography >
             <span className={classes.text}>Name: </span>
             <span className={classes.data}>{name}</span>
           </Typography>
+          {/* <BlankArea /> */}
           <Typography >
-            <span className={classes.text}>Account Number: </span>
+            <span className={classes.text}>A/C# </span>
             <span className={classes.data}>{account}</span>
           </Typography>
-          <Typography >
-            <span className={classes.text}>IFSC Code: </span>
-            <span className={classes.data}>{ifsc}</span>
-          </Typography>
+          {/* <BlankArea /> */}
+          {/* <Typography >
+            <span className={classes.text}>Bank Details:</span>
+          </Typography> */}
+          {/* <BlankArea /> */}
           <Typography>
-            <span className={classes.text}>Bank Name: </span>
+            <span className={classes.text}>Bank: </span>
             <span className={classes.data}>{bank}</span>
           </Typography>
           <Typography >
@@ -533,9 +539,14 @@ export default function WithdrawWallet(props) {
             <span className={classes.data}>{branch}</span>
           </Typography>
           <Typography >
+            <span className={classes.text}>IFSC Code: </span>
+            <span className={classes.data}>{ifsc}</span>
+          </Typography>
+          <Typography >
             <span className={classes.text}>City: </span>
             <span className={classes.data}>{city}</span>
           </Typography>
+          <BlankArea />
           <Typography >
             <span className={classes.data}>{message}</span>
           </Typography>

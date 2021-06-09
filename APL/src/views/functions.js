@@ -68,9 +68,9 @@ export function validateEmail(sss) {
     return sts;
 }
 
-const Number = /^[0-9]+$/;
+const NumberString = /^[0-9]+$/;
 export function validateInteger(sss) {
-  let sts = sss.match(Number);
+  let sts = sss.match(NumberString);
   return sts;
 }
 
@@ -174,8 +174,9 @@ async function getSinglePrizeDetails(count) {
 
 async function getPrizePortion() {
   let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getprizeportion`);
-  let prizePortion = resp.data.prizeportion;
-  // console.log("prize portion", prizePortion);
+  //console.log("resp", resp.data);
+  let prizePortion = resp.data.prizePortion / 100;
+  //console.log("prize portion", prizePortion);
   return prizePortion;
 
 }
@@ -216,8 +217,9 @@ async function getSinglePrize(prizeCount) {
 
 export async function getSinglePrizeTable(prizeCount, prizeAmount) {
   let prizePortion = await getPrizePortion();
-
+  //console.log(prizePortion)
   let myPrize = await getSinglePrize(prizeCount);
+  //console.log(myPrize);
 
   let totPrize = Math.floor(prizeAmount*prizePortion)
   // console.log("Total prize", totPrize);
@@ -252,6 +254,26 @@ export async function getUserBalance() {
     console.log(e);
   }
   return myBalance;
+}
+
+export async function feebreakup(memberfee, bonusAvailable) {
+
+  let fee = {done: false, wallet: 0, bonus: 0};
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/feebreakup/${memberfee}`);
+    // console.log(response.data);
+    fee.wallet = response.data.walletAmount;
+    fee.bonus = response.data.bonusAmount;
+  } catch(err) {
+    console.log(e);
+    return fee;
+  }
+  if (fee.bonus > bonusAvailable) {
+    fee.bonus = bonusAvailable;
+    fee.wallet = memberfee - bonusAvailable;
+  }
+  fee.done = true;
+  return fee;
 }
 
 export function specialSetPos() {

@@ -10,8 +10,8 @@ const modalStyles = {
       marginRight           : '-50%',
       marginBottom          : '-50%',
       transform             : 'translate(-50%, -50%)',
-      background            : '#E0E0E0',
-      color                 : '#000000',
+      background            : '#000000',        //'#E0E0E0',
+      color                 : '#FFFFFF',
       transparent           : false,   
     }
   };

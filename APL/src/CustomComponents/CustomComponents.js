@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -22,10 +23,12 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {red, blue, green, deepOrange, yellow} from '@material-ui/core/colors';
-import {validateSpecialCharacters, validateEmail, validateMobile,
+import {validateSpecialCharacters, validateEmail, validateMobile, validateInteger,
   encrypt, decrypt, currentAPLVersion, latestAPLVersion} from "views/functions.js";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import Divider from "@material-ui/core/Divider";
+import CancelIcon from '@material-ui/icons/Cancel';
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -83,6 +86,7 @@ const useStyles = makeStyles((theme) => ({
     // right: 0,
     marginRight: theme.spacing(3),
     fontSize: '18px',
+    fontWeight: theme.typography.fontWeightBold,
     color: blue[900],
     // // position: 'absolute',
     // alignItems: 'center',
@@ -302,6 +306,12 @@ export class ValidComp extends React.Component {
       return validateSpecialCharacters(value);
     });
 
+    ValidatorForm.addValidationRule('isNumeric', (value) => {
+      // console.log("string: ", value);
+      // console.log(value.toString());
+      return validateInteger(value.toString());
+    });
+
     ValidatorForm.addValidationRule('isEmailOK', (value) => {
       return validateEmail(value);
     });
@@ -323,7 +333,8 @@ export class ValidComp extends React.Component {
     ValidatorForm.removeValidationRule('mobile');
     ValidatorForm.removeValidationRule('minLength');
     ValidatorForm.removeValidationRule('noSpecialCharacters');   
-    ValidatorForm.removeValidationRule('checkbalance');   
+    ValidatorForm.removeValidationRule('checkbalance'); 
+    ValidatorForm.removeValidationRule('isNumeric');    
   }
 
   render() {
@@ -489,3 +500,17 @@ export async function DisplayLatestAPLVersion() {
   let version = await latestAPLVersion();
   return <DisplayVersion text="Latest APL version" version={version}/>
 }
+
+
+export function DisplayCancel(props) {
+return(
+  <div align="right" >
+  <IconButton
+  // iconStyle={{width: '24px', height: '24px'}}
+    onClick={props.onCancel}
+    // disabled={currentTournament === 0}
+    aria-label="left" color="primary">
+  < CancelIcon fontSize="large" />
+  </IconButton>
+  </div>
+)}
