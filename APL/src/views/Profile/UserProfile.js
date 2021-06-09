@@ -843,7 +843,7 @@ export default function Profile() {
       </AccordionDetails>
     </Accordion>
     <Typography align="left" className={classes.helpMessage}>Change Password</Typography>
-    <BlankArea />
+    {/* <BlankArea />
     <Accordion expanded={expandedPanel === "code"} onChange={handleAccordionChange("code")}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
             <Typography className={classes.heading}>Referral Code</Typography>
@@ -852,7 +852,6 @@ export default function Profile() {
         <DisplayUserCode />
       </AccordionDetails>
     </Accordion>
-    
     <IconButton
       aria-label="account of current group"
       aria-controls="group-appbar"
@@ -863,7 +862,7 @@ export default function Profile() {
     >
       <Typography align="left" className={classes.helpMessage}>Share Referral Code and earn Bonus </Typography>
       <InfoOutlinedIcon className={classes.icon}/>
-    </IconButton>
+    </IconButton> */}
     </div>
   )
   }

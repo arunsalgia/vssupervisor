@@ -381,7 +381,7 @@ export default function SignUp() {
           Register New User
         </Typography>
     <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
-      <TextValidator variant="outlined" fullWidth
+      {/* <TextValidator variant="outlined" fullWidth
           id="referal" label="Referral Code" name="referal"
           // defaultValue={userName}
           onChange={(event) => setReferalCode(event.target.value)}
@@ -391,7 +391,7 @@ export default function SignUp() {
           // helperText={helperText.userName}
           value={referalCode}
         />
-      <BlankArea/>
+      <BlankArea/> */}
       <TextValidator variant="outlined" required fullWidth
           id="userName" label="User Name" name="username"
           // defaultValue={userName}
