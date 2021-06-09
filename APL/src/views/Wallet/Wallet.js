@@ -42,7 +42,7 @@ export default function Wallet(props) {
   const gClasses = globalStyles();
 
   const [minBalance, setMinBalance] = useState(parseInt(process.env.REACT_APP_MINBALANCE));
-  const [balance, setBalance] = useState(0);
+  const [balance, setBalance] = useState({wallet: 0, amount: 0});
   const [transactions, setTransactions] = useState([]);
   const [registerStatus, setRegisterStatus] = useState(0);
   const [message, setMessage] = useState("");
@@ -74,8 +74,8 @@ export default function Wallet(props) {
         let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
         setEmptyRows(myempty);
 
-        let myBalance = response.data.reduce((accum,item) => accum + item.amount, 0);
-        setBalance(myBalance);
+        response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
+        setBalance(response.data);
       } catch (e) {
           console.log(e)
       }
@@ -124,7 +124,7 @@ export default function Wallet(props) {
   }
 
   function handleWithdraw() {
-    if (balance <= minBalance)
+    if (balance.wallet <= minBalance)
       alert(minMessage);
     else
       setTab(process.env.REACT_APP_WITHDRAWWALLET);
@@ -150,7 +150,8 @@ export default function Wallet(props) {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={gClasses.paper}>
-        <Typography component="h1" variant="h5">Wallet Balance: {balance}</Typography>
+        <Typography component="h1" variant="h5">Wallet Balance: {balance.wallet}</Typography>
+        <Typography component="h1" variant="h5">Bous Balance: {balance.bonus}</Typography>
         <ShowResisterStatus />
         <TableContainer>
         <Table>

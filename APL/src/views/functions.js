@@ -244,12 +244,12 @@ export async function getAllPrizeTable(prizeAmount) {
 
 
 export async function getUserBalance() {
-  let myBalance = 0;
+  let myBalance = {wallet: 0, bonus: 0};
   try {
     let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
-    myBalance = (await response).data.balance;
+    myBalance = response.data;
   } catch(err) {
-    myBalance = 0;
+    console.log(e);
   }
   return myBalance;
 }

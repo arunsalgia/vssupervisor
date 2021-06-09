@@ -125,7 +125,7 @@ export default function CreateGroup() {
   useEffect(() => {
     const a = async () => {
         var balres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
-        setBalance(balres.data.balance);
+        setBalance(balres.data);
 
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`); 
         // console.log("Getting tournament list");
@@ -348,7 +348,7 @@ export default function CreateGroup() {
 
   return (
     <Container component="main" maxWidth="xs">
-      <DisplayBalance balance={balance} />
+      <DisplayBalance wallet={balance.wallet} bonus={balance.bonus}/>
       <CssBaseline />
       <div align="center" className={gClasses.paper}>
         <Typography component="h1" variant="h5">
@@ -409,8 +409,8 @@ export default function CreateGroup() {
         onChange={(event) => changeMemberFee(event.target.value)}
         name="membercount"
         type="number"
-        validators={['required', 'minNumber:50', 'lessthanbalance']}
-        errorMessages={['Member count to be provided', 'Member fee cannot be less than 50', 'Insufficient Balance']}
+        validators={['required', 'minNumber:100']}
+        errorMessages={['Member count to be provided', 'Member fee cannot be less than 100']}
         value={memberFee}
       />
       <BlankArea/>
@@ -445,7 +445,7 @@ export default function CreateGroup() {
       </div>
     </ValidatorForm>
     </div>
-    <ChildComp p1={balance} p3={selectedTournament}/>   
+    <ChildComp p1={balance.wallet} p3={selectedTournament}/>   
     {/* <BlankArea />
     <DisplayGroupCode/> */}
     {/* <Switch>

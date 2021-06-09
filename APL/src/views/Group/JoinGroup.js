@@ -52,7 +52,7 @@ export default function JoinGroup() {
   const [registerStatus, setRegisterStatus] = useState(0);
   // const [ errorMsg, setErrorMessage ] = useState("");
   const [groupCode, setGroupCode] = useState(localStorage.getItem("joinGroupCode"));
-  const [balance, setBalance] = useState(0);
+  const [balance, setBalance] = useState({wallet: 0, bonus: 0});
 
   //console.log(localStorage.getItem("joinGroupCode"));
   // setTab(0); 
@@ -133,7 +133,7 @@ export default function JoinGroup() {
   
   return (
     <Container component="main" maxWidth="xs">
-      <DisplayBalance balance={balance} />
+      <DisplayBalance wallet={balance.wallet} bonus={balance.bonus} />
       <CssBaseline />
       <div className={classes.paper}>
         <Typography component="h1" variant="h5">Join Group</Typography>
