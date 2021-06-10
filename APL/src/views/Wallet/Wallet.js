@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 // import TextField from '@material-ui/core/TextField';
-// import Grid from '@material-ui/core/Grid';
+import Grid from '@material-ui/core/Grid';
 // import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 // import Table from "components/Table/Table.js";
@@ -14,7 +14,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-// import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 import axios from "axios";
@@ -22,6 +22,7 @@ import axios from "axios";
 import { setTab }from "CustomComponents/CricDreamTabs";
 import { BlankArea } from 'CustomComponents/CustomComponents';
 import { getMinimumBalance } from 'views/functions';
+// import classes from '*.module.css';
 var request= require('request');
 // import { UserContext } from "../../UserContext";
 // import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
@@ -34,16 +35,38 @@ var request= require('request');
 //const INSTAMOJOSCRIPT="https://js.instamojo.com/v1/checkout.js";
 const COUNTPERPAGE=5;
 
+
+const useStyles = makeStyles((theme) => ({
+  wallet : {
+    spacing: 0,
+    // border: 5,
+    align: "center",
+    padding: "none",
+    height: 10,
+    backgroundColor: '#B3E5FC',
+  },
+  bonus : {
+    spacing: 0,
+    // border: 5,
+    align: "center",
+    padding: "none",
+    height: 10,
+    backgroundColor: '#FFC0CB',
+  },
+}));
+  
+
 export default function Wallet(props) {
   //useScript(INSTAMOJOSCRIPT);
 
   //const history = useHistory();
-  // const classes = useStyles();
+  const classes = useStyles();
   const gClasses = globalStyles();
 
   const [minBalance, setMinBalance] = useState(parseInt(process.env.REACT_APP_MINBALANCE));
   const [balance, setBalance] = useState({wallet: 0, amount: 0});
   const [transactions, setTransactions] = useState([]);
+  const [masterTransactions, setMasterTransactions] = useState([]);
   const [registerStatus, setRegisterStatus] = useState(0);
   const [message, setMessage] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(COUNTPERPAGE);
@@ -71,6 +94,8 @@ export default function Wallet(props) {
         // get wallet transaction and also calculate balance
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
         setTransactions(response.data);
+        setMasterTransactions(response.data);
+
         let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
         setEmptyRows(myempty);
 
@@ -110,6 +135,8 @@ export default function Wallet(props) {
       </div>
     );
   }
+
+
   const handleChangePage = (event, newPage) => {
     event.preventDefault();
     setPage(newPage);
@@ -146,13 +173,61 @@ export default function Wallet(props) {
     )
   }
 
+  function allData() {
+    // console.log(" All");
+    setTransactions(masterTransactions);
+  }
+
+  function walletData() {
+    let tmp = masterTransactions.filter(x => x.isWallet === true);
+    // console.log(" Wallet", tmp.length);
+    setTransactions(tmp);
+  }
+
+  function bonusData() {
+    let tmp = masterTransactions.filter(x => x.isWallet === false);
+    // console.log(" Bonus", tmp.length);
+    setTransactions(tmp);
+  }
+
+  function SelectButton() {
+  return(
+    <Grid key="walletType" align="center" container>
+    <Grid item xs={4} sm={4} md={4} lg={4} >
+    <Button key="mt_t20" variant="contained" color="primary" size="small"
+    className={gClasses.button} 
+    onClick={allData}>
+    All
+    </Button>
+    </Grid>
+    <Grid item xs={4} sm={4} md={4} lg={4} >
+    <Button key="mt_odi" variant="contained" color="primary" size="small"
+    className={gClasses.button} 
+    onClick={walletData}>
+    Wallet
+    </Button>
+    </Grid>
+    <Grid item xs={4} sm={4} md={4} lg={4} >
+    <Button key="mt_test" variant="contained" color="primary" size="small"
+    className={gClasses.button} 
+    onClick={bonusData}>
+    Bonus
+    </Button>
+    </Grid>
+    </Grid>      
+  )};
+  
+
+
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={gClasses.paper}>
         <Typography component="h1" variant="h5">Wallet Balance: {balance.wallet}</Typography>
-        <Typography component="h1" variant="h5">Bous Balance: {balance.bonus}</Typography>
+        <Typography component="h1" variant="h5">Bonus Balance : {balance.bonus}</Typography>
         <ShowResisterStatus />
+        <SelectButton/>
         <TableContainer>
         <Table>
         <TableHead p={0}>
@@ -165,15 +240,17 @@ export default function Wallet(props) {
         < TableBody>
             {transactions.slice(page * rowsPerPage, (page + 1) * rowsPerPage )
             .map( (item, index) => {
+              let myClass = (item.isWallet) ? classes.wallet : classes.bonus;
+              // console.log(item.isWallet);
               return (
                 <TableRow key={index}>
-                  <TableCell  className={gClasses.td} p={0} align="center" >
+                  <TableCell  className={myClass} p={0} align="center" >
                     {item.date}
                   </TableCell>
-                  <TableCell  className={gClasses.td} p={0} align="center" >
+                  <TableCell  className={myClass} p={0} align="center" >
                     {item.type}
                   </TableCell>
-                  <TableCell  className={gClasses.td} p={0} align="center" >
+                  <TableCell  className={myClass} p={0} align="center" >
                     {item.amount}
                   </TableCell>
                 </TableRow>
