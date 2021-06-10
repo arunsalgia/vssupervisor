@@ -51,9 +51,9 @@ export default function Wallet(props) {
   const [page, setPage] = useState(0);
   const [minMessage, setMinMessage] = useState(`Minimum balance of  ${process.env.REACT_APP_MINBALANCE} is required for withdrawal.`)
   
-  // havew we comw via route
+  // have we come via route
   //console.log("Wallet", localStorage.getItem("menuValue"));
-  // console.log("dateils from Insta",
+  // console.log("details from Insta",
   // sessionStorage.getItem("payment_id"),
   // sessionStorage.getItem("payment_status"),
   // sessionStorage.getItem("payment_request_id")

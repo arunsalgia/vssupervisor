@@ -193,20 +193,20 @@ export default function CreateGroup() {
   }
 
   const handleConfirm = async() => {
-    if (groupFee.wallet > balance.wallet) {
-      alert("Add to wallet will be called");
-    } else {
-      alert("Balance available. Will call create group");
-    }
     closeModal();
-    return;
+
+    if (groupFee.wallet > balance.wallet) {
+      setTab(process.env.REACT_APP_ADDWALLET);
+      return;
+    } 
+   
     //setCreateDisable(true)
     setRegisterStatus(1001);
     //console.log("Submit command provided");
     //  /group/create/TeSt/8/1250/AUSINDT20
     // groupName  bidAmount selectedTournament
     try {
-      const response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/create/${groupName}/${localStorage.getItem("uid")}/${bidAmount}/${selectedTournament}/${memberCount}/${memberFee}`);
+      const response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/create/${groupName}/${localStorage.getItem("uid")}/${bidAmount}/${selectedTournament}/${memberCount}/${groupFee.wallet}/${groupFee.bonus}`);
       console.log(response.data);
       setNewGid(response.data.gid)      
 

@@ -66,8 +66,11 @@ export default function JoinGroup() {
     a();
   }, []);
 
-
-  const handleSubmit = async() => {
+  const handleSubmit = async() => { 
+  
+  }
+  
+  const handleConfirm = async() => {
     //console.log("Submit command provided");
     try {
       let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/join/${groupCode}/${localStorage.getItem("uid")}`);
