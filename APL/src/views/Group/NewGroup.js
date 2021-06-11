@@ -29,14 +29,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 // import { UserContext } from "../../UserContext";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import { useHistory } from "react-router-dom";
-import {validateSpecialCharacters, validateInteger, validateEmail, getUserBalance, feebreakup} from "views/functions.js";
-import {BlankArea, NothingToDisplay, 
-  DisplayPrizeTable, DisplayBalance,
-  DisplayCancel
-} from "CustomComponents/CustomComponents.js"
-import {red, blue, yellow} from '@material-ui/core/colors';
-// import blue from '@material-ui/core/colors/blue';
-import {setTab} from "CustomComponents/CricDreamTabs.js"
 // import copy from 'copy-clipboard';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { DisplayPageHeader, JumpButton } from 'CustomComponents/CustomComponents';
@@ -44,6 +36,16 @@ import { getAllPrizeTable } from 'views/functions';
 
 import Modal from 'react-modal';
 import modalStyles from 'assets/modalStyles';
+
+
+import {validateSpecialCharacters, validateInteger, 
+  validateEmail, getUserBalance, feebreakup} from "views/functions.js";
+import {BlankArea, NothingToDisplay, 
+  DisplayPrizeTable, DisplayBalance,
+  DisplayCancel
+} from "CustomComponents/CustomComponents.js"
+import {setTab} from "CustomComponents/CricDreamTabs.js"
+import {red, blue, yellow} from '@material-ui/core/colors';
 
 const NOFRACTION = 'Fraction not allowed';
 const useStyles = makeStyles((theme) => ({
@@ -149,8 +151,10 @@ export default function CreateGroup() {
   
   useEffect(() => {
     const a = async () => {
-        var balres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
-        setBalance(balres.data);
+        // var balres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
+        // setBalance(balres.data);
+        let myBalance = await getUserBalance();
+        setBalance(myBalance);
 
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`); 
         // console.log("Getting tournament list");

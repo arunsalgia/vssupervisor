@@ -257,23 +257,38 @@ export async function getUserBalance() {
 }
 
 export async function feebreakup(memberfee, bonusAvailable) {
-
-  let fee = {done: false, wallet: 0, bonus: 0};
   try {
     let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/feebreakup/${memberfee}`);
     // console.log(response.data);
-    fee.wallet = response.data.walletAmount;
-    fee.bonus = response.data.bonusAmount;
+    let fee = response.data;
+    if (fee.bonus > bonusAvailable) {
+      fee.bonus = bonusAvailable;
+      fee.wallet = memberfee - bonusAvailable;
+    }
+    fee["done"] = true;
+    return fee;
   } catch(err) {
     console.log(e);
+    return {done: false};
+  }
+}
+
+export async function groupfeebreakup(groupCode, bonusAvailable) {
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/groupfeebreakup/${groupCode}`);
+    // console.log(response.data);
+    let fee = response.data;
+    if (fee.bonus > bonusAvailable) {
+      fee.bonus = bonusAvailable;
+      fee.wallet = memberfee - bonusAvailable;
+    }
+    fee["done"] = true;
     return fee;
+  } catch(err) {
+    console.log(e);
+    return  {done: false};
   }
-  if (fee.bonus > bonusAvailable) {
-    fee.bonus = bonusAvailable;
-    fee.wallet = memberfee - bonusAvailable;
-  }
-  fee.done = true;
-  return fee;
+
 }
 
 export function specialSetPos() {

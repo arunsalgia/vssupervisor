@@ -6,13 +6,17 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 // import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import { useHistory } from "react-router-dom";
-import {BlankArea, NothingToDisplay, DisplayBalance} from "CustomComponents/CustomComponents.js"
-import {red, blue} from '@material-ui/core/colors';
+import Modal from 'react-modal';
+import modalStyles from 'assets/modalStyles';
+
+import {getUserBalance, groupfeebreakup} from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
-import {getUserBalance} from "views/functions.js"
+import {BlankArea, DisplayBalance, DisplayCancel} from "CustomComponents/CustomComponents.js"
+import {red, blue} from '@material-ui/core/colors';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -48,11 +52,22 @@ const useStyles = makeStyles((theme) => ({
 
 export default function JoinGroup() {
   const classes = useStyles();
+  const gClasses = globalStyles();
   const history = useHistory();
   const [registerStatus, setRegisterStatus] = useState(0);
   // const [ errorMsg, setErrorMessage ] = useState("");
   const [groupCode, setGroupCode] = useState(localStorage.getItem("joinGroupCode"));
   const [balance, setBalance] = useState({wallet: 0, bonus: 0});
+  const [memberFee, setMemberFee] = useState(0);
+
+  const [groupFee, setGroupFee] = useState({done: false, wallet: 0, bonus: 0});
+  const [modalIsOpen,setIsOpen] = React.useState(false);
+  function openModal() { setIsOpen(true); }
+  function closeModal(){ setIsOpen(false); }
+  function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    //subtitle.style.color = '#f00';
+  }
 
   //console.log(localStorage.getItem("joinGroupCode"));
   // setTab(0); 
@@ -67,13 +82,28 @@ export default function JoinGroup() {
   }, []);
 
   const handleSubmit = async() => { 
-  
+    let fee = await groupfeebreakup(groupCode, balance.bonus);
+    console.log(fee);
+    if (!fee.done) {
+      setRegisterStatus(1000);
+      return;
+    }
+
+    setGroupFee(fee);
+    setMemberFee(fee.wallet + fee.bonus);
+    openModal();
   }
   
   const handleConfirm = async() => {
-    //console.log("Submit command provided");
+    closeModal();
+
+    if (groupFee.wallet > balance.wallet) {
+      setTab(process.env.REACT_APP_ADDWALLET);
+      return;
+    } 
+
     try {
-      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/join/${groupCode}/${localStorage.getItem("uid")}`);
+      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/join/${groupCode}/${localStorage.getItem("uid")}/${groupFee.wallet}/${groupFee.bonus}`);
       console.log(response.data);
       // set this as default
       localStorage.setItem("gid", response.data.gid.toString());
@@ -84,7 +114,7 @@ export default function JoinGroup() {
       //console.log("Group Join Success");
       //let myBalance = await getUserBalance();
       //setBalance(myBalance);
-      setTab(process.env.REACT_APP_GROUP);
+      setTab(process.env.REACT_APP_GROUPDETAILS);
     } catch (err) {
         setRegisterStatus(err.response.status);
     }
@@ -161,6 +191,44 @@ export default function JoinGroup() {
         </Button>
       </div>
     </ValidatorForm>
+    <Modal
+      isOpen={modalIsOpen}
+      onAfterOpen={afterOpenModal}
+      onRequestClose={closeModal}
+      style={modalStyles}
+      contentLabel="Example Modal"
+      ariaHideApp={false}
+    >
+      <DisplayCancel onCancel={closeModal} />
+      {/* <BlankArea /> */}
+      <DisplayBalance wallet={balance.wallet} bonus={balance.bonus}/>
+      <BlankArea/>
+      <Typography className={classes.new} align="center">
+      Group : {groupFee.name}
+      </Typography>
+      <BlankArea />
+      <Typography className={classes.new} align="center">
+      Member Fee   : {memberFee}
+      </Typography>
+      <Typography className={classes.new} align="center">
+        Wallet Amout : {groupFee.wallet}
+      </Typography>
+      <Typography className={classes.new} align="center">
+        Bonus Amount : {groupFee.bonus}
+      </Typography>
+      <BlankArea />
+      <Typography className={gClasses.error} align="center">
+        {((groupFee.wallet > balance.wallet) ? "Insufficent amount in wallet." : "")}
+      </Typography>
+      <BlankArea />
+      <div align="center" >
+      <Button key="modalbutton" variant="contained" color="primary" size="medium"
+        className={classes.dashButton} onClick={handleConfirm}>
+        {((groupFee.wallet > balance.wallet) ? "Add to Wallet" : "Confirm Group Join")}
+      </Button>
+      </div>
+    </Modal>
+
     </div>
     </Container>
   );

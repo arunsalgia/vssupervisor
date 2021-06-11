@@ -27,7 +27,7 @@ const globalStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: '#FAF5E9',
+    // backgroundColor: '#FAF5E9',
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),
