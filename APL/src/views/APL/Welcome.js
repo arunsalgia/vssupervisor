@@ -24,10 +24,10 @@ const BRHEIGHT = 8;
 
 const useStyles = makeStyles((theme) => ({
 	background: {
-		backgroundImage:  `${process.env.PUBLIC_URL}/image/WELCOME.JPG`,
+		backgroundImage:  `${process.env.PUBLIC_URL}/image/APLWELCOME.JPG`,
 	},
 	container: {
-		backgroundImage: `${process.env.PUBLIC_URL}/image/WELCOME.JPG`,   //`url(${backgroundImage})`,
+		backgroundImage: `${process.env.PUBLIC_URL}/image/APLWELCOME.JPG`,   //`url(${backgroundImage})`,
 		backgroundPosition: 'center',
 		backgroundSize: 'cover',
 		backgroundRepeat: 'no-repeat',
