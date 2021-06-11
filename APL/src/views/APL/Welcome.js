@@ -51,7 +51,7 @@ const Welcome = () => {
     // let gClasses = globalStyles();
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [windowHeight, setWindowHeight] = useState(window.innerHeight);
-    const [bgImage, setBgImage] = useState("WELCOME")
+    const [bgImage, setBgImage] = useState("APLWELCOME")
 
     // const imageUrl =  ? desktopImage : mobileImage;
     // const [breakCount, setBreakCount] = useState(0);
@@ -86,7 +86,7 @@ const Welcome = () => {
         };
 
         setWindowWidth(window.innerWidth);
-				setWindowHeight(window.innerHeight);
+		setWindowHeight(window.innerHeight);
         window.addEventListener('resize', handleWindowResize);
 
         return () => {
@@ -107,13 +107,13 @@ const Welcome = () => {
 
 
     let myIMage= `${process.env.PUBLIC_URL}/image/${bgImage}.JPG`;
-    // console.log(myIMage);
+    console.log(myIMage);
     // console.log(breakCount);
     // console.log(dummyArray.length);
     return (
-				<div className={classes.container}>
+				<div>
 					{/* <img src={myIMage} alt="ARUN" height={setWindowHeight} width={windowWidth}/> */}
-					{/* <img src={myIMage} alt="ARUN" height={setWindowHeight} width={windowWidth} /> */}
+					<img src={myIMage} alt="ARUN" height={windowHeight} width={windowWidth} />
 					<Button type="submit" variant="contained" color="primary" 
 						onClick={handleSignin}
 						className={classes.buttonLeft}
