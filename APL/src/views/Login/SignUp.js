@@ -10,6 +10,7 @@ import Link from '@material-ui/core/Link';
 //import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 //import { UserContext } from "../../UserContext";
 //import axios from "axios";
@@ -57,6 +58,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignUp() {
   const classes = useStyles();
+  const gClasses = globalStyles();
   // const history = useHistory();
   const [referalCode, setReferalCode] = useState("");
   const [userName, setUserName] = useState("");
@@ -83,7 +85,7 @@ export default function SignUp() {
     if (response.status === 200) {
       let setemailresp = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricemailwelcome/${tmp2}`);
       // history.push("/signin");
-      localStorage.setItem("currentLogin", "SIGNIN");
+      sessionStorage.setItem("currentLogin", "SIGNIN");
       cdRefresh();
 
     } else {
@@ -96,7 +98,7 @@ export default function SignUp() {
   function handleLogin() {
     // console.log("Call for login here");
     // history.push("/signin")
-    localStorage.setItem("currentLogin", "SIGNIN");
+    sessionStorage.setItem("currentLogin", "SIGNIN");
     cdRefresh();
 
   }
@@ -127,7 +129,7 @@ export default function SignUp() {
     }
     return(
       <div>
-        <Typography className={(registerStatus === 200) ? classes.root : classes.error}>{myMsg}</Typography>
+        <Typography className={(registerStatus === 200) ? gClasses.nonerror : gClasses.error}>{myMsg}</Typography>
       </div>
     )
   }
@@ -372,15 +374,12 @@ export default function SignUp() {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
+      <div className={gClasses.paper}>
         <CricDreamLogo />
-        {/* <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar> */}
         <Typography component="h1" variant="h5">
           Register New User
         </Typography>
-    <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
+    <ValidatorForm className={gClasses.form} onSubmit={handleSubmit}>
       {/* <TextValidator variant="outlined" fullWidth
           id="referal" label="Referral Code" name="referal"
           // defaultValue={userName}
@@ -438,7 +437,7 @@ export default function SignUp() {
         fullWidth
         variant="contained"
         color="primary"
-        className={classes.submit}
+        className={gClasses.submit}
       >
         Register
     </Button>
@@ -446,7 +445,7 @@ export default function SignUp() {
     <ShowResisterStatus/>
     </div>
     <ValidComp p1={password}/>    
-    <Typography className={classes.root}>
+    <Typography className={gClasses.root}>
       <Link href="#" onClick={handleLogin} variant="body2">
         Already have an account? Sign in 
       </Link>

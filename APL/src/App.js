@@ -8,6 +8,7 @@ import "assets/css/material-dashboard-react.css?v=1.9.0";
 import { CricDreamTabs, setTab }from "CustomComponents/CricDreamTabs"
 import SignIn from "views/Login/SignIn.js";
 import SignUp from "views/Login/SignUp.js";
+import Welcome from "views/APL/Welcome";
 //import JoinGroup from "views/Group/JoinGroup.js"
 import ForgotPassword from "views/Login/ForgotPassword.js";
 import IdleTimer from 'react-idle-timer'
@@ -97,12 +98,14 @@ function AppRouter() {
       )  
     } else {
       console.log("New login requested");
-      if (localStorage.getItem("currentLogin") === "SIGNUP")
+      if (sessionStorage.getItem("currentLogin") === "SIGNUP")
         return (<SignUp/>)
-      else if (localStorage.getItem("currentLogin") === "RESET")
-        return (<ForgotPassword/>)
+      else if (sessionStorage.getItem("currentLogin") === "RESET")
+        return (<ForgotPassword/>);
+      else if (sessionStorage.getItem("currentLogin") === "SIGNIN")
+      return (<SignIn/>)
       else
-        return (<SignIn/>)
+        return (<Welcome/>)
     }
   }
 

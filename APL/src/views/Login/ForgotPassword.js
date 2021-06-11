@@ -92,7 +92,7 @@ export default function ForgotPassword() {
   }
 
   function handleLogin() {
-    localStorage.setItem("currentLogin", "SIGNIN");
+    sessionStorage.setItem("currentLogin", "SIGNIN");
     cdRefresh();
   }
 
