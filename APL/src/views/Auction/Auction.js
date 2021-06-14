@@ -39,7 +39,7 @@ import CardBody from "components/Card/CardBody.js";
 import { BlankArea, NoGroup, JumpButtonFull, DisplayPageHeader, MessageToUser } from 'CustomComponents/CustomComponents.js';
 import { UserContext } from "../../UserContext";
 import socketIOClient from "socket.io-client";
-import { hasGroup, getAuctionCountDown } from 'views/functions';
+import { hasGroup, getAuctionCountDown, getImageName } from 'views/functions';
 import {blue, green, orange, deepOrange}  from '@material-ui/core/colors';
 import Modal from 'react-modal';
 
@@ -497,9 +497,11 @@ export default function Auction() {
     function ShowPlayerAvatar(props) {
         if (props.pTeamLogo === "") return null;
     
-        let myTeam = `${process.env.PUBLIC_URL}/${props.pTeamLogo}.JPG`
-        myTeam = myTeam.replaceAll(" ", "");
-        // console.log(`Team:${myTeam}`);
+        // let myTeam = `${process.env.PUBLIC_URL}/${props.pTeamLogo}.JPG`
+        // myTeam = myTeam.replaceAll(" ", "");
+        let myTeam = getImageName(props.pTeamLogo);    
+        console.log("Team", myTeam);
+
         return (
             <div key="playerInfo">
                 <Card profile>                    
