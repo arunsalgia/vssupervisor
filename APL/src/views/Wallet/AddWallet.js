@@ -12,7 +12,7 @@ import Container from '@material-ui/core/Container';
 import axios from "axios";
 import useScript from './useScript';
 import { setTab }from "CustomComponents/CricDreamTabs";
-import { BlankArea, ValidComp, JumpButton } from 'CustomComponents/CustomComponents.js';
+import { BlankArea, ValidComp, JumpButton, DisplayBalance } from 'CustomComponents/CustomComponents.js';
 import { validateSpecialCharacters, validateEmail, cdRefresh, validateInteger,
   getMinimumAdd,
 } from "views/functions.js";
@@ -39,21 +39,26 @@ export default function AddWallet() {
   const [amount, setAmount] = React.useState(parseInt(process.env.REACT_APP_MINADDWALLET));
   const [registerStatus, setRegisterStatus] = useState(0);
 
-  const [balance, setBalance] = useState(0);
-  const [transactions, setTransactions] = useState([]);
+  const [balance, setBalance] = useState({wallet: 0, bonus: 0});
   const [message, setMessage] = useState("");
-  const [emptyRows, setEmptyRows] = React.useState(0);
-  const [page, setPage] = React.useState(0);
+
+  // const [transactions, setTransactions] = useState([]);
+  // const [emptyRows, setEmptyRows] = React.useState(0);
+  // const [page, setPage] = React.useState(0);
 
   useEffect(() => {
-  const minimumAmount = async () => {
-    let amt = await getMinimumAdd();
-    setMinBalance(amt); 
-    setAmount(amt);
-    console.log("Min add ", amt);
-    setMinMessage(`Minimum amount of  Rupees ${amt} to be added.`);
-  }
-    
+    const minimumAmount = async () => {
+      let amt = await getMinimumAdd();
+      setMinBalance(amt); 
+      setAmount(amt);
+      console.log("Min add ", amt);
+      setMinMessage(`Minimum amount of  Rupees ${amt} to be added.`);
+    }
+    const getBalance = async () => {
+      let  response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
+      setBalance(response.data);
+    }
+    getBalance();
     minimumAmount()
   }, []);
 
@@ -83,13 +88,14 @@ export default function AddWallet() {
       </div>
     );
   }
-  const handleChangePage = (event, newPage) => {
-    event.preventDefault();
-    setPage(newPage);
-    let myempty = rowsPerPage - Math.min(rowsPerPage, transactions.length - newPage * rowsPerPage);
-    setEmptyRows(myempty);
 
-  };
+  // const handleChangePage = (event, newPage) => {
+  //   event.preventDefault();
+  //   setPage(newPage);
+  //   let myempty = rowsPerPage - Math.min(rowsPerPage, transactions.length - newPage * rowsPerPage);
+  //   setEmptyRows(myempty);
+
+  // };
 
   
   function ShowResisterStatus() {
@@ -171,6 +177,7 @@ export default function AddWallet() {
 
   return (
     <Container component="main" maxWidth="xs">
+       <DisplayBalance wallet={balance.wallet} bonus={balance.bonus}/>
       <CssBaseline />
       <div align="center" className={gClasses.paper}>
       <Typography component="h1" variant="h5">

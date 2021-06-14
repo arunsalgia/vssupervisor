@@ -23,8 +23,11 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {red, blue, green, deepOrange, yellow} from '@material-ui/core/colors';
-import {validateSpecialCharacters, validateEmail, validateMobile, validateInteger,
-  encrypt, decrypt, currentAPLVersion, latestAPLVersion} from "views/functions.js";
+import {
+  validateSpecialCharacters, validateEmail, validateMobile, validateInteger, validateUpi,
+  encrypt, decrypt, 
+  currentAPLVersion, latestAPLVersion
+} from "views/functions.js";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import Divider from "@material-ui/core/Divider";
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -321,7 +324,11 @@ export class ValidComp extends React.Component {
     });
 
     ValidatorForm.addValidationRule('checkbalance', (value) => {
-      return validateSpecialCharacters(value > this.props.balance);
+      return (value >= this.props.balance);
+    });
+
+    ValidatorForm.addValidationRule('isUpiOK', (value) => {
+      return validateUpi(value);
     });
   }
 
@@ -335,6 +342,7 @@ export class ValidComp extends React.Component {
     ValidatorForm.removeValidationRule('noSpecialCharacters');   
     ValidatorForm.removeValidationRule('checkbalance'); 
     ValidatorForm.removeValidationRule('isNumeric');    
+    ValidatorForm.removeValidationRule('isUpiOK');
   }
 
   render() {

@@ -20,7 +20,7 @@ import Container from '@material-ui/core/Container';
 import axios from "axios";
 //import useScript from './useScript';
 import { setTab }from "CustomComponents/CricDreamTabs";
-import { BlankArea } from 'CustomComponents/CustomComponents';
+import { BlankArea, DisplayBalance } from 'CustomComponents/CustomComponents';
 import { getMinimumBalance } from 'views/functions';
 // import classes from '*.module.css';
 var request= require('request');
@@ -64,13 +64,13 @@ export default function Wallet(props) {
   const gClasses = globalStyles();
 
   const [minBalance, setMinBalance] = useState(parseInt(process.env.REACT_APP_MINBALANCE));
-  const [balance, setBalance] = useState({wallet: 0, amount: 0});
+  const [balance, setBalance] = useState({wallet: 0, bonus: 0});
   const [transactions, setTransactions] = useState([]);
   const [masterTransactions, setMasterTransactions] = useState([]);
   const [registerStatus, setRegisterStatus] = useState(0);
   const [message, setMessage] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(COUNTPERPAGE);
-  const [emptyRows, setEmptyRows] = useState(0);
+  // const [emptyRows, setEmptyRows] = useState(0);
   const [page, setPage] = useState(0);
   const [minMessage, setMinMessage] = useState(`Minimum balance of  ${process.env.REACT_APP_MINBALANCE} is required for withdrawal.`)
   
@@ -96,8 +96,8 @@ export default function Wallet(props) {
         setTransactions(response.data);
         setMasterTransactions(response.data);
 
-        let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
-        setEmptyRows(myempty);
+        // let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
+        // setEmptyRows(myempty);
 
         response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
         setBalance(response.data);
@@ -140,8 +140,8 @@ export default function Wallet(props) {
   const handleChangePage = (event, newPage) => {
     event.preventDefault();
     setPage(newPage);
-    let myempty = rowsPerPage - Math.min(rowsPerPage, transactions.length - newPage * rowsPerPage);
-    setEmptyRows(myempty);
+    // let myempty = rowsPerPage - Math.min(rowsPerPage, transactions.length - newPage * rowsPerPage);
+    // setEmptyRows(myempty);
 
   };
 
@@ -176,18 +176,21 @@ export default function Wallet(props) {
   function allData() {
     // console.log(" All");
     setTransactions(masterTransactions);
+    setPage(0);
   }
 
   function walletData() {
     let tmp = masterTransactions.filter(x => x.isWallet === true);
     // console.log(" Wallet", tmp.length);
     setTransactions(tmp);
+    setPage(0);
   }
 
   function bonusData() {
     let tmp = masterTransactions.filter(x => x.isWallet === false);
     // console.log(" Bonus", tmp.length);
     setTransactions(tmp);
+    setPage(0);
   }
 
   function SelectButton() {
@@ -222,11 +225,13 @@ export default function Wallet(props) {
 
   return (
     <Container component="main" maxWidth="xs">
+      <DisplayBalance wallet={balance.wallet} bonus={balance.bonus}/>
       <CssBaseline />
       <div className={gClasses.paper}>
-        <Typography component="h1" variant="h5">Wallet Balance: {balance.wallet}</Typography>
-        <Typography component="h1" variant="h5">Bonus Balance : {balance.bonus}</Typography>
+        {/* <Typography component="h1" variant="h5">Wallet Balance: {balance.wallet}</Typography>
+        <Typography component="h1" variant="h5">Bonus Balance : {balance.bonus}</Typography> */}
         <ShowResisterStatus />
+        <BlankArea />
         <SelectButton/>
         <TableContainer>
         <Table>

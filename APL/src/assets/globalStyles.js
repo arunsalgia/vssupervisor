@@ -219,7 +219,12 @@ const globalStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(0),
     marginLeft: theme.spacing(0),
   },
-
+  show: {
+    display: 'block',
+  },
+  hide: {
+    display: 'none',
+  },
 }));
 
 export default globalStyles;

@@ -68,6 +68,18 @@ export function validateEmail(sss) {
     return sts;
 }
 
+export function validateUpi(sss) {
+  let sts = false;
+  if (validateSpecialCharacters(sss)) {
+    let xxx = sss.split("@");
+    if (xxx.length === 2) {
+        sts = true;
+    }
+  }
+  return sts;
+}
+
+
 const NumberString = /^[0-9]+$/;
 export function validateInteger(sss) {
   let sts = sss.match(NumberString);
