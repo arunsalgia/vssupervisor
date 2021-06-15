@@ -187,7 +187,8 @@ export default function Dashboard() {
   const gClasses = globalStyles();
 
   const [rankArray, setRankArray] = useState([]);
-  const [rank, setRank] = useState();
+  const [rank, setRank] = useState(0);
+  const [prize, setPrize] = useState(0);
   const [score, setScore] = useState(0);
   const [mostRuns, setMostRuns] = useState({});
   const [mostWickets, setMostwickets] = useState({});
@@ -218,6 +219,9 @@ export default function Dashboard() {
     if (localStorage.getItem("saveRank"))
       setRank(JSON.parse(localStorage.getItem("saveRank")));
 
+	if (localStorage.getItem("savePrize"))
+      setPrize(JSON.parse(localStorage.getItem("savePrize")));
+  
     if (localStorage.getItem("saveScore"))
       setScore(JSON.parse(localStorage.getItem("saveScore")));
 
@@ -261,10 +265,13 @@ export default function Dashboard() {
           // if details of current user found (current user is a member of group 1)
           // console.log("Data available");
           setRank(userDetails[0].rank);
+		  setPrize(userDetails[0].prize);
           setScore(userDetails[0].grandScore)
           localStorage.setItem("saveRank", JSON.stringify(userDetails[0].rank));
+		  localStorage.setItem("savePrize", JSON.stringify(userDetails[0].prize));
           localStorage.setItem("saveScore", JSON.stringify(userDetails[0].grandScore));
-
+		  //console.log(userDetails[0].rank);
+		  
           // let myArray = tableData(allRank)
           let myArray = allRank;
           setRankArray(myArray);
@@ -303,6 +310,7 @@ export default function Dashboard() {
 
       sockConn.on("brief", (stat) => {
         var gStat = stat.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
+		//console.log(gStat);
         if (gStat.length > 0) {
           for(let rank=0; rank < gStat.length; ++rank) {
             gStat[rank]["rank"] = rank+1;
@@ -428,7 +436,7 @@ export default function Dashboard() {
               </CardIcon>
               <h2 className={classes.cardCategory}>Rank</h2>
               <h3 className={classes.cardTitle}>
-                {rank}
+                {rank + ((prize >0) ? " (Prize: " + prize + ")" : "") }
               </h3>
             </CardHeader>
             <CardFooter key="db_cftr_ub1" stats>

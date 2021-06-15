@@ -57,17 +57,24 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: '12px',
 		fontWeight: theme.typography.fontWeightBold,
 	},
+	dlm2: {
+		left: "1%",
+		//right: 'auto',
+		color: blue[900],
+		fontSize: '12px',
+		fontWeight: theme.typography.fontWeightBold,
+	},
 	left: {
-    fontSize: theme.typography.pxToRem(16),
-    fontWeight: theme.typography.fontWeightBold,
-    color: red[900],
-    //align: "right",
-  },
-  right: {
-    fontSize: theme.typography.pxToRem(16),
-    fontWeight: theme.typography.fontWeightBold,
-    color: blue[900]
-  },
+		fontSize: theme.typography.pxToRem(16),
+		fontWeight: theme.typography.fontWeightBold,
+		color: red[900],
+		//align: "right",
+	  },
+	right: {
+		fontSize: theme.typography.pxToRem(16),
+		fontWeight: theme.typography.fontWeightBold,
+		color: blue[900]
+	},
 	oContainer: {
 		display: "flex",
 		alignItems: 'center',
@@ -116,6 +123,7 @@ const Welcome = () => {
 		// console.log("Imgae is", tmp);
 		// setBgImage(tmp);
 	}
+
 	useEffect(() => {
 		// let tmp=[];
 		// for(let i=0; i<200; ++i) {
@@ -185,12 +193,6 @@ const Welcome = () => {
 	return (
 	<div>
 		<Button type="submit" variant="contained" color="primary" 
-			onClick={handleAndroid}
-			className={classes.buttonLeft}
-		>
-		Download 
-		</Button>
-		<Button type="submit" variant="contained" color="primary" 
 		onClick={handleSignin}
 		className={classes.buttonRight1}
 		>
@@ -202,7 +204,7 @@ const Welcome = () => {
 		>
 		Register
 		</Button>
-		<Typography className={classes.dlm} align="center">{downloadMessage}</Typography>
+		{ /* <Typography className={classes.dlm} align="center">{downloadMessage}</Typography> */ }
 	</div>
 	)};
 			
@@ -252,8 +254,10 @@ const Welcome = () => {
 			return (
 			<DisplayOffer key={item.header} offer={item} />
 		)})}
+		<Button onClick={handleAndroid} >
 		<img src={image2} alt="ARUN" />
-
+		</Button>
+		<Typography className={classes.dlm2} align="center">{downloadMessage}</Typography>
 	</div>
 	);
 };

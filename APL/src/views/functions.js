@@ -414,13 +414,14 @@ export async function downloadApk() {
     console.log("in try catch");
   } 
   
-  console.log("Debu complete");
+  console.log("Debug complete");
 
 }
 
 export function clearBackupData() {
   /* Clear dash board items */
   localStorage.removeItem("saveRank");
+  localStorage.removeItem("savePrize");
   localStorage.removeItem("saveScore");
   localStorage.removeItem("saveMaxRun");
   localStorage.removeItem("saveMaxWicket");

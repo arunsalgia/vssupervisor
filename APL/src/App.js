@@ -97,7 +97,7 @@ function AppRouter() {
         </div>
       )  
     } else {
-      console.log("New login requested");
+      //console.log("New login requested");
       if (sessionStorage.getItem("currentLogin") === "SIGNUP")
         return (<SignUp/>)
       else if (sessionStorage.getItem("currentLogin") === "RESET")
