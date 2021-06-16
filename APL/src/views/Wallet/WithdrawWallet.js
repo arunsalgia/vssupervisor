@@ -184,10 +184,14 @@ export default function WithdrawWallet(props) {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+	if (localStorage.getItem("saveBalance"))
+      setBalance(JSON.parse(localStorage.getItem("saveBalance")));
+	
     const walletInfo = async () => {
       try {
         let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
         setBalance(response.data);
+		localStorage.setItem("saveBalance", JSON.stringify(response.data));
       } catch (e) {
           console.log(e)
       }

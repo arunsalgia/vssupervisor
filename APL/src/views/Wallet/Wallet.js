@@ -82,25 +82,37 @@ export default function Wallet(props) {
   // sessionStorage.getItem("payment_request_id")
   // );
   useEffect(() => {
+	  
+	if (localStorage.getItem("saveBalance"))
+      setBalance(JSON.parse(localStorage.getItem("saveBalance")));
+
+	if (localStorage.getItem("saveTransactions")) {
+      setTransactions(JSON.parse(localStorage.getItem("saveTransactions")));
+	  setMasterTransactions(JSON.parse(localStorage.getItem("saveTransactions")));
+	}
+	
     const minimumAmount = async () => {
       let amt = await getMinimumBalance();
       setMinBalance(amt); 
       console.log("Min Balance ", amt);
       setMinMessage(`Minimum balance of  ${amt} is required for withdrawal.`);
     }
-    const WalletInfo = async () => {
+    
+	const WalletInfo = async () => {
       try {
         // get user details
         // get wallet transaction and also calculate balance
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
         setTransactions(response.data);
         setMasterTransactions(response.data);
-
+		localStorage.setItem("saveTransactions", JSON.stringify(response.data));
+		
         // let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
         // setEmptyRows(myempty);
 
         response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
         setBalance(response.data);
+		localStorage.setItem("saveBalance", JSON.stringify(response.data));
       } catch (e) {
           console.log(e)
       }

@@ -47,6 +47,9 @@ export default function AddWallet() {
   // const [page, setPage] = React.useState(0);
 
   useEffect(() => {
+	if (localStorage.getItem("saveBalance"))
+      setBalance(JSON.parse(localStorage.getItem("saveBalance")));
+
     const minimumAmount = async () => {
       let amt = await getMinimumAdd();
       setMinBalance(amt); 
@@ -57,6 +60,7 @@ export default function AddWallet() {
     const getBalance = async () => {
       let  response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
       setBalance(response.data);
+	  localStorage.setItem("saveBalance", JSON.stringify(response.data));
     }
     getBalance();
     minimumAmount()

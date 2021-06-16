@@ -150,12 +150,16 @@ export default function CreateGroup() {
   };
   
   useEffect(() => {
+	if (localStorage.getItem("saveBalance"))
+      setBalance(JSON.parse(localStorage.getItem("saveBalance")));
+  
     const a = async () => {
         // var balres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
         // setBalance(balres.data);
         let myBalance = await getUserBalance();
         setBalance(myBalance);
-
+		localStorage.setItem("saveBalance", JSON.stringify(response.data));
+		
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`); 
         // console.log("Getting tournament list");
         // console.log(response.data);

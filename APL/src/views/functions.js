@@ -438,6 +438,9 @@ export function clearBackupData() {
   /* clear home */
   localStorage.removeItem("home_tournamentList");
   localStorage.removeItem("home_groupList");
+  /* clear wallet details */
+  localStorage.removeItem("saveBalance");
+  localStorage.removeItem("saveTransactions");
 }
 
 

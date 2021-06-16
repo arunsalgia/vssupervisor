@@ -72,11 +72,16 @@ export default function JoinGroup() {
   //console.log(localStorage.getItem("joinGroupCode"));
   // setTab(0); 
   useEffect(() => {
+	  
+	if (localStorage.getItem("saveBalance"))
+      setBalance(JSON.parse(localStorage.getItem("saveBalance")));
+  
     const a = async () => {
       // var balres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
       // setBalance(balres.data.balance);
       let myBalance = await getUserBalance();
       setBalance(myBalance);
+	  localStorage.setItem("saveBalance", JSON.stringify(response.data));
     };    
     a();
   }, []);
