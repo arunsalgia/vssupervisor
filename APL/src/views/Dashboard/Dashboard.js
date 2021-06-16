@@ -52,6 +52,7 @@ import { getTsBuildInfoEmitOutputFilePath } from "typescript";
 import Modal from 'react-modal';
 
 const CardColor = "#ff9800";
+const currencyChar = '₹';
 
 const modelStyles = {
   content : {
@@ -436,7 +437,7 @@ export default function Dashboard() {
               </CardIcon>
               <h2 className={classes.cardCategory}>Rank</h2>
               <h3 className={classes.cardTitle}>
-                {rank + ((prize >0) ? " (Prize: " + prize + ")" : "") }
+                {rank + ((prize >0) ? " (You won: ₹" + prize + ")" : "") }
               </h3>
             </CardHeader>
             <CardFooter key="db_cftr_ub1" stats>
