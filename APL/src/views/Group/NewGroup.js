@@ -158,7 +158,7 @@ export default function CreateGroup() {
         // setBalance(balres.data);
         let myBalance = await getUserBalance();
         setBalance(myBalance);
-		localStorage.setItem("saveBalance", JSON.stringify(response.data));
+		localStorage.setItem("saveBalance", JSON.stringify(myBalance));
 		
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`); 
         // console.log("Getting tournament list");

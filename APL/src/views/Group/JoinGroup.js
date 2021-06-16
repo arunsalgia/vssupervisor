@@ -81,7 +81,7 @@ export default function JoinGroup() {
       // setBalance(balres.data.balance);
       let myBalance = await getUserBalance();
       setBalance(myBalance);
-	  localStorage.setItem("saveBalance", JSON.stringify(response.data));
+	  localStorage.setItem("saveBalance", JSON.stringify(myBalance));
     };    
     a();
   }, []);
