@@ -1,71 +1,21 @@
-const { 
-  getMaster, setMaster,
-} = require('./cricspecial'); 
 //var express = require('express');
 var router = express.Router();
-// let PrizeRes;
+let PrizeRes;
 
 /* GET users listing. */
 router.use('/', function(req, res, next) {
-  // PrizeRes = res;
-  setHeader(res);
-  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
+  PrizeRes = res;
+  setHeader();
+  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
   next('route');
 });
- 
- 
-router.get('/data', async function (req, res, next) {
-  // PrizeRes = res;
-  setHeader(res);
-	let myPrize = await Prize.find({})
-	sendok(res, myPrize);
-}); 
 
-router.get('/getmaster/:key', async function (req, res, next) {
-  setHeader(res); 
-  
-  var {key} = req.params;
-  let  myValue = await getMaster(key.toUpperCase());
-  sendok(res, myValue);
-}); 
 
-router.get('/setmaster/:key/:value', async function (req, res, next) {
-  setHeader(res);
-  
-  var {key, value} = req.params;
-  await setMaster(key.toUpperCase(), value);
-  sendok(res, "Done");
-}); 
-
-router.get('/getprizeportion', async function (req, res, next) {
-  setHeader(res);
-  let myPortion = await getMaster("PRIZEPORTION");
-  console.log(myPortion);
-  let amt = (myPortion !== "") ? parseInt(myPortion) : 100;
-  sendok(res, {prizePortion: amt});
-}); 
-
-router.get('/setprizeportion/:percentage', async function (req, res, next) {
-  setHeader(res);
-  var {percentage} = req.params;
-
-  await setMaster("PRIZEPORTION", percentage);
-  sendok(res, "OK");
-}); 
-
-router.get('/prizecount/:num', async function (req, res, next) {
-  // PrizeRes = res;
-  setHeader(res);
-  var {num} = req.params;
-
-	let myPrize = await Prize.findOne({prizeCount: num})
-	sendok(res, myPrize);
-}); 
 
 
 router.get('/all/:amount', async function (req, res, next) {
-  // PrizeRes = res;
-  setHeader(res);
+  PrizeRes = res;
+  setHeader();
 
   var { amount } = req.params;
  
@@ -74,14 +24,28 @@ router.get('/all/:amount', async function (req, res, next) {
     let mytab = await getPrizeTable(i, amount);
     allPrize.push(mytab);
   }
-  sendok(res, allPrize);
+  sendok(allPrize);
 }); 
 
 
+router.get('/group/:groupId', async function (req, res, next) {
+  PrizeRes = res;
+  setHeader();
+
+  var { groupId } = req.params;
+  
+  let groupRec =  await IPLGroup.findOne({gid: groupId});
+  if (groupRec) {
+    let myTable = await getPrizeTable(groupRec.prizeCount, groupRec.memberCount * groupRec.memberFee);
+    sendok(myTable);
+  }
+  senderr(601, 'Invalid group number');
+}); 
+
 
 router.get('/addprize', async function (req, res, next) {
-  // PrizeRes = res;
-  setHeader(res);
+  PrizeRes = res;
+  setHeader();
 
   let myPrize = new Prize({
     prizeCount: 1,
@@ -121,7 +85,7 @@ router.get('/addprize', async function (req, res, next) {
     prize4: 0,
     prize5: 0,
     prize6: 0,
-    prize7: 0,	
+    prize7: 0,
     prize8: 0,
     prize9: 0,
     prize10: 0,
@@ -158,14 +122,14 @@ router.get('/addprize', async function (req, res, next) {
   })
   myPrize.save();
 
-  sendok(res, "ok");
+  sendok("ok");
 }); 
 
 
-function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
-function setHeader(res) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+function sendok(usrmsg) { PrizeRes.send(usrmsg); }
+function senderr(errcode, errmsg) { PrizeRes.status(errcode).send(errmsg); }
+function setHeader() {
+  PrizeRes.header("Access-Control-Allow-Origin", "*");
+  PrizeRes.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 }
 module.exports = router;
