@@ -10,6 +10,7 @@ import Link from '@material-ui/core/Link';
 // import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 //import { UserContext } from "../../UserContext";
 import axios from "axios";
@@ -91,6 +92,7 @@ class ChildComp extends React.Component {
 
 export default function ResetPassword() {
   const classes = useStyles();
+	const gClasses = globalStyles();
 //  const history = useHistory();
   // const [userName, setUserName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -164,9 +166,10 @@ export default function ResetPassword() {
         myMsg = "New password cannot be same as Current Password";
       break;
 			case 1001:
-        myMsg = "Invalid User Code";
-			break; 
 			case 1002:
+        myMsg = "Invalid / Expired Link";
+			break; 
+			case 99999:
         myMsg = "Reset link expired";
 			break; 
       default:
@@ -186,6 +189,10 @@ export default function ResetPassword() {
 
   }
 	
+	function handleForgot() {
+		sessionStorage.setItem("currentLogin", "RESET");
+    cdRefresh();
+	}
 	
   return (
     <Container component="main" maxWidth="xs">
@@ -228,11 +235,22 @@ export default function ResetPassword() {
         fullWidth
         variant="contained"
         color="primary"
-        className={classes.submit}
-				disabled={disableButton}
+        className={(registerStatus === 0) ? gClasses.show : gClasses.hide}
+				//disabled={disableButton}
       >
         Update
-    </Button>
+			</Button>
+			<Button
+        //type="submit"
+        fullWidth
+        variant="contained"
+        color="primary"
+        className={(registerStatus !== 0) ? gClasses.show : gClasses.hide}
+				onClick={handleForgot}
+				//disabled={disableButton}
+      >
+        Regenrate Link
+			</Button>
     </ValidatorForm>
     </div>
     <ValidComp p1={newPassword}/>  
