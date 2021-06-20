@@ -1,4 +1,4 @@
-import React, { useState ,useContext} from 'react';
+import React, { useState ,useContext} from 'react'; 
 //import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -86,8 +86,9 @@ export default function ForgotPassword() {
 
 
   const handleSubmit = async() => {
-    let tmp1 = encrypt(email);
-    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricemailpassword/${tmp1}`);
+    let tmp1 = encrypt(email); 
+    //let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricemailpassword/${tmp1}`);
+		let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricemailreset/${tmp1}`);
     setRegisterStatus(response.status);
   }
 
@@ -103,7 +104,7 @@ export default function ForgotPassword() {
         myMsg = ``;
         break;
       case 200:
-        myMsg = `Successfully mailed password`;
+        myMsg = `Successfully mailed reset password link`;
         break;
       case 602:
         myMsg = `Email not configured in database`;

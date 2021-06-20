@@ -111,7 +111,7 @@ export default function ChangePassword() {
     if (currentPassword !== newPassword) {
       let tmp1 = encrypt(currentPassword);
       let tmp2 = encrypt(newPassword);
-      let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricreset/${localStorage.getItem("uid")}/${tmp1}/${tmp2}`);
+      let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricchangepassword/${localStorage.getItem("uid")}/${tmp1}/${tmp2}`);
       if (response.status === 200) {
         setTab(0);
       } else {

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { UserContext } from "./UserContext";
 //import Admin from "layouts/Admin.js";
@@ -9,6 +10,7 @@ import { CricDreamTabs, setTab }from "CustomComponents/CricDreamTabs"
 import SignIn from "views/Login/SignIn.js";
 import SignUp from "views/Login/SignUp.js";
 import Welcome from "views/APL/Welcome";
+import ResetPassword from "views/Login/ResetPassword";
 //import JoinGroup from "views/Group/JoinGroup.js"
 import ForgotPassword from "views/Login/ForgotPassword.js";
 import IdleTimer from 'react-idle-timer'
@@ -19,6 +21,7 @@ import { PinDropSharp } from "@material-ui/icons";
 
 
 const hist = createBrowserHistory();
+
 
 function checkJoinGroup(pathArray) {
   let sts = false;
@@ -51,8 +54,21 @@ function isUserLogged() {
     return true;
 }
 
-function AppRouter() {
+function checkResetPasswordRequest() {
+	let resetLink = "";
+	let x = location.pathname.split("/");
+	if (x.length >= 4)
+	if (x[1] === "apl")
+	if (x[2] === "resetpasswordconfirm") {
+		resetLink = x[3];
+	}
+	return resetLink;
+}
 
+
+function AppRouter() {
+  //let history={hist}
+	
   const [user, setUser] = useState(null);
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
   var idleTimer = null;
@@ -80,7 +96,6 @@ function AppRouter() {
     let isLogged = isUserLogged();
     // console.log("Login status", isLogged)
     if (isLogged) {
-      // get time out value in milliseconds
       // console.log("User is logged");
       let timeoutvalue = parseInt(process.env.REACT_APP_IDLETIMEOUT) * 1000;
       return (
@@ -104,8 +119,17 @@ function AppRouter() {
         return (<ForgotPassword/>);
       else if (sessionStorage.getItem("currentLogin") === "SIGNIN")
       return (<SignIn/>)
-      else
-        return (<Welcome/>)
+      else {
+				let userId = checkResetPasswordRequest();
+				if (userId !== "") {
+					sessionStorage.setItem("currentUserCode", userId);
+					hist.push("/");
+					//console.log(history, hist);
+					return (<ResetPassword />);
+				} else {
+					return (<Welcome/>)
+				}
+			}
     }
   }
 
