@@ -2,7 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
+// import TextField from '@material-ui/core/TextField';
+import { TextField, InputAdornment } from "@material-ui/core";
 import Grid from '@material-ui/core/Grid';
 import Link from '@material-ui/core/Link';
 import { Switch, Route } from 'react-router-dom';
@@ -18,12 +19,14 @@ import Container from '@material-ui/core/Container';
 import { useHistory } from "react-router-dom";
 import { UserContext } from "../../UserContext";
 import axios from "axios";
-import red from '@material-ui/core/colors/red';
+import {red, green, blue } from '@material-ui/core/colors';
 import { DesktopWindows } from '@material-ui/icons';
-import { cdRefresh, specialSetPos, encrypt, clearBackupData, downloadApk } from "views/functions.js"
+import { isMobile, cdRefresh, specialSetPos, encrypt, clearBackupData, downloadApk } from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { CricDreamLogo } from 'CustomComponents/CustomComponents.js';
 import { BlankArea } from 'CustomComponents/CustomComponents';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +50,6 @@ const useStyles = makeStyles((theme) => ({
   },
   downloadButon: {
   },
-
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -63,6 +65,14 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
       marginTop: '0px',
   },
+  error:  {
+    // right: 0,
+    fontSize: '12px',
+    color: blue[700],
+    // position: 'absolute',
+    alignItems: 'center',
+    marginTop: '0px',
+},
 }));
 
 const handleSubmit = e => {
@@ -71,13 +81,16 @@ const handleSubmit = e => {
 
 export default function SignIn() {
   const classes = useStyles();
+  const gClasses = globalStyles();
   const history = useHistory();
   const [userName, setUserName] = useState();
   const [password, setPassword] = useState();
   // const [showPage, setShowPage] = useState(true);
   // const [open, setOpen] = useState(true)
   // const { setUser } = useContext(UserContext);
-  const [ errorMessage, setErrorMessage ] = useState("");
+  const [ errorMessage, setErrorMessage ] = useState({msg: "", isError: false });
+  const [ downloadMessage, setDownloadMessage ] = useState("");
+  // const [errorFound, setErrorFound] = useState(false);
 
   useEffect(() => {
     if (window.localStorage.getItem("logout")) {
@@ -91,28 +104,37 @@ export default function SignIn() {
     }
   });
 
+  function setError(msg, isError) {
+    setErrorMessage({msg: msg, isError: isError});
+  }
+
   function handleForgot() {
     //console.log("Call forgot password here")
     // history.push('/admin/emailpassword');
-    localStorage.setItem("currentLogin", "RESET");
+    sessionStorage.setItem("currentLogin", "RESET");
     cdRefresh();
   }
 
   function handleRegister() {
     //console.log("Call for register here");
     // history.push("/admin/register")
-    localStorage.setItem("currentLogin", "SIGNUP");
+    sessionStorage.setItem("currentLogin", "SIGNUP");
     cdRefresh();
   }
 
   const handleClick = async () => {
+    let myUserName = document.getElementById("userName").value;
+    let myPassword = document.getElementById("password").value;
+    setUserName(myUserName);
+    setPassword(myPassword);
+
     let response = ""
     try { 
-      let enPassword = encrypt(password);
-      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/criclogin/${userName}/${enPassword}`); 
-      setErrorMessage("");
+      let enPassword = encrypt(myPassword);
+      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/criclogin/${myUserName}/${enPassword}`); 
+      setError("", false);
     } catch (err) {
-      setErrorMessage("Invalid Username / Password");
+      setError("Invalid Username / Password", true);
     }
     // console.log("Signinresponse", response.data);
     if (response.status === 200) {
@@ -133,23 +155,29 @@ export default function SignIn() {
       window.localStorage.setItem("userPlan", userPlan);
       window.localStorage.setItem("SNG", "");
       window.localStorage.setItem("cGroup", "");
+      clearBackupData();
 
-      // clearBackupData();
       // setUser({ uid: myUID, admin: response.data.admin });
       // cdRefresh(true);
       //let newPos = specialSetPos();
       //if (newPos < 0) newPos = 0;
-      let newPos = (response.data.gid > 0) ? process.env.REACT_APP_DASHBOARD : process.env.REACT_APP_GROUP;
+      // let newPos = (response.data.gid > 0) ? process.env.REACT_APP_DASHBOARD : process.env.REACT_APP_GROUP;
       // console.log(`User is ${localStorage.getItem("uid")}`)
-      setTab(4);
+      setTab(process.env.REACT_APP_HOME);
     }
 
   }
   
   async function handleAndroid() {
-    console.log("Download Android app");
-    await downloadApk();
-    console.log("APK has to be downloaded");
+    try {
+      setDownloadMessage("APL Android app download started. Please wait...")
+      // console.log("Download Android app");
+      await downloadApk();
+      setDownloadMessage("APL Android app download complete.")
+      // console.log("APK has to be downloaded");
+    } catch (e) {
+      setDownloadMessage("Error encountred while downloading APL Android app", true)
+    }
   }
 
   function handleIos() {
@@ -164,10 +192,11 @@ export default function SignIn() {
     let iosImage = `${process.env.PUBLIC_URL}/image/IOS.JPG`;
     return (
       <div align="center">
-      <Typography className={classes.download}>Download the offical app</Typography>
+      <Typography className={gClasses.message18}>Download the offical app</Typography>
       <BlankArea />
+      <Typography className={gClasses.nonerror} align="center">{downloadMessage}</Typography>
       <Grid key="jp1" container align="center">
-        <Grid item className={classes.downloadButon} xs={12} sm={12} md={12} lg={12} >
+        <Grid item xs={12} sm={12} md={12} lg={12} >
         <button><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
         </Grid>
         {/* <Grid item className={classes.downloadButon} xs={6} sm={6} md={6} lg={6} >
@@ -178,26 +207,99 @@ export default function SignIn() {
     )  
   } 
 
+  
+  const [showPassword, setShowPassword] = useState(false);
+
+  function handleVisibility(visible) {
+    let myName = document.getElementById("userName").value;
+    let myPassword = document.getElementById("password").value;
+    setUserName(myName);
+    setPassword(myPassword);
+    setShowPassword(visible);
+  }
+
+  function NonMobile() {
+    return (
+      <TextField variant="outlined" required fullWidth
+        id="password" label="Password" type="password"
+        defaultValue={password}
+        // onChange={(event) => setPassword(event.target.value)}
+      />
+    )
+  }
+
+  
+  function PwdVisible() {
+    console.log("IN visisble");
+    return (
+      <TextField variant="outlined" required fullWidth
+        id="password" label="Password" type="text"
+        defaultValue={password}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <VisibilityOffIcon onClick={() => { handleVisibility(false); }} />
+            </InputAdornment>
+          ),
+        }}
+      />
+    )
+  }
+
+  function PwdNotVisible() {
+    console.log("In non visisble")
+    return (
+      <TextField variant="outlined" required fullWidth
+        id="password" label="Password" type="password"
+        defaultValue={password}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <VisibilityIcon onClick={() => { handleVisibility(true); }} />
+            </InputAdornment>
+          ),
+        }}
+      />
+    )
+
+  }
+
+  function GetPassword() {
+    let itIsMobile = isMobile();
+    console.log("Mobile", itIsMobile)
+    if (itIsMobile) {
+      if (showPassword) 
+        return <PwdVisible />
+      else
+        return <PwdNotVisible />
+    } else {
+      return <NonMobile />
+    }
+  }
+
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
+      <div className={gClasses.paper}>
         <CricDreamLogo />        
         <Typography component="h1" variant="h5">Sign in</Typography>
-        <form className={classes.form} onSubmit={handleSubmit} noValidate>
+        <form className={gClasses.form} onSubmit={handleSubmit} noValidate>
           <TextField
-            autoComplete="fname"
-            name="userName"
+            // autoComplete="fname"
+            id="userName"
+            label="User Name"
+            // name="userName"
             variant="outlined"
             required
             fullWidth
-            id="userName"
-            label="User Name"
-            autoFocus
-            onChange={(event) => setUserName(event.target.value)}
+            defaultValue={userName}
+            // autoFocus
+            // onChange={(event) => setUserName(event.target.value)}
           />
           <h3></h3>
-          <TextField
+          <GetPassword />
+          {/* <TextField
             variant="outlined"
             required
             fullWidth
@@ -207,16 +309,16 @@ export default function SignIn() {
             id="password"
             autoComplete="current-password"
             onChange={(event) => setPassword(event.target.value)}
-          />
+          /> */}
           <div>
-          <Typography className={classes.error} align="left">{errorMessage}</Typography>
-          <Typography className={classes.root}>
-            <Link href="#" onClick={handleForgot} variant="body2">
-            Forgot password
-          </Link>
-        </Typography>
+            <Typography className={(errorMessage.isError) ? gClasses.error : gClasses.nonerror} align="left">{errorMessage.msg}</Typography>
+            <Typography className={gClasses.root}>
+              <Link href="#" onClick={handleForgot} variant="body2">
+              Forgot password
+              </Link>
+            </Typography>
           </div>
-          <Button
+          <Button 
             type="submit"
             fullWidth
             variant="contained"
@@ -225,15 +327,15 @@ export default function SignIn() {
             onClick={handleClick}
           >
             Sign In
-        </Button>
-        {/* <Typography className={classes.root}>
+          </Button>
+        </form>
+        {/* <Typography className={gClasses.root}>
             <Link href="#" onClick={handleRegister} variant="body2">
             Register
           </Link>
         </Typography> */}
           {/* <BlankArea /> */}
           <Button
-            //type="submit"
             fullWidth
             variant="contained"
             color="primary"
@@ -242,7 +344,6 @@ export default function SignIn() {
           >
             Sign Up
         </Button>
-        </form>
         <BlankArea />
         <DisplayDownload />
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { UserContext } from "./UserContext";
 //import Admin from "layouts/Admin.js";
@@ -8,13 +9,19 @@ import "assets/css/material-dashboard-react.css?v=1.9.0";
 import { CricDreamTabs, setTab }from "CustomComponents/CricDreamTabs"
 import SignIn from "views/Login/SignIn.js";
 import SignUp from "views/Login/SignUp.js";
+import Welcome from "views/APL/Welcome";
+import ResetPassword from "views/Login/ResetPassword";
 //import JoinGroup from "views/Group/JoinGroup.js"
 import ForgotPassword from "views/Login/ForgotPassword.js";
 import IdleTimer from 'react-idle-timer'
 import { setIdle }from "views/functions.js"
+import Wallet from "views/Wallet/Wallet";
+// import Dummy from "views/APL/Dummy";
+import { PinDropSharp } from "@material-ui/icons";
 
 
 const hist = createBrowserHistory();
+
 
 function checkJoinGroup(pathArray) {
   let sts = false;
@@ -47,8 +54,21 @@ function isUserLogged() {
     return true;
 }
 
-function AppRouter() {
+function checkResetPasswordRequest() {
+	let resetLink = "";
+	let x = location.pathname.split("/");
+	if (x.length >= 4)
+	if (x[1] === "apl")
+	if (x[2] === "resetpasswordconfirm") {
+		resetLink = x[3];
+	}
+	return resetLink;
+}
 
+
+function AppRouter() {
+  //let history={hist}
+	
   const [user, setUser] = useState(null);
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
   var idleTimer = null;
@@ -76,7 +96,6 @@ function AppRouter() {
     let isLogged = isUserLogged();
     // console.log("Login status", isLogged)
     if (isLogged) {
-      // get time out value in milliseconds
       // console.log("User is logged");
       let timeoutvalue = parseInt(process.env.REACT_APP_IDLETIMEOUT) * 1000;
       return (
@@ -93,13 +112,24 @@ function AppRouter() {
         </div>
       )  
     } else {
-      console.log("New login requested");
-      if (localStorage.getItem("currentLogin") === "SIGNUP")
+      //console.log("New login requested");
+      if (sessionStorage.getItem("currentLogin") === "SIGNUP")
         return (<SignUp/>)
-      else if (localStorage.getItem("currentLogin") === "RESET")
-        return (<ForgotPassword/>)
-      else
-        return (<SignIn/>)
+      else if (sessionStorage.getItem("currentLogin") === "RESET")
+        return (<ForgotPassword/>);
+      else if (sessionStorage.getItem("currentLogin") === "SIGNIN")
+      return (<SignIn/>)
+      else {
+				let userId = checkResetPasswordRequest();
+				if (userId !== "") {
+					sessionStorage.setItem("currentUserCode", userId);
+					hist.push("/");
+					//console.log(history, hist);
+					return (<ResetPassword />);
+				} else {
+					return (<Welcome/>)
+				}
+			}
     }
   }
 
@@ -120,19 +150,22 @@ function AppRouter() {
   // <Router history={hist}> 
   //     <UserContext.Provider value={value}>
   //       {!user && <Redirect from="/" to="/signIn" />}
-        // <Route path="/joingroup" component={JoinGroup} />
+  //       <Route path="/joingroup" component={JoinGroup} />
   //       <Route path="/admin" component={value ? Admin : SignIn} />
   //       <Redirect from="/" to="/signIn" />
   //     </UserContext.Provider>
-    // </Router>
+  //   </Router>
   // );
 
-return (
-      <Router history={hist}> 
-      <UserContext.Provider value={value}>
-      </UserContext.Provider>
-      <DispayTabs />
-      </Router>
+
+  return (
+    <Router history={hist}> 
+    <UserContext.Provider value={value}>
+    {/* <Route path="/apl/walletdetails" component={Dummy} /> */}
+    {/* <Route path="/apl/walletadd" component={Dummy} /> */}
+    </UserContext.Provider>
+    <DispayTabs />
+    </Router>
   );
 
 }

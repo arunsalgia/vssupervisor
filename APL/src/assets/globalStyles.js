@@ -11,10 +11,14 @@ import { makeStyles } from '@material-ui/core/styles';
 const globalStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
+    // backgroundColor: '#FAF5E9',
   },
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
   },
   page: {
   },
@@ -23,6 +27,7 @@ const globalStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    // backgroundColor: '#FAF5E9',
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),
@@ -32,6 +37,16 @@ const globalStyles = makeStyles((theme) => ({
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
     color: theme.palette.text.secondary,
+  },
+  message18: {
+    fontSize: theme.typography.pxToRem(18),
+    fontWeight: theme.typography.fontWeightBold,
+    // color: yellow[900]
+  },
+  message16: {
+    fontSize: theme.typography.pxToRem(16),
+    fontWeight: theme.typography.fontWeightBold,
+    // color: yellow[900]
   },
   message14: {
     fontSize: theme.typography.pxToRem(14),
@@ -204,7 +219,12 @@ const globalStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(0),
     marginLeft: theme.spacing(0),
   },
-
+  show: {
+    display: 'block',
+  },
+  hide: {
+    display: 'none',
+  },
 }));
 
 export default globalStyles;

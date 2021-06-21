@@ -29,16 +29,25 @@ import MenuItem from '@material-ui/core/MenuItem';
 // import { UserContext } from "../../UserContext";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import { useHistory } from "react-router-dom";
-import {validateSpecialCharacters, validateEmail, getUserBalance} from "views/functions.js";
-import {BlankArea, NothingToDisplay, DisplayPrizeTable, DisplayBalance} from "CustomComponents/CustomComponents.js"
-import {red, blue, yellow} from '@material-ui/core/colors';
-// import blue from '@material-ui/core/colors/blue';
-import {setTab} from "CustomComponents/CricDreamTabs.js"
 // import copy from 'copy-clipboard';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { DisplayPageHeader, JumpButton } from 'CustomComponents/CustomComponents';
 import { getAllPrizeTable } from 'views/functions';
 
+import Modal from 'react-modal';
+import modalStyles from 'assets/modalStyles';
+
+
+import {validateSpecialCharacters, validateInteger, 
+  validateEmail, getUserBalance, feebreakup} from "views/functions.js";
+import {BlankArea, NothingToDisplay, 
+  DisplayPrizeTable, DisplayBalance,
+  DisplayCancel
+} from "CustomComponents/CustomComponents.js"
+import {setTab} from "CustomComponents/CricDreamTabs.js"
+import {red, blue, yellow} from '@material-ui/core/colors';
+
+const NOFRACTION = 'Fraction not allowed';
 const useStyles = makeStyles((theme) => ({
   groupCode: {
     fontSize: theme.typography.pxToRem(20),
@@ -47,6 +56,11 @@ const useStyles = makeStyles((theme) => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
+  },
+  new: {
+    fontSize: theme.typography.pxToRem(18),
+    fontWeight: theme.typography.fontWeightBold,
+    //color: '#FFFFFF'
   },
 }));
 
@@ -70,6 +84,12 @@ class ChildComp extends React.Component {
     ValidatorForm.addValidationRule('noSpecialCharacters', (value) => {
       return validateSpecialCharacters(value);
     });    
+
+    ValidatorForm.addValidationRule('isNumeric', (value) => {
+      // console.log("string: ", value);
+      // console.log(value.toString());
+      return validateInteger(value.toString());
+    });
   }
 
   componentWillUnmount() {
@@ -77,6 +97,7 @@ class ChildComp extends React.Component {
     ValidatorForm.removeValidationRule('minLength');
     ValidatorForm.removeValidationRule('lessthanbalance');
     ValidatorForm.removeValidationRule('noSpecialCharacters');
+    ValidatorForm.removeValidationRule('isNumeric');
   }
 
   render() {
@@ -86,7 +107,7 @@ class ChildComp extends React.Component {
 }
 
 const STARTMEMBERCOUNT = 2;
-const STARTMEMBERFEE  = 50;
+const STARTMEMBERFEE  = 100;
 const STARTPRIZECOUNT = 1;
 
 export default function CreateGroup() {
@@ -105,7 +126,7 @@ export default function CreateGroup() {
   const [created, setCreate] = useState(false);
   const [groupCode, setGroupCode] = useState("");
   const [copyState, setCopyState] = useState({value: '', copied: false});
-  const [balance, setBalance] = useState(0);
+  const [balance, setBalance] = useState({wallet: 0, bonus: 0});
   const [prizeCount, setPrizeCount] = useState(STARTPRIZECOUNT);
   const [prizeTable, setPrizeTable] = useState([]);
   const [auctionCoins, setAuctionCoins] = useState(1000);
@@ -113,20 +134,32 @@ export default function CreateGroup() {
   const [newGid, setNewGid] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
   const [createDisable, setCreateDisable] = useState(false);
-  // state = {
-  //   value: 'arunsalgia',
-  //   copied: false,
-  // };
+
+  const [groupFee, setGroupFee] = useState({done: false, wallet: 0, bonus: 0});
+  const [modalIsOpen,setIsOpen] = React.useState(false);
+  function openModal() { setIsOpen(true); }
+  function closeModal(){ setIsOpen(false); }
+  function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    //subtitle.style.color = '#f00';
+  }
+
 
   const handleSelectedTournament = (event) => {
     SetSelectedTournament(event.target.value);
   };
   
   useEffect(() => {
+	if (localStorage.getItem("saveBalance"))
+      setBalance(JSON.parse(localStorage.getItem("saveBalance")));
+  
     const a = async () => {
-        var balres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
-        setBalance(balres.data.balance);
-
+        // var balres = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
+        // setBalance(balres.data);
+        let myBalance = await getUserBalance();
+        setBalance(myBalance);
+		localStorage.setItem("saveBalance", JSON.stringify(myBalance));
+		
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/tournament/list/notstarted`); 
         // console.log("Getting tournament list");
         // console.log(response.data);
@@ -157,13 +190,31 @@ export default function CreateGroup() {
   // }
 
   const handleSubmit = async() => {
-    setCreateDisable(true)
+    let fee = await feebreakup(memberFee, balance.bonus);
+    // console.log(fee);
+    if (!fee.done) {
+      setRegisterStatus(1000);
+      return;
+    }
+    setGroupFee(fee);
+    openModal();
+  }
+
+  const handleConfirm = async() => {
+    closeModal();
+
+    if (groupFee.wallet > balance.wallet) {
+      setTab(process.env.REACT_APP_ADDWALLET);
+      return;
+    } 
+   
+    //setCreateDisable(true)
     setRegisterStatus(1001);
     //console.log("Submit command provided");
     //  /group/create/TeSt/8/1250/AUSINDT20
     // groupName  bidAmount selectedTournament
     try {
-      const response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/create/${groupName}/${localStorage.getItem("uid")}/${bidAmount}/${selectedTournament}/${memberCount}/${memberFee}`);
+      const response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/create/${groupName}/${localStorage.getItem("uid")}/${bidAmount}/${selectedTournament}/${memberCount}/${groupFee.wallet}/${groupFee.bonus}`);
       console.log(response.data);
       setNewGid(response.data.gid)      
 
@@ -317,8 +368,9 @@ export default function CreateGroup() {
 
   async function changeMemberCount(newCount) {
     setMemberCount(newCount);
+    //console.log(memberFee, newCount);
     let myTable = await getAllPrizeTable(memberFee*newCount);
-    // console.log(myTable);
+    //console.log(myTable);
     setMasterPrizeTable(myTable)
     setPrizeCount(1);
     setPrizeTable(myTable[0]);
@@ -326,8 +378,9 @@ export default function CreateGroup() {
 
   async function changeMemberFee(newFee) {
     setMemberFee(newFee);
+    //console.log(newFee, memberCount);
     let myTable = await getAllPrizeTable(newFee*memberCount);
-    // console.log(myTable);
+    //console.log(myTable);
     setMasterPrizeTable(myTable)
     setPrizeCount(1);
     setPrizeTable(myTable[0]);
@@ -348,7 +401,7 @@ export default function CreateGroup() {
 
   return (
     <Container component="main" maxWidth="xs">
-      <DisplayBalance balance={balance} />
+      <DisplayBalance wallet={balance.wallet} bonus={balance.bonus}/>
       <CssBaseline />
       <div align="center" className={gClasses.paper}>
         <Typography component="h1" variant="h5">
@@ -394,8 +447,8 @@ export default function CreateGroup() {
         onChange={(event) => changeMemberCount(event.target.value)}
         name="membercount"
         type="number"
-        validators={['required', 'minNumber:2', 'maxNumber:25']}
-        errorMessages={['Member count to be provided', 'Group members cannot be less than 2', 'Group members cannot be more than 25']}
+        validators={['required', 'minNumber:2', 'maxNumber:25', 'isNumeric']}
+        errorMessages={['Member count to be provided', 'Group members cannot be less than 2', 'Group members cannot be more than 25', NOFRACTION]}
         value={memberCount}
       />
       <BlankArea/>
@@ -409,8 +462,8 @@ export default function CreateGroup() {
         onChange={(event) => changeMemberFee(event.target.value)}
         name="membercount"
         type="number"
-        validators={['required', 'minNumber:50', 'lessthanbalance']}
-        errorMessages={['Member count to be provided', 'Member fee cannot be less than 50', 'Insufficient Balance']}
+        validators={['required', 'minNumber:100', 'isNumeric']}
+        errorMessages={['Member count to be provided', 'Member fee cannot be less than 100', NOFRACTION]}
         value={memberFee}
       />
       <BlankArea/>
@@ -423,9 +476,9 @@ export default function CreateGroup() {
         label="Auction Coins"
         onChange={(event) => setBidAmount(event.target.value)}
         name="auctioncoins"
-        type="number"
-        validators={['required', 'minNumber:1000', 'maxNumber:10000']}
-        errorMessages={['Member count to be provided', 'Auction Coins cannot be less than 1000', 'Auction Coins cannot be more than 10000']}
+        type="number" 
+        validators={['required', 'minNumber:1000', 'maxNumber:10000', 'isNumeric']}
+        errorMessages={['Member count to be provided', 'Auction Coins cannot be less than 1000', NOFRACTION ]}
         value={bidAmount}
       />
       <BlankArea/>
@@ -444,8 +497,41 @@ export default function CreateGroup() {
         </Button> */}
       </div>
     </ValidatorForm>
+    <Modal
+      isOpen={modalIsOpen}
+      onAfterOpen={afterOpenModal}
+      onRequestClose={closeModal}
+      style={modalStyles}
+      contentLabel="Example Modal"
+      ariaHideApp={false}
+    >
+      <DisplayCancel onCancel={closeModal} />
+      {/* <BlankArea /> */}
+      <DisplayBalance wallet={balance.wallet} bonus={balance.bonus}/>
+      <BlankArea/>
+      <Typography className={classes.new} align="center">
+        Member Fee   : {memberFee}
+      </Typography>
+      <Typography className={classes.new} align="center">
+        Wallet Amout : {groupFee.wallet}
+      </Typography>
+      <Typography className={classes.new} align="center">
+        Bonus Amount : {groupFee.bonus}
+      </Typography>
+      <BlankArea />
+      <Typography className={gClasses.error} align="center">
+        {((groupFee.wallet > balance.wallet) ? "Insufficent amount in wallet." : "")}
+      </Typography>
+      <BlankArea />
+      <div align="center" >
+      <Button key="modalbutton" variant="contained" color="primary" size="medium"
+        className={classes.dashButton} onClick={handleConfirm}>
+        {((groupFee.wallet > balance.wallet) ? "Add to Wallet" : "Confirm Group Create")}
+      </Button>
+      </div>
+    </Modal>
     </div>
-    <ChildComp p1={balance} p3={selectedTournament}/>   
+    <ChildComp p1={balance.wallet} p3={selectedTournament}/>   
     {/* <BlankArea />
     <DisplayGroupCode/> */}
     {/* <Switch>

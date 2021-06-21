@@ -2,11 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -21,10 +23,15 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {red, blue, green, deepOrange, yellow} from '@material-ui/core/colors';
-import {validateSpecialCharacters, validateEmail, validateMobile,
-  encrypt, decrypt, currentAPLVersion, latestAPLVersion} from "views/functions.js";
+import {
+  validateSpecialCharacters, validateEmail, validateMobile, validateInteger, validateUpi,
+  encrypt, decrypt, 
+  currentAPLVersion, latestAPLVersion
+} from "views/functions.js";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import Divider from "@material-ui/core/Divider";
+import CancelIcon from '@material-ui/icons/Cancel';
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -82,6 +89,7 @@ const useStyles = makeStyles((theme) => ({
     // right: 0,
     marginRight: theme.spacing(3),
     fontSize: '18px',
+    fontWeight: theme.typography.fontWeightBold,
     color: blue[900],
     // // position: 'absolute',
     // alignItems: 'center',
@@ -297,7 +305,14 @@ export class ValidComp extends React.Component {
     });
 
     ValidatorForm.addValidationRule('noSpecialCharacters', (value) => {
+      // console.log("Special chars test for: ", value);
       return validateSpecialCharacters(value);
+    });
+
+    ValidatorForm.addValidationRule('isNumeric', (value) => {
+      // console.log("string: ", value);
+      // console.log(value.toString());
+      return validateInteger(value.toString());
     });
 
     ValidatorForm.addValidationRule('isEmailOK', (value) => {
@@ -309,7 +324,11 @@ export class ValidComp extends React.Component {
     });
 
     ValidatorForm.addValidationRule('checkbalance', (value) => {
-      return validateSpecialCharacters(value > this.props.balance);
+      return (value >= this.props.balance);
+    });
+
+    ValidatorForm.addValidationRule('isUpiOK', (value) => {
+      return validateUpi(value);
     });
   }
 
@@ -321,7 +340,9 @@ export class ValidComp extends React.Component {
     ValidatorForm.removeValidationRule('mobile');
     ValidatorForm.removeValidationRule('minLength');
     ValidatorForm.removeValidationRule('noSpecialCharacters');   
-    ValidatorForm.removeValidationRule('checkbalance');   
+    ValidatorForm.removeValidationRule('checkbalance'); 
+    ValidatorForm.removeValidationRule('isNumeric');    
+    ValidatorForm.removeValidationRule('isUpiOK');
   }
 
   render() {
@@ -356,10 +377,11 @@ export function DisplayPageHeader (props) {
 
 export function DisplayBalance (props) {
   const classes = useStyles();
-  let msg =  `Wallet balance: ${props.balance}`;
+  // let msg =  ;
   return (
   <div>
-    <Typography align="right" className={classes.balance} >{msg}</Typography>
+    <Typography align="right" className={classes.balance} >{`Wallet balance: ${props.wallet}`}</Typography>
+    <Typography align="right" className={classes.balance} >{`Bonus  balance: ${props.bonus}`}</Typography>
   </div>
   );
 }
@@ -391,19 +413,6 @@ export class Copyright extends React.Component {
   }
 }
 
-export function OrigJumpButton(props) {
-  const classes = useStyles();
-  return (
-    <div>
-      <Divider className={classes.divider} />
-      <BlankArea />
-      <Button variant="contained" fullWidth color="primary" align="center"
-        onClick={() => setTab(props.page) }>
-        {props.text}
-      </Button>
-  </div>
-  )
-}
 
 
 export function JumpButton(props) {
@@ -421,6 +430,22 @@ export function JumpButton(props) {
         {props.text}
       </Button>
   </div>
+  )
+}
+
+export function JumpButton2(props) {
+  let myDisabled1 = (props.disabled1) ? props.disabled1 : false;
+  let myDisabled2 = (props.disabled2) ? props.disabled2 : false;
+  //const classes = useStyles();
+  return (
+    <Grid container >
+      <Grid item xs={6} sm={6} md={6} lg={6} >
+        <JumpButton page={props.page1} text={props.text1} disabled={myDisabled1}/>
+      </Grid>
+      <Grid item xs={6} sm={6} md={6} lg={6} >
+        <JumpButton page={props.page2} text={props.text2} disabled={myDisabled2}/>
+      </Grid>
+    </Grid>
   )
 }
 
@@ -483,3 +508,17 @@ export async function DisplayLatestAPLVersion() {
   let version = await latestAPLVersion();
   return <DisplayVersion text="Latest APL version" version={version}/>
 }
+
+
+export function DisplayCancel(props) {
+return(
+  <div align="right" >
+  <IconButton
+  // iconStyle={{width: '24px', height: '24px'}}
+    onClick={props.onCancel}
+    // disabled={currentTournament === 0}
+    aria-label="left" color="primary">
+  < CancelIcon fontSize="large" />
+  </IconButton>
+  </div>
+)}

@@ -11,6 +11,7 @@
     "@ionic/cli": "^6.13.1",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "4.9.1",
+    "aadhaar-validator": "^1.1.0",
     "axios": "^0.20.0",
     "chartist": "0.10.1",
     "classnames": "2.2.6",
@@ -18,6 +19,8 @@
     "crypto": "^1.0.1",
     "env-cmd": "^10.1.0",
     "history": "4.10.1",
+    "ifsc-finder": "^1.1.4",
+    "instamojo-nodejs": "0.0.5",
     "js-file-download": "^0.4.12",
     "lodah": "0.0.1-security",
     "lodash": "^4.17.20",
@@ -42,6 +45,7 @@
     "react-scripts": "^4.0.0",
     "react-swipeable-views": "0.13.9",
     "socket.io-client": "^2.3.0",
+    "video-player": "0.0.1",
     "video-react": "^0.14.1"
   },
   "scripts": {

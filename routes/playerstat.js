@@ -1726,35 +1726,49 @@ async function checkallover() {
   }
 }
 
+async function pingServer() {
+  let junk = await fetch(PINGURL);
+}
+
 // schedule task 
-if (!PRODUCTION) {
-cron.schedule('*/1 * * * * *', () => {
+cron.schedule('*/1 * * * *', () => {
+
+
+  // if ((WEB) && (PRODUCTION)) {   // not to be done in APK
+  //   if (++pingTimer >= PINGUPDATEINTERVAL) {
+  //     console.log("Pinging Server");
+  //     pingTimer = 0;
+  //     pingServer();
+  //   }
+  // }
+
   if (!db_connection) {
-    console.log("============= No mongoose connection");
+    //console.log("============= No mongoose connection");
     return;
-  }   
+  }  
 
-  if (++cricTimer >= CRICUPDATEINTERVAL) {
-    cricTimer = 0;
-    // console.log("======== match update start");
-    // console.log("TIme to getch cric data");
-    update_cricapi_data_r1(false);
-    updateTournamentBrief();
-    checkallover();
-    // // console.log("match update over")
-  }
+  if (!PRODUCTION) {
+    if (++cricTimer >= CRICUPDATEINTERVAL) {
+      cricTimer = 0;
+      // console.log("======== match update start");
+      // console.log("TIme to getch cric data");
+      update_cricapi_data_r1(false);
+      updateTournamentBrief();
+      checkallover();
+      // // console.log("match update over")
+    }
 
-  if (++clientUpdateCount > CLIENTUPDATEINTERVAL) {
-    clientUpdateCount = 0;
-    // console.log("======== clinet update start");
-    // console.log(connectionArray);
-    sendDashboardData(); 
-    // console.log("client update over")
+    if (++clientUpdateCount > CLIENTUPDATEINTERVAL) {
+      clientUpdateCount = 0;
+      // console.log("======== clinet update start");
+      // console.log(connectionArray);
+      sendDashboardData(); 
+      // console.log("client update over")
+    }
   }
 
 });
 
-}
 
 var keyIndex = 0;
 function nextapikey() {

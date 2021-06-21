@@ -34,7 +34,7 @@ import axios from "axios";
 import Button from '@material-ui/core/Button';
 import Modal from 'react-modal';
 import Checkbox from '@material-ui/core/Checkbox';
-import BlueCheckbox from "components/CheckBox/BlueCheckBox";
+import BlueCheckbox from "components/CheckBox/BlueCheckbox";
 // import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 // import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -252,7 +252,7 @@ export default function Stats() {
         closeModal();
       }
     }
-    getGuide();
+    //getGuide();
 
     return () => {
       // componentwillunmount in functional component.

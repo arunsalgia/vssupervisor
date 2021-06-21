@@ -3,8 +3,11 @@ import download from 'js-file-download';
 import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import CircularProgressWithLabel from '@material-ui/core/LinearProgress';
+import { func } from "prop-types";
 
 var crypto = require("crypto");
+var ifscsystem = require('ifsc-finder');
+var aadhar = require('aadhaar-validator')
 
 export function cdRefresh() {
   window.location.reload();
@@ -63,6 +66,24 @@ export function validateEmail(sss) {
       }
     }
     return sts;
+}
+
+export function validateUpi(sss) {
+  let sts = false;
+  if (validateSpecialCharacters(sss)) {
+    let xxx = sss.split("@");
+    if (xxx.length === 2) {
+        sts = true;
+    }
+  }
+  return sts;
+}
+
+
+const NumberString = /^[0-9]+$/;
+export function validateInteger(sss) {
+  let sts = sss.match(NumberString);
+  return sts;
 }
 
 
@@ -164,9 +185,10 @@ async function getSinglePrizeDetails(count) {
 } 
 
 async function getPrizePortion() {
-  let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/prizeportion`);
-  let prizePortion = resp.data.prizeportion;
-  // console.log("prize portion", prizePortion);
+  let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getprizeportion`);
+  //console.log("resp", resp.data);
+  let prizePortion = resp.data.prizePortion / 100;
+  //console.log("prize portion", prizePortion);
   return prizePortion;
 
 }
@@ -207,8 +229,9 @@ async function getSinglePrize(prizeCount) {
 
 export async function getSinglePrizeTable(prizeCount, prizeAmount) {
   let prizePortion = await getPrizePortion();
-
+  //console.log(prizePortion)
   let myPrize = await getSinglePrize(prizeCount);
+  //console.log(myPrize);
 
   let totPrize = Math.floor(prizeAmount*prizePortion)
   // console.log("Total prize", totPrize);
@@ -235,14 +258,49 @@ export async function getAllPrizeTable(prizeAmount) {
 
 
 export async function getUserBalance() {
-  let myBalance = 0;
+  let myBalance = {wallet: 0, bonus: 0};
   try {
     let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
-    myBalance = (await response).data.balance;
+    myBalance = response.data;
   } catch(err) {
-    myBalance = 0;
+    console.log(e);
   }
   return myBalance;
+}
+
+export async function feebreakup(memberfee, bonusAvailable) {
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/feebreakup/${memberfee}`);
+    // console.log(response.data);
+    let fee = response.data;
+    if (fee.bonus > bonusAvailable) {
+      fee.bonus = bonusAvailable;
+      fee.wallet = memberfee - bonusAvailable;
+    }
+    fee["done"] = true;
+    return fee;
+  } catch(err) {
+    console.log(e);
+    return {done: false};
+  }
+}
+
+export async function groupfeebreakup(groupCode, bonusAvailable) {
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/groupfeebreakup/${groupCode}`);
+    // console.log(response.data);
+    let fee = response.data;
+    if (fee.bonus > bonusAvailable) {
+      fee.bonus = bonusAvailable;
+      fee.wallet = memberfee - bonusAvailable;
+    }
+    fee["done"] = true;
+    return fee;
+  } catch(err) {
+    console.log(e);
+    return  {done: false};
+  }
+
 }
 
 export function specialSetPos() {
@@ -255,8 +313,10 @@ export function specialSetPos() {
 }
 
 export function getImageName(teamName) {
-  let imageName = `${teamName}.JPG`;
+  let imageName = `${process.env.PUBLIC_URL}/teamimage/${teamName}.JPG`;
   imageName = imageName.replaceAll(" ", "");
+  // imageName = imageName.replace(/ /g, " ");
+  console.log("Function Image name", imageName);
   return imageName;
 }
 
@@ -297,7 +357,7 @@ export async function upGradeRequired() {
 }
 
 
-export async function downloadApk() {
+export async function org_downloadApk() {
   let myName = process.env.REACT_APP_NAME;
   let myURL = `${process.env.REACT_APP_APLAXIOS}/apl/downloadlatestbinary/${myName}/APK/`;
   try {
@@ -332,10 +392,36 @@ export async function downloadApk() {
 }
 
 
+export async function downloadApk() {
+  let myName = process.env.REACT_APP_NAME;
+  let myURL = `${process.env.REACT_APP_APLAXIOS}/apl/downloadlatestbinary/${myName}/APK/`;
+  try {
+    let response = await axios({
+      method: 'get',
+      url: myURL,
+      responseType: 'arraybuffer',
+      // onDownloadProgress: (progressEvent) => {
+      //   // let newPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      //   // console.log("File download in progress ", newPercent);
+      // },
+      });
+    let myFile = process.env.REACT_APP_NAME + ".APK";
+    console.log(myFile);
+    download(response.data, myFile);
+    console.log("download over");
+  } catch (e) {
+    console.log(e);
+    console.log("in try catch");
+  } 
+  
+  console.log("Debug complete");
+
+}
 
 export function clearBackupData() {
   /* Clear dash board items */
   localStorage.removeItem("saveRank");
+  localStorage.removeItem("savePrize");
   localStorage.removeItem("saveScore");
   localStorage.removeItem("saveMaxRun");
   localStorage.removeItem("saveMaxWicket");
@@ -349,8 +435,18 @@ export function clearBackupData() {
   localStorage.removeItem("captain");
   localStorage.removeItem("viceCaptain");
   localStorage.removeItem("captainList");
+  /* clear home */
+  localStorage.removeItem("home_tournamentList");
+  localStorage.removeItem("home_groupList");
+  /* clear wallet details */
+  localStorage.removeItem("saveBalance");
+  localStorage.removeItem("saveTransactions");
 }
 
+
+export function isMobile() {
+  return (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone/i.test(navigator.userAgent)) ? true : false;
+}
 
 export function checkIdle() {
 
@@ -399,3 +495,93 @@ export function internalToText(txt) {
   txt1 = x.join(SP);
   return txt1;
 }
+
+
+export async function ifscBank(code) {
+  let mybank = await ifscsystem.getBankName(code.toUpperCase());
+  //console.log(mybank.substring(0,3));
+  if (mybank.substring(0,3) === "Not") 
+    mybank = "";
+  return mybank;
+}
+
+export async function ifscBranch(code) {
+  let mybank = await ifscsystem.getBranchName(code.toUpperCase());
+  //console.log(mybank.substring(0,3));
+  if (mybank.substring(0,3) === "Not") 
+    mybank = "";
+  return mybank;
+}
+
+export async function ifscCity(code) {
+  let mybank = await ifscsystem.getCity(code.toUpperCase());
+  //console.log(mybank.substring(0,3));
+  if (mybank.substring(0,3) === "Not") 
+    mybank = "";
+  return mybank;
+}
+
+export async function ifscNeft(code) {
+  let mybank = await ifscsystem.getCity(code.toUpperCase());
+  // console.log(mybank.substring(0,3));
+  if (mybank.substring(0,3) === "Not") 
+    mybank = false;
+  return mybank;
+}
+
+export async function validateAadhar(code) {
+  let sts = await aadhar.isValidNumber(code)
+  return sts;
+}
+
+
+export async function getMinimumBalance() {
+  let minimumBalance = process.env.REACT_APP_MINBALANCE;
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/MINBALANCE`);
+    //console.log(response.data);
+    minimumBalance = response.data;
+  } catch(err)  {
+    console.log("---------minimum balance error");
+    console.log(err);
+  }
+  return parseInt(minimumBalance);
+}
+
+export async function getMinimumAdd() {
+  let minimumBalance = process.env.REACT_APP_MINADDWALLET;
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/MINADDWALLET`);
+    //console.log(response.data);
+    minimumBalance = response.data;
+  } catch(err)  {
+    console.log("---------minimum add error");
+    console.log(err);
+  }
+  return parseInt(minimumBalance);
+}
+
+export async function getAuctionCountDown() {
+  let temp = process.env.AUCTIONCOUNTDOWN;
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/AUCTIONCOUNTDOWN`);
+    temp = response.data;
+  } catch(err)  {
+    console.log("---------auction count down error");
+    console.log(err);
+  }
+  return parseInt(temp);
+}
+
+export async function getIdleTimeout() {
+  let temp = process.env.REACT_APP_IDLETIMEOUT;
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/IDLETIMEOUT`);
+    temp = response.data;
+  } catch(err)  {
+    console.log("---------idle time out error");
+    console.log(err);
+  }
+  return parseInt(temp);
+}
+

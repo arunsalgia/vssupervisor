@@ -39,9 +39,12 @@ import CardBody from "components/Card/CardBody.js";
 import { BlankArea, NoGroup, JumpButtonFull, DisplayPageHeader, MessageToUser } from 'CustomComponents/CustomComponents.js';
 import { UserContext } from "../../UserContext";
 import socketIOClient from "socket.io-client";
-import { hasGroup } from 'views/functions';
+import { hasGroup, getAuctionCountDown, getImageName } from 'views/functions';
 import {blue, green, orange, deepOrange}  from '@material-ui/core/colors';
 import Modal from 'react-modal';
+
+const PLAYCOUNTDOWNAUDIO=false;
+const PLAYCLICKAUDIO=true;
 
 const modalStyles = {
     content : {
@@ -208,7 +211,7 @@ function leavingAuction(myConn) {
   
   
 let arunCancel = false;
-const MAXCOUNTDOWN = parseInt(process.env.REACT_APP_AUCTIONCOUNTDOWN);
+let MAXCOUNTDOWN = parseInt(process.env.REACT_APP_AUCTIONCOUNTDOWN);
 
 
 export default function Auction() {
@@ -323,11 +326,12 @@ export default function Auction() {
                 }
                 //console.log("mycount", myCountdown);
                 setCountDown(myCountdown);
-                if (myCountdown > 0) {
-                    let countMp3 = `${process.env.PUBLIC_URL}/audio/${myCountdown}.MP3`;
-                    let audioClick = new Audio(countMp3);
-                    audioClick.play();
-        
+                if (PLAYCOUNTDOWNAUDIO) {
+                    if (myCountdown > 0) {
+                        let countMp3 = `${process.env.PUBLIC_URL}/audio/${myCountdown}.MP3`;
+                        let audioClick = new Audio(countMp3);
+                        audioClick.play();
+                    }
                 }
             });
 
@@ -343,9 +347,11 @@ export default function Auction() {
                 setBidAmount(grec.auctionBid);
                 setBidUser(grec.currentBidUser);
                 setBidUid(grec.currentBidUid);
-                let clickMp3 = `${process.env.PUBLIC_URL}/audio/CLICK.MP3`;
-                let audioClick = new Audio(clickMp3);
-                audioClick.play();    
+                if (PLAYCLICKAUDIO) {
+                    let clickMp3 = `${process.env.PUBLIC_URL}/audio/CLICK.MP3`;
+                    let audioClick = new Audio(clickMp3);
+                    audioClick.play();    
+                }
             });
             sockConn.on("playerChange", async (newPlayerDetails, balanceDetails) => {
                 // console.log("Calling updatePlayerChange from socker");
@@ -375,6 +381,9 @@ export default function Auction() {
                     setBidUid(response1.data.currentBidUid);            
                 }
             }
+
+            MAXCOUNTDOWN = await getAuctionCountDown();
+            console.log("Max Countdown value", MAXCOUNTDOWN);
         }
         a();
 
@@ -488,9 +497,11 @@ export default function Auction() {
     function ShowPlayerAvatar(props) {
         if (props.pTeamLogo === "") return null;
     
-        let myTeam = `${process.env.PUBLIC_URL}/${props.pTeamLogo}.JPG`
-        myTeam = myTeam.replaceAll(" ", "");
-        // console.log(`Team:${myTeam}`);
+        // let myTeam = `${process.env.PUBLIC_URL}/${props.pTeamLogo}.JPG`
+        // myTeam = myTeam.replaceAll(" ", "");
+        let myTeam = getImageName(props.pTeamLogo);    
+        console.log("Team", myTeam);
+
         return (
             <div key="playerInfo">
                 <Card profile>                    
@@ -504,11 +515,13 @@ export default function Auction() {
                             {/* <Avatar variant="square" src={`${process.env.PUBLIC_URL}/${props.pTeamLogo}.JPG`} className={classes.medium} /> */}
                             <Avatar variant="square" src={myTeam} className={classes.medium} />
                         </Grid>
-                        <div align="center"><h6 className={classes.hdrText} align="center">
+                        <div align="center">
+                            <h6 className={classes.hdrText} align="center">
                             {role}<br/>
                             {battingStyle}<br />
                             {bowlingStyle}
-                        </h6></div>
+                        </h6>
+                        </div>
                     </CardBody>
                 </Card>
             </div>

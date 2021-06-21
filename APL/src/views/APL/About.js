@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import clsx from 'clsx';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -7,7 +7,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Collapse from '@material-ui/core/Collapse';
 import Avatar from '@material-ui/core/Avatar';
-import { Player } from 'video-react';
+// import { Player } from 'video-react';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Grid from "@material-ui/core/Grid";
@@ -26,6 +26,8 @@ import { DisplayPageHeader, DisplayVersion } from 'CustomComponents/CustomCompon
 import {currentAPLVersion, latestAPLVersion} from "views/functions.js";
 import { blue, red } from '@material-ui/core/colors';
 import PsPage from "views/APL/PSPage";
+// import DisplayDemo from "views/APL/DisplayDemo"
+import APLPlayer from './VideoPlayer';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -78,10 +80,14 @@ const useStyles = makeStyles((theme) => ({
 }));
   
 
+export function PlayVideo() {
+
+}
 export default function About() { 
   const classes = useStyles();
+  const videoPlayer = useRef();
   // const [expanded, setExpanded] = React.useState(false);
-   const [matchType, setMatchType] = useState("T20");
+   const [demoType, setDemoType] = useState("new");
    const [currentVersion, setCurrentVersion] = useState(9.9);
    const [latestVersion, setLatestVersion] = useState(8.8);
 
@@ -304,14 +310,25 @@ export default function About() {
       </Card>
     )}
   
-  return (
+    // let myVideo = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
+    // let myVideo= "https://www.youtube.com/watch?v=GwFsx5F3dGk";
+    let myVideo = `${process.env.PUBLIC_URL}/video/AUCTION.MP4`;
+    
+    return (
     <div className={classes.root}>
-      {/* <DIsplayGif gif="SAMPLE.GIF"/> */}
       <DisplayPageHeader headerName="Help Desk" groupName="" tournament=""/>
       <BlankArea/>
       {/* <DisplayVersion text="Current APL Version" version={currentVersion}/>
       <DisplayVersion text="Latest APL  Version" version={latestVersion}/>
       <BlankArea/> */}
+      <Accordion expanded={expandedPanel === "demo"} onChange={handleAccordionChange("demo")}>
+        <DisplayHeader header="How to Play demo"/>
+        <AccordionDetails>
+        {/* <DisplayDemo /> */}
+        <APLPlayer video={myVideo} />
+        {/* <DIsplayGif gif="SAMPLE.GIF"/> */}
+        </AccordionDetails>
+      </Accordion>
       <Accordion expanded={expandedPanel === "about"} onChange={handleAccordionChange("about")}>
         <DisplayHeader header="Auction Permier League"/>
         <AccordionDetails>
