@@ -22,9 +22,14 @@ var request= require('request');
 // import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
 // import { red, deepOrange } from '@material-ui/core/colors';
 // var Insta = require('instamojo-nodejs');
+const INSTAMOJOSCRIPT = "https://js.instamojo.com/v1/checkout.js";
+const INSTALINK='https://test.instamojo.com/@arun_salgia/';
+
+var paymentId = "";
+var paymentRequest = "";
 
 export default function AddWallet() {
-  //useScript(INSTAMOJOSCRIPT);
+  useScript(INSTAMOJOSCRIPT);
 
   // const history = useHistory();
   // const classes = useStyles();
@@ -41,6 +46,10 @@ export default function AddWallet() {
 
   const [balance, setBalance] = useState({wallet: 0, bonus: 0});
   const [message, setMessage] = useState("");
+
+  // const [paymentRequest, setPaymentRequest ] = useState("");
+  // const [paymentId, setPaymentId] = useState("");
+
 
   // const [transactions, setTransactions] = useState([]);
   // const [emptyRows, setEmptyRows] = React.useState(0);
@@ -66,7 +75,7 @@ export default function AddWallet() {
     minimumAmount()
   }, []);
 
-  function ShowResisterStatus() {
+  function junkShowResisterStatus() {
     let myMsg;
     let errmsg = true;
     switch (registerStatus) {
@@ -93,6 +102,46 @@ export default function AddWallet() {
     );
   }
 
+  function onOpenHandler () {
+    // alert('Payments Modal is Opened');
+   }
+
+  async function onCloseHandler () {
+    let myURL;
+
+    if (paymentId !== "") {
+      myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/paymentok/${paymentRequest}/${paymentId}`;
+    } else {
+      myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/paymentfail/${paymentRequest}`;
+    }
+
+    try {
+      let resp = await axios.get(myURL);
+      if (paymentId !== "")
+        setTab(process.env.REACT_APP_WALLET);
+      else
+        setRegisterStatus(1003);
+    } catch (e) {
+      console.log(e);
+      setRegisterStatus(1002);
+    }
+   }
+
+  function onPaymentSuccessHandler (response) {
+    //alert('Payment Success');
+    console.log('Successs -----', response);
+    //setPaymentId(response.paymentId)
+    paymentId = response.paymentId;
+  }
+
+   function onPaymentFailureHandler (response) {
+     //alert('Payment Failure');
+     console.log('Failed-----------------', response);
+     //setPaymentId("");
+     paymentId = "";
+     console.log(paymentRequest);
+   }
+
   // const handleChangePage = (event, newPage) => {
   //   event.preventDefault();
   //   setPage(newPage);
@@ -108,6 +157,12 @@ export default function AddWallet() {
     switch (registerStatus) {
       case 1001:
         myMsg = 'Error connecting to Payment gateway';
+      break;
+      case 1002:
+        myMsg = 'Error updating payment details...................';
+      break;
+      case 1003:
+        myMsg = 'Payment failed. Retry payment';
       break;
       case 0:
         myMsg = ``;
@@ -126,7 +181,7 @@ export default function AddWallet() {
   }
  
     
-  async function handleSubmit() {
+  async function OrghandleSubmit() {
     setRegisterStatus(0);
     let sts;
 
@@ -137,6 +192,41 @@ export default function AddWallet() {
       var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/generatepaymentrequest/${localStorage.getItem("uid")}/${amount}`);
       //let myrequestid = response.data;
       let resp = await window.open(`${process.env.REACT_APP_GATEWAYURL}/${response.data}`, '_parent');
+      console.log("Done");
+      //setTab(process.env.REACT_APP_WALLET);
+    } catch (e) {
+      setRegisterStatus(1001);
+      console.log(e);
+      console.log("Error calling wallet");
+    }
+  }
+
+  async function handleSubmit() {
+    setRegisterStatus(0);
+    let sts;
+
+    sts = await validate("amount")
+		if (sts) return;
+
+    paymentRequest = "";
+    paymentId = "";
+
+    try {
+      var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/generatepaymentrequest/${localStorage.getItem("uid")}/${amount}`);
+      //setPaymentRequest(response.data);
+      paymentRequest = response.data;
+      //let myrequestid = response.data;
+      //let resp = await window.open(`${process.env.REACT_APP_GATEWAYURL}/${response.data}`, '_parent');
+      Instamojo.configure({
+        handlers: {
+          onOpen: onOpenHandler,
+          onClose: onCloseHandler,
+          onSuccess: onPaymentSuccessHandler,
+          onFailure: onPaymentFailureHandler
+        }
+      });
+      Instamojo.open(INSTALINK + response.data);
+      //setTab(process.env.REACT_APP_WALLET);
     } catch (e) {
       setRegisterStatus(1001);
       console.log(e);
