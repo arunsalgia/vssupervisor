@@ -136,8 +136,10 @@ app.use((req, res, next) => {
       req.url.includes("Logout") ||
       req.url.includes("aplmaster")
     ){
-    req.url = "/";
-    res.redirect('/');
+    //req.url = "/";
+    //res.redirect('/');
+    console.log("Path is ", req.url);
+    res.sendFile(path.resolve(__dirname, 'APL', 'build', 'index.html'));
   }
   else {
     next();
