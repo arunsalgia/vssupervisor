@@ -134,8 +134,8 @@ app.use((req, res, next) => {
   if (req.url.includes("admin") || 
       req.url.includes("signIn") ||
       req.url.includes("Logout") ||
-      req.url.includes("aplmaster") ||
-  ) {
+      req.url.includes("aplmaster")
+    ){
     req.url = "/";
     res.redirect('/');
   }
