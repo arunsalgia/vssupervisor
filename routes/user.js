@@ -569,7 +569,7 @@ router.get('/cricemailreset/:mailid', async function (req, res, next) {
 	let myCode = encrypt( uRec._id + "/" + T1.getTime() );
 	//console.log(myCode);
 	
-  myLink = `${BASELINK}/apl/resetpasswordconfirm/${myCode}`;
+  myLink = `${BASELINK}/aplmaster/resetpasswordconfirm/${myCode}`;
   
   let text = `Dear User,
   
