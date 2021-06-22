@@ -129,7 +129,7 @@ function AppRouter() {
 					//console.log(history, hist);
 					return (<ResetPassword />);
 				} else {
-					return null         //(<Welcome/>)
+					return (<Welcome/>)
 				}
 			}
     }
