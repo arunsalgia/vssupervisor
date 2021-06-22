@@ -58,7 +58,7 @@ function checkResetPasswordRequest() {
 	let resetLink = "";
 	let x = location.pathname.split("/");
 	if (x.length >= 4)
-	if (x[1] === "apl")
+	if (x[1] === "aplmaster")
 	if (x[2] === "resetpasswordconfirm") {
 		resetLink = x[3];
 	}
