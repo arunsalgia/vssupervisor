@@ -57,6 +57,8 @@ function isUserLogged() {
 function checkResetPasswordRequest() {
 	let resetLink = "";
 	let x = location.pathname.split("/");
+  console.log("Path is");
+  console.log(x);
 	if (x.length >= 4)
 	if (x[1] === "aplmaster")
 	if (x[2] === "resetpasswordconfirm") {
@@ -118,7 +120,7 @@ function AppRouter() {
       else if (sessionStorage.getItem("currentLogin") === "RESET")
         return (<ForgotPassword/>);
       else if (sessionStorage.getItem("currentLogin") === "SIGNIN")
-      return (<SignIn/>)
+        return (<SignIn/>)
       else {
 				let userId = checkResetPasswordRequest();
 				if (userId !== "") {
@@ -127,7 +129,7 @@ function AppRouter() {
 					//console.log(history, hist);
 					return (<ResetPassword />);
 				} else {
-					return (<Welcome/>)
+					return null         //(<Welcome/>)
 				}
 			}
     }
