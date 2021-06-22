@@ -8,14 +8,28 @@ fetch = require('node-fetch');
 _ = require("lodash");
 cron = require('node-cron');
 nodemailer = require('nodemailer');
+crypto = require('crypto');
 app = express();
-PRODUCTION=true; 
-WEB=true;
-PINGURL="https://ankitipl.herokuapp.com/apl/master/list";
+const { akshuDelGroup,
+  getMaster, setMaster,
+} = require('./routes/cricspecial'); 
+
+PASSWORDLINKVALIDTIME=10			// Password link valid time in minutes
+PRODUCTION=true;  
 PRIZEPORTION=1.0
 
+//
+if (PRODUCTION) {
+  //PORT = process.env.PORT || 80;
+  BASELINK='https://happy-home-ipl-2020.herokuapp.com';
+} else {
+  //PORT = process.env.PORT || 4000;
+  BASELINK='http://localhost:3000';
+}
+PORT = process.env.PORT || 4000;
 
-PORT = process.env.PORT || 1961;
+
+
 http = require('http');
 httpServer = http.createServer(app);
 io = require('socket.io')(httpServer, {
@@ -44,48 +58,57 @@ matchRouter = require('./routes/match');
 tournamentRouter = require('./routes/tournament');
 walletRouter = require('./routes/wallet');
 prizeRouter = require('./routes/prize');
+aplRouter = require('./routes/apl');
+kycRouter = require('./routes/kyc');
 
 // maintaing list of all active client connection
 connectionArray  = [];
 masterConnectionArray  = [];
 clientData = [];
-CLIENTUPDATEINTERVAL=10;
-clientUpdateCount=0;
-CRICUPDATEINTERVAL = 15;    // in seconds. Interval after seconds fetch cricket match data from cricapi
-cricTimer = 0;
-PINGUPDATEINTERVAL=20;   // 20 minutes
-pingTimer = 0;
 
+CLIENTUPDATEINTERVAL = 5;
+CRICUPDATEINTERVAL = 5;    // in seconds. Interval after seconds fetch cricket match data from cricapi
+cricTimer = 0;
+clientUpdateCount=0;
+
+CRICDBCLEANUPINTERVAL = 15;
+dbcleanupCount = 0;
 // maintain list of runnning matches
 runningMatchArray = [];
+runningScoreArray = [];
 clentData = [];
 auctioData = [];
 
 io.on('connect', socket => {
   app.set("socket",socket);
   socket.on("page", (pageMessage) => {
-    console.log("page message from "+socket.id);
-    console.log(pageMessage);
-    var myClient = _.find(masterConnectionArray, x => x.socketId === socket.id);
-    if (pageMessage.page.toUpperCase().includes("DASH")) {
-      myClient.page = "DASH";
-      myClient.gid = parseInt(pageMessage.gid);
-      myClient.uid = parseInt(pageMessage.uid);
-      myClient.firstTime = true;
-      clientUpdateCount = CLIENTUPDATEINTERVAL+1;
-    } else if (pageMessage.page.toUpperCase().includes("STAT")) {
-      myClient.page = "STAT";
-      myClient.gid = parseInt(pageMessage.gid);
-      myClient.uid = parseInt(pageMessage.uid);
-      myClient.firstTime = true;
-      clientUpdateCount = CLIENTUPDATEINTERVAL+1;
-    } else if (pageMessage.page.toUpperCase().includes("AUCT")) {
-      myClient.page = "AUCT";
-      myClient.gid = parseInt(pageMessage.gid);
-      myClient.uid = parseInt(pageMessage.uid);
-      myClient.firstTime = true;
-      clientUpdateCount = CLIENTUPDATEINTERVAL+1;
-    }
+  // console.log("page message from "+socket.id);
+	// console.log(masterConnectionArray);
+	// console.log(socket.id);
+  //   console.log(pageMessage);
+  var myClient = _.find(masterConnectionArray, x => x.socketId === socket.id);
+	// console.log(myClient);
+	if (myClient) {
+		if (pageMessage.page.toUpperCase().includes("DASH")) {
+		  myClient.page = "DASH";
+		  myClient.gid = parseInt(pageMessage.gid);
+		  myClient.uid = parseInt(pageMessage.uid);
+		  myClient.firstTime = true;
+		  clientUpdateCount = CLIENTUPDATEINTERVAL+1;
+		} else if (pageMessage.page.toUpperCase().includes("STAT")) {
+		  myClient.page = "STAT";
+		  myClient.gid = parseInt(pageMessage.gid);
+		  myClient.uid = parseInt(pageMessage.uid);
+		  myClient.firstTime = true;
+		  clientUpdateCount = CLIENTUPDATEINTERVAL+1;
+		} else if (pageMessage.page.toUpperCase().includes("AUCT")) {
+		  myClient.page = "AUCT";
+		  myClient.gid = parseInt(pageMessage.gid);
+		  myClient.uid = parseInt(pageMessage.uid);
+		  myClient.firstTime = true;
+		  clientUpdateCount = CLIENTUPDATEINTERVAL+1;
+		}
+	}
   });
 });
 
@@ -103,12 +126,8 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-//app.use(express.static(path.join(__dirname, 'APL/build/')));
+app.use(express.static(path.join(__dirname, 'APL', 'build')));
 app.use(express.json());
-app.use(express.static('APL/build'));
-app.get('*', (request, response) => {
-	response.sendFile(path.resolve(__dirname, 'APL', 'build', 'index.html'));
-});
 
 
 app.use((req, res, next) => {
@@ -133,6 +152,8 @@ app.use('/match', matchRouter);
 app.use('/tournament', tournamentRouter);
 app.use('/wallet', walletRouter);
 app.use('/prize', prizeRouter);
+app.use('/apl', aplRouter);
+app.use('/kyc', kycRouter);
 
 // ---- start of globals
 // connection string for database
@@ -140,8 +161,10 @@ mongoose_conn_string = "mongodb+srv://akshama:akshama@cluster0-urc6p.mongodb.net
 
 //Schema
 MasterSettingsSchema = mongoose.Schema ({
-  msid: Number,
-  trialExpiry: String,
+  msId: Number,
+  msKey: String,
+  msValue: String
+  //trialExpiry: String,
 })
 
 UserSchema = mongoose.Schema({
@@ -153,7 +176,39 @@ UserSchema = mongoose.Schema({
   defaultGroup: Number,
   email: String,
   userPlan: Number,
-  mobile: String
+  mobile: String,
+  showGuide: Boolean,
+  currentGuide: Number
+});
+
+UserKycSchema = mongoose.Schema({
+  uid: Number,
+  // ID details;
+  idDetails: String,   // id proof as encrypted
+  // bank details
+  bankDetails: String,    // will store <username>-<account number>-<ifsc>  (encrypted)
+  // UPI details
+  upiDetails: String,    // will store <username>-<account number>-<ifsc>  (encrypted)
+  // use kyc
+  useUpi: Boolean,
+  
+});
+
+SchemeSchema = mongoose.Schema({
+  date: Date,
+  uid: Number,
+  uid2: Number,
+  scheme: String,
+  pending: Boolean,
+  offer: Number,
+  maxOffer: Number,
+
+});
+
+GuideSchema = mongoose.Schema({
+  guideNumber: Number,
+  guideTitle: String,
+  guideText: String
 });
 
 IPLGroupSchema = mongoose.Schema({
@@ -208,7 +263,10 @@ GroupMemberSchema = mongoose.Schema({
   score: Number,
   rank: Number,
   prize: Number,
-  enable: Boolean
+  enable: Boolean,
+  // breakup of fees paid by user
+  walletFee: Number,
+  bonusFee: Number
 });
 
 CaptainSchema = mongoose.Schema({
@@ -235,6 +293,7 @@ TournamentSchema = mongoose.Schema({
 })
 
 WalletSchema = mongoose.Schema({
+  isWallet: Boolean,
   transNumber: Number,
   transDate: String,
   transType: String,
@@ -245,6 +304,16 @@ WalletSchema = mongoose.Schema({
   transLink: Number,
   amount: Number,
   transStatus: Boolean,
+})
+
+AplSchema = mongoose.Schema({
+  aplCode: Number,
+  date: String,
+  uid: Number,
+  transType: String,
+  message: String,
+  email: String,
+  status: String,
 })
 
 PrizeSchema = mongoose.Schema({
@@ -300,7 +369,8 @@ StatSchema = mongoose.Schema({
   bowled: Number,
   lbw: Number,
   catch: Number,
-
+  duck: Number,
+  economy: Number,
   // overall performance
   manOfTheMatch: Boolean
 });
@@ -347,11 +417,26 @@ BriefStatSchema = mongoose.Schema({
   bowled: Number,
   lbw: Number,
   catch: Number,
+  duck: Number,
+  economy: Number,
   // overall performance
   maxTouramentRun: Number,
   maxTouramentWicket: Number,
   manOfTheMatch: Number
 });  
+
+PaymentSchema = mongoose.Schema({
+  uid: Number,
+  email: String,
+  amount: Number,
+  status: String,
+  requestId: String,
+  requestTime: Date,
+  paymentId: String,
+  paymentTime: Date,
+  fee: Number,
+});
+
 // table name will be <tournament Name>_brief r.g. IPL2020_brief
 BRIEFSUFFIX = "_brief";
 RUNNINGMATCH=1;
@@ -362,6 +447,7 @@ AUCT_OEVR="OVER";
 
 // models
 User = mongoose.model("users", UserSchema);
+Guide = mongoose.model("guide", GuideSchema);
 Player = mongoose.model("iplplayers", PlayerSchema);
 Auction = mongoose.model("iplauction", AuctionSchema);
 IPLGroup = mongoose.model("iplgroups", IPLGroupSchema);
@@ -376,6 +462,10 @@ SkippedPlayer = mongoose.model("skippedplayers", SkippedPlayerSchema)
 CricapiMatch = mongoose.model("cricApiMatch", CricapiMatchSchema)
 Wallet = mongoose.model('wallet', WalletSchema);
 Prize = mongoose.model('prize', PrizeSchema);
+Apl = mongoose.model('aplinfo', AplSchema);
+Payment = mongoose.model('payment', PaymentSchema);
+UserKyc = mongoose.model('userkyc', UserKycSchema);
+Scheme = mongoose.model('schemes', SchemeSchema);
 
 nextMatchFetchTime = new Date();
 router = express.Router();
@@ -419,12 +509,29 @@ MATCHREADINTERVAL = 3;
 WalletTransType = {
   accountOpen: "accountOpen",
   refill: "refill",
-  withdrawl: "withdrawl",
+  withdrawl: "withdrawal",
   offer: "offer",
   bonus: "bonus",
   prize: "prize",
   groupJoin: "groupJoin",
-  groupCancel: "groupCancel"
+  groupCancel: "groupCancel",
+  feeChange: "feeChange",
+  pending: "pending",			// refund pending
+  refundDone: "refundOk",
+};
+
+BonusTransType = {
+  accountOpen: "registerBonus",
+  refill: "refillBonus",
+  //withdrawl: "withdrawal",
+  offer: "offerBonus",
+  bonus: "bonus",
+  //prize: "prize",
+  groupJoin: "groupJoinBonus",
+  groupCancel: "groupCancelBonus",
+  //feeChange: "feeChange",
+  //pending: "pending",			// refund pending
+  //refundDone: "refundOk",
 };
 
 // match id for record which has bonus score for  Maximum Run and Maximum Wicket
@@ -440,23 +547,36 @@ defaultMaxPlayerCount = 15;
 // Point scroring
 ViceCaptain_MultiplyingFactor = 1.5;
 Captain_MultiplyingFactor = 2;
-BonusRun = 1;
-Bonus4 = 1;
-Bonus6 = 2;
-Bonus50 = 20;
-Bonus100 = 50;
+BonusRun = {"TEST": 1, "ODI": 1, "T20": 1};  //1;
+Bonus4 = {"TEST": 1, "ODI": 1, "T20": 1};  //1;
+Bonus6 = {"TEST": 2, "ODI": 2, "T20": 2};  //2;
+Bonus50 = {"TEST": 10, "ODI": 20, "T20": 20};  //20;
+Bonus100 = {"TEST": 50, "ODI": 50, "T20": 50};  //50;
+Bonus200 = {"TEST": 100, "ODI": 100, "T20": 100};  //50;
 
-BonusWkt = 25;
-BonusWkt3 = 20;
-BonusWkt5 = 50;
-BonusMaiden = 20;
+BonusMaiden = {"TEST": 0, "ODI": 10, "T20": 20};  //20;
+BonusWkt = {"TEST": 25, "ODI": 25, "T20": 25};  //25;
+BonusWkt3 = {"TEST": 20, "ODI": 20, "T20": 20};  //20;
+//BonusWkt4 = {"TEST": 20, "ODI": 20, "T20": 20};  //20;
+BonusWkt5 = {"TEST": 50, "ODI": 50, "T20": 50};  //50;
+Wicket3 = {"TEST": 4, "ODI": 4, "T20": 3}
+Wicket5 = {"TEST": 5, "ODI": 5, "T20": 5}
 
-BonusDuck = -5;
-BonusNoWkt = 0;
-BonusMOM = 20;
+BonusDuck = {"TEST": -2, "ODI": -2, "T20": -2};  //-5;
+BonusNoWkt = {"TEST": 0, "ODI": 0, "T20": 0};  //0;
+BonusMOM = {"TEST": 20, "ODI": 20, "T20": 20};  //20;
 
-BonusMaxRun = 100;
-BonusMaxWicket = 100;
+BonusEconomy = {"TEST": 0, "ODI": 2, "T20": 2};  //2;
+EconomyGood = {"TEST": 6.0, "ODI": 4.0, "T20": 6.0};  //6.0;
+EconomyBad = {"TEST": 9.0, "ODI": 7.0, "T20": 9.0};  //9.0;
+MinOvers = {"TEST": 1000000.0, "ODI": 4.0, "T20": 2.0};  //2.0;
+
+BonusCatch = {"TEST": 4, "ODI": 4, "T20": 4};  //4;
+BonusRunOut = {"TEST": 4, "ODI": 4, "T20": 4};  //4;
+BonusStumped = {"TEST": 6, "ODI": 6, "T20": 6};  //6;
+
+BonusMaxRun = {"TEST": 100, "ODI": 100, "T20": 100};  //100;
+BonusMaxWicket = {"TEST": 100, "ODI": 100, "T20": 100};  //100;
 
 // variables rreuiqred by timer
 sendDashboard = false;
@@ -470,16 +590,11 @@ serverUpdateInterval = 10; // in seconds. INterval after which data to be update
 
 // ----------------  end of globals
 
-
 // make mogoose connection
 
 // Create the database connection 
 //mongoose.connect(mongoose_conn_string);
-if (PRODUCTION)
-  console.log(`No mongoose connection in PRODUCTION`);
-else
-  mongoose.connect(mongoose_conn_string, { useNewUrlParser: true, useUnifiedTopology: true });
-
+mongoose.connect(mongoose_conn_string, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // CONNECTION EVENTS
 // When successfully connected
@@ -513,14 +628,12 @@ process.on('SIGINT', function () {
 });
 
 // schedule task
-if (!PRODUCTION) {
 cron.schedule('*/15 * * * * *', () => {
   // console.log('running every 15 second');
   // console.log(`db_connection: ${db_connection}    connectREquest: ${connectRequest}`);
-    if (!connectRequest)
-      mongoose.connect(mongoose_conn_string, { useNewUrlParser: true, useUnifiedTopology: true });
+  if (!connectRequest)
+    mongoose.connect(mongoose_conn_string, { useNewUrlParser: true, useUnifiedTopology: true });
 });
-}
 
 
 
@@ -542,10 +655,8 @@ const AMPM = [
 const TZ_IST={hours: 5, minutes: 30};
 cricDate = function (d)  {
   var xxx = new Date(d.getTime());
-  if (PRODUCTION) {
-    xxx.setHours(xxx.getHours()+TZ_IST.hours);
-    xxx.setMinutes(xxx.getMinutes()+TZ_IST.minutes);
-  }
+  xxx.setHours(xxx.getHours()+TZ_IST.hours);
+  xxx.setMinutes(xxx.getMinutes()+TZ_IST.minutes);
   var myHour = xxx.getHours();
   var myampm = AMPM[myHour];
   if (myHour > 12) myHour -= 12;
@@ -570,51 +681,52 @@ cricTeamName = function (t)  {
   return tmp.join(' ');
 }
 
-getLoginName = function (name) {
-  return name.toLowerCase().replace(/\s/g, "");
-}
 
-getDisplayName = function (name) {
-  var xxx = name.split(" ");
-  xxx.forEach( x => { 
-    x = x.trim()
-    x = x.substr(0,1).toUpperCase() +
-      (x.length > 1) ? x.substr(1, x.length-1).toLowerCase() : "";
-  });
-  return xxx.join(" ");
-}
-
-masterRec = null;
-joinOffer=500;
-
-fetchMasterSettings = async function () {
-  // if (masterRec === null) {
-    let tmp = await MasterData.find();
-    masterRec = tmp[0];  
-  // }  
-}
 
 USERTYPE = { TRIAL: 0, SUPERUSER: 1, PAID: 2}
-
 userAlive = async function (uRec) {
   let sts = false;
   if (uRec) {
     switch (uRec.userPlan) {
       case USERTYPE.SUPERUSER:
         sts = true;
-        break;
+      break;
       case  USERTYPE.PAID:
         sts = true;
-        break;
+      break;
       case  USERTYPE.TRIAL:
+        let expiryDate = getMaster("EXPIRYDATE");
+        if (expiryDate === "") expiryDate = "2021-04-30"
+
         let cTime = new Date();
-        await fetchMasterSettings(); 
-        // console.log(masterRec);
-        let tTime = new Date(masterRec.trialExpiry);
-        // console.log(cTime);
-        // console.log(tTime);
+        let tTime = new Date(expiryDate);
         sts =  (tTime.getTime() > cTime.getTime());
-        break;
+      break;
+    }
+  }
+  return sts;
+}
+
+// TRIAL user is to be conisered as normal user
+userAlive = async function (uRec) {
+  let sts = false;
+  if (uRec) {
+    switch (uRec.userPlan) {
+      case USERTYPE.SUPERUSER:
+        sts = true;
+      break;
+      case  USERTYPE.TRIAL:
+      case  USERTYPE.PAID:
+        sts = true;
+      break;
+      // case  USERTYPE.TRIAL:
+      //   let expiryDate = getMaster("EXPIRYDATE");
+      //   if (expiryDate === "") expiryDate = "2021-04-30"
+
+      //   let cTime = new Date();
+      //   let tTime = new Date(expiryDate);
+      //   sts =  (tTime.getTime() > cTime.getTime());
+      // break;
     }
   }
   return sts;
@@ -623,7 +735,7 @@ userAlive = async function (uRec) {
 refundGroupFee = async function(groupid, amount) {
   let allMembers = await GroupMember.find({gid: groupid});
   for(gm of allMembers) {
-    await WalletAccountGroupCancel(gm.gid, gm.uid, amount)
+    await WalletAccountGroupCancel(gm.gid, gm.uid, gm.walletFee, gm.bonusFee)
   };
 }
 
@@ -634,6 +746,8 @@ doDisableAndRefund = async function(g) {
   if (memberCount !== g.memberCount) {
     g.enable = false;
     g.save();
+    akshuDelGroup(g);
+
     // refund wallet amount since group is disabled.
     await refundGroupFee(g.gid, g.memberFee);
     console.log(`Refund compeletd fpr group ${g.gid}`)
@@ -676,24 +790,6 @@ updateTournamentOver = async function (tournamentName) {
   } 
 };
 
-// check if all matches complete. If yes then set tournament over
-checkTournamentOver = async function (tournamentName) {
-  // await update brief of this tournament
-  await updatePendingBrief(tournamentName);
-  // check if any uncomplete match  
-  //console.log(tournamentName);
-  let matchesNotOver = await CricapiMatch.find({tournament: tournamentName, matchEnded: false});
-  //console.log(matchesNotOver);
-  // if no uncomplete match then declare tournament as over
-  if (matchesNotOver.length === 0) {
-    // set tournamet as over
-    await updateTournamentOver(tournamentName);
-    // add min and max run of the tournamenet and assign points to user
-    await updateTournamentMaxRunWicket(tournamentName);
-    // update group with rank / score. Also allocate prize money
-    await awardRankPrize(tournamentName);
-  }
-}
 
 
 
@@ -718,15 +814,17 @@ getBlankStatRecord = function(tournamentStat) {
     hattrick: 0,
     maiden: 0,
     oversBowled: 0,
-    maxTouramentRun: 0,
-    maxTouramentWicket: 0,
     // fielding details
     runout: 0,
     stumped: 0,
     bowled: 0,
     lbw: 0,
     catch: 0,
+    duck: 0,
+    economy: 0,
     // overall performance
+    maxTouramentRun: 0,
+    maxTouramentWicket: 0,
     manOfTheMatch: false
   });
 }
@@ -758,6 +856,8 @@ getBlankBriefRecord = function(tournamentStat) {
     bowled: 0,
     lbw: 0,
     catch: 0,
+    duck: 0,
+    economy: 0,
     // overall performance
     manOfTheMatch: 0,
     maxTouramentRun: 0,
@@ -771,34 +871,26 @@ awardRankPrize = async function(tournamentName) {
   let allGroups = await IPLGroup.find({tournament: tournamentName, enable: true});
   // allGroups.forEach(g => {
   for(const g of allGroups) {
-    // arun
-    // memberCount: Number,
-    // memberFee: Number,
-    // prizeCount: Number,
-    let prizeTable = await getPrizeTable(g.prizeCount, g.memberCount*memberFee);
+    let prizeTable = await getPrizeTable(g.prizeCount, g.memberCount*g.memberFee);
     let allgmRec = await GroupMember.find({gid: g.gid});
     // allgmRec.forEach(gmRec => {
     for (const gmRec of allgmRec) {
-      // arun
+      if (gmRec.rank === 0) continue;
+      if (gmRec.rank > g.prizeCount) continue;
+      
       if (gmRec.rank <= g.prizeCount) {
-        gmRec.prize = prizeTable[gmRec.rank-1].prizeAmount;
-        await WalletArun(gmRec.gid, gmRec.uid, prizeTable[gmRec.rank-1].prizeAmount)
-      } else {
-        gmRec.prize = 0;
-      }
-      gmRec.save();
+        gmRec.prize = prizeTable[gmRec.rank-1].prize;
+        await WalletPrize(gmRec.gid, gmRec.uid, gmRec.rank, prizeTable[gmRec.rank-1].prize)
+        gmRec.save();
+      } 
     }
   }
 }
 
 
 updateTournamentMaxRunWicket = async function(tournamentName) {
-//--- start
+  //--- start
   // ------------ Assuming tournament as over
-  // let myTournament = await Tournament.findOne({name: tournamentName});
-  // if (!myTournament) return false;
-  // if (!myTournament.over) return false;
-
   let tournamentStat = mongoose.model(tournamentName, StatSchema);
   let BriefStat = mongoose.model(tournamentName+BRIEFSUFFIX, BriefStatSchema);
 
@@ -827,7 +919,7 @@ updateTournamentMaxRunWicket = async function(tournamentName) {
   tmp = _.maxBy(sumList, x => x.totalRun);
   //console.log(tmp);
   let maxList = _.filter(sumList, x => x.totalRun == tmp.totalRun);
-  let bonusAmount  = BonusMaxRun / maxList.length;
+  let bonusAmount  = BonusMaxRun["TEST"] / maxList.length;
   maxList.forEach( mmm => {
     let myrec = getBlankStatRecord(tournamentStat);
     myrec.mid = MaxRunMid;
@@ -850,7 +942,7 @@ updateTournamentMaxRunWicket = async function(tournamentName) {
   tmp = _.maxBy(sumList, x => x.totalWicket);
   //console.log(tmp);
   maxList = _.filter(sumList, x => x.totalWicket == tmp.totalWicket);
-  bonusAmount  = BonusMaxWicket / maxList.length;
+  bonusAmount  = BonusMaxWicket["TEST"] / maxList.length;
   maxList.forEach( mmm => {
     let myrec = getBlankStatRecord(tournamentStat);
     myrec.mid = MaxWicketMid;
@@ -865,7 +957,7 @@ updateTournamentMaxRunWicket = async function(tournamentName) {
     mybrief.pid = mmm.pid;
     mybrief.playerName = mmm.playerName;
     mybrief.score = bonusAmount;
-    mybrief.maxTouramentRun = mmm.totalWicket;  
+    mybrief.maxTouramentWicket = mmm.totalWicket;  
     mybrief.save(); 
   });
 
@@ -879,13 +971,13 @@ updatePendingBrief = async function (mytournament) {
   // get match if the matches that are completed in this tournament
   let ttt = mytournament.toUpperCase();
   let completedMatchList = await CricapiMatch.find({tournament: ttt, matchEnded: true});
-  // console.log(`${ttt} Completed match status ${completedMatchList.length}`)
   if (completedMatchList.length <= 0) return;
   let midList = _.map(completedMatchList, 'mid');
 
   // get gets record in brief table which are not yet merge
   let BriefStat = mongoose.model(mytournament+BRIEFSUFFIX, BriefStatSchema);
   var briefList = await BriefStat.find({ sid: { $in: midList } });
+  // console.log(briefList);
   if (briefList.length === 0) return;
   console.log("Pending procesing started");
   // some pending reocrd to be update
@@ -934,6 +1026,8 @@ updatePendingBrief = async function (mytournament) {
       myMasterRec.bowled += myList[i].bowled;
       myMasterRec.lbw += myList[i].lbw;
       myMasterRec.catch += myList[i].catch;
+      myMasterRec.duck += myList[i].duck;
+      myMasterRec.economy += myList[i].economy;
       // overall performance
       myMasterRec.manOfTheMatch += myList[i].manOfTheMatch;
       myMasterRec.maxTouramentRun += myList[i].maxTouramentRun;
@@ -949,33 +1043,18 @@ updatePendingBrief = async function (mytournament) {
 
 
 EMAILERROR="";
-CRICDREAMEMAILID='cricketpwd@gmail.com';
-sendEmailToUser = async function(userEmailId, userSubject, userText) {
-  // USERSUBJECT='User info from CricDream';
-  // USEREMAILID='salgia.ankit@gmail.com';
-  // USERTEXT=`Dear User,
-    
-      // Greeting from CricDeam.
-  
-      // As requested by you here is login details.
-  
-      // Login Name: ${uRec.userName} 
-      // User Name : ${uRec.displayName}
-      // Password  : ${uRec.password}
-  
-      // Regards,
-      // for Cricdream.`
-    
+APLEMAILID='cricketpwd@gmail.com';
+discarded_sendEmailToUser = async function(userEmailId, userSubject, userText) {
   var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: CRICDREAMEMAILID,
+    user: APLEMAILID,
     pass: 'Anob@1989#93'
   }
   });
   
   var mailOptions = {
-  from: CRICDREAMEMAILID,
+  from: APLEMAILID,
   to: userEmailId,
   subject: userSubject,
   text: userText
@@ -985,24 +1064,28 @@ sendEmailToUser = async function(userEmailId, userSubject, userText) {
   //mailOptions.text = 
   
   var status = true;
-  transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-      console.log(error);
-      EMAILERROR=error;
-      //senderr(603, error);
-      status=false;
-    } else {
-      //console.log('Email sent: ' + info.response);
-      //sendok('Email sent: ' + info.response);
-    }
-    return(status);
-  });
+  try {
+    await transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(`Unable to send email to ${transporter.auth.user} and ${transporter.auth.pass}`);
+        console.log(error);
+        EMAILERROR=error;
+        //senderr(603, error);
+        status=false;
+      } 
+    });
+  } catch (e) {
+    console.log("in CATCH");
+    console.log(e);
+  }
+  return(status);
 }
 
 //------------- wallet function
 
 createWalletTransaction = function () {
   myTrans = new Wallet();
+  myTrans.isWallet = true;
   currTime = new Date();
   // Tue Dec 08 2020 14:22:21 GMT+0530 (India Standard Time)"
   myTrans.transNumber = currTime.getTime();
@@ -1022,21 +1105,46 @@ createWalletTransaction = function () {
 
 WalletAccountOpen = async function (userid, openamount) {
   // console.log(`Account open for user ${userid} for amount ${openamount}`)
+  
   let myTrans = createWalletTransaction();
-  myTrans.transType = WalletTransType.accountOpen;
+  myTrans.isWallet = false;
+  myTrans.transType = BonusTransType.accountOpen;
   myTrans.uid = userid;
   myTrans.amount = openamount;
-  await myTrans.save();
+  if (openamount !== 0) await myTrans.save();
   // console.log(myTrans);
   return myTrans;
 }
 
+WalletFeeChange = async function (userid, groupid, amount) {
+  // console.log(`Account open for user ${userid} for amount ${openamount}`)
+  let myTrans = createWalletTransaction();
+  myTrans.transType = WalletTransType.feeChange;
+  myTrans.uid = userid;
+  myTrans.gid = groupid;
+  myTrans.amount = amount;
+  if (amount !== 0) await myTrans.save();
+  // console.log(myTrans);
+  return myTrans;
+}
 
 WalletAccountOffer = async function (userid, offeramount) {
   let myTrans = createWalletTransaction();
+  myTrans.isWallet = false;
   myTrans.transType = WalletTransType.offer;
   myTrans.uid = userid;
   myTrans.amount = offeramount;
+  await myTrans.save();
+  return myTrans;
+}
+
+WalletPrize = async function (groupid, userid, rank, prizeAmount) {
+  let myTrans = createWalletTransaction();
+  myTrans.transType = WalletTransType.prize;
+  myTrans.uid = userid;
+  myTrans.gid = groupid;
+  myTrans.rank = rank;
+  myTrans.amount = prizeAmount;
   await myTrans.save();
   return myTrans;
 }
@@ -1050,50 +1158,81 @@ WalletAccountOffer = async function (userid, offeramount) {
 //   return myTransWalletAccountOpen;
 // }
 
-WalletAccountGroupJoin = async function (groupid, userid, groupfee) {
+WalletAccountWithdrawl = async function (userid, amount) {
+  // console.log(`Account open for user ${userid} for amount ${openamount}`)
   let myTrans = createWalletTransaction();
-  myTrans.transType = WalletTransType.groupJoin;
-  myTrans.gid = groupid;
+  myTrans.transType = WalletTransType.pending;
   myTrans.uid = userid;
-  myTrans.amount = -groupfee;
+  myTrans.amount = amount;
   await myTrans.save();
+  // console.log(myTrans);
   return myTrans;
 }
 
-WalletAccountGroupCancel = async function (groupid, userid, groupfee) {
-  let myTrans = createWalletTransaction();
-  myTrans.transType = WalletTransType.groupCancel;
-  myTrans.uid = userid;
-  myTrans.gid = groupid;
-  myTrans.amount = groupfee;
-  await myTrans.save();
+
+WalletAccountGroupJoin = async function (groupid, userid, walletFee, bonusFee) {
+  let myTrans;
+  
+  if (walletFee > 0) {
+    myTrans = createWalletTransaction();
+    myTrans.isWallet = true;
+    myTrans.transType = WalletTransType.groupJoin;
+    myTrans.gid = groupid;
+    myTrans.uid = userid;
+    myTrans.amount = -walletFee;
+    await myTrans.save();
+  }
+
+  if (bonusFee > 0) {
+    myTrans = createWalletTransaction();
+    myTrans.isWallet = false;
+    myTrans.transType = BonusTransType.groupJoin;
+    myTrans.gid = groupid;
+    myTrans.uid = userid;
+    myTrans.amount = -bonusFee;
+    await myTrans.save();
+  }
+
   return myTrans;
 }
 
-WalletBalance = async function (userid) {
-  let tmp = 0;
-  // let allRec = await Wallet.find({uid: userid});
-  // if (allRec.length > 0)
-  //   tmp = _.sumBy(allRec, x => x.amount);
-  // db.articles.aggregate( [
-  //   { $match: { $or: [ { score: { $gt: 70, $lt: 90 } }, { views: { $gte: 1000 } } ] } },
-  //   { $group: { _id: null, count: { $sum: 1 } } }
-  // ] );
-  // iuserid = ;
-  let xxx = await Wallet.aggregate([
-    {$match: {uid: parseInt(userid)}},
-    {$group : {_id : "$uid", balance : {$sum : "$amount"}}}
-  ]);
-  if (xxx.length === 1) tmp = xxx[0].balance;
-  return tmp;
+WalletAccountGroupCancel = async function (groupid, userid, walletFee, bonusFee) {
+
+  let myTrans;
+
+  if (walletFee > 0) {
+    myTrans = createWalletTransaction();
+    myTrans.isWallet = true;
+    myTrans.transType = WalletTransType.groupCancel;
+    myTrans.uid = userid;
+    myTrans.gid = groupid;
+    myTrans.amount = walletFee;
+    await myTrans.save();
+  }
+
+  if (bonusFee > 0) {
+    myTrans = createWalletTransaction();
+    myTrans.isWallet = false;
+    myTrans.transType = BonusTransType.groupCancel;
+    myTrans.uid = userid;
+    myTrans.gid = groupid;
+    myTrans.amount = bonusFee;
+    await myTrans.save();
+  }
+
+  return myTrans;
 }
+
 
 
 getPrizeTable = async function (count, amount) {
+  let tmp = getMaster("PRIZEPORTION");
+  let ourPortion = (tmp !== "") ? parseInt(tmp) : 100;
+
   let myPrize = await Prize.findOne({prizeCount: count})
   // we will keep 5% of amount
   // rest (i.e. 95%) will be distributed among users
-  let totPrize = Math.floor(amount*PRIZEPORTION);
+  let totPrize = Math.floor(amount*ourPortion/100);
   let allotPrize = 0;
   let prizeTable=[]
   for(i=1; i<count; ++i) {
@@ -1105,19 +1244,5 @@ getPrizeTable = async function (count, amount) {
   return prizeTable;
 }
 
-GroupMemberCount = async function (groupid) {
-  // let allRec = await GroupMember.find({gid: groupid});
-  // return allRec.length;
-//   > db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : 1}}}])
-// { "_id" : "tutorials point", "num_tutorial" : 2 }
-// { "_id" : "Neo4j", "num_tutorial" : 1 }
-  let memberCount = 0;
-  let xxx = await GroupMember.aggregate([
-    {$match: {gid: parseInt(groupid)}},
-    {$group : {_id : "$gid", num_members : {$sum : 1}}}
-  ]);
-  if (xxx.length === 1) memberCount = xxx[0].num_members;
-  return(memberCount);
-}
 // module.exports = app;
 

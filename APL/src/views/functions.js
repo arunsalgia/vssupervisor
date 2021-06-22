@@ -534,54 +534,41 @@ export async function validateAadhar(code) {
   return sts;
 }
 
+async function getMaster(key) {
+  let value = "";
+  try {
+    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/getmaster/${key}`);
+    //console.log(response.data);
+    value = response.data;
+  } catch(err)  {
+    console.log("---------get master fetch errorr", key);
+    console.log(err);
+  } 
+  return value; 
+}
 
 export async function getMinimumBalance() {
-  let minimumBalance = process.env.REACT_APP_MINBALANCE;
-  try {
-    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/MINBALANCE`);
-    //console.log(response.data);
-    minimumBalance = response.data;
-  } catch(err)  {
-    console.log("---------minimum balance error");
-    console.log(err);
-  }
-  return parseInt(minimumBalance);
+  let value = await getMaster("MINBALANCE");
+  if (value === "") value = process.env.REACT_APP_MINBALANCE;
+  return parseInt(value);
 }
 
 export async function getMinimumAdd() {
-  let minimumBalance = process.env.REACT_APP_MINADDWALLET;
-  try {
-    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/MINADDWALLET`);
-    //console.log(response.data);
-    minimumBalance = response.data;
-  } catch(err)  {
-    console.log("---------minimum add error");
-    console.log(err);
-  }
-  return parseInt(minimumBalance);
+  let value = await getMaster("MINADDWALLET");
+  if (value === "") value = process.env.REACT_APP_MINADDWALLET;
+  return parseInt(value);
 }
 
 export async function getAuctionCountDown() {
-  let temp = process.env.AUCTIONCOUNTDOWN;
-  try {
-    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/AUCTIONCOUNTDOWN`);
-    temp = response.data;
-  } catch(err)  {
-    console.log("---------auction count down error");
-    console.log(err);
-  }
-  return parseInt(temp);
+  let value = await getMaster("AUCTIONCOUNTDOWN");
+  if (value === "") value = process.env.AUCTIONCOUNTDOWN;
+  return parseInt(value);
+
 }
 
 export async function getIdleTimeout() {
-  let temp = process.env.REACT_APP_IDLETIMEOUT;
-  try {
-    let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/prize/getmaster/IDLETIMEOUT`);
-    temp = response.data;
-  } catch(err)  {
-    console.log("---------idle time out error");
-    console.log(err);
-  }
-  return parseInt(temp);
+  let value = await getMaster("IDLETIMEOUT");
+  if (value === "") value = process.env.REACT_APP_IDLETIMEOUT;
+  return parseInt(value);
 }
 

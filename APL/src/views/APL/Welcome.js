@@ -219,19 +219,19 @@ const Welcome = () => {
 	function DisplayOffer(props) {
 	// console.log(props.offer);
 	return (
-	<Box key={props.offer.header} borderColor="primary.main" border={2}>
-		<Grid key={props.offer.header} container justify="center" alignItems="center" >
-		<GridItem key={props.offer.header+"1"}  xs={2} sm={2} md={2} lg={2} >
-			<Avatar variant="square" 
-			src={`${process.env.PUBLIC_URL}/image/OFFER2.JPG`}
-			className={classes.medium} />   
-		</GridItem>
-		<GridItem key={props.offer.header+"2"} xs={10} sm={10} md={10} lg={10} >
-		<Typography className={classes.oText1}>{props.offer.header}</Typography>
-		<Typography className={classes.oText2}>{props.offer.message}</Typography>
-		</GridItem>
-		</Grid>
-	</Box>
+		<Box key={props.offer.header} borderColor="primary.main" border={2}>
+			<Grid key={props.offer.header} container justify="center" alignItems="center" >
+			<GridItem key={props.offer.header+"1"}  xs={2} sm={2} md={2} lg={2} >
+				<Avatar variant="square" 
+				src={`${process.env.PUBLIC_URL}/image/OFFER2.JPG`}
+				className={classes.medium} />   
+			</GridItem>
+			<GridItem key={props.offer.header+"2"} xs={10} sm={10} md={10} lg={10} >
+			<Typography className={classes.oText1}>{props.offer.header}</Typography>
+			<Typography className={classes.oText2}>{props.offer.message}</Typography>
+			</GridItem>
+			</Grid>
+		</Box>
 	)}
 
 	let image1= `${process.env.PUBLIC_URL}/image/APLWELCOME1.JPG`;
@@ -254,10 +254,10 @@ const Welcome = () => {
 			return (
 			<DisplayOffer key={item.header} offer={item} />
 		)})}
+		<Typography className={classes.dlm2} align="center">{downloadMessage}</Typography>
 		<Button onClick={handleAndroid} >
 		<img src={image2} alt="ARUN" />
 		</Button>
-		<Typography className={classes.dlm2} align="center">{downloadMessage}</Typography>
 	</div>
 	);
 };
