@@ -1240,7 +1240,7 @@ async function statCalculation (igroup) {
       userName: urec[0].displayName,   //  curruserName, `
       displayName: gm.displayName,    //  currdisplayName,
       grandScore: totscore, 
-	  prize: gm.prize,
+			prize: gm.prize,
       rank: 0});
 
   var tmpRun = _.maxBy(userMaxList, x => x.totalRun);
@@ -1320,7 +1320,7 @@ async function statCalculation (igroup) {
   // console.log(`End   calc: ${calcEnd}  Duration: ${duration4}`);
   //console.log(`Total Time: ${totDur}`) 
 
-  //console.log(userRank);
+  console.log(userRank);
   return({rank: userRank, maxRun: userMaxRunList, maxWicket: userMaxWicketList});
 }
 
