@@ -13,9 +13,10 @@ app = express();
 const { akshuDelGroup,
   getMaster, setMaster,
 } = require('./routes/cricspecial'); 
+PRODUCTION=true;  
+WEB=true;
 
 PASSWORDLINKVALIDTIME=10			// Password link valid time in minutes
-PRODUCTION=true;  
 PRIZEPORTION=1.0
 
 //

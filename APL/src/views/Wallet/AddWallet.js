@@ -32,12 +32,15 @@ const PAYMENTGATEWAY="RAZOR";
 var paymentId = "";
 var paymentRequest = "";
 
+
 export default function AddWallet() {
+	const aplLogo = `${process.env.PUBLIC_URL}/APLLOGO2.JPG`;
 	if (PAYMENTGATEWAY === "RAZOR")
 		useScript(RAZORSCRIPT);
 	else
 		useScript(INSTAMOJOSCRIPT);
-
+	
+	
   // const history = useHistory();
   // const classes = useStyles();
   const gClasses = globalStyles();
@@ -227,6 +230,7 @@ export default function AddWallet() {
 				var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/razorgeneratepaymentrequest/${localStorage.getItem("uid")}/${amount}`);
 				let myOptions = response.data;
 				myOptions.handler = handleRazor;
+				myOptions.image = aplLogo;					    // COMPANY LOGO
 				var rzp1 = new window.Razorpay(myOptions, '_parent');
 				rzp1.open();
 			}

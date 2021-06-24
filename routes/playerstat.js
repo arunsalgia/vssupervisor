@@ -2435,9 +2435,10 @@ async function checkallover() {
   }
 }
 
+if (WEB) {		// schedule not to be when part of APK. It will be only part of WEB
 // schedule task 
 let clientSemaphore = false;
-cron.schedule('*/1 * * * * *', async () => {
+cron.schedule('*/1 * * * * *', async () => {	
   ++cricTimer;
   ++clientUpdateCount;
   if (!db_connection) {
@@ -2476,6 +2477,9 @@ cron.schedule('*/1 * * * * *', async () => {
   }
   clientSemaphore = false;  // job over
 });
+
+}
+
 
 var keyIndex = 0;
 function nextapikey() {
