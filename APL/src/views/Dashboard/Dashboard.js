@@ -264,7 +264,7 @@ export default function Dashboard() {
 
         if (userDetails.length > 0) {
           // if details of current user found (current user is a member of group 1)
-          console.log(userDetails[0]);
+          //console.log(userDetails[0]);
           setRank(userDetails[0].rank);
 					setPrize(userDetails[0].prize);
           setScore(userDetails[0].grandScore)
