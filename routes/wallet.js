@@ -6,8 +6,12 @@ const { akshuGetUser, GroupMemberCount, akshuGetGroup,
 } = require('./cricspecial'); 
 var router = express.Router();
 
-const API_KEY = "test_122c89dd87b24c3977474e3e82f";
-const AUTH_KEY = "test_4c814766fd46608724119f04929";
+const INSTA_API_KEY = "test_122c89dd87b24c3977474e3e82f";
+const INSTA_AUTH_KEY = "test_4c814766fd46608724119f04929";
+
+const RAZOR_API_KEY = "rzp_test_yIKmVHzFDY4UUB";
+const RAZOR_AUTH_KEY = "DhwkW4yZdSh1am96eqzuYpkk";
+
 
 let paymentRequestArray = [];
 
@@ -26,6 +30,26 @@ var instaOptions = {
   // redirect_url: "https://happy-home-ipl-2020.herokuapp.com/apl/walletdetails",
 };
 
+var razorOptions = {
+	"key": RAZOR_API_KEY,
+	"amount": 0, 		// Example: 2000 paise = INR 20
+	"name": "APL",
+	"description": "APL Wallet",
+	//"image": "VS.JPG",    // COMPANY LOGO
+	//"handler": handleRazor,
+	"prefill": {
+		"name": "", 		// pass customer name
+		"email": '',		// customer email
+		"contact": '' 	//customer phone no.
+	},
+	"notes": {
+		"address": "address" //customer address 
+	},
+	"theme": {
+		"color": "#15b8f3" // screen color
+	}
+};
+
 
 /* GET users listing. */
 router.use('/', function(req, res, next) {
@@ -37,7 +61,7 @@ router.use('/', function(req, res, next) {
 
 
 // given by instamojo on successfull payment
-router.post('/webhook', async function (req, res) {
+router.post('/instawebhook', async function (req, res) {
   setHeader(res);
   console.log("In WEBHOOK ----------------------------------------");
   console.log(req.body);
@@ -95,7 +119,7 @@ mac: 'ec891618e4e2b2a23377647065168e5458ca39b4'
 });	
 	
 // create intamojo payment request when add waller selected by user with amount
-router.get('/generatepaymentrequest/:userid/:amount', async function (req, res, next) {
+router.get('/instageneratepaymentrequest/:userid/:amount', async function (req, res, next) {
   setHeader(res);
     let { userid, amount } = req.params;
     let PAYMENT_REQUEST_URL = '';
@@ -105,7 +129,7 @@ router.get('/generatepaymentrequest/:userid/:amount', async function (req, res, 
 	instaOptions.buyer_name = userRec.displayName;
 	instaOptions.email = dbdecrypt(userRec.email);
 
-	Instamojo.setKeys(API_KEY, AUTH_KEY);	
+	Instamojo.setKeys(INSTA_API_KEY, INSTA_AUTH_KEY);	
 	Instamojo.isSandboxMode(true); // For testing
 	const paymentData = Instamojo.PaymentData(instaOptions);
 	console.log(paymentData);
@@ -129,7 +153,7 @@ router.get('/generatepaymentrequest/:userid/:amount', async function (req, res, 
 	sendok(res, PAYMENT_REQUEST_URL);
 }); 
 
-router.get('/getpaymentdetails/:requestId', async function (req, res, next) {
+router.get('/instagetpaymentdetails/:requestId', async function (req, res, next) {
   setHeader(res);
     let { requestId } = req.params;
 	console.log(paymentRequestArray);
@@ -142,7 +166,7 @@ router.get('/getpaymentdetails/:requestId', async function (req, res, next) {
 	return;
 	
 	console.log("All okay");
-	Instamojo.setKeys(API_KEY, AUTH_KEY);	
+	Instamojo.setKeys(INSTA_API_KEY, INSTA_AUTH_KEY);	
 	Instamojo.isSandboxMode(true); // For testing
 	
 
@@ -157,9 +181,8 @@ router.get('/getpaymentdetails/:requestId', async function (req, res, next) {
 	}
 }); 
 
-
 // given by instamojo on successfull payment
-router.get('/paymentok/:paymentRequest/:paymentId', async function (req, res) {
+router.get('/instapaymentok/:paymentRequest/:paymentId', async function (req, res) {
   setHeader(res);
   console.log("In success payment");
   var {paymentRequest, paymentId } = req.params;
@@ -193,8 +216,7 @@ router.get('/paymentok/:paymentRequest/:paymentId', async function (req, res) {
   return sendok(res, "done");
 });	
 	
-	
-router.get('/paymentfail/:paymentRequest', async function (req, res) {
+router.get('/instapaymentfail/:paymentRequest', async function (req, res) {
   setHeader(res);
 	var {paymentRequest} = req.params;
 	console.log("In failed payment");
@@ -209,6 +231,73 @@ router.get('/paymentfail/:paymentRequest', async function (req, res) {
   return sendok(res, "done");
 });	
 	
+	
+router.get('/razorgeneratepaymentrequest/:userid/:amount', async function (req, res, next) {
+  setHeader(res);
+	let { userid, amount } = req.params;
+	let PAYMENT_REQUEST_URL = '';
+	
+	let userRec = await akshuGetUser(userid);
+
+	razorOptions.amount = Number(amount) * 100;			// convert to paise
+	razorOptions.prefill.name = userRec.displayName;
+	razorOptions.prefill.email = dbdecrypt(userRec.email);
+	razorOptions.prefill.contact = '+91' + userRec.mobile;
+	
+	sendok(res, razorOptions);
+}); 
+
+// given by razorpay on successfull payment
+router.get('/razorpaymentok/:userId/:amount/:paymentId', async function (req, res) {
+  setHeader(res);
+  console.log("In success payment");
+  var {userId, amount, paymentId } = req.params;
+	
+	let userRec = await akshuGetUser(userId);
+	
+	let myPayment = new Payment();
+	myPayment.uid = userRec.uid;
+	myPayment.email = userRec.email;
+	myPayment.amount = parseFloat(amount);
+	myPayment.paymentId = paymentId;
+  myPayment.paymentTime = new Date();
+  myPayment.status = "CREDIT";			//req.body.status.toUpperCase();
+  myPayment.fee = 0;   							//parseFloat(req.body.fees);
+	myPayment.requestId = 'NA';   		//response.payment_request.id;
+	myPayment.requestTime = new Date();
+	await myPayment.save();
+  
+  let myTrans = createWalletTransaction();
+  myTrans.isWallet = true;
+  myTrans.uid = myPayment.uid;
+  myTrans.transType = WalletTransType.refill;
+  myTrans.transSubType = myPayment.paymentId;
+  myTrans.amount = myPayment.amount;
+  await myTrans.save();
+  
+  let bonusAmount = calculateBonus(myPayment.amount);
+  
+  myTrans = createWalletTransaction();
+  myTrans.isWallet = false;
+  myTrans.uid = myPayment.uid;
+  myTrans.transType = BonusTransType.refill;
+  myTrans.transSubType = myPayment.paymentId;
+  myTrans.amount = bonusAmount;
+  await myTrans.save();
+  
+  return sendok(res, "done");
+});	
+
+// given by razorpay on failed payment
+router.get('/razorpaymentfail/:userId/:paymentRequest', async function (req, res) {
+  setHeader(res);
+	var {userId, paymentRequest} = req.params;
+	console.log("In failed payment");
+  // never called for razor
+  return sendok(res, "done");
+});	
+	
+
 function getDate(x) {
 	let y = ("0" + x.getDate()).slice(-2) + "/" +
 		("0" + (x.getMonth()+1)).slice(-2) + "/" +

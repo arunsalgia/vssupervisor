@@ -262,47 +262,48 @@ export default function Auction() {
 
     // console.log(`Dangerous ${playerId}`)
     useEffect(() => {
-        // console.log(process.env.PUBLIC_URL);
-        var sendMessage = {page: "AUCT", gid: localStorage.getItem("gid"), uid: localStorage.getItem("uid") };
-        var sockConn = socketIOClient(process.env.REACT_APP_ENDPOINT);
+			// console.log(process.env.PUBLIC_URL);
+			var sendMessage = {page: "AUCT", gid: localStorage.getItem("gid"), uid: localStorage.getItem("uid") };
+			var sockConn = socketIOClient(process.env.REACT_APP_ENDPOINT);
 
-        const makeconnection = async () => {
-          await sockConn.connect();
-          sockConn.emit("page", sendMessage);
+			const makeconnection = async () => {
+				await sockConn.connect();
+				sockConn.emit("page", sendMessage);
+			}
+
+			function updatePlayerChange(newPlayerDetails, balanceDetails) {
+					console.log(balanceDetails);
+					setBidPaused(false);
+					// console.log("Player Changed");
+					// console.log(`New: ${newPlayerDetails.pid}  Old: ${playerId} `)
+					// first set PID so that display is better
+					setPid(newPlayerDetails.pid)
+					// let tmp = `${process.env.PUBLIC_URL}/${newPlayerDetails.pid}.JPG`
+					let tmp = `https://www.cricapi.com/playerpic/${newPlayerDetails.pid}.JPG`
+					if (playerImage != tmp) {
+							// console.log("Different image")
+							// setPlayerImage(`${process.env.PUBLIC_URL}/${newPlayerDetails.pid}.JPG`);
+							setPlayerImage(tmp);
+					} else {
+							// console.log("Same player image")
+					}
+					setTeam(newPlayerDetails.Team)
+					setRole(newPlayerDetails.role)
+					setBattingStyle(newPlayerDetails.battingStyle)
+					setBowlingStyle(newPlayerDetails.bowlingStyle)
+					setPlayerName(newPlayerDetails.fullName)
+
+					let ourBalance = balanceDetails.filter(balance => balance.uid == localStorage.getItem("uid"))
+					setMyBalanceAmount(ourBalance[0].balance);
+					// for ADMIN, NOW WE WILL SHOW BALANCE of himself/herself. Not of other members
+					// let allUserBalance = (localStorage.getItem("admin") === "false") ? ourBalance : balanceDetails;
+					let allUserBalance = ourBalance;
+					setAuctionTableData(allUserBalance);
+					setAuctionStatus("RUNNING");
         }
 
-        function updatePlayerChange(newPlayerDetails, balanceDetails) {
-            setBidPaused(false);
-            // console.log("Player Changed");
-            // console.log(`New: ${newPlayerDetails.pid}  Old: ${playerId} `)
-            // first set PID so that display is better
-            setPid(newPlayerDetails.pid)
-            // let tmp = `${process.env.PUBLIC_URL}/${newPlayerDetails.pid}.JPG`
-            let tmp = `https://www.cricapi.com/playerpic/${newPlayerDetails.pid}.JPG`
-            if (playerImage != tmp) {
-                // console.log("Different image")
-                // setPlayerImage(`${process.env.PUBLIC_URL}/${newPlayerDetails.pid}.JPG`);
-                setPlayerImage(tmp);
-            } else {
-                // console.log("Same player image")
-            }
-            setTeam(newPlayerDetails.Team)
-            setRole(newPlayerDetails.role)
-            setBattingStyle(newPlayerDetails.battingStyle)
-            setBowlingStyle(newPlayerDetails.bowlingStyle)
-            setPlayerName(newPlayerDetails.fullName)
-
-            let ourBalance = balanceDetails.filter(balance => balance.uid == localStorage.getItem("uid"))
-            setMyBalanceAmount(ourBalance[0].balance);
-            // for ADMIN, NOW WE WILL SHOW BALANCE of himself/herself. Not of other members
-            // let allUserBalance = (localStorage.getItem("admin") === "false") ? ourBalance : balanceDetails;
-            let allUserBalance = ourBalance;
-            setAuctionTableData(allUserBalance);
-            setAuctionStatus("RUNNING");
-        }
-
-        makeconnection();    
-        sockConn.on("connect", () => {
+			makeconnection();    
+			sockConn.on("connect", () => {
             sockConn.emit("page", sendMessage);
 
             sockConn.on("auctionStatus", (newAuctionStatus) => {
@@ -359,37 +360,37 @@ export default function Auction() {
             });
         })
 
-        const a = async () => {
-            if (!hasGroup()) return;
-            // console.log("Calling get auction status");
-            const response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/getauctionstatus/${localStorage.getItem("gid")}`);
-            // console.log(response.data)
-            setAuctionStatus(response.data);
-            if (response.data === "RUNNING") {
-                // get current player details
-                //same as when data rcvd in socket msg playerChange
-                const response2 = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/auction/current/${localStorage.getItem("gid")}`)
-                // console.log("Calling updatePlayerChange from currentr");
-                updatePlayerChange(response2.data.a, response2.data.b);
-                // get whi has bidded
-                const response1 = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/auction/getbid/${localStorage.getItem("gid")}`);
-                // console.log("GETBID");
-                // console.log(response1.data)
-                if (response1.status === 200) {
-                    setBidAmount(response1.data.auctionBid)
-                    setBidUser(response1.data.currentBidUser);
-                    setBidUid(response1.data.currentBidUid);            
-                }
-            }
+			const a = async () => {
+					if (!hasGroup()) return;
+					// console.log("Calling get auction status");
+					const response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/getauctionstatus/${localStorage.getItem("gid")}`);
+					// console.log(response.data)
+					setAuctionStatus(response.data);
+					if (response.data === "RUNNING") {
+							// get current player details
+							//same as when data rcvd in socket msg playerChange
+							const response2 = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/auction/current/${localStorage.getItem("gid")}`)
+							// console.log("Calling updatePlayerChange from currentr");
+							updatePlayerChange(response2.data.a, response2.data.b);
+							// get whi has bidded
+							const response1 = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/auction/getbid/${localStorage.getItem("gid")}`);
+							// console.log("GETBID");
+							// console.log(response1.data)
+							if (response1.status === 200) {
+									setBidAmount(response1.data.auctionBid)
+									setBidUser(response1.data.currentBidUser);
+									setBidUid(response1.data.currentBidUid);            
+							}
+					}
 
-            MAXCOUNTDOWN = await getAuctionCountDown();
-            console.log("Max Countdown value", MAXCOUNTDOWN);
-        }
-        a();
+					MAXCOUNTDOWN = await getAuctionCountDown();
+					console.log("Max Countdown value", MAXCOUNTDOWN);
+			}
+			a();
 
-        return () => {
-            leavingAuction(sockConn);
-        }
+			return () => {
+				leavingAuction(sockConn);
+			}
     }, []);
 
 

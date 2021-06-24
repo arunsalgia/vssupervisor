@@ -40,7 +40,8 @@ function calculateBalance(arpanaGID) {
       userName: gm.displayName,
       gid: gm.gid,
       playerCount: myPlayerCount,
-      balance: mybal
+      balance: mybal,
+			players: myAuction
     });
   });
   return balanceDetails;
