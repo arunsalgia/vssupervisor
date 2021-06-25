@@ -14,7 +14,7 @@ const { akshuDelGroup,
   getMaster, setMaster,
 } = require('./routes/cricspecial'); 
 PRODUCTION=true;  
-WEB=true;
+WEB=false;
 
 PASSWORDLINKVALIDTIME=10			// Password link valid time in minutes
 PRIZEPORTION=1.0
