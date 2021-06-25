@@ -9,11 +9,11 @@ var router = express.Router();
 const INSTA_API_KEY = "test_122c89dd87b24c3977474e3e82f";
 const INSTA_AUTH_KEY = "test_4c814766fd46608724119f04929";
 
-const RAZOR_API_KEY = "rzp_test_yIKmVHzFDY4UUB";
-const RAZOR_AUTH_KEY = "DhwkW4yZdSh1am96eqzuYpkk";
+const RAZOR_API_KEY = "rzp_live_PWqtTU1HrN1C5M";
+const RAZOR_AUTH_KEY = "jbV2ARMEfXPCNZUZ84GUnQQ9";
 
 
-let paymentRequestArray = [];
+//let paymentRequestArray = [];
 
 var instaOptions = {
   purpose: "APL Wallet", // REQUIRED
@@ -155,11 +155,11 @@ router.get('/instageneratepaymentrequest/:userid/:amount', async function (req, 
 
 router.get('/instagetpaymentdetails/:requestId', async function (req, res, next) {
   setHeader(res);
-    let { requestId } = req.params;
-	console.log(paymentRequestArray);
+	let { requestId } = req.params;
+	//console.log(paymentRequestArray);
 	
 	let myRequest = await Payment.findOne({requestId: requestId});
-//	let myRequest = paymentRequestArray.find(x => x.requestId === requestId);
+	//	let myRequest = paymentRequestArray.find(x => x.requestId === requestId);
 	if (!myRequest) return senderr(res, 601, 'Invalid request id ' + requestId);
 	console.log(myRequest);
 	sendok(res, myRequest);
