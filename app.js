@@ -257,6 +257,7 @@ AuctionSchema = mongoose.Schema({
   uid: Number,
   pid: Number,
   team: String,
+	role: String,
   playerName: String,
   bidAmount: Number
 });

@@ -1173,7 +1173,7 @@ async function unopt_publish_auctionedplayers(res, groupid, userid, withOrWithou
   var gmembers = await Pgmembers; 
   //console.log(datalist);
 
-  datalist = _.map(datalist, d => _.pick(d, ['uid', 'pid', 'playerName', 'team', 'bidAmount']));
+  //datalist = _.map(datalist, d => _.pick(d, ['uid', 'pid', 'playerName', 'team', 'bidAmount']));
   var userlist = _.map(gmembers, d => _.pick(d, ['uid']));
   if (userid != allUSER)
     userlist = _.filter(userlist, x => x.uid == userid);
@@ -1235,19 +1235,18 @@ async function publish_auctionedplayers(res, groupid, userid, withOrWithout)
   let gmembers = await akshuGetGroupMembers(groupid);       //     Pgmembers; 
   let userlist = _.map(gmembers, d => _.pick(d, ['uid']));
   let datalist = await akshuGetAuction(groupid);
-  datalist = _.map(datalist, d => _.pick(d, ['uid', 'pid', 'playerName', 'team', 'bidAmount']));
+  datalist = _.map(datalist, d => _.pick(d, ['uid', 'pid', 'playerName', 'team', 'bidAmount', 'role']));
 
   if (userid !== allUSER) {
     userlist = _.filter(userlist, u => u.uid === userid);
     datalist = _.filter(datalist, d => d.uid === userid);
   }  
-  
+	
   var grupdatalist = [];
   // userlist.forEach( myuser => {
   for(idx=0; idx<userlist.length; ++idx) {
     let myuser = userlist[idx];
     let userRec = await akshuGetUser(myuser.uid);   //          _.filter(allUsers, x => x.uid == myuser.uid);
-    //console.log(`${userRec}`);
 
     let myplrs = _.filter(datalist, p => p.uid === myuser.uid);
     myplrs = _.sortBy(myplrs, p => p.playerName);
@@ -1269,7 +1268,7 @@ async function publish_auctionedplayers(res, groupid, userid, withOrWithout)
     grupdatalist.push(tmp);
   };
   grupdatalist = _.sortBy(grupdatalist, 'bidAmount').reverse();
-  // console.log(grupdatalist.length);
+  //console.log(grupdatalist[0].players);
   sendok(res, grupdatalist);
 }
 

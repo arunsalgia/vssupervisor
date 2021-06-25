@@ -316,7 +316,7 @@ export function getImageName(teamName) {
   let imageName = `${process.env.PUBLIC_URL}/teamimage/${teamName}.JPG`;
   imageName = imageName.replaceAll(" ", "");
   // imageName = imageName.replace(/ /g, " ");
-  console.log("Function Image name", imageName);
+  //console.log("Function Image name", imageName);
   return imageName;
 }
 
