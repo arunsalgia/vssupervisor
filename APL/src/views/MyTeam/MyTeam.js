@@ -97,7 +97,7 @@ export default function MyTeam() {
 				{
 					var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/myteam/${localStorage.getItem("gid")}/${localStorage.getItem("uid")}`);
 					setTeamArray(response.data);
-					//console.log(response.data);
+					console.log(response.data);
 					localStorage.setItem("team", JSON.stringify(response.data));
 				}
       } catch (e) {

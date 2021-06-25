@@ -1268,7 +1268,7 @@ async function publish_auctionedplayers(res, groupid, userid, withOrWithout)
     grupdatalist.push(tmp);
   };
   grupdatalist = _.sortBy(grupdatalist, 'bidAmount').reverse();
-  //console.log(grupdatalist[0].players);
+  console.log(grupdatalist[0].players);
   sendok(res, grupdatalist);
 }
 
