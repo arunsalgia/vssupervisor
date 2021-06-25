@@ -10,11 +10,11 @@ cron = require('node-cron');
 nodemailer = require('nodemailer');
 crypto = require('crypto');
 app = express();
-const { akshuDelGroup,
-  getMaster, setMaster,
+const { akshuDelGroup, akshuUpdGroupMember,
+  getMaster, setMaster, 
 } = require('./routes/cricspecial'); 
 PRODUCTION=true;  
-WEB=false;
+WEB=true; 
 
 PASSWORDLINKVALIDTIME=10			// Password link valid time in minutes
 PRIZEPORTION=1.0
@@ -600,8 +600,12 @@ serverUpdateInterval = 10; // in seconds. INterval after which data to be update
 
 // Create the database connection 
 //mongoose.connect(mongoose_conn_string);
-mongoose.connect(mongoose_conn_string, { useNewUrlParser: true, useUnifiedTopology: true });
-
+if (WEB) {
+	mongoose.connect(mongoose_conn_string, { useNewUrlParser: true, useUnifiedTopology: true });
+} else {
+	db_connection = true;
+  connectRequest = true;
+}
 // CONNECTION EVENTS
 // When successfully connected
 mongoose.connection.on('connected', function () {
@@ -891,6 +895,7 @@ awardRankPrize = async function(tournamentName) {
         await WalletPrize(gmRec.gid, gmRec.uid, gmRec.rank, prizeTable[gmRec.rank-1].prize)
 				//console.log(gmRec);
         gmRec.save();
+				akshuUpdGroupMember(gmRec);
       } 
     }
   }

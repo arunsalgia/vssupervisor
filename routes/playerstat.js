@@ -1,6 +1,6 @@
 router = express.Router();
 const { 
-  akshuGetGroup, akshuUpdGroup, akshuGetGroupMembers,
+  akshuGetGroup, akshuUpdGroup, akshuGetGroupMembers, akshuUpdGroupMember,
   akshuGetAuction, akshuGetTournament,
   akshuGetGroupUsers,
   getTournamentType,
@@ -1320,7 +1320,7 @@ async function statCalculation (igroup) {
   // console.log(`End   calc: ${calcEnd}  Duration: ${duration4}`);
   //console.log(`Total Time: ${totDur}`) 
 
-  console.log(userRank);
+  //console.log(userRank);
   return({rank: userRank, maxRun: userMaxRunList, maxWicket: userMaxWicketList});
 }
 
@@ -1710,12 +1710,11 @@ checkTournamentOver = async function (tournamentName) {
   if (matchesNotOver.length === 0) {    
     // declare tournament as over
     // await updateTournamentOver(tournamentName);
-    // add min and max run of the tournamenet and assign points to user
+    // add min and max run of the tournament and assign points to user
     await updateTournamentMaxRunWicket(tournamentName);
     // update group with rank / score. Also allocate prize money
     await updateAllGroupRankScore(tournamentName);
     await awardRankPrize(tournamentName);
-
     tRec.over = true;
     await tRec.save();
   }
@@ -1740,6 +1739,7 @@ async function updateGroupRankScore(groupRec) {
     gmRec.rank = rec.rank;
     gmRec.score = rec.grandScore;
     await gmRec.save();
+		akshuUpdGroupMember(gmRec);
   };
 }
 
@@ -2290,7 +2290,7 @@ async function processConnection(i) {
       (connectionArray[i].uid  <= 0)  ||
       (connectionArray[i].page.length  <= 0)) return;
   
-  //console.log(connectionArray[i]);
+  //console.log(connectionArray[i]); 
   var myDate1 = new Date();
   var myTournament = await getTournameDetails(connectionArray[i].gid);
   if (myTournament.length === 0) return;
@@ -2298,10 +2298,17 @@ async function processConnection(i) {
   
   var myData = _.find(clientData, x => x.tournament === myTournament && x.gid === connectionArray[i].gid);
   let sts = false;
-  //myData = null;	//-------------------------------> for testing purpose
+	
+	//-------------------------------> for testing purpose
+  //myData = null;	
+	//if (myData)
+	//	console.log("------- data available of tournament", myTournament, "---------------");
+	//else
+	//	console.log("******* reading data of tournament", myTournament,   "***************");
+	
   if (!myData) {
     // no data of this tournament with us. Read database and do calculation
-	//memoryLeaked();
+		//memoryLeaked();
     sts = await readDatabase(connectionArray[i].gid );
 	  // console.log(`read database status ${sts}`);
     if (sts) {
@@ -2387,9 +2394,10 @@ async function sendDashboardData() {
   // console.log("Running match array");
   // console.log(runningMatchArray);
   // console.log(clientData);
-  runningMatchArray.forEach( ccc => {
-    _.remove(clientData, x => x.tournament === ccc.tournament);
-  });
+  //runningMatchArray.forEach( ccc => {
+  //  _.remove(clientData, x => x.tournament === ccc.tournament);
+  //});
+	//clearRunningClientData()
   //-----------
   //------ Start Remove calculated data for the group which has no connection
   let newClientdata = [];
@@ -2435,6 +2443,12 @@ async function checkallover() {
   }
 }
 
+function clearRunningClientData() {
+	for(let i=0; i<runningMatchArray.length; ++i) {
+    _.remove(clientData, x => x.tournament === runningMatchArray[i].tournament);
+  }
+}
+
 if (WEB) {		// schedule not to be when part of APK. It will be only part of WEB
 // schedule task 
 let clientSemaphore = false;
@@ -2455,6 +2469,7 @@ cron.schedule('*/1 * * * * *', async () => {
 
     if (PRODUCTION) {
       if (cricTimer >= CRICUPDATEINTERVAL) {
+				clearRunningClientData();
         cricTimer = 0;
         await update_cricapi_data_r1(false);
         await updateTournamentBrief();
