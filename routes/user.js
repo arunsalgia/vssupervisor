@@ -1213,7 +1213,7 @@ async function publish_auctionedplayers(res, groupid, userid, withOrWithout)
   // var myGroup = await IPLGroup.findOne({gid: 1});
   var myGroup = await akshuGetGroup(groupid);
   if (!myGroup) { senderr(res, 601, `Invalid group number ${groupid}`); return; }
-  // console.log(myGroup);
+  console.log(myGroup);
 
   // if (isNaN(userid)) { senderr(res, 605, "Invalid user"); return; }
   if (userid === allUSER) { 
