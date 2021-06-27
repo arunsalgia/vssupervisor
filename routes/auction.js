@@ -186,6 +186,7 @@ router.get('/add/:igroup/:iuser/:iplayer/:ibid', async function(req, res, next) 
     pid: iplayer,
     playerName: myplayer.name,
     team: myplayer.Team,
+		role: myplayer.role,
     gid: arunGID,
     bidAmount: ibid 
   });

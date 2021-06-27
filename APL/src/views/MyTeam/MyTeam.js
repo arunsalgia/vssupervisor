@@ -119,10 +119,16 @@ export default function MyTeam() {
 
 	function ShowPlayers(props) {
 		let myPlayers = teamArray[0].players.filter(x => x.role === props.role);
+		let pText = '';
+		switch (myPlayers.length) {
+			case 0: pText = 'No Players'; break;
+			case 1: pText = '1 player'; break;
+			default: pText = myPlayers.length + ' players';
+		}
 		return (
 		<Accordion key={props.role} expanded={expandedPanel === props.role} onChange={handleAccordionChange(props.role)}>
 		<AccordionSummary key={props.role} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-		<Typography className={classes.heading}>{props.role} ({myPlayers.length} players)</Typography>
+		<Typography className={classes.heading}>{props.role} ( {pText} )</Typography>
 		</AccordionSummary>
 		<AccordionDetails>
 		<DisplayMyPlayers players={myPlayers} />
