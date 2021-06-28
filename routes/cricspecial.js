@@ -186,6 +186,16 @@ async function GroupMemberCount(groupid) {
   return(memberCount);
 }
 
+/** calculate #time refill done by user till now **/
+async function rechargeCount(userid) {
+  let value = 0;
+  let xxx = await Wallet.aggregate([
+    {$match: {uid: parseInt(userid), isWallet: true, transType: WalletTransType.refill}},
+    {$group : {_id : "$uid", count : {$sum : 1}}}
+  ]);
+  if (xxx.length === 1) value = xxx[0].count;
+  return(value);
+}
 
 async function akshuGetUser(uid) {
   // let suid = uid.toString();
@@ -414,4 +424,5 @@ module.exports = {
   akshuDelGroup,
   feeBreakup, getUserBalance,
   calculateBonus,
+	rechargeCount,
 }; 

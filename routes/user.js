@@ -1,4 +1,5 @@
 router = express.Router();
+router = express.Router();
 const { encrypt, decrypt, dbencrypt, dbdecrypt, dbToSvrText, 
   akshuGetGroup, akshuUpdGroup, akshuGetGroupMembers,
   akshuGetAuction, akshuGetTournament,
@@ -152,7 +153,7 @@ router.get('/signup/:uName/:uPassword/:uEmail', async function (req, res, next) 
 
 
 router.get('/cricsignup/:uName/:uPassword/:uEmail/:mobileNumber/:referalCode', async function (req, res, next) {
-  // CricRes = res;
+  // CricRes = res; 
   setHeader(res);
   var {uName, uPassword, uEmail, mobileNumber, referalCode } = req.params;
   var isValid = false;
@@ -170,8 +171,8 @@ router.get('/cricsignup/:uName/:uPassword/:uEmail/:mobileNumber/:referalCode', a
   let refRec;
   if (referalCode !== "NA") {
 	  // validate referalCode
-	refRec = await User.findOne({_id: referalCode });
-	if (!refRec) return senderr(res, 604, "Invalid refereal Code.");
+		refRec = await User.findOne({_id: referalCode });
+		if (!refRec) return senderr(res, 604, "Invalid referral Code.");
   }
   
   uRec = await User.find().limit(1).sort({ "uid": -1 });
@@ -188,24 +189,32 @@ router.get('/cricsignup/:uName/:uPassword/:uEmail/:mobileNumber/:referalCode', a
     });
   user1.save();
   akshuUpdUser(user1);
-  // add entry for referral code here
-  if (refRec) {
-    let schemaRec = new Schema();
-    schemaRec.date = new Date();
-    schemaRec.uid = refRec.uid;
-    schemaRec.uid2 = user1.uid;
-    schemaRec.scheme = "NEWUSER";
-    schemaRec.pending = true;
-    schemaRec.offer = 100;
-    schemaRec.maxOffer = 100;
-  }
-  console.log(`user record for ${lname}`);
-  // open user wallet with 0 balance
-  let tmp = getMaster("JOINOFFER");
+	
+	// give joining bonus to new user
+	let tmp = await getMaster("JOINOFFER");
+	console.log("Join Offer", tmp)
+	console.log("Amount", parseInt(tmp)); 
   let amount = (tmp !== "") ? parseInt(tmp) : 0;
   await WalletAccountOpen(user1.uid, amount);
-
-  // console.log(user1);
+	
+  // add entry for referral code here
+  if (refRec) {
+		let ofr = await getMaster("REFEROFFER");
+		let amt = (ofr !== "") ? parseInt(ofr) : 0;
+		if (amt > 0) {
+			let schemaRec = new Reference();
+			schemaRec.date = new Date();
+			schemaRec.uid = user1.uid;
+			schemaRec.referenceUid = refRec.uid;
+			schemaRec.scheme = "NEWUSER";
+			schemaRec.pending = true;
+			schemaRec.offer = amt;
+			schemaRec.maxOffer = amt;
+			await schemaRec.save();
+		}
+  }
+	
+  console.log(`user record for ${lname}`);
   sendok(res, "OK"); 
 })
 

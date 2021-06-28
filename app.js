@@ -200,12 +200,12 @@ UserKycSchema = mongoose.Schema({
   
 });
 
-SchemeSchema = mongoose.Schema({
+ReferenceSchema = mongoose.Schema({
   date: Date,
   uid: Number,
-  uid2: Number,
-  scheme: String,
-  pending: Boolean,
+  referenceUid: Number,
+  scheme: String,				// NEWUSER
+  pending: Boolean,			// true till recharge not done by uid2
   offer: Number,
   maxOffer: Number,
 
@@ -472,7 +472,7 @@ Prize = mongoose.model('prize', PrizeSchema);
 Apl = mongoose.model('aplinfo', AplSchema);
 Payment = mongoose.model('payment', PaymentSchema);
 UserKyc = mongoose.model('userkyc', UserKycSchema);
-Scheme = mongoose.model('schemes', SchemeSchema);
+Reference = mongoose.model('reference', ReferenceSchema);
 
 nextMatchFetchTime = new Date();
 router = express.Router();
@@ -530,7 +530,8 @@ WalletTransType = {
 BonusTransType = {
   accountOpen: "registerBonus",
   refill: "refillBonus",
-  //withdrawl: "withdrawal",
+	referral: "referralBonus",
+  //withdrawal: "withdrawal",
   offer: "offerBonus",
   bonus: "bonus",
   //prize: "prize",

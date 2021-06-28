@@ -80,8 +80,9 @@ export default function SignUp() {
 
     let tmp1 = encrypt(x.password);
     let tmp2 = encrypt(email);
-    let tmp = (referalCode !== "") ? referalCode : "NA";
-    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricsignup/${x.userName}/${tmp1}/${tmp2}/${mobile}/${referalCode}`);
+    let rCode = (referalCode !== "") ? referalCode : "NA";
+		
+    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricsignup/${x.userName}/${tmp1}/${tmp2}/${mobile}/${rCode}`);
     if (response.status === 200) {
       let setemailresp = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricemailwelcome/${tmp2}`);
       // history.push("/signin");
@@ -380,8 +381,8 @@ export default function SignUp() {
           Register New User
         </Typography>
     <ValidatorForm className={gClasses.form} onSubmit={handleSubmit}>
-      {/* <TextValidator variant="outlined" fullWidth
-          id="referal" label="Referral Code" name="referal"
+      <TextValidator variant="outlined" fullWidth
+          id="referral" label="Referral Code" name="referral"
           // defaultValue={userName}
           onChange={(event) => setReferalCode(event.target.value)}
           validators={['noSpecialCharacters']}
@@ -390,7 +391,7 @@ export default function SignUp() {
           // helperText={helperText.userName}
           value={referalCode}
         />
-      <BlankArea/> */}
+      <BlankArea/>
       <TextValidator variant="outlined" required fullWidth
           id="userName" label="User Name" name="username"
           // defaultValue={userName}

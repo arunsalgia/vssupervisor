@@ -843,7 +843,7 @@ export default function Profile() {
       </AccordionDetails>
     </Accordion>
     <Typography align="left" className={classes.helpMessage}>Change Password</Typography>
-    {/* <BlankArea />
+    <BlankArea />
     <Accordion expanded={expandedPanel === "code"} onChange={handleAccordionChange("code")}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
             <Typography className={classes.heading}>Referral Code</Typography>
@@ -860,9 +860,9 @@ export default function Profile() {
       color="inherit"
       align="left"
     >
-      <Typography align="left" className={classes.helpMessage}>Share Referral Code and earn Bonus </Typography>
-      <InfoOutlinedIcon className={classes.icon}/>
-    </IconButton> */}
+      <Typography align="left" className={classes.helpMessage}>Share Referral Code with friends and earn Bonus </Typography>
+				{/* <InfoOutlinedIcon className={classes.icon}/> */}
+    </IconButton>
     </div>
   )
   }

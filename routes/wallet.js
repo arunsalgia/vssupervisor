@@ -3,6 +3,7 @@ const { akshuGetUser, GroupMemberCount, akshuGetGroup,
    dbdecrypt, svrToDbText, 
    getUserBalance, feeBreakup,
    calculateBonus,
+	 rechargeCount,
 } = require('./cricspecial'); 
 var router = express.Router();
 
@@ -438,15 +439,45 @@ router.get('/refill/:userId/:amount/:paymentId', async function (req, res, next)
   setHeader(res);
   var {userId, amount, paymentId} = req.params;
 	
+	// find out if this is the first recharge by user. If yes then count will be 0
+	let count = await rechargeCount(userId);
+	
   let myTrans = createWalletTransaction();
   myTrans.transType = WalletTransType.refill;
   myTrans.uid = userId;
   myTrans.transSubType = paymentId;
   myTrans.amount = amount;
-  myTrans.save();
+  await myTrans.save();
   // console.log(myTrans);
 
+	// if user is 1st recharge. Find if it registered using reference
+	if (count === 0) {
+		let refRec = await Reference.findOne({uid: userId, pending: true, scheme: "NEWUSER"});
+		if (refRec) {
+			let refTrans = createWalletTransaction();
+			refTrans.isWallet = false;			// it is bonus and not wallet
+			refTrans.transType = BonusTransType.referral;
+			refTrans.uid = refRec.referenceUid;
+			//refTrans.transSubType = "";
+			refTrans.amount = refRec.offer;
+			await refTrans.save();
+			
+			refRec.pending = false;			// job done. Bonus given
+			await refRec.save();
+		}
+	}
+	
   sendok(res, myTrans);
+}); 
+
+router.get('/refillcount/:userId', async function (req, res, next) {
+  setHeader(res);
+  var {userId} = req.params;
+	
+	// find out if this is the first recharge by user
+	let count = await rechargeCount(userId);
+  
+  sendok(res, {count: count});
 }); 
 
 router.get('/withdraw/:userId/:amount/:details', async function (req, res, next) {
