@@ -271,7 +271,7 @@ router.get('/setmaster/:key/:value', async function (req, res, next) {
 router.get('/firebase/token/:code', async function (req, res, next) {
   setHeader(res);
 	var {code} = req.params;
-	code = svrToDbText(code);
+	code = decrypt(code);
 	let myFire = await Firebase.findOne({token: code});
 	if (!myFire) {
 		myFire = new Firebase();
@@ -300,7 +300,7 @@ router.get('/firebase/sendtoall', async function (req, res,next)  {
 	let allFire = await Firebase.find({});
 	let fcm_tokens = _.map(allFire, 'token');
 
-	fcm_tokens[0] = dbdecrypt(fcm_tokens[0]);
+	//fcm_tokens[0] = dbdecrypt(fcm_tokens[0]);
 	console.log(fcm_tokens);
 	
 	let notification_body = {
