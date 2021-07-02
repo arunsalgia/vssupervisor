@@ -301,6 +301,7 @@ router.get('/firebase/sendtoall', async function (req, res,next)  {
 	let fcm_tokens = _.map(allFire, 'token');
 
 	//fcm_tokens[0] = dbdecrypt(fcm_tokens[0]);
+	
 	console.log(fcm_tokens);
 	
 	let notification_body = {
