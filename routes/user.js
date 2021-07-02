@@ -4,7 +4,8 @@ const { encrypt, decrypt, dbencrypt, dbdecrypt, dbToSvrText,
   akshuGetGroup, akshuUpdGroup, akshuGetGroupMembers,
   akshuGetAuction, akshuGetTournament,
   getTournamentType,
-  svrToDbText, getLoginName, getDisplayName, sendCricMail, 
+  svrToDbText, getLoginName, getDisplayName, 
+	sendCricMail, sendCricHtmlMail,
   akshuGetUser, akshuUpdUser,
   getMaster, setMaster,
 } = require('./cricspecial'); 
@@ -697,32 +698,32 @@ router.get('/cricemailwelcome/:mailid', async function (req, res, next) {
   setHeader(res);
   var {mailid} = req.params;
   var isValid = false;
-  //mailid = mailid.toLowerCase();
 
   let uRec = await User.findOne({ email: svrToDbText(mailid) });
   //console.log(uRec)
   if (!uRec) {senderr(res, 602, "Invalid email id"); return  }
 
-  let text = `Dear ${uRec.displayName},
-  
-    Welcome to the family of Auction Permier League.
+	let displayName = uRec.displayName;
+	let referenceCode = uRec._id;
+	let userName = uRec.userName;
+	let referBonus = await getMaster("REFEROFFER");
+	
+	let htmlText = `<div style="background-image: url('https://i.pinimg.com/originals/29/9c/a1/299ca187762b51cb637f29cf7472e574.png');">
+<h4 style="text-align: left;">&nbsp;</h4>
+<h4 style="text-align: left;"><strong>Dear ${displayName},</strong></h4>
+<p><strong><img src="https://html-online.com/editor/tiny4_9_11/plugins/emoticons/img/smiley-smile.gif" alt="smile" /></strong><span style="text-decoration: underline; color: #993300;"><strong>Welcome to the family of Auction Permier League <img src="https://html-online.com/editor/tiny4_9_11/plugins/emoticons/img/smiley-smile.gif" alt="smile" /></strong></span></p>
+<p>Thanking you registering in Auction Permier League (APL).</p>
+<p>You can now create Group, with family and friends and select the tournament, Auction players among group members and let APL provide you the players details during the tournament.</p>
+<p>Your reference code is&nbsp;</p>
+<h3><span style="color: #993300;">${referenceCode}</span></h3>
+<p>Invite your friends to join the APL family using the reference code given above and earn bonus of Rs.${referBonus} on their first recharge.</p>
+<p>&nbsp;</p>
+<p>Your login name is as given below:</p>
+<h4><span style="color: #0000ff;"><strong>Login Name: ${userName}</strong></span><br /><br /></h4>
+<p><span style="color: #993300; background-color: #ffff00;">Regards,</span><br /><span style="color: #993300; background-color: #ffff00;">for Auction Permier League.</span></p>
+</div>`
 
-    Thanking you registering in Auction Permier League (APL).
-
-    You can now create Group, with family and friends and select the tournament,
-    Auction players among group members
-    and let APL provide you the players details during the tournament.
-
-    Your login details are:
-    
-    Login Name: ${uRec.userName} 
-    User Name : ${uRec.displayName}
-    Password  : ${dbdecrypt(uRec.password)}
-
-    Regards,
-    for Auction Permier League.`
-
-  let resp = await sendCricMail(dbdecrypt(uRec.email), 'Welcome to Auction Permier League', text);
+  let resp = await sendCricHtmlMail(dbdecrypt(uRec.email), 'Welcome to Auction Premier League', htmlText);
   console.log(resp);
   if (resp.status) {
 	console.log('Email sent: ' + resp.error);

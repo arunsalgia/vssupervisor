@@ -28,8 +28,8 @@ var mailOptions =  {
   user: 'cricketpwd@gmail.com',
   pass: 'cwezdlvmqqbegugi',
   to:   '',
-  subject: '',
-  text: ''
+  subject: ''
+  //html: ''
 }
 
 
@@ -166,6 +166,23 @@ async function sendCricMail (dest, mailSubject, mailText) {
   mailOptions.to = dest;
   mailOptions.subject = mailSubject;
   mailOptions.text = mailText;
+
+  try {
+    const res = await send(mailOptions);
+    return {status: true, error: 'Email Successfully sent'};
+  } catch (e) {
+    console.log(e);
+    return {status: false, error: 'error sending Email'}; 
+  }
+} 
+
+
+async function sendCricHtmlMail (dest, mailSubject, mailText) {
+
+  // setup to, subject and text
+  mailOptions.to = dest;
+  mailOptions.subject = mailSubject;
+  mailOptions.html = mailText;
 
   try {
     const res = await send(mailOptions);
@@ -409,7 +426,7 @@ module.exports = {
   encrypt, decrypt, dbencrypt, dbdecrypt,
   dbToSvrText, svrToDbText,
   GroupMemberCount,
-  sendCricMail,
+  sendCricMail, sendCricHtmlMail,
   // master
   getMaster, setMaster,
   // get

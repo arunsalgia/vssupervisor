@@ -7,6 +7,7 @@ import { UserContext } from "./UserContext";
 import "assets/css/material-dashboard-react.css?v=1.9.0";
 // import { DesktopWindows } from "@material-ui/icons";
 import { CricDreamTabs, setTab }from "CustomComponents/CricDreamTabs"
+import axios from "axios";
 import SignIn from "views/Login/SignIn.js";
 import SignUp from "views/Login/SignUp.js";
 import Welcome from "views/APL/Welcome";
@@ -16,8 +17,14 @@ import ForgotPassword from "views/Login/ForgotPassword.js";
 import IdleTimer from 'react-idle-timer'
 import { setIdle }from "views/functions.js"
 import Wallet from "views/Wallet/Wallet";
-// import Dummy from "views/APL/Dummy";
 import { PinDropSharp } from "@material-ui/icons";
+import firebase from './firebase'
+import { 
+isMobile, cdRefresh, specialSetPos, 
+encrypt, 
+clearBackupData, downloadApk 
+} from "views/functions.js"
+
 
 
 const hist = createBrowserHistory();
@@ -72,6 +79,8 @@ function AppRouter() {
   //let history={hist}
 	
   const [user, setUser] = useState(null);
+	const [fireToken, setFireToken] = useState("");
+	
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
   var idleTimer = null;
   
@@ -158,6 +167,25 @@ function AppRouter() {
   //     </UserContext.Provider>
   //   </Router>
   // );
+	
+	const messaging = firebase.messaging()
+    messaging.requestPermission().then(()=>{
+      return messaging.getToken()
+    }).then(token=> {
+      console.log('Token : ',token);
+			let xxx = encrypt(token);
+			axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/firebase/token/${xxx}`)
+			.then(response => {
+				console.log("sent token"); 
+			})
+			.catch(error => {
+					console.error('There was an error!', error);
+			});
+			console.log("Done");
+    }).catch((err)=>{
+      console.log(err); 
+	})
+
 
 
   return (

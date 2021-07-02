@@ -1,7 +1,7 @@
 const { 
 	encrypt, decrypt, dbencrypt, dbdecrypt, 
 	dbToSvrText, svrToDbText, 
-	sendCricMail, 
+	sendCricMail, sendCricHtmlMail,
 	getMaster, setMaster,
 } = require('./cricspecial'); 
 
@@ -53,6 +53,38 @@ router.get('/feedback/:userid/:message', async function (req, res, next) {
     senderr(res, 603, resp.error);
   }
 }); 
+
+router.get('/html', async function (req, res, next) {
+  // now send the mail 
+	let message = `
+<p>Simple HTML.</p>
+<h3><em>So very simple.</em></h3>
+<p><span style="color: #ff0000;">Lame joke that follows.</span></p>
+<p>
+  <span style="color: #ff0000;"
+    ><img
+      src="https://afinde-production.s3.amazonaws.com/uploads/981ebabb-5722-44c1-ad30-fc57fbc8ee9d.jpeg"
+      alt="Lame joke"
+      width="245"
+      height="221"
+  /></span>
+</p>
+<h2 style="padding-left: 30px;">do you?</h2>
+<ul>
+  <li>yes</li>
+  <li>no</li>
+  <li><strong>not entirely sure</strong></li>
+</ul>`;
+
+  let resp = await sendCricHtmlMail("arunsalgia@gmail.com", "HTML", message);
+  if (resp.status) {
+    sendok(res, "Done");
+  } else {
+    console.log(resp.error);
+    senderr(res, 601, resp.error);
+  }
+});
+
 
 router.get('/master/list', async function (req, res, next) {
   // AplRes = res;
@@ -231,6 +263,15 @@ router.get('/setmaster/:key/:value', async function (req, res, next) {
   var {key, value} = req.params;
   await setMaster(key.toUpperCase(), value);
   sendok(res, "Done");
+}); 
+
+router.get('/firebase/token/:code', async function (req, res, next) {
+  setHeader(res);
+	var {code} = req.params;
+	code = decrypt(code);
+	
+  console.log("code is ", code);
+  sendok(res, 'Done');
 }); 
 
 router.get('/support1', async function (req, res, next) {
