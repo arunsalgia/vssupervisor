@@ -1,3 +1,5 @@
+const fetch = require('node-fetch');
+
 const { 
 	encrypt, decrypt, dbencrypt, dbdecrypt, 
 	dbToSvrText, svrToDbText, 
@@ -6,6 +8,7 @@ const {
 } = require('./cricspecial'); 
 
 var router = express.Router();
+
 // let AplRes;
 
 /* GET users listing. */
@@ -268,11 +271,58 @@ router.get('/setmaster/:key/:value', async function (req, res, next) {
 router.get('/firebase/token/:code', async function (req, res, next) {
   setHeader(res);
 	var {code} = req.params;
-	code = decrypt(code);
+	code = svrToDbText(code);
+	let myFire = await Firebase.findOne({token: code});
+	if (!myFire) {
+		myFire = new Firebase();
+		myFire.token = code;
+		myFire.uid = 0;
+		myFire.device = "WEB";
+		myFire.context = "";
+	}
+	myFire.enabled = true;
+	await myFire.save();
 	
   console.log("code is ", code);
   sendok(res, 'Done');
 }); 
+
+
+router.get('/firebase/sendtoall', async function (req, res,next)  {
+  setHeader(res);
+
+	
+	var notification = {
+		'title': 'From APL',
+		'text': 'Padmavati mata ki Jai'
+	}
+	
+	let allFire = await Firebase.find({});
+	let fcm_tokens = _.map(allFire, 'token');
+
+	fcm_tokens[0] = dbdecrypt(fcm_tokens[0]);
+	console.log(fcm_tokens);
+	
+	let notification_body = {
+		'notification': notification,
+		'registration_ids': fcm_tokens
+	}
+	
+	fetch('https://fcm.googleapis.com/fcm/send', {
+		'method': 'POST',
+		'headers': { 
+			'Authorization': 'key='+'AAAA7SGD30s:APA91bEZj9abtcNu7ME08rJxw6Rgdgi1rqQLdZtyw_ieVmNxq8ckSACdJSSSBalBwYqdiop3ynvYfFwDFgxfE0LFqy2NUUVVR0lZ1zUvD7vfg06LOZ-8XvFwQDE0XBdtZyEO6v73A8Rr',
+			'Content-Type': 'application/json'
+		},
+		'body': JSON.stringify(notification_body)
+	}).then(() => {
+		sendok(res, 'Done');
+	}).catch((err) => {
+		senderr(res, 601,'Cannot send');
+		console.log(err);
+	})
+
+});
 
 router.get('/support1', async function (req, res, next) {
   // AplRes = res;

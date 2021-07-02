@@ -173,14 +173,7 @@ function AppRouter() {
       return messaging.getToken()
     }).then(token=> {
       console.log('Token : ',token);
-			let xxx = encrypt(token);
-			axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/firebase/token/${xxx}`)
-			.then(response => {
-				console.log("sent token"); 
-			})
-			.catch(error => {
-					console.error('There was an error!', error);
-			});
+			localStorage.setItem("token", token);
 			console.log("Done");
     }).catch((err)=>{
       console.log(err); 

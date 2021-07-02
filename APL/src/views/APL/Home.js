@@ -18,7 +18,7 @@ import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import { UserContext } from "../../UserContext";
 import { DisplayPageHeader, BlankArea, JumpButton } from 'CustomComponents/CustomComponents.js';
-import { clearBackupData, hasGroup, upGradeRequired, downloadApk } from 'views/functions';
+import { encrypt, clearBackupData, hasGroup, upGradeRequired, downloadApk } from 'views/functions';
 import { red, blue, deepOrange } from '@material-ui/core/colors';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -215,11 +215,22 @@ export default function Home() {
           console.log(error);
         })        
       }
-
+			const sendToken = () => {
+				let xxx = encrypt(localStorage.getItem("token"));
+				axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/firebase/token/${xxx}`)
+				.then(response => {
+					console.log("sent token"); 
+				})
+				.catch(error => {
+						console.error('Token send error!', error);
+				});
+			}
+			
       if (hasGroup()) setDefaultGroup(localStorage.getItem("groupName"));
       getTournamentList();
       getGroups();
       checkVersion();
+			sendToken();
     }, [])
 
     function ShowResisterStatus() {

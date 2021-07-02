@@ -444,6 +444,14 @@ PaymentSchema = mongoose.Schema({
   fee: Number,
 });
 
+FirebaseSchema = mongoose.Schema({
+	token: String,
+	uid: Number,
+	device: String,
+	context: String,
+	enabled: Boolean
+});
+
 // table name will be <tournament Name>_brief r.g. IPL2020_brief
 BRIEFSUFFIX = "_brief";
 RUNNINGMATCH=1;
@@ -473,6 +481,7 @@ Apl = mongoose.model('aplinfo', AplSchema);
 Payment = mongoose.model('payment', PaymentSchema);
 UserKyc = mongoose.model('userkyc', UserKycSchema);
 Reference = mongoose.model('reference', ReferenceSchema);
+Firebase = mongoose.model('firebase', FirebaseSchema);
 
 nextMatchFetchTime = new Date();
 router = express.Router();
