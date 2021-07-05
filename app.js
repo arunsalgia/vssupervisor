@@ -15,7 +15,7 @@ const { akshuDelGroup, akshuUpdGroupMember,
 } = require('./routes/cricspecial'); 
 
 PRODUCTION=true;  
-WEB=true; 
+WEB=false; 
 PASSWORDLINKVALIDTIME=10			// Password link valid time in minutes
 
 
