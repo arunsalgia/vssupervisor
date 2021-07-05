@@ -268,10 +268,14 @@ router.get('/setmaster/:key/:value', async function (req, res, next) {
   sendok(res, "Done");
 }); 
 
+
+//var fcm_tokens = [""];
+
 router.get('/firebase/token/:code', async function (req, res, next) {
   setHeader(res);
 	var {code} = req.params;
 	code = decrypt(code);
+	//fcm_tokens[0] = code;			// FOR TESTING
 	let myFire = await Firebase.findOne({token: code});
 	if (!myFire) {
 		myFire = new Firebase();
@@ -290,24 +294,116 @@ router.get('/firebase/token/:code', async function (req, res, next) {
 
 router.get('/firebase/sendtoall', async function (req, res,next)  {
   setHeader(res);
-
 	
 	var notification = {
 		'title': 'From APL',
-		'text': 'Padmavati mata ki Jai'
+		'body': 'Create group using tournament IND-ENG WT20',
+		//'image': './APLLOGO2.JPG',
+		'icon': './APLLOGO1.ICO'
 	}
 	
 	let allFire = await Firebase.find({});
 	let fcm_tokens = _.map(allFire, 'token');
 
-	//fcm_tokens[0] = dbdecrypt(fcm_tokens[0]);
-	
 	console.log(fcm_tokens);
 	
 	let notification_body = {
 		'notification': notification,
 		'registration_ids': fcm_tokens
 	}
+	
+	fetch('https://fcm.googleapis.com/fcm/send', {
+		'method': 'POST',
+		'headers': { 
+			'Authorization': 'key='+'AAAA7SGD30s:APA91bEZj9abtcNu7ME08rJxw6Rgdgi1rqQLdZtyw_ieVmNxq8ckSACdJSSSBalBwYqdiop3ynvYfFwDFgxfE0LFqy2NUUVVR0lZ1zUvD7vfg06LOZ-8XvFwQDE0XBdtZyEO6v73A8Rr',
+			'Content-Type': 'application/json'
+		},
+		'body': JSON.stringify(notification_body)
+	}).then(() => {
+		sendok(res, 'Done');
+	}).catch((err) => {
+		senderr(res, 601,'Cannot send');
+		console.log(err);
+	})
+
+});
+
+
+router.get('/firebase/test1', async function (req, res,next)  {
+  setHeader(res);
+	let notification_body = {
+    "data":{
+        "url":"https://www.google.com"
+    },
+    "webpush":{
+        "data":{
+            "title":"yey"
+        },
+        "notification":{
+            "title":"Web Title",
+            "body":"Web Body",
+            "icon":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Stack_Overflow_logo.svg/250px-Stack_Overflow_logo.svg.png"
+        }
+    },
+    "notification":{
+			'title': 'APL InfoMania',
+			'body': 'Create group using tournament W-IND-ENG T20',
+			'icon': './APLLOGO1.ICO'
+    },
+    //"token": fcm_tokens[0]
+		'registration_ids': fcm_tokens
+	}
+
+	//data.token = fcm_tokens[0];
+	
+	//console.log(notification_body);
+	
+	fetch('https://fcm.googleapis.com/fcm/send', {
+		'method': 'POST',
+		'headers': { 
+			'Authorization': 'key='+'AAAA7SGD30s:APA91bEZj9abtcNu7ME08rJxw6Rgdgi1rqQLdZtyw_ieVmNxq8ckSACdJSSSBalBwYqdiop3ynvYfFwDFgxfE0LFqy2NUUVVR0lZ1zUvD7vfg06LOZ-8XvFwQDE0XBdtZyEO6v73A8Rr',
+			'Content-Type': 'application/json'
+		},
+		'body': JSON.stringify(notification_body)
+	}).then(() => {
+		sendok(res, 'Done');
+	}).catch((err) => {
+		senderr(res, 601,'Cannot send');
+		console.log(err);
+	})
+
+});
+
+
+
+router.get('/firebase/test2', async function (req, res,next)  {
+  setHeader(res);
+	let notification_body = {
+    "data":{
+        "url":"https://www.google.com"
+    },
+    "webpush":{
+        "data":{
+            "title":"yey"
+        },
+        "notification":{
+            "title":"Web Title",
+            "body":"Web Body",
+            "icon":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Stack_Overflow_logo.svg/250px-Stack_Overflow_logo.svg.png"
+        }
+    },
+    "notification":{
+			'title': 'APL InfoMania',
+			'body': `Your wallet has gone below 100. Recharge wallet and earn Bonus`,
+			'icon': './APLLOGO1.ICO'
+    },
+    //"token": fcm_tokens[0]
+		'registration_ids': fcm_tokens
+	}
+
+	//data.token = fcm_tokens[0];
+	
+	//console.log(notification_body);
 	
 	fetch('https://fcm.googleapis.com/fcm/send', {
 		'method': 'POST',

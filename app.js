@@ -13,11 +13,11 @@ app = express();
 const { akshuDelGroup, akshuUpdGroupMember,
   getMaster, setMaster, 
 } = require('./routes/cricspecial'); 
+
 PRODUCTION=true;  
 WEB=true; 
-
 PASSWORDLINKVALIDTIME=10			// Password link valid time in minutes
-PRIZEPORTION=1.0
+
 
 //
 if (PRODUCTION) {
@@ -649,13 +649,14 @@ process.on('SIGINT', function () {
 });
 
 // schedule task
-cron.schedule('*/15 * * * * *', () => {
-  // console.log('running every 15 second');
-  // console.log(`db_connection: ${db_connection}    connectREquest: ${connectRequest}`);
-  if (!connectRequest)
-    mongoose.connect(mongoose_conn_string, { useNewUrlParser: true, useUnifiedTopology: true });
-});
-
+if (WEB) {
+  cron.schedule('*/15 * * * * *', () => {
+    // console.log('running every 15 second');
+    // console.log(`db_connection: ${db_connection}    connectREquest: ${connectRequest}`);
+    if (!connectRequest)
+      mongoose.connect(mongoose_conn_string, { useNewUrlParser: true, useUnifiedTopology: true });
+  });
+}
 
 
 // start app to listen on specified port

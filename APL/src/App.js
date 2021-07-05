@@ -168,6 +168,7 @@ function AppRouter() {
   //   </Router>
   // );
 	
+  // get the FIREBASE token and save it. We will send it to server in Home page
 	const messaging = firebase.messaging()
     messaging.requestPermission().then(()=>{
       return messaging.getToken()
