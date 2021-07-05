@@ -7,6 +7,7 @@ import { UserContext } from "./UserContext";
 import "assets/css/material-dashboard-react.css?v=1.9.0";
 // import { DesktopWindows } from "@material-ui/icons";
 import { CricDreamTabs, setTab }from "CustomComponents/CricDreamTabs"
+import axios from "axios";
 import SignIn from "views/Login/SignIn.js";
 import SignUp from "views/Login/SignUp.js";
 import Welcome from "views/APL/Welcome";
@@ -16,8 +17,14 @@ import ForgotPassword from "views/Login/ForgotPassword.js";
 import IdleTimer from 'react-idle-timer'
 import { setIdle }from "views/functions.js"
 import Wallet from "views/Wallet/Wallet";
-// import Dummy from "views/APL/Dummy";
 import { PinDropSharp } from "@material-ui/icons";
+import firebase from './firebase'
+import { 
+isMobile, cdRefresh, specialSetPos, 
+encrypt, 
+clearBackupData, downloadApk 
+} from "views/functions.js"
+
 
 
 const hist = createBrowserHistory();
@@ -57,8 +64,10 @@ function isUserLogged() {
 function checkResetPasswordRequest() {
 	let resetLink = "";
 	let x = location.pathname.split("/");
+  console.log("Path is");
+  console.log(x);
 	if (x.length >= 4)
-	if (x[1] === "apl")
+	if (x[1] === "aplmaster")
 	if (x[2] === "resetpasswordconfirm") {
 		resetLink = x[3];
 	}
@@ -70,6 +79,8 @@ function AppRouter() {
   //let history={hist}
 	
   const [user, setUser] = useState(null);
+	const [fireToken, setFireToken] = useState("");
+	
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
   var idleTimer = null;
   
@@ -118,7 +129,7 @@ function AppRouter() {
       else if (sessionStorage.getItem("currentLogin") === "RESET")
         return (<ForgotPassword/>);
       else if (sessionStorage.getItem("currentLogin") === "SIGNIN")
-      return (<SignIn/>)
+        return (<SignIn/>)
       else {
 				let userId = checkResetPasswordRequest();
 				if (userId !== "") {
@@ -156,6 +167,19 @@ function AppRouter() {
   //     </UserContext.Provider>
   //   </Router>
   // );
+	
+  // get the FIREBASE token and save it. We will send it to server in Home page
+	const messaging = firebase.messaging()
+    messaging.requestPermission().then(()=>{
+      return messaging.getToken()
+    }).then(token=> {
+      console.log('Token : ',token);
+			localStorage.setItem("token", token);
+			console.log("Done");
+    }).catch((err)=>{
+      console.log(err); 
+	})
+
 
 
   return (

@@ -22,15 +22,25 @@ var request= require('request');
 // import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
 // import { red, deepOrange } from '@material-ui/core/colors';
 // var Insta = require('instamojo-nodejs');
-const INSTAMOJOSCRIPT = "https://js.instamojo.com/v1/checkout.js";
 const INSTALINK='https://test.instamojo.com/@arun_salgia/';
 
+const INSTAMOJOSCRIPT = "https://js.instamojo.com/v1/checkout.js";
+const RAZORSCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
+
+
+const PAYMENTGATEWAY="RAZOR";
 var paymentId = "";
 var paymentRequest = "";
 
-export default function AddWallet() {
-  useScript(INSTAMOJOSCRIPT);
 
+export default function AddWallet() {
+	const aplLogo = `${process.env.PUBLIC_URL}/APLLOGO2.JPG`;
+	if (PAYMENTGATEWAY === "RAZOR")
+		useScript(RAZORSCRIPT);
+	else
+		useScript(INSTAMOJOSCRIPT);
+	
+	
   // const history = useHistory();
   // const classes = useStyles();
   const gClasses = globalStyles();
@@ -110,9 +120,9 @@ export default function AddWallet() {
     let myURL;
 
     if (paymentId !== "") {
-      myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/paymentok/${paymentRequest}/${paymentId}`;
+      myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/instapaymentok/${paymentRequest}/${paymentId}`;
     } else {
-      myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/paymentfail/${paymentRequest}`;
+      myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/instapaymentfail/${paymentRequest}`;
     }
 
     try {
@@ -134,7 +144,7 @@ export default function AddWallet() {
     paymentId = response.paymentId;
   }
 
-   function onPaymentFailureHandler (response) {
+	function onPaymentFailureHandler (response) {
      //alert('Payment Failure');
      console.log('Failed-----------------', response);
      //setPaymentId("");
@@ -142,13 +152,21 @@ export default function AddWallet() {
      console.log(paymentRequest);
    }
 
-  // const handleChangePage = (event, newPage) => {
-  //   event.preventDefault();
-  //   setPage(newPage);
-  //   let myempty = rowsPerPage - Math.min(rowsPerPage, transactions.length - newPage * rowsPerPage);
-  //   setEmptyRows(myempty);
-
-  // };
+	async function handleRazor(response) {
+		// AFTER RAZOR TRANSACTION IS COMPLETE and SUCCESSFULL YOU WILL GET THE RESPONSE HERE.
+		console.log(response);
+		let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/razorpaymentok/${localStorage.getItem("uid")}/${amount}/${response.razorpay_payment_id}`;
+    
+    try {
+			console.log(myURL);
+      await axios.get(myURL);
+			setTab(process.env.REACT_APP_WALLET);
+    } catch (e) {
+      console.log(e);
+      setRegisterStatus(1002);
+    }
+	}
+  
 
   
   function ShowResisterStatus() {
@@ -180,27 +198,6 @@ export default function AddWallet() {
     );
   }
  
-    
-  async function OrghandleSubmit() {
-    setRegisterStatus(0);
-    let sts;
-
-    sts = await validate("amount")
-		if (sts) return;
-
-    try {
-      var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/generatepaymentrequest/${localStorage.getItem("uid")}/${amount}`);
-      //let myrequestid = response.data;
-      let resp = await window.open(`${process.env.REACT_APP_GATEWAYURL}/${response.data}`, '_parent');
-      console.log("Done");
-      //setTab(process.env.REACT_APP_WALLET);
-    } catch (e) {
-      setRegisterStatus(1001);
-      console.log(e);
-      console.log("Error calling wallet");
-    }
-  }
-
   async function handleSubmit() {
     setRegisterStatus(0);
     let sts;
@@ -212,21 +209,31 @@ export default function AddWallet() {
     paymentId = "";
 
     try {
-      var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/generatepaymentrequest/${localStorage.getItem("uid")}/${amount}`);
-      //setPaymentRequest(response.data);
-      paymentRequest = response.data;
-      //let myrequestid = response.data;
-      //let resp = await window.open(`${process.env.REACT_APP_GATEWAYURL}/${response.data}`, '_parent');
-      Instamojo.configure({
-        handlers: {
-          onOpen: onOpenHandler,
-          onClose: onCloseHandler,
-          onSuccess: onPaymentSuccessHandler,
-          onFailure: onPaymentFailureHandler
-        }
-      });
-      Instamojo.open(INSTALINK + response.data);
-      //setTab(process.env.REACT_APP_WALLET);
+			if (PAYMENTGATEWAY !== "RAZOR") {
+				var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/instageneratepaymentrequest/${localStorage.getItem("uid")}/${amount}`);
+				//setPaymentRequest(response.data);
+				paymentRequest = response.data;
+				//let myrequestid = response.data;
+				//let resp = await window.open(`${process.env.REACT_APP_GATEWAYURL}/${response.data}`, '_parent');
+				Instamojo.configure({
+					handlers: {
+						onOpen: onOpenHandler,
+						onClose: onCloseHandler,
+						onSuccess: onPaymentSuccessHandler,
+						onFailure: onPaymentFailureHandler
+					}
+				});
+				Instamojo.open(INSTALINK + response.data);
+				//setTab(process.env.REACT_APP_WALLET);
+			} 
+			else {
+				var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/razorgeneratepaymentrequest/${localStorage.getItem("uid")}/${amount}`);
+				let myOptions = response.data;
+				myOptions.handler = handleRazor;
+				myOptions.image = aplLogo;					    // COMPANY LOGO
+				var rzp1 = new window.Razorpay(myOptions, '_parent');
+				rzp1.open();
+			}
     } catch (e) {
       setRegisterStatus(1001);
       console.log(e);

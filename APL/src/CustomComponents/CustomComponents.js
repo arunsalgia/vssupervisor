@@ -26,12 +26,13 @@ import {red, blue, green, deepOrange, yellow} from '@material-ui/core/colors';
 import {
   validateSpecialCharacters, validateEmail, validateMobile, validateInteger, validateUpi,
   encrypt, decrypt, 
-  currentAPLVersion, latestAPLVersion
+  currentAPLVersion, latestAPLVersion,
+	getImageName,
 } from "views/functions.js";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import Divider from "@material-ui/core/Divider";
 import CancelIcon from '@material-ui/icons/Cancel';
-
+import globalStyles from "assets/globalStyles";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -522,3 +523,36 @@ return(
   </IconButton>
   </div>
 )}
+
+export function ShowTeamImage(props) {
+	let myTeam = getImageName(props.teamName);
+	return(
+	<Avatar variant="square" src={myTeam} />    
+	)
+} 
+
+export function DisplayMyPlayers(props) {
+const gClasses = globalStyles();
+return(
+  <Table>
+		<TableHead p={0}>
+			<TableRow key="header" align="center">
+			<TableCell className={gClasses.th} p={0} align="center">Team</TableCell>
+			<TableCell className={gClasses.th} p={0} align="center">Player Name</TableCell>
+			<TableCell className={gClasses.th} p={0} align="center">Bid Amount</TableCell>      
+			</TableRow>
+		</TableHead>
+		<TableBody p={0}>
+			{props.players.map(item => {
+			return (
+				<TableRow key={item.playerName}>
+				<TableCell className={gClasses.td} p={0} align="center" ><ShowTeamImage teamName={item.team} /></TableCell> 
+				{/* <TableCell className={gClasses.td} p={0} align="center" >{item.team}</TableCell>*/}
+				<TableCell className={gClasses.td} p={0} align="center" >{item.playerName}</TableCell>
+				<TableCell className={gClasses.td} p={0} align="center" >{item.bidAmount}</TableCell>
+				</TableRow>
+			)})}
+		</TableBody> 
+	</Table>
+)}
+

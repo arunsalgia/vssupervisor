@@ -1,59 +1,82 @@
-// const { all } = require(".");
-
 var router = express.Router();
-let TournamentRes;
+// let TournamentRes;
 
 /* GET users listing. */
 router.use('/', function(req, res, next) {
-  TournamentRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
 
   if (req.url == '/') 
-    publishTournament({});
+    publishTournament(res, {});
   else
     next('route');
+}); 
+
+router.use('/info/:tournamentName', function(req, res, next) {
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
+
+  var {tournamentName} = req.params;
+  tournamentName = tournamentName.toUpperCase();
+  publishTournament(res, {name: tournamentName});
+});
+
+router.get('/allfilter/:partTournamentName', async function(req, res, next) {
+  // TournamentRes = res;
+  setHeader(res);
+  
+  let {partTournamentName}=req.params;
+  partTournamentName = partTournamentName.toUpperCase();
+  let plist = await Tournament.find({} );
+  //console.log(plist);
+  if (partTournamentName !== "ALL") {
+	plist = plist.filter(x => x.name.toUpperCase().includes(partTournamentName));
+  }
+  plist = _.sortBy(plist, 'name');
+  sendok(res, plist)
 });
 
 router.get(`/list/running`, function(req, res, next) {
-  TournamentRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
-  publishTournament({over: false});
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
+  publishTournament(res, {enabled: true, over: false});
 });
 
 router.get(`/list/notstarted`, function(req, res, next) {
-  TournamentRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
-  publishTournament({started: false});
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
+  publishTournament(res, {enabled: true, started: false});
 });
 
 router.get(`/list/over`, function(req, res, next) {
-  TournamentRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
-  publishTournament({over: true});
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
+  publishTournament(res, {enabled: true, over: true});
 });
 
 router.get(`/list/enabled`, function(req, res, next) {
-  TournamentRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
-  publishTournament({enabled: true});
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
+  publishTournament(res, {enabled: true});
 });
 
 router.get(`/list/disabled`, function(req, res, next) {
-  TournamentRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
-  publishTournament({enabled: false});
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
+  publishTournament(res, {enabled: false});
 });
 
 router.get(`/statusupdate/:tournamentName`, async function(req, res, next) {
-  TournamentRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
   var {tournamentName} = req.params;
 
   /* 
@@ -83,20 +106,20 @@ router.get(`/statusupdate/:tournamentName`, async function(req, res, next) {
     }
     // console.log(tournamentRec);
     tournamentRec.save();
-    sendok("OK");
+    sendok(res, "OK");
   } else
-    senderr(741, `Invalid tournament name ${tournamentName}`);
+    senderr(res, 741, `Invalid tournament name ${tournamentName}`);
 });
 
 router.get('/add/:tournamentName/:tournamentDesc/:tournamentType', async function(req, res, next) {
-    TournamentRes = res;
-    setHeader();
-    if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
+    // TournamentRes = res;
+    setHeader(res);
+    if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
 
     var {tournamentName, tournamentDesc, tournamentType} = req.params;
     tournamentType = tournamentType.toUpperCase();
     if (!["TEST", "ODI", "T20"].includes(tournamentType)) {
-      senderr(743, `Invalid tournament type ${tournamentType}. Has be be either TEST, ODI or T20`);
+      senderr(res, 743, `Invalid tournament type ${tournamentType}. Has be be either TEST, ODI or T20`);
       return;
     }
     tournamentName = tournamentName.toUpperCase();
@@ -106,40 +129,69 @@ router.get('/add/:tournamentName/:tournamentDesc/:tournamentType', async functio
         myrec.name = tournamentName;
         myrec.desc = tournamentDesc;
         myrec.type = tournamentType;
+		myrec.started = false;
         myrec.over = false;
+		myrec.enabled = true;
         myrec.save();
-        sendok(`Successfully created tournament ${tournamentName}`);
+        sendok(res, `Successfully created tournament ${tournamentName}`);
     } else
-        senderr(742,`Tournament ${tournamentName} already exists`);
+        senderr(res, 742,`Tournament ${tournamentName} already exists`);
+});
+
+
+router.get('/update/:tournamentName/:tournamentDesc/:tournamentType', async function(req, res, next) {
+    // TournamentRes = res;
+    setHeader(res);
+    if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
+
+    var {tournamentName, tournamentDesc, tournamentType} = req.params;
+    tournamentType = tournamentType.toUpperCase();
+    if (!["TEST", "ODI", "T20"].includes(tournamentType)) {
+      senderr(res, 743, `Invalid tournament type ${tournamentType}. Has be be either TEST, ODI or T20`);
+      return;
+    }
+    tournamentName = tournamentName.toUpperCase();
+    var myrec = await Tournament.findOne({name: tournamentName});
+    if (!myrec) {
+        myrec = new Tournament();
+        myrec.name = tournamentName;
+		myrec.started = false;
+        myrec.over = false;
+		myrec.enabled = true;
+    } 
+	myrec.desc = tournamentDesc;
+	myrec.type = tournamentType;
+	myrec.save();
+	sendok(res, `Successfully updated tournament ${tournamentName}`);
 });
 
 
 router.use('/start/:tournamentName', function(req, res, next) {
-    TournamentRes = res;
-    setHeader();
-    if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
+    // TournamentRes = res;
+    setHeader(res);
+    if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
 
     var {tournamentName} = req.params;
     sendTournamentStatus(tournamentName, false);
 });
 
 router.use('/end/:tournamentName', function(req, res, next) {
-    TournamentRes = res;
-    setHeader();
-    if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
+    // TournamentRes = res;
+    setHeader(res);
+    if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
 
     var {tournamentName} = req.params;
     sendTournamentStatus(tournamentName, true);
 });
 
 router.use('/team/:tournamentName', function(req, res, next) {
-    TournamentRes = res;
-    setHeader();
-    if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
+    // TournamentRes = res;
+    setHeader(res);
+    if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
 
     var {tournamentName} = req.params;
     tournamentName = tournamentName.toUpperCase();
-    publish_teams({tournament: tournamentName});
+    publish_teams(res, {tournament: tournamentName});
 });
 
 async function getMatchDetails(tournamentName) {
@@ -154,10 +206,10 @@ async function getMatchDetails(tournamentName) {
 }
 
 
-router.use('/tournament', async function(req, res, next) {
-  TournamentRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
+router.get('/tournament', async function(req, res, next) {
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
   
   let startTime = new Date();
   startTime.setDate(startTime.getDate()-90);
@@ -190,7 +242,20 @@ router.use('/tournament', async function(req, res, next) {
     }
   }
   matchesOfTournament = _.sortBy(matchesOfTournament, 'startTime');
-  sendok(matchesOfTournament);
+  sendok(res, matchesOfTournament);
+});
+
+router.get('/arun/:tournamentName', async function(req, res, next) {
+  // TournamentRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
+
+  var {tournamentName} = req.params;
+
+  let myTournament = await Tournament.findOne({name: tournamentName})
+  if (!myTournament) { senderr(res, 601, "Invalid tournament"); return; };
+  checkTournamentOver(tournamentName);
+  sendok(res, "Checking done");
 });
 
 async function sendTournamentStatus(tname, started)
@@ -198,7 +263,7 @@ async function sendTournamentStatus(tname, started)
     tname = tname.toUpperCase();
     var mytournament = await Tournament.findOne({name: tname});
     if (!mytournament) {
-        senderr(741, `Invalid tournament name ${tname}`);
+        senderr(res, 741, `Invalid tournament name ${tname}`);
         return;
     }
     mytournament.over = started;
@@ -206,28 +271,29 @@ async function sendTournamentStatus(tname, started)
     var retsts;
     if (!started)   retsts = `Tournament ${tname} is going on`;
     else            retsts = `Tournament ${tname} has ended`;
-    sendok(retsts);
+    sendok(res, retsts);
 }
 
-async function publishTournament(filter_tournament)
+async function publishTournament(res, filter_tournament)
 {
   var tlist = await Tournament.find(filter_tournament);
   // tlist = _.map(tlist, o => _.pick(o, ['name', 'desc', 'type', 'over']));
-  sendok(tlist);
+  tlist = _.sortBy(tlist, 'name');
+  sendok(res, tlist);
 }
 
 
-async function publish_teams(filter_teams)
+async function publish_teams(res, filter_teams)
 {
   var tlist = await Team.find(filter_teams);
   tlist = _.map(tlist, o => _.pick(o, ['name', 'fullname', 'tournament']));
-  sendok(tlist);
+  sendok(res, tlist);
 }
 
-function sendok(usrmsg) { TournamentRes.send(usrmsg); }
-function senderr(errcode, errmsg) { TournamentRes.status(errcode).send(errmsg); }
-function setHeader() {
-  TournamentRes.header("Access-Control-Allow-Origin", "*");
-  TournamentRes.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+function sendok(res, usrmsg) { res.send(usrmsg); }
+function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
+function setHeader(res) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 }
 module.exports = router;
