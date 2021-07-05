@@ -340,7 +340,7 @@ export async function latestAPLVersion()  {
 export async function upGradeRequired() {
   let upGrade = false;
   let upGradeRecord;
-  if (process.env.REACT_APP_DEVICE === "MOBILE") {
+  if (process.env.REACT_APP_DEVICE === "APK") {
     let myName = process.env.REACT_APP_NAME;
     let myVersion = process.env.REACT_APP_VERSION;
     let myURL = `${process.env.REACT_APP_APLAXIOS}/apl/confirmlatest/${myName}/APK/${myVersion}`;
@@ -351,7 +351,10 @@ export async function upGradeRequired() {
     upGradeRecord = response.data.latest;
     upGradeRecord.text = internalToText(upGradeRecord.text);
     // console.log(upGradeRecord);
-  }
+  } else if (process.env.REACT_APP_DEVICE === "IOS") {
+		console.log("IOS currently not supported");
+	}
+	
   console.log(`upgrade required: ${upGrade}`);
   return ({status: upGrade, latest: upGradeRecord});
 }

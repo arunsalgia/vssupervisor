@@ -18,7 +18,7 @@ import IdleTimer from 'react-idle-timer'
 import { setIdle }from "views/functions.js"
 import Wallet from "views/Wallet/Wallet";
 import { PinDropSharp } from "@material-ui/icons";
-import firebase from './firebase'
+//import firebase from './firebase'
 import { 
 isMobile, cdRefresh, specialSetPos, 
 encrypt, 
@@ -168,8 +168,9 @@ function AppRouter() {
   //   </Router>
   // );
 	
+if (process.env.REACT_APP_DEVICE === "WEB") {
   // get the FIREBASE token and save it. We will send it to server in Home page
-	const messaging = firebase.messaging()
+	const messaging = firebase.messaging();
     messaging.requestPermission().then(()=>{
       return messaging.getToken()
     }).then(token=> {
@@ -180,6 +181,16 @@ function AppRouter() {
       console.log(err); 
 	})
 
+	messaging.onMessage((payload) => {
+		console.log('Message received. ', payload);
+		// ...
+	});
+
+
+	messaging.onBackgroundMessage(function(payload){
+		console.log("onBackgroundMessage:",payload);
+	});
+}
 
 
   return (

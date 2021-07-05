@@ -269,7 +269,8 @@ router.get('/setmaster/:key/:value', async function (req, res, next) {
 }); 
 
 
-//var fcm_tokens = [""];
+var fcm_tokens = ["dA9LCvstMrLTDdi62lCJ_k:APA91bHfPMDFRXGi4TardAslpZYkVs4ooH9A7WcMBVHadDAFTdVNmVWK0ZP2ThgpUT9bfRnyb1rJNqHrrbCvyOM7fQuA7vU3x1HcX28ZLNhr8ZXeB5ybK4ZwJflx4NxSR4FPAwoA-e9v"];
+// ch4SSa25V8zMo9tMo8v8Zh:APA91bF-DNQHmlH6Fs5F3wu9SePfPJklnREnccK5YPE0bXtsSWfZYpFUCM3Z50mCtWkBOd1PW_WiSq7hmgVK1SrqMVjYXNl1wI1wOnAUufPEdMI6UltOWdPMK9xQaNpgP_4Q24q5x1kK
 
 router.get('/firebase/token/:code', async function (req, res, next) {
   setHeader(res);
@@ -296,14 +297,14 @@ router.get('/firebase/sendtoall', async function (req, res,next)  {
   setHeader(res);
 	
 	var notification = {
+		'icon': './APLLOGO1.ICO',
 		'title': 'From APL',
 		'body': 'Create group using tournament IND-ENG WT20',
-		//'image': './APLLOGO2.JPG',
-		'icon': './APLLOGO1.ICO'
+		//'image': './APLLOGO2.JPG'
 	}
 	
-	let allFire = await Firebase.find({});
-	let fcm_tokens = _.map(allFire, 'token');
+	//let allFire = await Firebase.find({});
+	// fcm_tokens = _.map(allFire, 'token');
 
 	console.log(fcm_tokens);
 	
@@ -331,32 +332,28 @@ router.get('/firebase/sendtoall', async function (req, res,next)  {
 
 router.get('/firebase/test1', async function (req, res,next)  {
   setHeader(res);
-	let notification_body = {
-    "data":{
-        "url":"https://www.google.com"
-    },
-    "webpush":{
-        "data":{
-            "title":"yey"
-        },
-        "notification":{
-            "title":"Web Title",
-            "body":"Web Body",
-            "icon":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Stack_Overflow_logo.svg/250px-Stack_Overflow_logo.svg.png"
-        }
-    },
-    "notification":{
-			'title': 'APL InfoMania',
-			'body': 'Create group using tournament W-IND-ENG T20',
-			'icon': './APLLOGO1.ICO'
-    },
-    //"token": fcm_tokens[0]
-		'registration_ids': fcm_tokens
-	}
-
-	//data.token = fcm_tokens[0];
 	
-	//console.log(notification_body);
+	var notification = {
+		"title" : "APL InfoMania",
+		"body" : "Create new group using tournament IND-ENG-WT20",
+		"icon" : "./APLLOGO1.ICO",
+		"image": "./APLLOGO2.JPG",
+		"sound": "./CLICK.MP3",
+	}
+	
+	
+	let allFire = await Firebase.find({});
+	//let fcm_tokens = _.map(allFire, 'token');
+
+	//console.log(fcm_tokens);
+	
+	
+	let notification_body = {
+		notification: notification,
+		//'registration_ids': fcm_tokens
+		to: "dA9LCvstMrLTDdi62lCJ_k:APA91bHfPMDFRXGi4TardAslpZYkVs4ooH9A7WcMBVHadDAFTdVNmVWK0ZP2ThgpUT9bfRnyb1rJNqHrrbCvyOM7fQuA7vU3x1HcX28ZLNhr8ZXeB5ybK4ZwJflx4NxSR4FPAwoA-e9v"
+	}
+	
 	
 	fetch('https://fcm.googleapis.com/fcm/send', {
 		'method': 'POST',
@@ -378,32 +375,29 @@ router.get('/firebase/test1', async function (req, res,next)  {
 
 router.get('/firebase/test2', async function (req, res,next)  {
   setHeader(res);
-	let notification_body = {
-    "data":{
-        "url":"https://www.google.com"
-    },
-    "webpush":{
-        "data":{
-            "title":"yey"
-        },
-        "notification":{
-            "title":"Web Title",
-            "body":"Web Body",
-            "icon":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Stack_Overflow_logo.svg/250px-Stack_Overflow_logo.svg.png"
-        }
-    },
-    "notification":{
-			'title': 'APL InfoMania',
-			'body': `Your wallet has gone below 100. Recharge wallet and earn Bonus`,
-			'icon': './APLLOGO1.ICO'
-    },
-    //"token": fcm_tokens[0]
-		'registration_ids': fcm_tokens
-	}
-
-	//data.token = fcm_tokens[0];
 	
-	//console.log(notification_body);
+	var data = {
+		"title" : "APL InfoMania",
+		"body" : "Create new group using tournament IND-ENG-WT20",
+		"icon" : "./APLLOGO1.ICO",
+		"image": "./APLLOGO2.JPG",
+		//"sound": "./CLICK.MP3",
+		"clickUrl": "https://google.com"
+	}
+	
+	
+	let allFire = await Firebase.find({});
+	//let fcm_tokens = _.map(allFire, 'token');
+
+	//console.log(fcm_tokens);
+	
+	
+	let notification_body = {
+		to: "dA9LCvstMrLTDdi62lCJ_k:APA91bHfPMDFRXGi4TardAslpZYkVs4ooH9A7WcMBVHadDAFTdVNmVWK0ZP2ThgpUT9bfRnyb1rJNqHrrbCvyOM7fQuA7vU3x1HcX28ZLNhr8ZXeB5ybK4ZwJflx4NxSR4FPAwoA-e9v",
+		//'registration_ids': fcm_tokens,
+		data: data,
+	}
+	
 	
 	fetch('https://fcm.googleapis.com/fcm/send', {
 		'method': 'POST',

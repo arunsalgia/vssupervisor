@@ -108,6 +108,14 @@ const useStyles = makeStyles((theme) => ({
         alignItems: 'center',
         marginTop: '0px',
     },
+		nonerror:  {
+			// right: 0,
+			fontSize: '12px',
+			color: blue[700],
+			alignItems: 'center',
+			marginTop: '0px',
+			fontWeight: theme.typography.fontWeightBold,
+    },
     updatemsg:  {
         // right: 0,
         fontSize: '12px',
@@ -146,6 +154,7 @@ export default function Home() {
     const [currentGroup, setCurrentGroup] = useState(0);
 
     const [startDownload, setStartDownload] = useState(false);
+		const [downloadMessage, setDownloadMessage] = useState("");
     const [firstTime, setFirstTime] = useState(true);
 
     useEffect(() => {
@@ -216,14 +225,16 @@ export default function Home() {
         })        
       }
 			const sendToken = () => {
-				let xxx = encrypt(localStorage.getItem("token"));
-				axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/firebase/token/${xxx}`)
-				.then(response => {
-					console.log("sent token"); 
-				})
-				.catch(error => {
-						console.error('Token send error!', error);
-				});
+				if (localStorage.getItem("token")) {
+					let xxx = encrypt(localStorage.getItem("token"));
+					axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/firebase/token/${xxx}`)
+					.then(response => {
+						console.log("sent token"); 
+					})
+					.catch(error => {
+							console.error('Token send error!', error);
+					});
+				}
 			}
 			
       if (hasGroup()) setDefaultGroup(localStorage.getItem("groupName"));
@@ -542,10 +553,13 @@ export default function Home() {
   
     async function handleUpgrade() {
       //console.log("upgrade requested");
+			setDownloadMessage("APK download started. Please wait...");
       setStartDownload(true);
       closeModal();
       await downloadApk();
       console.log("APK has to be downloaded");
+			setDownloadMessage("APK download complete");
+			setTimeout(() => setDownloadMessage(""), 5000);   
     }
   
     function openModal() { setIsOpen(true); }
@@ -596,6 +610,7 @@ export default function Home() {
    
     return (
     <div className={classes.root} key="uctournament" align="center">
+			<Typography className={classes.nonerror}>{downloadMessage}</Typography>
       <BlankArea/>
       <DisplayPageHeader headerName="Upcoming Tournament" groupName="" tournament=""/>
       {/* <BlankArea/> */}
