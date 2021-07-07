@@ -34,6 +34,7 @@ import { cricTeamName } from 'views/functions';
 // const rPrefix = "radio-";
 const specialChars = /[!@#$%^&*()+\=\[\]{};':"\\|<>\/?]+/;
 
+const playerRoles = ["Batsman", "Bowler", "AllRounder", "Wk"];
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -140,10 +141,10 @@ export default function SU_Player() {
         myMsg = 'Team name cannot be blank';
         break;
       case 2005:
-        myMsg = 'DUplicate Team name';
+        myMsg = 'Duplicate Team name';
         break;
       case 2006:
-        myMsg = 'DUplicate Tournamenet name';
+        myMsg = 'Duplicate Tournamenet name';
         break;
       case 2007:
         myMsg = 'Error updating team name';
@@ -181,6 +182,9 @@ export default function SU_Player() {
         break;
       case 9006:
         myMsg = 'Special characters found in player details';
+        break;
+      case 9007:
+        myMsg = 'Invalid role';
         break;
       case 0:
         myMsg = ``;
@@ -338,6 +342,10 @@ export default function SU_Player() {
       }
       if(specialChars.test(playerList[i].role)){
         setRegisterStatus(9006);
+        return;
+      }
+      if(!playerRoles.includes(playerList[i].role)){
+        setRegisterStatus(9007);
         return;
       }
       if(specialChars.test(playerList[i].battingStyle)){
@@ -502,7 +510,8 @@ export default function SU_Player() {
         label="Bowling Style"
         id={bowlLabel} margin="none" 
         defaultValue={props.myPlayer.bowlingStyle}  
-      />        
+      /> 
+			<ShowResisterStatus/>			
       <BlankArea/>
       <Grid container justify="center" alignItems="center" >
         <GridItem xs={6} sm={6} md={6} lg={6} >
@@ -538,6 +547,11 @@ export default function SU_Player() {
     let tRole = document.getElementById("ROLE_"+label).value.trim();
     if(specialChars.test(tRole)){
       setRegisterStatus(9006);
+      return;
+    }
+		// check if player role is correct
+		if(!playerRoles.includes(tRole)){
+      setRegisterStatus(9007);
       return;
     }
     let tBat = document.getElementById("BAT_"+label).value.trim();
@@ -585,7 +599,7 @@ export default function SU_Player() {
   }
 
   var newPlayerData = {label: "", pid: 0, name: "", fullName: "", Team: "",  tournament: "",
-    role: "NA", bowlingStyle:  "NA", battingStyle: "NA" 
+    role: "Batsman", bowlingStyle:  "NA", battingStyle: "NA" 
   };
 
 
@@ -609,11 +623,11 @@ export default function SU_Player() {
   /// 1) Get tournament, Team and fetch players
   /// 2) Display Player list
   return (
-  <div className={classes.paper} align="center" key="groupinfo">
+  <div className={classes.paper} align="center" key={newPlayerData.name}>
       <DisplayPageHeader headerName="Configure New Player" groupName="" tournament=""/>
       <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <ValidatorForm className={classes.form}>  
+      <ValidatorForm key={newPlayerData.name} onSubmit={handleSubmit} className={classes.form}>  
       {/* onSubmit={handleSubmit}> */}
       <BlankArea/>
       <Select labelId='tname' id='tname'
@@ -668,7 +682,6 @@ export default function SU_Player() {
       <ShowResisterStatus/>
       <BlankArea/>
       <Button type="submit" key={"create"} variant="contained" color="primary" 
-          onClick={() => { handleSubmit() }}
           className={classes.button}>Submit
       </Button>
       </ValidatorForm>

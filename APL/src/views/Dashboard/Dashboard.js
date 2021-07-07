@@ -200,6 +200,7 @@ export default function Dashboard() {
   const [teamArray, setTeamArray] = useState([]);
   const [currentGuide, setCurrentGuide] = useState({guideNumber: 0});
   const [maxGuide, setMaxGuide] = useState(0);
+	const [tournamentOver, setTournamentOver] = useState(false);
   const classes = useStyles();
   const dashClasses = useDashStyles();
 
@@ -220,7 +221,7 @@ export default function Dashboard() {
     if (localStorage.getItem("saveRank"))
       setRank(JSON.parse(localStorage.getItem("saveRank")));
 
-	if (localStorage.getItem("savePrize"))
+		if (localStorage.getItem("savePrize"))
       setPrize(JSON.parse(localStorage.getItem("savePrize")));
   
     if (localStorage.getItem("saveScore"))
@@ -258,9 +259,18 @@ export default function Dashboard() {
       sockConn.on("rank", (rank) => {
         // console.log(new Date());
         // console.log(localStorage.getItem("uid"))
-        const allRank = rank.filter(x => x.gid === parseInt(localStorage.getItem("gid")));
-        const userDetails = allRank.filter(x => x.uid === parseInt(localStorage.getItem("uid")));
-        //console.log(allRank);
+				//console.log("Rank from server");
+				//console.log(rank);
+				// array = [{"adults":2,"children":3},{"adults":2,"children":1}];
+				// var totalChild = this.array.reduce((accum,item) => accum + item.children, 0)
+				var totprize = rank.reduce((accum, item) => accum + item.prize, 0)
+				//console.log(totprize);
+				setTournamentOver(totprize > 0);
+				// console.log(totprize > 0);
+				
+        const allRank = rank.filter(x => x.gid == localStorage.getItem("gid"));
+        const userDetails = allRank.filter(x => x.uid == localStorage.getItem("uid"));
+        // console.log(allRank);
 
         if (userDetails.length > 0) {
           // if details of current user found (current user is a member of group 1)
@@ -319,7 +329,7 @@ export default function Dashboard() {
           setTeamArray(gStat)
           localStorage.setItem("statData", JSON.stringify(gStat));
           if (first) {
-            console.log(gStat);
+            //console.log(gStat);
             first = false;
           }
         }
@@ -444,7 +454,7 @@ export default function Dashboard() {
               <div className={classes.stats}>
                 <GroupIcon />
                 <a href="#pablo" onClick={e => e.preventDefault()}>
-                  {localStorage.getItem("groupName")}
+                  {localStorage.getItem("groupName") + ((tournamentOver) ? " (Tournament Over)" : "")}
                 </a>
               </div>
             </CardFooter>

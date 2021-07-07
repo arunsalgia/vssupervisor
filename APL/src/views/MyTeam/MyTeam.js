@@ -119,22 +119,26 @@ export default function MyTeam() {
 
 	function ShowPlayers(props) {
 		let myPlayers = teamArray[0].players.filter(x => x.role === props.role);
-		let pText = '';
+		let pText = "";		//myPlayers.length + " Player" + ((myPlayers.length > 1) ? "s" : "");
 		switch (myPlayers.length) {
 			case 0: pText = 'No Players'; break;
-			case 1: pText = '1 player'; break;
-			default: pText = myPlayers.length + ' players';
+			case 1: pText = '1 Player'; break;
+			default: pText = myPlayers.length + ' Players';
 		}
-		return (
-		<Accordion key={props.role} expanded={expandedPanel === props.role} onChange={handleAccordionChange(props.role)}>
-		<AccordionSummary key={props.role} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-		<Typography className={classes.heading}>{props.role} ( {pText} )</Typography>
-		</AccordionSummary>
-		<AccordionDetails>
-		<DisplayMyPlayers players={myPlayers} />
-		</AccordionDetails>
-		</Accordion>
-	)}
+		if (true) //(myPlayers.length > 0)
+			return (
+			<Accordion key={props.role} expanded={expandedPanel === props.role} onChange={handleAccordionChange(props.role)}>
+			<AccordionSummary key={props.role} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+			<Typography className={classes.heading}>{props.desc} ( {pText} )</Typography>
+			</AccordionSummary>
+			<AccordionDetails>
+			<DisplayMyPlayers players={myPlayers} />
+			</AccordionDetails>
+			</Accordion>
+			)
+		else
+			return null;
+	}
 	
 
   if (hasGroup())
@@ -143,10 +147,10 @@ export default function MyTeam() {
       <div>
         <DisplayPageHeader headerName="My Team" groupName={localStorage.getItem("groupName")} tournament={localStorage.getItem("tournament")}/>
 				<BlankArea />
-        <ShowPlayers role="Batsman" />
-				<ShowPlayers role="Bowler" />
-				<ShowPlayers role="AllRounder" />
-				<ShowPlayers role="Wk" />
+        <ShowPlayers role="Batsman" desc="Batsman"/>
+				<ShowPlayers role="Bowler"  desc="Bowler" />
+				<ShowPlayers role="AllRounder" desc="All Rounder" />
+				<ShowPlayers role="Wk" desc="Wicket Keeper"/>
         <Divider />
         <ShowJumpButtons />
         <BlankArea />

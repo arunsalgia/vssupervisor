@@ -1,4 +1,4 @@
-if (process.env.REACT_APP_DEVICE === "WEB") {
+if (true) {
 importScripts('https://www.gstatic.com/firebasejs/3.5.0/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/3.5.0/firebase-messaging.js');
 
@@ -18,8 +18,7 @@ firebase.initializeApp({
 
 const initMessaging = firebase.messaging()
 
-messaging.usePublicVapidKey("BMh2i6ChRLOt1ZgI3mRdBF8yLJ_VmR9oYIbwAs9s7-6dPjxQXPss75gXaVG29ixLgGGv19EUEJrxgy9VU69l0LU");
-
+/*
 messaging.getToken().then((currentToken) => {
 	if (currentToken) {
 				console.log('currentToken', currentToken);
@@ -30,7 +29,14 @@ messaging.getToken().then((currentToken) => {
 }).catch((err) => {
 		console.log('An error occurred while retrieving token. ', err);
 });
-		
+*/
+
+	
+/*
+messaging.usePublicVapidKey("BMh2i6ChRLOt1ZgI3mRdBF8yLJ_VmR9oYIbwAs9s7-6dPjxQXPss75gXaVG29ixLgGGv19EUEJrxgy9VU69l0LU");
+
+
+	
 messaging.onMessage((payload) => {
 	console.log('Message received. ', payload);
 	alert('Message received. ');
@@ -39,10 +45,13 @@ messaging.onMessage((payload) => {
 		// ...
 });
 
+
 messaging.onBackgroundMessage((payload) => {
     console.log('Message received.onBackgroundMessage ', payload);
 		alert('Message received.onBackgroundMessage ');
 });
+*/
+
 
 /*
 messaging.onBackgroundMessage((payload) => {

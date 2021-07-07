@@ -338,7 +338,7 @@ router.get('/firebase/test1', async function (req, res,next)  {
 		"body" : "Create new group using tournament IND-ENG-WT20",
 		"icon" : "./APLLOGO1.ICO",
 		"image": "./APLLOGO2.JPG",
-		"sound": "./CLICK.MP3",
+		"sound": "default",
 	}
 	
 	
@@ -351,7 +351,7 @@ router.get('/firebase/test1', async function (req, res,next)  {
 	let notification_body = {
 		notification: notification,
 		//'registration_ids': fcm_tokens
-		to: "dA9LCvstMrLTDdi62lCJ_k:APA91bHfPMDFRXGi4TardAslpZYkVs4ooH9A7WcMBVHadDAFTdVNmVWK0ZP2ThgpUT9bfRnyb1rJNqHrrbCvyOM7fQuA7vU3x1HcX28ZLNhr8ZXeB5ybK4ZwJflx4NxSR4FPAwoA-e9v"
+		to: "f1xVa2IbFEhPK9oXmcxBZW:APA91bHWxS68nzY_Piluzbm06vuD8tW0eSjjd3Lxa5iXqBccfQj_B5THSIMeEIUXWglwvgFK-L1wZPv_GeuRZEHaqnQBKOseHXW2fB_IEzfipF--NVvyXLkmkZq0TEF-LPqy1SKg-PLg"
 	}
 	
 	
