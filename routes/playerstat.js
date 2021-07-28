@@ -1564,7 +1564,13 @@ async function update_cricapi_data_r1(logToResponse)
         
       // now fetch fresh match details from cricapi
       var matchesFromCricapi = await fetchMatchesFromCricapi();
-      if (matchesFromCricapi.matches === undefined) {
+      //console.log(matchesFromCricapi);
+      let itmp = false;
+      if (matchesFromCricapi) 
+      if (matchesFromCricapi.matches)
+        itmp = true;
+
+      if (!itmp) {
         var errmsg = "Could not fetch Match details from CricAPI"
         if (logToResponse)  senderr(res, CRICFETCHERR, errmsg)
         else                console.log(errmsg);
@@ -2237,7 +2243,7 @@ async function fetchMatchStatsFromCricapi(matchId) { // (1)
 }
 
 // get match details from cricapi
-async function fetchMatchesFromCricapi() {
+async function orgfetchMatchesFromCricapi() {
   let matchres = await fetch(  get_cricapiMatchInfo_URL() );
   
   if (matchres.status == 200) { 
@@ -2248,16 +2254,47 @@ async function fetchMatchesFromCricapi() {
 }
 
 
-// get Player information
-async function fetchPlayerInfoFromCricapi(playerId) { // (1)
-  let cricres = await fetch(get_cricapi_PlayerInfo_URL(playerId)); 
+async function fetchMatchesFromCricapi() {
+  try {
+    let matchres = await fetch(  get_cricapiMatchInfo_URL() );
+  
+    if (matchres.status == 200) { 
+      let json = await matchres.json(); // (3)
+      return json;
+    }
+  } catch {
+    //throw new Error(matchres.status); 
+    console.log(e);
+    console.log("CricAPI Match fetch error");
+  }
+}
 
-  if (cricres.status == 200) {
-    let json = await cricres.json(); // (3)
+
+async function org_fetchMatchesFromCricapi() {
+  let matchres = await fetch(  get_cricapiMatchInfo_URL() );
+  
+  if (matchres.status == 200) { 
+    let json = await matchres.json(); // (3)
     return json;
   }
+  throw new Error(matchres.status); 
+}
+
+// get Player information
+async function fetchPlayerInfoFromCricapi(playerId) { // (1)
+  try {
+    let cricres = await fetch(get_cricapi_PlayerInfo_URL(playerId)); 
+
+    if (cricres.status == 200) {
+      let json = await cricres.json(); // (3)
+      return json;
+    }
+  } catch (e) {
   // console
-  throw new Error(cricres.status);
+    //throw new Error(cricres.status);
+    console.log(e);
+    console.log("Could not fetch info");
+  }
 }
 
 async function sendMatchInfoToClient(igroup, doSendWhat) {
@@ -2462,19 +2499,24 @@ cron.schedule('*/1 * * * * *', async () => {
   if (clientSemaphore) return;       // previous execution in progress
   clientSemaphore = true;
 
-  try {
-    console.log("Start with running score --------------------")
+ // try {
+   // console.log("Start with running score --------------------")
 
     let T1 = new Date();
 
     if (PRODUCTION) {
       if (cricTimer >= CRICUPDATEINTERVAL) {
+        try {
 				clearRunningClientData();
         cricTimer = 0;
         await update_cricapi_data_r1(false);
         await updateTournamentBrief();
-        //console.log(runningScoreArray);
+        console.log(runningScoreArray);
         //await checkallover();  ---- Confirm this is done when match ends
+        } catch (e) {
+          console.log(e);
+          console.log("error in crictimer");
+        }
       }
     }
 
@@ -2486,10 +2528,10 @@ cron.schedule('*/1 * * * * *', async () => {
     let T3 = new Date();
     let diff1 = T3.getTime() - T1.getTime();
     console.log("End --------------- time taken: ", diff1);
-  } catch(e) {
-    console.log("Error in schedule fuction");
-    console.log(e);
-  }
+ // } catch(e) {
+  //  console.log("Error in schedule fuction");
+  //  console.log(e);
+ // }
   clientSemaphore = false;  // job over
 });
 
