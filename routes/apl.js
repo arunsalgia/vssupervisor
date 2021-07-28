@@ -252,6 +252,20 @@ router.get('/getprevguide/:userId', async function (req, res, next) {
 	  senderr(res, 601, "No guides available");
 });
 
+router.get('/getoffer/:reqType', async function (req, res, next) {
+  // AplRes = res;
+  setHeader(res);
+  var { reqType } = req.params;
+
+	
+let offerList = await Offer.find({}).sort({order: 1});
+  if (offerList.length > 0) {
+	  sendok(res, offerList);
+  } else
+	  senderr(res, 601, "No Offers available");
+});
+
+
 router.get('/getmaster/:key', async function (req, res, next) {
   setHeader(res); 
   
@@ -337,8 +351,8 @@ router.get('/firebase/test1', async function (req, res,next)  {
 		"title" : "APL InfoMania",
 		"body" : "Create new group using tournament IND-ENG-WT20",
 		"icon" : "./APLLOGO1.ICO",
-		"image": "./APLLOGO2.JPG",
-		"sound": "default",
+		//"image": "./APLLOGO2.JPG",
+		"sound": "./CLICK.MP3",
 	}
 	
 	

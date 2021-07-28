@@ -323,6 +323,13 @@ AplSchema = mongoose.Schema({
   status: String,
 })
 
+OfferSchema = mongoose.Schema({
+	order: Number,
+	header: String,
+	message: String,
+})
+
+
 PrizeSchema = mongoose.Schema({
   prizeCount: Number,
   prize1: Number,
@@ -482,6 +489,7 @@ Payment = mongoose.model('payment', PaymentSchema);
 UserKyc = mongoose.model('userkyc', UserKycSchema);
 Reference = mongoose.model('reference', ReferenceSchema);
 Firebase = mongoose.model('firebase', FirebaseSchema);
+Offer = mongoose.model('offer', OfferSchema);
 
 nextMatchFetchTime = new Date();
 router = express.Router();

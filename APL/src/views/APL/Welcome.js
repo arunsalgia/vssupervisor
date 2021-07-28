@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // import './App.css';
-// import axios from "axios";
+import axios from "axios";
 import Grid from '@material-ui/core/Grid';
 import GridItem from "components/Grid/GridItem.js";
 import Avatar from "@material-ui/core/Avatar"
@@ -104,7 +104,6 @@ const Welcome = () => {
 	const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 	const [bgImage, setBgImage] = useState("APLIMAGE")
 	const [ downloadMessage, setDownloadMessage ] = useState("");
-
 	const [allOffer, setAllOffer] = useState([]);
 
 	// const imageUrl =  ? desktopImage : mobileImage;
@@ -125,13 +124,6 @@ const Welcome = () => {
 	}
 
 	useEffect(() => {
-		// let tmp=[];
-		// for(let i=0; i<200; ++i) {
-		//     tmp.push(i);
-		// }
-		// setDummyArray(tmp);
-		calculateBR();
-
 		const handleWindowResize = () => {
 			console.log(window.innerHeight, window.innerWidth);
 			calculateBR();
@@ -140,17 +132,21 @@ const Welcome = () => {
 			// console.log()
 		};
 
+		const getOffer = async () => {
+			try {
+				let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/getoffer/ALL`); 
+				setAllOffer(resp.data);
+			} catch (e) {
+				console.log(e);
+			}
+		}
+
 		setWindowWidth(window.innerWidth);
 		setWindowHeight(window.innerHeight);
 		window.addEventListener('resize', handleWindowResize);
-
-		let ofr = [];
-		ofr.push({header: "Register Bonus", message: "Register and get Bonus to play with"});
-		ofr.push({header: "Referral Bonus", message: "Refer and get Bonus on 1st recharge"});
-		ofr.push({header: "Recharge Bonus", message: "Get Bonus on every recharge"});
-		ofr.push({header: "Withdrawal", message: "Facility to withdraw from wallet"});
-		setAllOffer(ofr);
-
+		calculateBR();
+		getOffer();
+		
 		return () => {
 				window.removeEventListener('resize', handleWindowResize);
 		}

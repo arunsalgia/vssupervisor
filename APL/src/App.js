@@ -18,7 +18,12 @@ import IdleTimer from 'react-idle-timer'
 import { setIdle }from "views/functions.js"
 import Wallet from "views/Wallet/Wallet";
 import { PinDropSharp } from "@material-ui/icons";
-import firebase from './firebase'
+import firebase from 'firebase';
+//import arunfb from 'firebase';
+
+//const arunfb = require('firebase/app').default
+//import messaging from 'firebase/messaging';
+
 import { 
 isMobile, cdRefresh, specialSetPos, 
 encrypt, 
@@ -169,6 +174,17 @@ function AppRouter() {
   // );
 
 if (process.env.REACT_APP_DEVICE === "WEB") {
+	const config ={
+		apiKey: "AIzaSyBqJAEVFJOsrztnMrIqO0tfGmisU95Plrk",
+		authDomain: "aplclient.firebaseapp.com",
+		projectId: "aplclient",
+		storageBucket: "aplclient.appspot.com",
+		messagingSenderId: "1018469539659",
+		appId: "1:1018469539659:web:102ea6f8c5cf39dda9d2ce",
+		measurementId: "G-4RN59HCLKD"
+	}
+	firebase.initializeApp(config);
+	
 	const messaging = firebase.messaging();
 	  // get the FIREBASE token and save it. We will send it to server in Home page
     messaging.requestPermission().then(()=>{
