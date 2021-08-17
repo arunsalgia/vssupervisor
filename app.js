@@ -164,7 +164,7 @@ app.use('/wallet', walletRouter);
 app.use('/prize', prizeRouter);
 app.use('/apl', aplRouter);
 app.use('/kyc', kycRouter);
-app.use('/razor', kycRouter);
+app.use('/razor', razorRouter);
 
 // ---- start of globals
 // connection string for database
