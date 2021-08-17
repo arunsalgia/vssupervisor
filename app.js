@@ -9,6 +9,9 @@ _ = require("lodash");
 cron = require('node-cron');
 nodemailer = require('nodemailer');
 crypto = require('crypto');
+Razorpay = require("razorpay");
+
+
 app = express();
 const { akshuDelGroup, akshuUpdGroupMember,
   getMaster, setMaster, 
@@ -61,6 +64,7 @@ walletRouter = require('./routes/wallet');
 prizeRouter = require('./routes/prize');
 aplRouter = require('./routes/apl');
 kycRouter = require('./routes/kyc');
+razorRouter = require('./routes/razor');
 
 // maintaing list of all active client connection
 connectionArray  = [];
@@ -160,6 +164,7 @@ app.use('/wallet', walletRouter);
 app.use('/prize', prizeRouter);
 app.use('/apl', aplRouter);
 app.use('/kyc', kycRouter);
+app.use('/razor', kycRouter);
 
 // ---- start of globals
 // connection string for database
