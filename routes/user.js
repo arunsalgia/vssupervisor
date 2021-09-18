@@ -462,7 +462,7 @@ router.get('/cricemailpassword/:mailid', async function (req, res, next) {
   
   let text = `Dear User,
   
-    Greetings from Auction Permier League.
+    Greetings from Viraag Dental Services.
 
     As requested by you, here are your login details.
 
@@ -502,11 +502,11 @@ router.get('/cricemailreset/:mailid', async function (req, res, next) {
 	let myCode = encrypt( uRec._id + "/" + T1.getTime() );
 	//console.log(myCode);
 	
-  myLink = `${BASELINK}/aplmaster/resetpasswordconfirm/${myCode}`;
+  myLink = `${BASELINK}/viraagdental/resetpassword/${myCode}`;
   
   let text = `Dear User,
   
-	Greetings from Auction Permier League.
+	Greetings from Viraag Dental Services.
 
 	Reset your password using the link given below.
 
@@ -515,16 +515,16 @@ router.get('/cricemailreset/:mailid', async function (req, res, next) {
 	Kindly note that this link is valid only for ${PASSWORDLINKVALIDTIME} minutes.
 	
 	Best Regards,
-	for Auction Permier League`
+	for Viraag Dental Services`
 
 	let xxx = decrypt(mailid);
 	console.log(`Send message to ${xxx}`);
-	let resp = await sendCricMail(xxx, 'User info from Auction Premier League', text);
+	let resp = await sendCricMail(xxx, 'User info from Viraag Dental Services', text);
 	if (resp.status) {
     console.log('Email sent: ' + resp.error);
     sendok(res, `Email sent to ${resp.error}`);
   } else {
-    console.log(`errror sending email to ${xxx}`);
+    console.log(`error sending email to ${xxx}`);
     console.log(resp.error);
     senderr(res, 603, resp.error);
   }

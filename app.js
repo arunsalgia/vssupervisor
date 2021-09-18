@@ -17,7 +17,7 @@ axios = require('axios');
 
 app = express();
 
-PRODUCTION=process.env.PRODUCTION;   
+PRODUCTION=(process.env.PRODUCTION.toUpperCase() === "TRUE");   
 WEB=process.env.WEB;
 console.log("Prod", PRODUCTION);
 console.log("Web", WEB);
@@ -27,8 +27,10 @@ PASSWORDLINKVALIDTIME=10			// Password link valid time in minutes
 
 //
 if (PRODUCTION) {
-  BASELINK='https://happy-home-ipl-2020.herokuapp.com';
+	console.log("Using cloud  base  link");
+  BASELINK='https://viraagdental.herokuapp.com';
 } else {
+	console.log("Using local base  link");
   BASELINK='http://localhost:3000';
 }
 PORT = process.env.PORT || 4000;

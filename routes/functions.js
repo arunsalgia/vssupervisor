@@ -25,8 +25,8 @@ let debugTest = true;
 // for sending email
 const send = require('gmail-send')();
 var mailOptions =  {
-  user: 'cricketpwd@gmail.com',
-  pass: 'cwezdlvmqqbegugi',
+  user: 'viraagdental@gmail.com',
+  pass: 'xcktxnafszblafzz',
   to:   '',
   subject: ''
   //html: ''
@@ -128,18 +128,18 @@ async function nommalPasswordsendCricMail (dest, mailSubject, mailText) {
     text: ''
   };
 
-  //console.log("About to start");
+  console.log("About to start");
   mailOptions.to = dest;
   mailOptions.subject = mailSubject;
   mailOptions.text = mailText;
 
-  //console.log(mailOptions.to);
-  //console.log(mailOptions.subject);
-  //console.log(mailOptions.text.length);
-  //console.log(`About to send email`);
+  console.log(mailOptions.to);
+  console.log(mailOptions.subject);
+  console.log(mailOptions.text.length);
+  console.log(`About to send email`);
   try {
     let response = await transporter.sendMail(mailOptions);
-    //console.log(response);
+    console.log(response);
     return ({status: true, error: 'Email Successfully sent'});
   } catch (e) {
     console.log("error sending email");
@@ -170,7 +170,8 @@ async function sendCricMail (dest, mailSubject, mailText) {
   mailOptions.to = dest;
   mailOptions.subject = mailSubject;
   mailOptions.text = mailText;
-
+	console.log(mailOptions);
+	
   try {
     const res = await send(mailOptions);
     return {status: true, error: 'Email Successfully sent'};
