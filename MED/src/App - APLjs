@@ -2,24 +2,22 @@ import React, { useState, useMemo } from "react";
 import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { createBrowserHistory } from "history";
-import { UserContext } from "./UserContext"; 
+import { UserContext } from "./UserContext";
 //import Admin from "layouts/Admin.js";
 import "assets/css/material-dashboard-react.css?v=1.9.0";
 // import { DesktopWindows } from "@material-ui/icons";
 import { CricDreamTabs, setTab }from "CustomComponents/CricDreamTabs"
 import axios from "axios";
-import SignIn from "views/Login/SignIn"
+import SignIn from "views/Login/SignIn.js";
 import SignUp from "views/Login/SignUp.js";
-import Welcome from "views/MED/Welcome";
+import Welcome from "views/APL/Welcome";
 import ResetPassword from "views/Login/ResetPassword";
-//import Session from "views/Session/Session"
 //import JoinGroup from "views/Group/JoinGroup.js"
 import ForgotPassword from "views/Login/ForgotPassword.js";
 import IdleTimer from 'react-idle-timer'
-
+import { setIdle }from "views/functions.js"
+import Wallet from "views/Wallet/Wallet";
 import { PinDropSharp } from "@material-ui/icons";
-
-
 import firebase from 'firebase';
 //import arunfb from 'firebase';
 
@@ -27,11 +25,12 @@ import firebase from 'firebase';
 //import messaging from 'firebase/messaging';
 
 import { 
-setIdle, isUserLogged,
 isMobile, cdRefresh, specialSetPos, 
 encrypt, 
 clearBackupData, downloadApk 
 } from "views/functions.js"
+
+
 
 const hist = createBrowserHistory();
 
@@ -57,21 +56,15 @@ function initCdParams() {
   console.log(`ipos: ${ipos}   Tabpos ${localStorage.getItem("tabpos")}`)
 }
 
-
-
-function checkSessionRequest() {
-	let resetLink = false;
-	let x = location.pathname.split("/");
-  console.log("Path is");
-  console.log(x);
-	if (x.length >= 3)
-	if (x[1].toLowerCase() === "medmaster")
-	if (x[2].toLowerCase() === "session") {
-		resetLink = true;
-	}
-	return resetLink;
+function isUserLogged() {
+  console.log("User is", localStorage.getItem("uid"));
+  if ((localStorage.getItem("uid") === "") || 
+      (localStorage.getItem("uid") === "0") ||
+      (localStorage.getItem("uid") === null))
+    return false;
+  else
+    return true;
 }
-
 
 function checkResetPasswordRequest() {
 	let resetLink = "";
@@ -79,8 +72,8 @@ function checkResetPasswordRequest() {
   console.log("Path is");
   console.log(x);
 	if (x.length >= 4)
-	if (x[1] === "viraagdental")
-	if (x[2] === "resetpassword") {
+	if (x[1] === "aplmaster")
+	if (x[2] === "resetpasswordconfirm") {
 		resetLink = x[3];
 	}
 	return resetLink;
@@ -117,37 +110,43 @@ function AppRouter() {
 
   function DispayTabs() {
     let isLogged = isUserLogged();
-    console.log("Login status", isLogged)
+    // console.log("Login status", isLogged)
     if (isLogged) {
       // console.log("User is logged");
+      let timeoutvalue = parseInt(process.env.REACT_APP_IDLETIMEOUT) * 1000;
       return (
         <div>
           <CricDreamTabs/>
+          <IdleTimer
+            ref={ref => { idleTimer = ref }}
+            timeout={timeoutvalue}
+            // onAction={handleOnAction}
+            // onActive={handleOnActive}
+            onIdle={handleOnIdle}
+            debounce={250}
+          />
         </div>
       )  
-    } 
-		else if (sessionStorage.getItem("currentLogin") ===  "SIGNIN") {
-			return <SignIn />
-		} 
-		else if (sessionStorage.getItem("currentLogin") ===  "SIGNUP") {
-			return <SignUp />
-		} 
-		else if (sessionStorage.getItem("currentLogin") ===  "FORGOT") {
-			return <ForgotPassword />
-		} 
-		else  {
-			let myLink = checkResetPasswordRequest();
-			console.log("Link", myLink);
-			if (myLink !== "") {
-				sessionStorage.setItem("currentUserCode", myLink);
-				hist.push("/");
-				//console.log(history, hist);
-				return (<ResetPassword />);
-			} else {
-				console.log("Aboyt to call Welcome");
-				return (<Welcome/>)
+    } else {
+      //console.log("New login requested");
+      if (sessionStorage.getItem("currentLogin") === "SIGNUP")
+        return (<SignUp/>)
+      else if (sessionStorage.getItem("currentLogin") === "RESET")
+        return (<ForgotPassword/>);
+      else if (sessionStorage.getItem("currentLogin") === "SIGNIN")
+        return (<SignIn/>)
+      else {
+				let userId = checkResetPasswordRequest();
+				if (userId !== "") {
+					sessionStorage.setItem("currentUserCode", userId);
+					hist.push("/");
+					//console.log(history, hist);
+					return (<ResetPassword />);
+				} else {
+					return (<Welcome/>)
+				}
 			}
-		} 
+    }
   }
 
   // logic before displaying component
@@ -174,10 +173,48 @@ function AppRouter() {
   //   </Router>
   // );
 
+if (process.env.REACT_APP_DEVICE === "WEB") {
+	const config ={
+		apiKey: "AIzaSyBqJAEVFJOsrztnMrIqO0tfGmisU95Plrk",
+		authDomain: "aplclient.firebaseapp.com",
+		projectId: "aplclient",
+		storageBucket: "aplclient.appspot.com",
+		messagingSenderId: "1018469539659",
+		appId: "1:1018469539659:web:102ea6f8c5cf39dda9d2ce",
+		measurementId: "G-4RN59HCLKD"
+	}
+	firebase.initializeApp(config);
+	
+	const messaging = firebase.messaging();
+	  // get the FIREBASE token and save it. We will send it to server in Home page
+    messaging.requestPermission().then(()=>{
+      return messaging.getToken()
+    }).then(token=> {
+      console.log('Token : ',token);
+			localStorage.setItem("token", token);
+			console.log("Done");
+    }).catch((err)=>{
+      console.log(err); 
+	  })
+
+		/*
+    messaging.onMessage((payload) => {
+      console.log('Message received. ', payload);
+      // ...
+    }); 
+
+    messaging.onBackgroundMessage(function(payload){
+      console.log("onBackgroundMessage:",payload);
+    });
+		*/
+  }
+
 
   return (
     <Router history={hist}> 
     <UserContext.Provider value={value}>
+    {/* <Route path="/apl/walletdetails" component={Dummy} /> */}
+    {/* <Route path="/apl/walletadd" component={Dummy} /> */}
     </UserContext.Provider>
     <DispayTabs />
     </Router>
