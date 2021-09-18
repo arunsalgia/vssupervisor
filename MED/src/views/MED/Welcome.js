@@ -49,6 +49,23 @@ const useStyles = makeStyles((theme) => ({
 		borderColor: 'blue',
 		borderStyle: 'solid',
 	},
+	welcomeMobileMESSAGE: {
+    align: "center",
+		position: "fixed",
+		top: "20%",
+		left: "10%",
+		width: '80%',
+		color: blue[700],
+		backgroundColor: yellow[100],
+		fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		border: 5,
+		borderRadius: 7,
+		borderWidth: 2,
+		margin: 5,
+		borderColor: 'blue',
+		borderStyle: 'solid',
+	},
 	quote: {
 		border: 5,
 		borderRadius: 7,
@@ -59,6 +76,23 @@ const useStyles = makeStyles((theme) => ({
 		top: "20%",
 		width: '40%',
 		left: "30%",
+		//left: "10%",
+		//width: '80%',
+		//display: "flex",
+		//justifyContent: "center",
+		//alignItems: "center",
+		backgroundColor: 'yellow',
+	},
+	quoteMobile: {
+		border: 5,
+		borderRadius: 7,
+		borderWidth: 2,
+		align: "center",
+		position: "fixed",
+		justifyContent: "center",
+		top: "20%",
+		width: '90%',
+		left: "5%",
 		//left: "10%",
 		//width: '80%',
 		//display: "flex",
@@ -248,7 +282,7 @@ const Welcome = () => {
 	function DisplayWelcome() {
 	return (
 	<div align="center">
-		<Typography className={classes.welcomeMESSAGE} >{welcomeMESSAGE}</Typography>	
+		<Typography className={(isMobile()) ?  classes.welcomeMobileMESSAGE : classes.welcomeMESSAGE } >{welcomeMESSAGE}</Typography>	
 	</div>
 	)};
 	
@@ -271,7 +305,7 @@ const Welcome = () => {
 
 	function DisplayQOD() {
 	return (
-	<div className={classes.quote}> 
+	<div className={(isMobile()) ? classes.quoteMobile : classes.quote}> 
 		<Typography className={classes.quoteAuthor}>Quote of the day</Typography>
 		<BlankArea />
 		<Typography className={classes.quoteMessage} >{quoteMessage}</Typography>
