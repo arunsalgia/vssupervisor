@@ -8,7 +8,7 @@ const { encrypt, decrypt, dbencrypt, dbdecrypt, dbToSvrText,
 	sendCricMail, sendCricHtmlMail,
   akshuGetUser, akshuUpdUser,
   getMaster, setMaster,
-} = require('./cricspecial'); 
+} = require('./functions'); 
 
 
 const is_Captain = true;
@@ -153,10 +153,10 @@ router.get('/signup/:uName/:uPassword/:uEmail', async function (req, res, next) 
 })
 
 
-router.get('/cricsignup/:uName/:uPassword/:uEmail/:mobileNumber/:referalCode', async function (req, res, next) {
+router.get('/cricsignup/:cid/:uName/:uPassword/:uEmail/:mobileNumber/:referalCode', async function (req, res, next) {
   // CricRes = res; 
   setHeader(res);
-  var {uName, uPassword, uEmail, mobileNumber, referalCode } = req.params;
+  var {cid, uName, uPassword, uEmail, mobileNumber, referalCode } = req.params;
   var isValid = false;
   // if user name already used up
   var lname = getLoginName(uName);
@@ -164,9 +164,9 @@ router.get('/cricsignup/:uName/:uPassword/:uEmail/:mobileNumber/:referalCode', a
   uEmail = svrToDbText(uEmail);
   uPassword = svrToDbText(uPassword);
   
-  let uuu = await User.findOne({userName: lname });
+  let uuu = await User.findOne({cid: cid, userName: lname });
   if (uuu) {senderr(res, 602, "User name already used."); return; }
-  uuu = await User.findOne({ email: uEmail });
+  uuu = await User.findOne({ cid: cid, email: uEmail });
   if (uuu) {senderr(res, 603, "Email already used."); return; }
   
   let refRec;
@@ -176,113 +176,39 @@ router.get('/cricsignup/:uName/:uPassword/:uEmail/:mobileNumber/:referalCode', a
 		if (!refRec) return senderr(res, 604, "Invalid referral Code.");
   }
   
-  uRec = await User.find().limit(1).sort({ "uid": -1 });
+  uRec = await User.find({cid: cid}).limit(1).sort({"uid": -1 });
+	let newUID = (uRec[0]) ?  uRec[0].uid + 1 : 1;
   var user1 = new User({
-      uid: uRec[0].uid + 1,
-      userName: lname,
-      displayName: dname,
-      password: uPassword,
-      status: true,
-      defaultGroup: 0,
-      email: uEmail,
-      userPlan: USERTYPE.TRIAL,
+		cid: cid,
+		uid: newUID,
+		userName: lname,
+		displayName: dname,
+		password: uPassword,
+		status: true,
+		defaultGroup: 0,
+		email: uEmail,
+		userPlan: USERTYPE.TRIAL,
 	  mobile: mobileNumber
     });
   user1.save();
   akshuUpdUser(user1);
-	
-	// give joining bonus to new user
-	let tmp = await getMaster("JOINOFFER");
-	console.log("Join Offer", tmp)
-	console.log("Amount", parseInt(tmp)); 
-  let amount = (tmp !== "") ? parseInt(tmp) : 0;
-  await WalletAccountOpen(user1.uid, amount);
-	
-  // add entry for referral code here
-  if (refRec) {
-		let ofr = await getMaster("REFEROFFER");
-		let amt = (ofr !== "") ? parseInt(ofr) : 0;
-		if (amt > 0) {
-			let schemaRec = new Reference();
-			schemaRec.date = new Date();
-			schemaRec.uid = user1.uid;
-			schemaRec.referenceUid = refRec.uid;
-			schemaRec.scheme = "NEWUSER";
-			schemaRec.pending = true;
-			schemaRec.offer = amt;
-			schemaRec.maxOffer = amt;
-			await schemaRec.save();
-		}
-  }
 	
   console.log(`user record for ${lname}`);
   sendok(res, "OK"); 
 })
 
 
-//=============== RESET
-router.get('/reset/:userId/:oldPwd/:newPwd', async function (req, res, next) {
-  // CricRes = res;
-  setHeader(res);
-  var {userId, oldPwd, newPwd } = req.params;
 
-  var uDoc = await User.findOne({uid: userId});
-  if (uDoc) { 
-    if (uDoc.password === dbencrypt(oldPwd)) {
-      uDoc.password = dbencrypt(newPwd);
-      uDoc.save();
-      akshuUpdUser(uDoc);
-      sendok(res, "OK");
-      return;
-    }
-  }
-  senderr(res, 602, "Invalid user Name or Password"); 
-});
-
-router.get('/// CricReset/:userId/:oldPwd/:newPwd', async function (req, res, next) {
-  // CricRes = res;
-  setHeader(res);
-  var {userId, oldPwd, newPwd } = req.params;
-
-  var uDoc = await User.findOne({uid: userId});
-  if (uDoc) { 
-	oldPwd = decrypt(oldPwd);
-    if (uDoc.password === dbencrypt(oldPwd)) {
-	  newPwd = decrypt(newPwd)
-      uDoc.password = dbencrypt(newPwd);
-      uDoc.save();
-      akshuUpdUser(uDoc);
-      sendok(res, "OK");
-      return;
-    }
-  }
-  senderr(res, 602, "Invalid user Name or Password"); 
-});
 
 
 //=============== LOGIN
-router.get('/login/:uName/:uPassword', async function (req, res, next) {
-  // CricRes = res;
-  setHeader(res);
-  var {uName, uPassword } = req.params;
-  var isValid = false;
-  //let lName = dbencrypt(getLoginName(uName));
-  let uRec = await User.findOne({ userName:  getLoginName(uName)});
-  console.log(uRec)
-  // let tmp = dbencrypt(uPassword);
-  // console.log(tmp);
-  if (await userAlive(uRec)) 
-    isValid = (dbencrypt(uPassword) === uRec.password);
-
-  if (isValid) sendok(res, uRec.uid.toString());
-  else         senderr(res, 602, "Invalid User name or password");
-});
 
 router.get('/criclogin/:uName/:uPassword', async function (req, res, next) {
   // CricRes = res;
   setHeader(res);
   var {uName, uPassword } = req.params;
   var isValid = false;
+	//console.log(getLoginName(uName));
   let uRec = await User.findOne({ userName:  getLoginName(uName)});
   //console.log(uRec)
 	if (uRec) {
@@ -379,15 +305,12 @@ router.get('/cricprofile/:userId', async function (req, res, next) {
   let userRec = await User.findOne({uid: userId});
   // console.log(userRec);
   if (userRec) {
-    let groupRec = await IPLGroup.findOne({gid: userRec.defaultGroup})
-    let myGroup = (groupRec) ? groupRec.name : "";
     sendok(res, {
 	  userCode: userRec._id,
       loginName: userRec.userName,
       userName: userRec.displayName,
       email: encrypt(dbdecrypt(userRec.email)),
       password: encrypt(dbdecrypt(userRec.password)),
-      defaultGroup: myGroup,
     });
   } else
     senderr(res, 601, `Invalid user id ${userId}`);
@@ -1324,8 +1247,6 @@ function senderr(res, errcode, errmsg) { res.status(errcode).send({error: errmsg
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  _group = defaultGroup;
-  _tournament = defaultTournament;
 }
 module.exports = router;
 
