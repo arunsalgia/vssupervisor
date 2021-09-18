@@ -86,6 +86,7 @@ import {
 	left, right,
 	intString,
 	updatePatientByFilter,
+	dispAge, dispEmail, dispMobile,
 } from "views/functions.js";
 
 
@@ -831,19 +832,19 @@ export default function Appointment() {
 					<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 					<div align="left" >
 					<Typography>
-					<span className={classes.patientName}>{m.displayName}</span>
+						<span className={gClasses.patientName}>{m.displayName}</span>
 					</Typography>
 					<Typography>
-					<span className={classes.patientInfo}>{"Id: " + m.pid}</span>
+						<span className={gClasses.patientInfo}>{"Id: " + m.pid}</span>
 					</Typography>
-					<Typography className={classes.patientInfo}> 
-						{"Age: " + m.age+m.gender.substr(0, 1)}
+					<Typography className={gClasses.patientInfo}> 
+						{"Age: " + dispAge(m.age, m.gender)}
 					</Typography>
-					<Typography className={classes.patientInfo}> 
-						{"Email: "+decrypt(m.email)}
+					<Typography className={gClasses.patientInfo}> 
+						{"Email: "+dispEmail(m.email)}
 					</Typography>
-					<Typography className={classes.patientInfo}> 
-						{"Mobile: "+m.mobile}
+					<Typography className={gClasses.patientInfo}> 
+						{"Mobile: "+dispMobile(m.mobile)}
 					</Typography>
 					<BlankArea />
 					<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />
@@ -958,7 +959,7 @@ export default function Appointment() {
 			<Grid key="DateTime" container justify="right" alignItems="center" >
 				<Grid item xs={6} sm={6} md={6} lg={6} >
 					<Typography className={classes.apptName}>
-					{currentPatient + " (Id: " + currentPatientData.pid  + ") " + currentPatientData.age + currentPatientData.gender.substr(0,1)}
+					{currentPatient + " (Id: " + currentPatientData.pid  + ") " + dispAge(currentPatientData.age, currentPatientData.gender)}
 					</Typography>
 				</Grid>
 				<Grid item xs={2} sm={2} md={2} lg={2} >
@@ -1632,7 +1633,7 @@ export default function Appointment() {
 					</IconButton>
 				</div>
 				<Typography>
-						<span className={classes.patientName}>Select Patient</span>
+						<span className={gClasses.patientName}>Select Patient</span>
 				</Typography>
 				<DisplayFilter />
 				<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
@@ -1641,19 +1642,19 @@ export default function Appointment() {
 						<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 						<div align="left" >
 						<Typography>
-						<span className={classes.patientName}>{m.displayName}</span>
+						<span className={gClasses.patientName}>{m.displayName}</span>
 						</Typography>
 						<Typography>
-						<span className={classes.patientInfo}>{"Id: " + m.pid}</span>
+						<span className={gClasses.patientInfo}>{"Id: " + m.pid}</span>
 						</Typography>
-						<Typography className={classes.patientInfo}> 
-							{"Age: " + m.age+m.gender.substr(0, 1)}
+						<Typography className={gClasses.patientInfo}> 
+							{"Age: " + dispAge(m.age, m.gender)}
 						</Typography>
-						<Typography className={classes.patientInfo}> 
-							{"Email: "+decrypt(m.email)}
+						<Typography className={gClasses.patientInfo}> 
+							{"Email: "+dispEmail(m.email)}
 						</Typography>
-						<Typography className={classes.patientInfo}> 
-							{"Mobile: "+m.mobile}
+						<Typography className={gClasses.patientInfo}> 
+							{"Mobile: "+dispMobile(m.mobile)}
 						</Typography>
 						<BlankArea />
 						<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />

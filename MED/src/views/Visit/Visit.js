@@ -68,6 +68,7 @@ import { callYesNo,
 	encrypt, decrypt, 
 	validateInteger,
 	updatePatientByFilter,
+	dispAge, dispEmail, dispMobile,
 } from "views/functions.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -1401,19 +1402,19 @@ export default function Visit() {
 				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 				<div align="left" >
 				<Typography>
-				<span className={classes.patientName}>{m.displayName}</span>
+				<span className={gClasses.patientName}>{m.displayName}</span>
 				</Typography>
 				<Typography>
-				<span className={classes.patientInfo}>{"Id: " + m.pid}</span>
+				<span className={gClasses.patientInfo}>{"Id: " + m.pid}</span>
 				</Typography>
-				<Typography className={classes.patientInfo}> 
-					{"Age: " + m.age+m.gender.substr(0, 1)}
+				<Typography className={gClasses.patientInfo}> 
+					{"Age: " + dispAge(m.age, m.gender)}
 				</Typography>
-				<Typography className={classes.patientInfo}> 
-					{"Email: "+decrypt(m.email)}
+				<Typography className={gClasses.patientInfo}> 
+					{"Email: "+dispEmail(m.email)}
 				</Typography>
-				<Typography className={classes.patientInfo}> 
-					{"Mobile: "+m.mobile}
+				<Typography className={gClasses.patientInfo}> 
+					{"Mobile: "+dispMobile(m.mobile)}
 				</Typography>
 				<BlankArea />
 				<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />

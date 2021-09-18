@@ -672,4 +672,20 @@ export	async function updatePatientByFilter(filter, userCid) {
 	//console.log(tmp);
 	return tmp;
 }
-	
+
+export function dispOnlyAge(xxx) {
+	return (xxx > 0) ? xxx.toString() : "";
+}	
+export function dispAge(xxx, gender) {
+	return (xxx > 0) ? xxx.toString() + gender.substr(0, 1) : "";
+}	
+
+export function dispMobile(xxx) {
+	return (xxx > 0) ? xxx.toString() : "";
+}	
+
+export function dispEmail(xxx) {
+	return (xxx != "cd") ? decrypt(xxx) : "";
+}
+
+

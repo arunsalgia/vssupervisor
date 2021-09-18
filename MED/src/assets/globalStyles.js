@@ -23,6 +23,14 @@ const globalStyles = makeStyles((theme) => ({
 		backgroundColor: '#B3E5FC',
 		margin: "none",
 	},
+	patientName: {
+		fontSize: theme.typography.pxToRem(16),
+		fontWeight: theme.typography.fontWeightBold,	
+		color: 'blue',
+	},
+	patientInfo: {
+		fontSize: theme.typography.pxToRem(14),
+	},
 	selectForm: {
     margin: theme.spacing(1),
     minWidth: 120,

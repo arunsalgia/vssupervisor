@@ -356,7 +356,7 @@ export function CricDreamTabs() {
 
       case 901: return <Patient />;
       case 902: return <Medicine />;
-			case 903: return <Sample />
+			//case 903: return <Sample />
 
 /*
       //case 4: 
@@ -494,7 +494,7 @@ export function CricDreamTabs() {
                 <Divider/>
 								<MenuItem onClick={handlePatient}>Patient</MenuItem>
 								<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
-								<MenuItem onClick={handleSample}>Sample</MenuItem>
+									{/*<MenuItem onClick={handleSample}>Sample</MenuItem>*/}
                 <Divider/>
                 <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>       
                 <Divider/>

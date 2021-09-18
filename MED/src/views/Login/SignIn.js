@@ -141,13 +141,13 @@ export default function SignIn() {
 
     if (response.status === 200) {
 			console.log("Signinresponse", response.data);
-      let myUID = response.data.uid;
-      let userPlan = response.data.userPlan; 
-      window.sessionStorage.setItem("uid", myUID)
+
+      window.sessionStorage.setItem("uid", response.data.uid)
       window.sessionStorage.setItem("userName", response.data.displayName);
-      window.sessionStorage.setItem("userPlan", userPlan);
+      window.sessionStorage.setItem("userType", response.data.userType);
 			 window.sessionStorage.setItem("cid", response.data.cid);
-			window.sessionStorage.setItem("admin", true)
+			 
+			//window.sessionStorage.setItem("admin", true)
 			setTab(process.env.REACT_APP_PATIENT);
 			 
 			//setUser({ uid: myUID, admin: true })

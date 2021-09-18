@@ -44,7 +44,9 @@ import { useHistory } from "react-router-dom";
 
 // import CardAvatar from "components/Card/CardAvatar.js";
 // import { UserContext } from "../../UserContext";
-import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFilter } from "views/functions.js"
+import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFilter,
+	dispOnlyAge, dispAge, dispEmail, dispMobile,
+ } from "views/functions.js"
 import {DisplayYesNo, DisplayPageHeader, BlankArea } from "CustomComponents/CustomComponents.js"
 
 // styles
@@ -64,14 +66,6 @@ import {setTab} from "CustomComponents/CricDreamTabs.js"
 const AVATARHEIGHT=4;
 const useStyles = makeStyles((theme) => ({
 	boxStyle: {padding: "5px 10px", margin: "4px 2px", backgroundColor: blue[300] },
-	patientName: {
-		fontSize: theme.typography.pxToRem(16),
-		fontWeight: theme.typography.fontWeightBold,	
-		color: 'blue',
-	},
-	patientInfo: {
-		fontSize: theme.typography.pxToRem(14),
-	},
 	radio: {
 		fontSize: theme.typography.pxToRem(20),
 		fontWeight: theme.typography.fontWeightBold,
@@ -246,8 +240,8 @@ export default function Patient() {
 	const	[patientName, setPatientName] = useState("");
 	const	[patientAge, setPatientAge] = useState(0);
 	const	[patientGender, setPatientGender] = useState("Male");
-	const	[patientEmail, setPatientEmail] = useState("nomail@mail.com");
-	const	[patientMobile, setPatientMobile] = useState(1111111111);
+	const	[patientEmail, setPatientEmail] = useState("");
+	const	[patientMobile, setPatientMobile] = useState(0);
 	
 	//const [rowsPerPage, setRowsPerPage] = useState(ROWSPERPAGE);
   const [page, setPage] = useState(0);
@@ -408,11 +402,11 @@ export default function Patient() {
 	function handleAdd() {
 		//console.log("handleAdd");
 		setPatientName("");
-		setPatientAge(40);
+		setPatientAge("");
 		setPatientGender("Male")
 		setRadioValue("Male");
-		setPatientEmail("nomail@mail.com");
-		setPatientMobile(1111111111);
+		setPatientEmail("");
+		setPatientMobile("");
 		
 		setRegisterStatus(0);
 		setAddEdit("ADD");
@@ -424,11 +418,11 @@ export default function Patient() {
 
 		setOldPatientName(rec.displayName);
 		setPatientName(rec.displayName);		
-		setPatientAge(rec.age);
+		setPatientAge(dispOnlyAge(rec.age));
 		setPatientGender(rec.gender);
 		setRadioValue(rec.gender);
-		setPatientEmail(decrypt(rec.email));
-		setPatientMobile(rec.mobile);
+		setPatientEmail(dispEmail(rec.email));
+		setPatientMobile(dispMobile(rec.mobile));
 		
 		setRegisterStatus(0);
 		setAddEdit("EDIT");
@@ -466,16 +460,19 @@ export default function Patient() {
 	
 	async function handleAddEditSubmit() {
 		
-		console.log("Addedit", patientName, patientAge, patientGender, patientEmail, patientMobile);		
+		console.log("Addedit", patientName, patientAge, patientGender, patientEmail, patientMobile);
+		let myAge = (patientAge !== "") ? patientAge : 0;
+		let myMobile = (patientMobile !== "") ? patientMobile : 0;
+		let myEmail = (patientEmail !== "") ? patientEmail : "-";
+		myEmail = encrypt(myEmail);
+		console.log(myEmail);
+		console.log("Addedit", patientName, myAge, patientGender, myEmail, myMobile);
 		
 		let resp;
 		let myUrl;
-		let myEmail = encrypt(patientEmail);
-
-		
 		if (addEdit === "ADD") {
 			try {
-				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/add/${userCid}/${patientName}/${patientAge}/${patientGender}/${myEmail}/${patientMobile}`;
+				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/add/${userCid}/${patientName}/${myAge}/${patientGender}/${myEmail}/${myMobile}`;
 				resp = await axios.get(myUrl);
 			} catch (error)  {
 				console.log(error.response.status);
@@ -484,7 +481,7 @@ export default function Patient() {
 			}
 		} else {
 			try {
-				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/edit/${userCid}/${oldPatientName}/${patientName}/${patientAge}/${patientGender}/${myEmail}/${patientMobile}`;
+				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/edit/${userCid}/${oldPatientName}/${patientName}/${myAge}/${patientGender}/${myEmail}/${myMobile}`;
 				resp = await axios.get(myUrl);
 			} catch (error)  {
 				console.log(error.response.status);
@@ -540,12 +537,12 @@ export default function Patient() {
       />
 			</Grid>
 			<Grid item xs={3} sm={3} md={3} lg={3} >
-			<TextValidator variant="outlined" required fullWidth       
+			<TextValidator variant="outlined" fullWidth       
 				id="newPatientAge" label="Age" type="number"
 				value={patientAge}
 				onChange={() => { setPatientAge(event.target.value) }}
-				validators={['required', 'minNumber:1', 'maxNumber:99']}
-        errorMessages={['Age to be provided', 'Age to be above 1', 'Age to be less than 100']}
+				validators={['minNumber:1', 'maxNumber:99']}
+        errorMessages={['Age to be above 1', 'Age to be less than 100']}
 				
       />
 			</Grid>
@@ -573,8 +570,8 @@ export default function Patient() {
 				id="newPatientMobile" label="Mobile" type="number"
 				value={patientMobile} 
 				onChange={() => { setPatientMobile(event.target.value) }}
-				validators={['required', 'minNumber:1000000000', 'maxNumber:9999999999']}
-        errorMessages={['Mobile to be provided', 'Invalid Mobile number','Invalid Mobile number']}
+				validators={['minNumber:1000000000', 'maxNumber:9999999999']}
+        errorMessages={['Invalid Mobile number','Invalid Mobile number']}
       />	
 			</Grid>
 			<Grid item xs={12} sm={12} md={3} lg={3} >
@@ -586,25 +583,25 @@ export default function Patient() {
 			</ValidatorForm>    
 		</Box>	
 		}
-		<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
+		<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
 		{patientArray.map( (m, index) => 
 			<Grid key={"PAT"+index} item xs={12} sm={12} md={3} lg={3} >
 			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 			<div align="left" >
 			<Typography>
-			<span className={classes.patientName}>{m.displayName}</span>
+			<span className={gClasses.patientName}>{m.displayName}</span>
 			</Typography>
 			<Typography>
-			<span className={classes.patientInfo}>{"Id: " + m.pid}</span>
+			<span className={gClasses.patientInfo}>{"Id: " + m.pid}</span>
 			</Typography>
-			<Typography className={classes.patientInfo}> 
-				{"Age: " + m.age+m.gender.substr(0, 1)}
+			<Typography className={gClasses.patientInfo}> 
+				{"Age: " + dispAge(m.age, m.gender)}
 			</Typography>
-			<Typography className={classes.patientInfo}> 
-				{"Email: "+decrypt(m.email)}
+			<Typography className={gClasses.patientInfo}> 
+				{"Email: "+ dispEmail(m.email)}
 			</Typography>
-			<Typography className={classes.patientInfo}> 
-				{"Mobile: "+m.mobile}
+			<Typography className={gClasses.patientInfo}> 
+				{"Mobile: "+ dispMobile(m.mobile)}
 			</Typography>
 			<BlankArea />
 			<VsButton name="Appt"  color='green' onClick={() => { handleAppointmentConfirm(m)}} />
