@@ -21,6 +21,8 @@ import CardContent from '@material-ui/core/CardContent';
 import { makeStyles } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
+import Box from '@material-ui/core/Box';
+
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {red, blue, green, deepOrange, yellow} from '@material-ui/core/colors';
 import {
@@ -28,6 +30,7 @@ import {
   encrypt, decrypt, 
   currentAPLVersion, latestAPLVersion,
 	getImageName,
+	dispOnlyAge, dispAge, dispEmail, dispMobile,
 } from "views/functions.js";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import Divider from "@material-ui/core/Divider";
@@ -584,3 +587,48 @@ export function DisplayYesNo(props) {
 		</div>
 	)}
 	
+
+export function DisplayPatientDetails(props) {
+	const gClasses = globalStyles();
+	let _button1 = (props.button1 == null);
+	let _button2 = (props.button2 == null);
+	let _button3 = (props.button3 == null);
+	let _button4 = (props.button4 == null);
+	let _button5 = (props.button5 == null);
+	//console.log(_button1, _button2, _button3, _button4, _button5);
+return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+	<div align="left" >
+		<Typography>
+		<span className={gClasses.patientName}>{props.patient.displayName}</span>
+		</Typography>
+		<Typography>
+		<span className={gClasses.patientInfo}>{"Id: " + props.patient.pid}</span>
+		</Typography>
+		<Typography className={gClasses.patientInfo}> 
+			{"Age: " + dispAge(props.patient.age, props.patient.gender)}
+		</Typography>
+		<Typography className={gClasses.patientInfo}> 
+			{"Email: "+ dispEmail(props.patient.email)}
+		</Typography>
+		<Typography className={gClasses.patientInfo}> 
+			{"Mobile: "+ dispMobile(props.patient.mobile)}
+		</Typography>
+		<BlankArea />
+		{(!_button1) && props.button1}
+		{(!_button2) && props.button2}
+		{(!_button3) && props.button3}
+		{(!_button4) && props.button4}
+		{(!_button5) && props.button5}
+	</div>
+	</Box>
+)}
+
+export function DisplayPatientName(props) {
+	let myText = props.name;
+	if (props.id) myText + " (Id: " + props.id
+return (
+<Typography></Typography>
+)}
+
+

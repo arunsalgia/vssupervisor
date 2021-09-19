@@ -47,7 +47,9 @@ import { useHistory } from "react-router-dom";
 import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFilter,
 	dispOnlyAge, dispAge, dispEmail, dispMobile,
  } from "views/functions.js"
-import {DisplayYesNo, DisplayPageHeader, BlankArea } from "CustomComponents/CustomComponents.js"
+import {DisplayYesNo, DisplayPageHeader, BlankArea,
+DisplayPatientDetails,
+} from "CustomComponents/CustomComponents.js"
 
 // styles
 import globalStyles from "assets/globalStyles";
@@ -585,31 +587,14 @@ export default function Patient() {
 		}
 		<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
 		{patientArray.map( (m, index) => 
-			<Grid key={"PAT"+index} item xs={12} sm={12} md={3} lg={3} >
-			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<div align="left" >
-			<Typography>
-			<span className={gClasses.patientName}>{m.displayName}</span>
-			</Typography>
-			<Typography>
-			<span className={gClasses.patientInfo}>{"Id: " + m.pid}</span>
-			</Typography>
-			<Typography className={gClasses.patientInfo}> 
-				{"Age: " + dispAge(m.age, m.gender)}
-			</Typography>
-			<Typography className={gClasses.patientInfo}> 
-				{"Email: "+ dispEmail(m.email)}
-			</Typography>
-			<Typography className={gClasses.patientInfo}> 
-				{"Mobile: "+ dispMobile(m.mobile)}
-			</Typography>
-			<BlankArea />
-			<VsButton name="Appt"  color='green' onClick={() => { handleAppointmentConfirm(m)}} />
-			<VsButton name="Visit" color='green' onClick={() => { handleVisit(m)}} />
-			<VsButton name="Edit" onClick={() => { handleEdit(m)}} />
-			<VsButton name="Del" color='red' onClick={() => { handleCancel(m)}} />
-			</div>
-			</Box>
+			<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={3} lg={3} >
+			<DisplayPatientDetails 
+				patient={m} 
+				button1={<VsButton name="Appt"  color='green' onClick={() => { handleAppointmentConfirm(m)}} />}
+				button2={<VsButton name="Visit" color='green' onClick={() => { handleVisit(m)}} />}
+				button3={<VsButton name="Edit" onClick={() => { handleEdit(m)}} />}
+				button4={<VsButton name="Del" color='red' onClick={() => { handleCancel(m)}} />}
+			/>
 			</Grid>
 		)}
 		</Grid>

@@ -59,7 +59,9 @@ import Link from '@material-ui/core/Link';
 // import { useHistory } from "react-router-dom";
 // import { UserContext } from "../../UserContext";
 
-import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo} from "CustomComponents/CustomComponents.js"
+import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
+DisplayPatientDetails,
+} from "CustomComponents/CustomComponents.js"
 
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 
@@ -87,6 +89,7 @@ import {
 	intString,
 	updatePatientByFilter,
 	dispAge, dispEmail, dispMobile,
+	ordinalSuffix,
 } from "views/functions.js";
 
 
@@ -95,9 +98,26 @@ const useStyles = makeStyles((theme) => ({
 		width: '100%',
 	}, 
 	dateTime: {
-			color: blue[700],
-			fontWeight: theme.typography.fontWeightBold,
-			backgroundColor: pink[100],
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		backgroundColor: pink[100],
+		align: 'center',
+		width: (isMobile()) ? '60%' : '20%',
+	}, 
+	dateTimeNormal: {
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(14),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: pink[100],
+		align: 'center',
+		//width: (isMobile()) ? '60%' : '20%',
+	}, 
+	dateTimeBlock: {
+		color: 'blue',
+		//fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: pink[100],
 	}, 
 	info: {
 			color: blue[700],
@@ -382,6 +402,7 @@ export default function Appointment() {
 	const [radioValue, setRadioValue] = useState("all");
 	
 	const [directoryMode, setDirectoryMode] = useState(defaultDirectoryMode);
+	const [monthYearDate, setMonthYearDate] = useState(new Date());
 	
   const [expandedPanel, setExpandedPanel] = useState(false);
   const handleAccordionChange = (panel) => (event, isExpanded) => {
@@ -807,7 +828,7 @@ export default function Appointment() {
 	function DisplayDailyAppointments() {
 	return(
 	<div>
-	<Typography className={classes.title}>{"Appointments of "+menuData.date+' '+month + ' ' + year}</Typography>
+	<Typography className={classes.title}>{"Appointments of "+ordinalSuffix(menuData.date)+' '+month + ' ' + year}</Typography>
 	<DisplayNewApptBtn />
 	{(newAppointment) && 
 		<div>
@@ -828,28 +849,11 @@ export default function Appointment() {
 			<DisplayFilter />
 			<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
 				{patientArray.map( (m, index) => 
-					<Grid key={"PAT"+index} item xs={12} sm={12} md={3} lg={3} >
-					<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-					<div align="left" >
-					<Typography>
-						<span className={gClasses.patientName}>{m.displayName}</span>
-					</Typography>
-					<Typography>
-						<span className={gClasses.patientInfo}>{"Id: " + m.pid}</span>
-					</Typography>
-					<Typography className={gClasses.patientInfo}> 
-						{"Age: " + dispAge(m.age, m.gender)}
-					</Typography>
-					<Typography className={gClasses.patientInfo}> 
-						{"Email: "+dispEmail(m.email)}
-					</Typography>
-					<Typography className={gClasses.patientInfo}> 
-						{"Mobile: "+dispMobile(m.mobile)}
-					</Typography>
-					<BlankArea />
-					<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />
-					</div>
-					</Box>
+					<Grid key={"PAT"+index} item xs={12} sm={6} md={3} lg={3} >
+					<DisplayPatientDetails 
+						patient={m} 
+						button1={<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />}
+					/>
 					</Grid>
 				)}
 			</Grid>
@@ -957,24 +961,27 @@ export default function Appointment() {
 				{currentPatient + " (Id: " + currentPatientData.pid  + ") " + currentPatientData.age + currentPatientData.gender.substr(0,1)}
 			</Typography>*/}
 			<Grid key="DateTime" container justify="right" alignItems="center" >
-				<Grid item xs={6} sm={6} md={6} lg={6} >
+				<Grid item xs={false} sm={false} md={1} lg={1} />
+				<Grid item xs={12} sm={12} md={3} lg={3} >
 					<Typography className={classes.apptName}>
 					{currentPatient + " (Id: " + currentPatientData.pid  + ") " + dispAge(currentPatientData.age, currentPatientData.gender)}
 					</Typography>
 				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
+				<Grid item xs={12} sm={12} md={2} lg={2} >
 					<Datetime 
+						className={classes.dateTimeBlock}
+						inputProps={{className: classes.dateTimeNormal}}
 						timeFormat={false} 
 						initialValue={aptDate}
 						dateFormat="DD/MM/yyyy"
 						isValidDate={(directoryMode) ? disableAllDt : disablePastDt}
-						className={classes.dateTime}
 						onClose={handleDate}
 					/>
 				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
+				<Grid item xs={12} sm={12} md={2} lg={2} >
 					<Datetime 
-						className={classes.dateTime}
+						className={classes.dateTimeBlock}
+						inputProps={{className: classes.dateTimeNormal}}
 						dateFormat={false} 
 						timeFormat="HH:mm"
 						initialValue={aptTime}
@@ -982,14 +989,11 @@ export default function Appointment() {
 						onClose={handleTime}
 					/>
 				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Button 
-						variant="contained" color="primary" className={gClasses.submit}
-						onClick={handleNewAppointmentSubmit}
-						>Add New
-					</Button>
+				<Grid item xs={12} sm={12} md={2} lg={2} >
+					<VsButton name="Add New" onClick={handleNewAppointmentSubmit} />
 				</Grid>
-			</Grid>
+				<Grid item xs={false} sm={false} md={2} lg={2} />			
+				</Grid>
 			</div>
 		}
 		</Box>
@@ -1207,6 +1211,7 @@ export default function Appointment() {
 	)}
 	
 	function DisplayBlockAppointments(props) {
+	let colCount = isMobile() ? 6 : 7;
 	return (
 		<Box className={classes.allAppt} border={1} width="100%">
 			<TableContainer>
@@ -1214,13 +1219,13 @@ export default function Appointment() {
 			<TableHead>
 				<TableRow align="center">
 					<TableCell key={"TH1"} component="th" scope="row" align="center" padding="none"
-					className={classes.th} colSpan={7}>
+					className={classes.th} colSpan={colCount}>
 					{"Appointment List"}
 					</TableCell>
 				</TableRow>
 				<TableRow align="center">
 					<TableCell key={"TH3"} component="th" scope="row" align="center" padding="none"
-						className={classes.th} colSpan={7}>
+						className={classes.th} colSpan={colCount}>
 						<DisplayFilterRadios />
 					</TableCell>
 				</TableRow>
@@ -1257,7 +1262,7 @@ export default function Appointment() {
 
 				let myDate = ooo.substr(6,2) + "-" + 
 					intString(Number(ooo.substr(4,2))+1, 2) + "-" + 
-					ooo.substr(0, 4);
+					(isMobile() ? ooo.substr(2, 2) : ooo.substr(0, 4));
 
 				let myTime = ooo.substr(8,2) + ":" + ooo.substr(10,2)
 				let myVisit;
@@ -1270,12 +1275,13 @@ export default function Appointment() {
 				let editAppt = (a.visit !== VISITTYPE.pending);
 				let cancelAppt = (a.visit !== VISITTYPE.pending);
 				let visitAppt = (a.visit !== VISITTYPE.pending);
+				let myName = a.displayName + (isMobile() ? "" : " (ID: " + a.pid + ")");
 				return(
 					<TableRow key={"TROW"+index}>
 					<TableCell key={"TD1"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 						<Typography className={classes.apptName}>
-							{a.displayName + " (ID: " + a.pid + ")"}
+							{myName}
 						</Typography>
 					</TableCell>
 					{/*<TableCell key={"TD2"+index} align="center" component="td" scope="row" align="center" padding="none"
@@ -1296,12 +1302,14 @@ export default function Appointment() {
 							{myTime}
 						</Typography>
 					</TableCell>
+					{(!isMobile()) &&
 					<TableCell key={"TD5"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 							<Typography className={classes.apptName}>
 							{myVisit}
 							</Typography>
 					</TableCell>
+					}
 					<TableCell key={"TD11"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 						<IconButton color="primary" disabled={visitAppt} size="small" onClick={() => { handleVisitAppt(a) } } >
@@ -1676,10 +1684,40 @@ export default function Appointment() {
 		</div>
 	)}
 	
+	async function handleMonthYear(d) {
+		setMonthlyMode(true);	
+		let myDate = d.toDate();
+		setMonthYearDate(myDate);
+		//alert(myDate);
+		
+		let myMonth = MONTHSTR[myDate.getMonth()];
+		let myYear = myDate.getFullYear().toString();
+		setYear(myYear)
+		setMonth(myMonth);
+
+		// last day
+		//let tmp = new Date(Number(year), MONTHSTR.indexOf(month)+1, 0)
+		//setLastDayOfMonth(tmp.getDate());
+
+		let myCounts = await getMonthlyAppointmentCounts(myMonth, myYear)
+		await generateMatrix(myMonth, myYear, myCounts);
+
+	}
+	
 	function DisplayDirectoryMode() {
 	return(
 	<div>
-		<DisplayMonthYear />
+		<BlankArea />
+		<Datetime 
+			timeFormat={false} 
+			initialValue={monthYearDate}
+			dateFormat="MMMM yyyy"
+			inputProps={{className: classes.dateTime}}
+			onClose={handleMonthYear}
+			className={classes.dateTimeBlock}
+		/>
+		<BlankArea />
+		{/*<DisplayMonthYear /> */}
 		{(monthlyMode) && <DisplayApptMatrix />}
 		{(!monthlyMode) && <DisplayDailyAppointments />}
 	</div>

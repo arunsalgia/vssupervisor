@@ -47,7 +47,9 @@ import Avatar from "@material-ui/core/Avatar"
 // import { useHistory } from "react-router-dom";
 // import { UserContext } from "../../UserContext";
 
-import {DisplayYesNo, DisplayPageHeader, ValidComp, BlankArea} from "CustomComponents/CustomComponents.js"
+import {DisplayYesNo, DisplayPageHeader, ValidComp, BlankArea,
+DisplayPatientDetails,
+} from "CustomComponents/CustomComponents.js"
 
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 
@@ -217,7 +219,7 @@ export default function Visit() {
 	const [visitArray, setVisitArray] = useState([])
 
 	const [nextVisitTime, setNextVisitTime] = useState(2);
-	const [nextVisitUnit, setNextVisitUnit] = useState(unitArray[0]);
+	const [nextVisitUnit, setNextVisitUnit] = useState(unitArray[1]);
 	
 	const [addEditNotes, setAddEditNotes] = useState(false);
 	
@@ -1250,78 +1252,14 @@ export default function Visit() {
 	
 	// handle visits
 	
-	// filter patient 
-	function oldDisplaySearch() {
-		return (
-			<Grid key="DisplaySearch" container justify="center" alignItems="center" >
-			<Grid item xs={2} sm={2} md={2} lg={2} />
-			<Grid item xs={4} sm={4} md={4} lg={4} >
-				<TextField id="filter" variant="outlined" fullWidth label="Filter Patient" padding={10} 
-				defaultValue={searchText}
-				//onChange={(event) => setSearchText(event.target.value)}
-				InputProps={{
-					endAdornment: (
-						<InputAdornment position="end">
-							<SearchIcon onClick={selectFilter}/>
-						</InputAdornment>
-				)}}
-				/>
-			</Grid>
-			<Grid item xs={4} sm={4} md={4} lg={4} >
-				{/*<InputLabel align= "left" id="demo-simple-select-label"></InputLabel>*/}
-				<FormControl fullWidth className={classes.formControl}>
-        <InputLabel htmlFor="grouped-native-select">Select Patient Name</InputLabel>
-				<Select labelId='team' id='team' name="team" padding={10}
-					variant="outlined" required fullWidth 
-					value={currentPatient}
-					//size="3"
-					inputProps={{
-						name: 'Group',
-						id: 'filled-age-native-simple',
-						label: "Select Patient",
-					}}
-					onChange={(event) => selectPatient(event.target.value)}
-				>
-					{patientArray.map(x =>	<MenuItem key={x.displayName} value={x.displayName}>{x.displayName + " (Id:"+ x.pid+") ("+x.age+x.gender.substr(0,1)+")"}</MenuItem>)}
-				</Select>
-				 </FormControl>
-			</Grid>
-			<Grid item xs={2} sm={2} md={2} lg={2} />
-			</Grid>
-		);
-	}
 	
-	
-	async function old_getPatientList(filter) {
-		filter = filter.trim();
-		var subcmd = "list"
-		if (filter != "") {
-			// if it is complete numeric then it must by ID
-			subcmd = (validateInteger(filter))	? "listbyid" : subcmd = "listbyname";
-		} else
-			subcmd = "list"
-		
-		try {
-			var resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/patient/${subcmd}/${userCid}/${filter}`)
-			//console.log(resp.data);
-			let tmp = resp.data;
-			tmp.forEach(ttt => {
-				ttt.email = decrypt(ttt.email);
-			});
-			//console.log(tmp);
-			setPatientArray(tmp);
-		} catch (e) {
-			console.log(e);
-			setPatientArray([]);
-		}
-	}
-	
-	function DisplayPatientDetails() {
+	function DisplayPatientName() {
 	return(
 		<Typography className={classes.modalHeader}>
 		{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "+currentPatientData.age+currentPatientData.gender.substring(0,1)}
 		</Typography>
 	)}
+	
 	// yes no handler
 	function yesNoHandler(id, action) {
 		console.log(id, action);
@@ -1398,28 +1336,11 @@ export default function Visit() {
 		<DisplayFilter />
 		<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
 			{patientArray.map( (m, index) => 
-				<Grid key={"PAT"+index} item xs={12} sm={12} md={3} lg={3} >
-				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-				<div align="left" >
-				<Typography>
-				<span className={gClasses.patientName}>{m.displayName}</span>
-				</Typography>
-				<Typography>
-				<span className={gClasses.patientInfo}>{"Id: " + m.pid}</span>
-				</Typography>
-				<Typography className={gClasses.patientInfo}> 
-					{"Age: " + dispAge(m.age, m.gender)}
-				</Typography>
-				<Typography className={gClasses.patientInfo}> 
-					{"Email: "+dispEmail(m.email)}
-				</Typography>
-				<Typography className={gClasses.patientInfo}> 
-					{"Mobile: "+dispMobile(m.mobile)}
-				</Typography>
-				<BlankArea />
-				<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />
-				</div>
-				</Box>
+				<Grid key={"PAT"+index} item xs={12} sm={6} md={3} lg={3} >
+				<DisplayPatientDetails 
+					patient={m} 
+					button1={<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />}
+					/>
 				</Grid>
 			)}
 		</Grid>
