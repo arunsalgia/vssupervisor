@@ -710,7 +710,7 @@ export function getOnlyDate(t) {
 	let outStr  = "";
 	tmp = t.getDate();
 	outStr += ((tmp < 10) ? "0" : "") + tmp.toString() + "-"
-	tmp = t.getMonth();
+	tmp = t.getMonth() + 1;
 	outStr += ((tmp < 10) ? "0" : "") + tmp.toString() + "-"
 	outStr += t.getFullYear();
 	

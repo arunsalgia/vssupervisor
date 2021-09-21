@@ -203,7 +203,7 @@ function setSearchText(sss) { searchText = sss;}
 //let info="";
 //function setInfo(i) { info = i; }
 
-const userCid = sessionStorage.getItem("cid");
+var userCid;
 export default function Visit() {
   
   const classes = useStyles();
@@ -304,6 +304,7 @@ export default function Visit() {
 		}
 		setMedQty();
 		getAllMedicines();
+		userCid = sessionStorage.getItem("cid");
 		// find out if we have 
 		checkPatient();
   }, []);

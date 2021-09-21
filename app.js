@@ -210,11 +210,13 @@ QuoteSchema = mongoose.Schema({
 
 CustomerSchema = mongoose.Schema({
 	name: String,
-	plan: String,
-	name: String,
+	//displayNamename: String,
 	
+	plan: String,
 	email: String,
 	mobile: String,
+	
+	fee: Number,
 	
 	addr1: String,
 	addr2: String,

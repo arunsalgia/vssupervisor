@@ -182,7 +182,7 @@ let searchText = "";
 function setSearchText(sss) { searchText = sss;}
 
 
-const userCid = sessionStorage.getItem("cid");
+var userCid; 
 
 export default function Medicine() {
   const classes = useStyles();
@@ -214,6 +214,7 @@ export default function Medicine() {
       const us = async () => {
 		
       }
+			userCid = sessionStorage.getItem("cid");
 			us();
   }, [])
 

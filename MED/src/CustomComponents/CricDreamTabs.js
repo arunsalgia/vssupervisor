@@ -27,8 +27,11 @@ import Visit from "views/Visit/Visit"
 import Appointment from "views/Appointment/Appointment"
 import Medicine from "views/Medicine/Medicine.js" 
 import Patient from "views/Patient/Patient.js" 
-import Sample from "views/MED/Sample.js"
+
 import NextVisit from "views/NextVisit/NextVisit";
+
+import Customer from "views/SuperUser/Customer";
+import Sample from "views/SuperUser/Sample.js"
 
 // cd items import
 //import Dash from "views/Dashboard/Dashboard"
@@ -299,36 +302,23 @@ export function CricDreamTabs() {
 
   const handlePatient = () => { handleClose(); setMenuValue(901);}
 	const handleMedicine = () => { handleClose(); setMenuValue(902);}
-	const handleSample = () => { handleClose(); setMenuValue(903);}
 	const handleNextVisit = () => { handleClose(); setMenuValue(904);}
 	
   const handleProfile = () => { handleClose(); setMenuValue(101);}
 	const handleContactUs = () => { handleClose(); setMenuValue(202);}
 	
+	const handleSample = () => { handleClose(); setMenuValue(801);}
+	const handleCustomer = () => { handleClose(); setMenuValue(802);}
 	
-  //const handlePassword = () => { handleClose(); setMenuValue(102);}
-  //const handleTeam = () => { setMenuValue(3);  }
-  //const handleMatch = () => { handleClose(); setMenuValue(101);}
-  //const handleAuction = () => { handleClose(); setMenuValue(102);}
-  //const handleCaptain = () => { handleClose(); setMenuValue(103);}
-  //const handleGroup = () => { handleGrpClose(); setMenuValue(104);}
-  //const handleWallet = () => { handleClose(); setMenuValue(105);}
-  // 108 for add wallet
-  //const handleHelpDesk = () => { handleClose(); setMenuValue(201);}
-  
-  //const handleSuImage = () => { handleClose(); setMenuValue(303);}
-
-  //const handleGroupNew = () => { handleGrpClose(); setMenuValue(1001);}
-  //const handleGroupJoin = () => { handleGrpClose(); setMenuValue(1002);}
-  //const handleGroupDetails = () => { handleGrpClose(); setMenuValue(1003);}
-  //const handlePlayerInfo = () => { handleGrpClose(); setMenuValue(1004);}
 
   const handleLogout = () => {
     handleClose();
+		
 		window.sessionStorage.setItem("uid", "")
+		window.sessionStorage.setItem("cid", "");
 		window.sessionStorage.setItem("userName", "");
-		window.sessionStorage.setItem("userPlan", "");
-		window.sessionStorage.setItem("admin", false)
+		window.sessionStorage.setItem("userType", "");
+	 
     cdRefresh();  
   };
 
@@ -354,6 +344,9 @@ export function CricDreamTabs() {
 			
       case 101: return <Profile />;
       case 102: return <ContactUs />;
+
+			case 801: return <Sample />
+			case 802: return <Customer />
 
       case 901: return <Patient />;
       case 902: return <Medicine />;
@@ -496,9 +489,15 @@ export function CricDreamTabs() {
                 <Divider/>
 								<MenuItem onClick={handlePatient}>Patient</MenuItem>
 								<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
-									{/*<MenuItem onClick={handleSample}>Sample</MenuItem>*/}
 								<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
                 <Divider/>
+								{(window.sessionStorage.getItem("userType") === "Developer") &&
+									<div>
+									<MenuItem onClick={handleSample}>Sample</MenuItem>
+									<MenuItem onClick={handleCustomer}>Customer</MenuItem>
+									<Divider/>
+									</div>
+								}
                 <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>       
                 <Divider/>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>

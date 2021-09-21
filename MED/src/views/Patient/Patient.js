@@ -211,7 +211,7 @@ function setSearchText(sss) { searchText = sss;}
 
 
 const defaultDirectoryMode=true;
-const userCid = sessionStorage.getItem("cid");
+var userCid;
 
 export default function Patient() {
 	//const history = useHistory();	
@@ -260,6 +260,7 @@ export default function Patient() {
 		}
 		us();
 		sessionStorage.setItem("YESNOMODAL", "");
+		userCid = sessionStorage.getItem("cid");
   }, [])
 
 	

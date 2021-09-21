@@ -394,7 +394,7 @@ let aptTime = new Date(2021, 9, 1, 10, 0);
 function setAptTime(d) { aptTime = d; }
 
 
-const userCid = sessionStorage.getItem("cid");
+var userCid
 export default function Appointment() {
   const classes = useStyles();
 	const gClasses = globalStyles();
@@ -474,6 +474,7 @@ export default function Appointment() {
 		}
 
 		
+		 userCid = sessionStorage.getItem("cid");
 		// make year
 		WEEKENDS = [0, 6];			//JSON.parse(`${process.env.REACT_APP_WEEKENDS}`)
 		let x = `${process.env.REACT_APP_WEEKENDS}`;
