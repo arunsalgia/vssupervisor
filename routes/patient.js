@@ -3,6 +3,7 @@ const {
 	ALPHABETSTR,
 	getLoginName, getDisplayName,
 	svrToDbText, dbToSvrText,
+	dbencrypt, dbdecrypt,
 	getMaster, setMaster,
 } = require('./functions'); 
 
@@ -121,9 +122,8 @@ router.get('/new/:cid/:pName', async function(req, res, next) {
 	
 	// Check if patient already registered
   var tmp = await M_Patient.find({cid: cid, name: lname});
-  if (tmp.length > 1)  { senderr(res, 601, `Patient ${dname} already in database.`); return; }
-	if (tmp.length == 1) { sendok(res, {isNew: false, record: tmp[0]}); return; }
-
+  if (tmp.length > 0)  { senderr(res, 601, `Patient ${dname} already in database.`); return; }
+	
 	let newPid = await getNewPid();
 	console.log("New Pid", newPid);
 	
@@ -131,14 +131,14 @@ router.get('/new/:cid/:pName', async function(req, res, next) {
 	mRec.cid = cid;
 	mRec.name = lname;
 	mRec.displayName = dname;
-	mRec.email= 'noemail@email.com';
-	mRec.mobile = 1234567890;
+	mRec.email= svrToDbText("-");
+	mRec.mobile = 0;
 	mRec.age = 0;
 	mRec.gender = 'Male';
 	mRec.enabled = true;
 	mRec.pid = newPid;
 	mRec.save();
-	sendok(res, {isNew: true, record: mRec});
+	sendok(res, mRec);
 });
 
 router.get('/update/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {

@@ -18,7 +18,7 @@ axios = require('axios');
 app = express();
 
 PRODUCTION=(process.env.PRODUCTION.toUpperCase() === "TRUE");   
-WEB=process.env.WEB;
+WEB=(process.env.WEB.toUpperCase() === "TRUE");   
 console.log("Prod", PRODUCTION);
 console.log("Web", WEB);
 
@@ -34,7 +34,7 @@ if (PRODUCTION) {
   BASELINK='http://localhost:3000';
 }
 PORT = process.env.PORT || 4000;
-
+VISITTYPE = {pending: 'pending', cancelled: 'cancelled', over: 'over'};
 
 
 http = require('http');
@@ -159,6 +159,16 @@ VisitSchema = mongoose.Schema({
 	cid: String,
 });
 
+NextVisitSchema = mongoose.Schema({
+  pid: Number,
+	displayName: String,
+	visitDate: Date,
+	nextVisit: Date,
+	status: String,
+	cid: String,
+});
+
+
 HolidaySchema = mongoose.Schema({
   date: Number,
 	month: Number,
@@ -225,6 +235,7 @@ M_Appointment = mongoose.model('Appointment', AppointmentSchema);
 M_Info = mongoose.model('Info', InfoSchema);
 M_Quote = mongoose.model('Quote', QuoteSchema);
 M_Customer = mongoose.model('Customer', CustomerSchema);
+M_NextVisit = mongoose.model('NextVisit', NextVisitSchema);
 
 router = express.Router();
 
@@ -263,7 +274,7 @@ if (WEB) {
 // CONNECTION EVENTS
 // When successfully connected
 mongoose.connection.on('connected', function () {
-  console.log('Mongoose default connection open to ' + process.env.MONGOCONNECTION);
+  //console.log('Mongoose default connection open to ' + process.env.MONGOCONNECTION);
   db_connection = true;
   connectRequest = true;
 });

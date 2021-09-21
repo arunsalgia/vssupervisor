@@ -703,3 +703,45 @@ export function ordinalSuffix(i) {
     }
     return i + "th";
 }
+
+export function getOnlyDate(t) {
+	t = new Date(t);		//?????????????????? why required
+	let tmp;
+	let outStr  = "";
+	tmp = t.getDate();
+	outStr += ((tmp < 10) ? "0" : "") + tmp.toString() + "-"
+	tmp = t.getMonth();
+	outStr += ((tmp < 10) ? "0" : "") + tmp.toString() + "-"
+	outStr += t.getFullYear();
+	
+	if (false) {
+		outStr += " ";	
+		tmp = t.getHours();
+		outStr += ((tmp < 10) ? "0" : "") + tmp.toString() + ":"
+		tmp = t.getMinutes();
+		outStr += ((tmp < 10) ? "0" : "") + tmp.toString();
+	}
+	return outStr;
+}
+
+export async function downloadVisit() { 
+  try {
+		let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/visit/downloadvisit`;
+    let response = await axios({ method: 'get', url: myURL, responseType: 'arraybuffer',
+      // onDownloadProgress: (progressEvent) => {
+      //   // let newPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      //   // console.log("File download in progress ", newPercent);
+      // },
+		});
+    let myFile = "patientVisit.docx";
+    console.log(myFile);
+    await download(response.data, myFile);
+    console.log("download over");
+  } catch (e) {
+    console.log(e);
+    console.log("in try catch");
+  } 
+  
+  console.log("Debug complete");
+
+}

@@ -4,7 +4,7 @@ const {  akshuGetUser, GroupMemberCount,
 } = require('./functions'); 
 var router = express.Router();
 
-const VISITTYPE = {pending: 'pending', cancelled: 'cancelled'}
+
 
 /* GET users listing. */
 router.use('/', function(req, res, next) {

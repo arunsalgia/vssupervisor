@@ -10,6 +10,7 @@ import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import VsButton from "CustomComponents/VsButton";
+import VsCancel from "CustomComponents/VsCancel";
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
@@ -60,13 +61,14 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
-import CancelIcon from '@material-ui/icons/Cancel';
+//import CancelIcon from '@material-ui/icons/Cancel';
 
 //colours 
 import { red, blue 
 } from '@material-ui/core/colors';
 
 import { callYesNo, 
+	downloadVisit,
 	encrypt, decrypt, 
 	validateInteger,
 	updatePatientByFilter,
@@ -228,21 +230,7 @@ export default function Visit() {
 	const [hideInfo, setHideInfo] = useState(true);
 	const [editMedicine, setEditMedicine] = useState({});
 	
-	// for old medicine
-	//const [currentVisit, setCurrentVisit] = useState("");
-	
-
-	
-	// for new patient to be added
-	// or patient to be modified
-	//const	[patientName, setPatientName] = useState("");
-	//const [patientEmail, setPatientEmail] = useState("");
-	//const [patientMobile, setPatientMobile] = useState("");
-	//const [patientGender, setPatientGender] = useState("Male");
-	//const [patientAge, setPatientAge] = useState(30);
-	
-	// medicines
-
+	const [newPatient, setNewPatient] = useState(false)
 	
 	const [emurVisitNumber, setEmurVisitNumber] = useState(0);
 	const [emurNumber, setEmurNumber] = useState(0);
@@ -257,6 +245,7 @@ export default function Visit() {
 	const [registerStatus, setRegisterStatus] = useState(0);
 	const [registerError, setRegisterError] = useState("");
 	const [modalRegister, setModalRegister] = useState(0);
+	const [visitRegister, setVisitRegister] = useState(0);
 	//const [rowsPerPage, setRowsPerPage] = useState(COUNTPERPAGE);
   //const [page, setPage] = useState(0);
 	
@@ -353,13 +342,7 @@ export default function Visit() {
 		
 		
 	function DisplayCloseModal() {
-	return (
-		<div align="right">
-		<IconButton color="secondary"  size="small" onClick={closeModal} >
-			<CancelIcon />
-		</IconButton>
-		</div>
-	)}
+	return ( <VsCancel align="right" onClick={closeModal} /> )}
 	
 	
 	//======old funcs
@@ -453,6 +436,9 @@ export default function Visit() {
         break;
       case 302:
         myMsg = `Remark cannot be blank`;
+        break;
+			case 401:
+        myMsg = `Patient name already in database`;
         break;
       default:
           myMsg = "Unknown Error";
@@ -861,12 +847,60 @@ export default function Visit() {
 		setVisitArray(tmpArray);
 	}
 	
+		
+	function VisitRegisterStatus() {
+    // console.log(`Status is ${modalRegister}`);
+    let myMsg;
+    switch (visitRegister) {
+      case 0:
+        myMsg = "";
+        break;
+      case 100:
+        myMsg = `Successfully updated new Visit to database`;
+        break;
+      case 101:
+        myMsg = `Unable to save new Visit `;
+        break;
+			case 200:
+        myMsg = `Successfully generated document of new Visit`;
+        break;
+      case 201:
+        myMsg = `Unable to generate document of new Visit `;
+        break;
+      case 300:
+        myMsg = `Successfully uploaded Visit document`;
+        break;
+      case 301:
+        myMsg = `Unable to download document of new Visit `;
+        break;
+      default:
+          myMsg = "Unknown Error";
+          break;
+    }
+    return(
+      <Grid key="VisitRegister" container justify="center" alignItems="center" >
+				<Grid item xs={11} sm={11} md={11} lg={11} >
+					<Typography className={((visitRegister % 100) != 0) ? gClasses.error : gClasses.nonerror}>
+					{myMsg}
+					</Typography>
+				</Grid>
+				<Grid item xs={1} sm={1} md={1} lg={1} >
+				{ (visitRegister !== 0) && <VsCancel onClick={() => {setVisitRegister(0)}} />}
+				</Grid>
+      </Grid>
+    )
+  }
+	
+	
+	
 	function DisplayVisitUpdateButton() {
 	if  ((visitArray.length > 0) && (visitArray[0].visitNumber === 0)) 
 		return (
 			<div align="left">
 			<VsButton name="Update New Visit"  onClick={updateVisit} />
-			<VsButton name="Print Visit"  onClick={printVisit} />
+			<VsButton name="Generate Visit Document"  onClick={generateVisit} />
+			<VsButton name="Download Visit Document"  onClick={printVisit} />
+			<VisitRegisterStatus />
 			</div>
 		)
 	else
@@ -914,13 +948,9 @@ export default function Visit() {
 		setVisitArray(tmp);
 	}
 	
-	async function printVisit() {
-		alert("To be implemented");
-	}
 	
-	async function updateVisit() {
-		//console.log("Update today's visit", visitArray[0].medicines);
-		
+	
+	function validateNewVisit() {
 		let errcode = 0;
 		
 		// confirm of atleast 1 medicine given
@@ -954,22 +984,62 @@ export default function Visit() {
 			}
 			
 		};
+		return (errcode);
+	}
+	
+	async function generateVisit() {
+				//console.log("Update today's visit", visitArray[0].medicines);
+		let errcode = validateNewVisit();
+
+		if (errcode !== 0) { setVisitError(errcode); return; }
 		
+		let newVisit = visitArray.length;
+		let newVisitInfo = JSON.stringify(
+		{
+			appointment: currentAppt,
+			visit:       visitArray[0],
+			nextVisit:   {after: nextVisitTime, unit: nextVisitUnit},
+		});
+		
+		
+		try {
+			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/printdoc/${userCid}/${newVisitInfo}`);
+			setVisitRegister(200);
+		} catch (e) {
+			console.log(e)
+			setVisitRegister(201);
+		}
+	}
+	
+	async function printVisit() {	
+		try {
+			await downloadVisit();
+			setVisitRegister(300);
+		} catch (e) {
+			setVisitRegister(301);
+		}
+	}
+	
+	async function updateVisit() {
+		//console.log("Update today's visit", visitArray[0].medicines);
+		let errcode = validateNewVisit();
+
 		if (errcode == 0) {
 			let newVisit = visitArray.length;
 			let newVisitInfo = JSON.stringify(
 			{
 				appointment: currentAppt,
-				visit:       visitArray[0]
+				visit:       visitArray[0],
+				nextVisit:   {after: nextVisitTime, unit: nextVisitUnit},
 			});
 			try {
-				errcode = 200;
 				await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/updatenewvisit/${userCid}/${newVisit}/${newVisitInfo}`)
+				setVisitRegister(100);
 			} catch (e) {
 				console.log(e)
-				errcode = 201;
+				setVisitRegister(101);
 			}
-		}
+		} else
 		setVisitError(errcode);
 	}
 	
@@ -1267,14 +1337,55 @@ export default function Visit() {
 	
 	//--------
 	
+	async function addNewPatient() {
+		//let myName=document.getElementById("emurName").value;
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/new/${userCid}/${emurName}`;
+			let resp = await axios.get(myUrl);
+			//let tmpArray=[].concat(patientArray);
+			//tmpArray.push(resp.data);
+			//tmpArray.sort((a, b) => { return a.order - b.order;});
+			//setPatientArray
+			closeModal();
+			setPatientArray([resp.data]);
+		} catch(e) {
+			console.log(e);
+			setModalRegister(401);
+		}
+	}
+	
+	function DisplayNewPatient() {
+	return (	
+	<Container component="main" maxWidth="md">
+		<VsCancel align="right" onClick={closeModal} />
+		<Typography align="center" className={classes.modalHeader}>"Input new Patient Name"</Typography>
+		<BlankArea />
+			<ValidatorForm align="center" className={gClasses.form} onSubmit={addNewPatient} >
+			<Grid key="NewPatirnt" container justify="center" alignItems="center" >
+				<Grid item xs={10} sm={10} md={10} lg={10} >
+					<TextValidator variant="outlined" required fullWidth color="primary"
+						id="emurName" label="New Patient Name" name="emurName"
+						onChange={(event) => setEmurName(event.target.value)}
+						autoFocus
+						value={emurName}
+					/>
+				</Grid>
+				<Grid item xs={2} sm={2} md={2} lg={2} >
+					<VsButton name="New Patient" />
+				</Grid>
+			</Grid>
+			</ValidatorForm>
+			<ModalResisterStatus />
+	</Container>
+	)}
+	
 	function DisplayFilter() {
 	return (	
-		<Grid className={classes.noPadding} key="Filter" container justify="center" alignItems="center" >
-			<Grid item xs={false} sm={false} md={3} lg={3} />
-			<Grid item xs={12} sm={12} md={6} lg={6} >
-				<TextField id="filter"  padding={5} variant="outlined" fullWidth label="Patient Name / Id" 
+	<Grid className={classes.noPadding} key="Filter" container justify="center" alignItems="center" >
+		<Grid item xs={false} sm={false} md={3} lg={3} />
+		<Grid item xs={9} sm={9} md={6} lg={6} >
+			<TextField id="filter"  padding={5} variant="outlined" fullWidth label="Patient Name / Id" 
 				defaultValue={searchText}
-				//onChange={(event) => setSearchText(event.target.value)}
 				InputProps={{
 					endAdornment: (
 						<InputAdornment position="end">
@@ -1282,9 +1393,11 @@ export default function Visit() {
 						</InputAdornment>
 				)}}
 			/>
-			</Grid>
-			<Grid item xs={false} sm={false} md={3} lg={3} />
 		</Grid>
+		<Grid item xs={3} sm={3} md={3} lg={3} >
+			<VsButton name="New Patient" onClick={() => { setEmurName(""); openModal("NEWPATIENT")}} />	
+		</Grid>	
+	</Grid>
 	)}
 	
 	async function selectFilter() {
@@ -1327,9 +1440,7 @@ export default function Visit() {
 	}
 	{(selectPatient) && 
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-		<div align="right"><IconButton color="secondary"  size="small" onClick={() => {setSelectPatient(false)}} >
-				<CancelIcon />
-			</IconButton></div>
+			<VsCancel align="right"onClick={() => {setSelectPatient(false)}} />
 			<Typography>
 				<span className={classes.patientName}>Select Patient</span>
 			</Typography>
@@ -1524,6 +1635,19 @@ export default function Visit() {
 	}
 	</Container>
 	<Modal
+		isOpen={modalIsOpen == "NEWPATIENT"}
+		shouldCloseOnOverlayClick={false}
+		onAfterOpen={afterOpenModal}
+		onRequestClose={closeModal}
+		style={modalStyles}
+		contentLabel="Example Modal"
+		aria-labelledby="modalTitle"
+		aria-describedby="modalDescription"
+		ariaHideApp={false}
+	>
+		<DisplayNewPatient />
+	</Modal>
+	<Modal
 		isOpen={modalIsOpen == "REMARK"}
 		shouldCloseOnOverlayClick={false}
 		onAfterOpen={afterOpenModal}
@@ -1561,7 +1685,20 @@ export default function Visit() {
 		ariaHideApp={false}
 	>
 		<DisplayEditUserNotes />
-	</Modal>				
+	</Modal>	
+	<Modal
+		isOpen={modalIsOpen == "ERROR"}
+		shouldCloseOnOverlayClick={false}
+		onAfterOpen={afterOpenModal}
+		onRequestClose={closeModal}
+		style={modalStyles}
+		contentLabel="Example Modal"
+		aria-labelledby="modalTitle"
+		aria-describedby="modalDescription"
+		ariaHideApp={false}
+	>
+		<DisplayVisitError />
+	</Modal>						
   </div>
   );    
 }

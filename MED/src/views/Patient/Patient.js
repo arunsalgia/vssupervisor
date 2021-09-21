@@ -9,6 +9,7 @@ import SwitchBtn from '@material-ui/core/Switch';
 import Modal from 'react-modal';
 import Box from '@material-ui/core/Box';
 import VsButton from "CustomComponents/VsButton";
+import VsCancel from "CustomComponents/VsCancel";
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import FormControl from '@material-ui/core/FormControl';
@@ -59,7 +60,7 @@ import {dynamicModal } from "assets/dynamicModal";
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
-import CancelIcon from '@material-ui/icons/Cancel';
+//import CancelIcon from '@material-ui/icons/Cancel';
 
 import {red, blue, yellow, orange } from '@material-ui/core/colors';
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
@@ -322,11 +323,7 @@ export default function Patient() {
 	
 	function DisplayCloseModal() {
 	return (
-		<div align="right">
-		<IconButton color="secondary"  size="small" onClick={closeModal} >
-			<CancelIcon />
-		</IconButton>
-		</div>
+		<VsCancel align="right" onClick={closeModal} />
 	)}
 	
 	
@@ -524,9 +521,7 @@ export default function Patient() {
 		{(!newPatient) && <DisplayNewPatientBtn />}
 		{(newPatient) &&
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<div align="right"><IconButton color="secondary"  size="small" onClick={() => {setNewPatient(false)}} >
-				<CancelIcon />
-			</IconButton></div>
+			<VsCancel align="right" onClick={() => {setNewPatient(false)}} />
 			<Typography className={classes.header}>{(addEdit == "ADD") ? "Add New Patient" : "Edit Patient"}</Typography>
 			<BlankArea />
 			<ValidatorForm className={classes.form} onSubmit={handleAddEditSubmit}>

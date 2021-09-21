@@ -28,7 +28,7 @@ import Appointment from "views/Appointment/Appointment"
 import Medicine from "views/Medicine/Medicine.js" 
 import Patient from "views/Patient/Patient.js" 
 import Sample from "views/MED/Sample.js"
-
+import NextVisit from "views/NextVisit/NextVisit";
 
 // cd items import
 //import Dash from "views/Dashboard/Dashboard"
@@ -300,6 +300,7 @@ export function CricDreamTabs() {
   const handlePatient = () => { handleClose(); setMenuValue(901);}
 	const handleMedicine = () => { handleClose(); setMenuValue(902);}
 	const handleSample = () => { handleClose(); setMenuValue(903);}
+	const handleNextVisit = () => { handleClose(); setMenuValue(904);}
 	
   const handleProfile = () => { handleClose(); setMenuValue(101);}
 	const handleContactUs = () => { handleClose(); setMenuValue(202);}
@@ -357,6 +358,7 @@ export function CricDreamTabs() {
       case 901: return <Patient />;
       case 902: return <Medicine />;
 			//case 903: return <Sample />
+			case 904: return <NextVisit />
 
 /*
       //case 4: 
@@ -495,6 +497,7 @@ export function CricDreamTabs() {
 								<MenuItem onClick={handlePatient}>Patient</MenuItem>
 								<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
 									{/*<MenuItem onClick={handleSample}>Sample</MenuItem>*/}
+								<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
                 <Divider/>
                 <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>       
                 <Divider/>

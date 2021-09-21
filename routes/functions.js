@@ -441,6 +441,40 @@ ALPHABETSTR = [
 "U", "V", "W", "X", "Y", "Z"
 ]
 
+var ROOTDIR="";
+function getRootDir() {
+  if (ROOTDIR === "")
+    ROOTDIR = process.cwd() + "/"
+  return ROOTDIR;
+} 
+
+function getFileName(productName, productVersion, productType) {
+  let myFile = getRootDir() + ARCHIVEDIR + 
+    productName + "_" + 
+    productVersion + "." + 
+    productType;
+  return myFile 
+}
+
+function fileExist(myFile) {
+  status = fs.existsSync(myFile)
+  return status;
+}
+
+function renameFile(oldfile, newFile) {
+  // if new file already exists delete it
+  if (fileExist(newFile))
+    fs.unlinkSync(newFile);
+
+    // now rename the file
+  fs.renameSync(oldfile, newFile);
+}
+
+function deletefile(fileName) {
+  if (fileExist(fileName))
+    fs.unlinkSync(fileName);
+}
+
 module.exports = {
 	ALPHABETSTR,
   getLoginName, getDisplayName,

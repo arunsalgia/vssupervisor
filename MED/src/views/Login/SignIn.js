@@ -132,7 +132,7 @@ export default function SignIn() {
     let response = ""
     try { 
       let enPassword = encrypt(myPassword);
-      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/criclogin/${myUserName}/${enPassword}`); 
+      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/jaijiendra/${myUserName}/${enPassword}`); 
       setError("", false);
     } catch (err) {
       setError("Invalid Username / Password", true);

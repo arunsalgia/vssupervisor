@@ -13,6 +13,7 @@ import globalStyles from "assets/globalStyles";
 // import modalStyles from "assets/modalStyles";
 //import Header from "CustomComponents/Header";
 import useScript from './useScript';
+import VsButton from "CustomComponents/VsButton";
 
 import { downloadApk } from "views/functions";
 import { BlankArea } from 'CustomComponents/CustomComponents';
@@ -293,7 +294,7 @@ const Welcome = () => {
 	
 	function ContinueLoginButton() {
 	return (
-		<Button type="submit" variant="contained" color="primary" 
+		<Button variant="contained" color="primary" 
 		onClick={handleLogin}
 		className={classes.loginButton}
 		>
@@ -301,8 +302,6 @@ const Welcome = () => {
 		</Button>
 	)};
 	
-	console.log("About to render Welcome");
-
 	function DisplayQOD() {
 	return (
 	<div className={(isMobile()) ? classes.quoteMobile : classes.quote}> 

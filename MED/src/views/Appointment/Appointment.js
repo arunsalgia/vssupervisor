@@ -27,6 +27,7 @@ import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Box from '@material-ui/core/Box';
 import Modal from 'react-modal';
 import VsButton from "CustomComponents/VsButton";
+import VsCancel from "CustomComponents/VsCancel"
 import { borders } from '@material-ui/system';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormLabel from '@material-ui/core/FormLabel';
@@ -37,7 +38,6 @@ import Radio from '@material-ui/core/Radio';
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import moment from "moment";
-
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
@@ -72,7 +72,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
-import CancelIcon from '@material-ui/icons/Cancel';
+//import CancelIcon from '@material-ui/icons/Cancel';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 
 //colors 
@@ -399,6 +399,8 @@ export default function Appointment() {
   const classes = useStyles();
 	const gClasses = globalStyles();
 	
+	const [emurName, setEmurName] = useState("");
+	const [modalRegister, setModalRegister] = useState(0)
 	const [radioValue, setRadioValue] = useState("all");
 	
 	const [directoryMode, setDirectoryMode] = useState(defaultDirectoryMode);
@@ -502,6 +504,59 @@ export default function Appointment() {
 		checkPatient();
   }, []);
 
+function ModalResisterStatus() {
+    // console.log(`Status is ${modalRegister}`);
+		let regerr = true;
+    let myMsg;
+    switch (modalRegister) {
+      case 0:
+        myMsg = "";
+				regerr = false;
+        break;
+      case 100:
+        myMsg = "Medicine successfully updated";
+				regerr = false;
+        break;
+      case 101:
+        myMsg = `All the doses cannot be 0`;
+        break;
+      case 102:
+        myMsg = `No Medicine selected`;
+        break;
+      case 200:
+        myMsg = "Note successfully updated";
+				regerr = false;
+        break;
+      case 201:
+        myMsg = `All notes cannot be 0`;
+        break;
+      case 202:
+        myMsg = `Notes cannot be blank`;
+        break;
+      case 300:
+        myMsg = "Remark successfully updated";
+				regerr = false;
+        break;
+      case 301:
+        myMsg = `All notes cannot be 0`;
+        break;
+      case 302:
+        myMsg = `Remark cannot be blank`;
+        break;
+			case 401:
+        myMsg = `Patient name already in database`;
+        break;
+      default:
+          myMsg = "Unknown Error";
+          break;
+    }
+    return(
+      <div>
+        <Typography className={(regerr) ? gClasses.error : gClasses.nonerror}>{myMsg}</Typography>
+      </div>
+    )
+  }
+	
 	function DisplayMonthYear() {
 	return (
 	<Grid className={classes.noPadding} key="MonthYear" container justify="center" alignItems="center" >
@@ -740,11 +795,7 @@ export default function Appointment() {
 	
 	function DisplayCloseModal() {
 	return (
-		<div align="right">
-		<IconButton color="secondary"  size="small" onClick={closeModal} >
-			<CancelIcon />
-		</IconButton>
-		</div>
+		<VsCancel align="right" onClick={closeModal} />
 	)}
 	
 	async function setHoliday(mData, todo) {
@@ -839,10 +890,7 @@ export default function Appointment() {
 		}
 		{(selectPatient) &&
 			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<div align="right"><IconButton color="secondary"  size="small" onClick={() => {setSelectPatient(false)}} >
-					<CancelIcon />
-				</IconButton>
-			</div>
+			<VsCancel align="right" onClick={() => {setSelectPatient(false)}} />
 			<Typography>
 					<span className={classes.patientName}>Select Patient</span>
 			</Typography>
@@ -946,11 +994,7 @@ export default function Appointment() {
 	return(
 		<Box className={classes.newAppt} border={1} >
 		<CssBaseline />
-		<div align="right">
-				<IconButton align="right" color="secondary"  size="small" onClick={handleNewAppointmentCancel} >
-					<CancelIcon />
-				</IconButton>
-		</div>
+		<VsCancel align="right" onClick={handleNewAppointmentCancel} />
 		<Typography className={classes.switchText}>New Appointment</Typography>
 		{/*<DisplayOldSearch />*/}
 		{/*(directoryMode) &&	<DisplayFilter handler={selectPatientForNewAppointment}/>}*/}
@@ -1136,7 +1180,7 @@ export default function Appointment() {
 		// check if appointment of same date and time for the user already there (type pending)
 		let sameTime = masterApptArray.filter(x => x.visit === VISITTYPE.pending &&
 			x.year == myYear && x.month == myMonth && x.date === myDate &&
-			x.hour == myHour && x.minute == myMin);
+			x.hour == myHour && x.minute == myMin && x.pid === currentPatientData.pid);
 			//console.log("SAME", sameTime);
 			//x.hour === Number(apptHour) && x.minute === Number(apptMinute));
 		if (sameTime.length > 0) {
@@ -1246,10 +1290,12 @@ export default function Appointment() {
 					className={classes.th} >
 					Time
 					</TableCell>
+					{(!isMobile()) && 
 					<TableCell key={"TH25"} component="th" scope="row" align="center" padding="none"
 					className={classes.th} >
 					Status
 					</TableCell>
+					}
 					<TableCell key={"TH26"} component="th" scope="row" align="center" padding="none"
 					className={classes.th} colSpan={3}>
 					cmd
@@ -1324,9 +1370,7 @@ export default function Appointment() {
 					</TableCell>
 					<TableCell key={"TD13"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
-						<IconButton color="secondary" disabled={cancelAppt}  size="small" onClick={() => { handleCancelAppt(a) } } >
-							<CancelIcon />
-						</IconButton>
+						<VsCancel onClick={() => { handleCancelAppt(a) } } />
 					</TableCell>
 					</TableRow>
 				)}
@@ -1440,14 +1484,52 @@ export default function Appointment() {
 		setApptArray(fArray);
 	}
 	
+	
+	async function addNewPatient() {
+		//let myName=document.getElementById("emurName").value;
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/new/${userCid}/${emurName}`;
+			let resp = await axios.get(myUrl);
+			closeModal();
+			setPatientArray([resp.data]);
+		} catch(e) {
+			console.log(e);
+			setModalRegister(401);
+		}
+	}
+	
+	function DisplayNewPatient() {
+	return (	
+	<Container component="main" maxWidth="md">
+		<VsCancel align="right" onClick={closeModal} />
+		<Typography align="center" className={classes.modalHeader}>"Input new Patient Name"</Typography>
+		<BlankArea />
+			<ValidatorForm align="center" className={gClasses.form} onSubmit={addNewPatient} >
+			<Grid key="NewPatirnt" container justify="center" alignItems="center" >
+				<Grid item xs={10} sm={10} md={10} lg={10} >
+					<TextValidator variant="outlined" required fullWidth color="primary"
+						id="emurName" label="New Patient Name" name="emurName"
+						onChange={(event) => setEmurName(event.target.value)}
+						autoFocus
+						value={emurName}
+					/>
+				</Grid>
+				<Grid item xs={2} sm={2} md={2} lg={2} >
+					<VsButton name="New Patient" />
+				</Grid>
+			</Grid>
+			</ValidatorForm>
+			<ModalResisterStatus />
+	</Container>
+	)}
+	
 	function DisplayFilter() {
 	return (	
-		<Grid className={classes.noPadding} key="Filter" container justify="center" alignItems="center" >
-			<Grid item xs={false} sm={false} md={3} lg={3} />
-			<Grid item xs={12} sm={12} md={6} lg={6} >
-				<TextField id="filter"  padding={5} variant="outlined" fullWidth label="Patient Name / Id" 
+	<Grid className={classes.noPadding} key="Filter" container justify="center" alignItems="center" >
+		<Grid item xs={false} sm={false} md={3} lg={3} />
+		<Grid item xs={9} sm={9} md={6} lg={6} >
+			<TextField id="filter"  padding={5} variant="outlined" fullWidth label="Patient Name / Id" 
 				defaultValue={searchText}
-				//onChange={(event) => setSearchText(event.target.value)}
 				InputProps={{
 					endAdornment: (
 						<InputAdornment position="end">
@@ -1455,9 +1537,11 @@ export default function Appointment() {
 						</InputAdornment>
 				)}}
 			/>
-			</Grid>
-			<Grid item xs={false} sm={false} md={3} lg={3} />
 		</Grid>
+		<Grid item xs={3} sm={3} md={3} lg={3} >
+			<VsButton name="New Patient" onClick={() => { setEmurName(""); openModal("NEWPATIENT")}} />	
+		</Grid>	
+	</Grid>
 	)}
 	
 	async function selectFilter() {
@@ -1582,9 +1666,7 @@ export default function Appointment() {
 					</TableCell>
 					<TableCell key={"TD6"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={classes.td}>
-						<IconButton color="secondary"  size="small" onClick={() => { handleCancelAppt(a) } } >
-							<CancelIcon />
-						</IconButton>
+						<VsCancel onClick={() => { handleCancelAppt(a) } } />
 					</TableCell>
 					</TableRow>
 				)}
@@ -1636,10 +1718,7 @@ export default function Appointment() {
 			}
 			{(selectPatient) &&
 				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-				<div align="right"><IconButton color="secondary"  size="small" onClick={() => {setSelectPatient(false)}} >
-						<CancelIcon />
-					</IconButton>
-				</div>
+				<VsCancel align="right" onClick={() => {setSelectPatient(false)}} />
 				<Typography>
 						<span className={gClasses.patientName}>Select Patient</span>
 				</Typography>
@@ -1713,6 +1792,7 @@ export default function Appointment() {
 			initialValue={monthYearDate}
 			dateFormat="MMMM yyyy"
 			inputProps={{className: classes.dateTime}}
+			closeOnSelect={true}
 			onClose={handleMonthYear}
 			className={classes.dateTimeBlock}
 		/>
@@ -1853,6 +1933,19 @@ export default function Appointment() {
 		{(directoryMode) && <DisplayDirectoryMode />}
 		{(!directoryMode) && <DisplayFilterMode />}
 		</Container>
+		<Modal
+			isOpen={modalIsOpen == "NEWPATIENT"}
+			shouldCloseOnOverlayClick={false}
+			onAfterOpen={afterOpenModal}
+			onRequestClose={closeModal}
+			style={modalStyles}
+			contentLabel="Example Modal"
+			aria-labelledby="modalTitle"
+			aria-describedby="modalDescription"
+			ariaHideApp={false}
+		>
+			<DisplayNewPatient />
+		</Modal>
 		<Modal
 			isOpen={modalIsOpen == "TABLECELL"}
 			shouldCloseOnOverlayClick={false}

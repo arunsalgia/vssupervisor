@@ -203,7 +203,7 @@ router.get('/cricsignup/:cid/:uName/:uPassword/:uEmail/:mobileNumber/:referalCod
 
 //=============== LOGIN
 
-router.get('/criclogin/:uName/:uPassword', async function (req, res, next) {
+router.get('/jaijiendra/:uName/:uPassword', async function (req, res, next) {
   // CricRes = res;
   setHeader(res);
   var {uName, uPassword } = req.params;
@@ -489,7 +489,7 @@ router.get('/cricemailpassword/:mailid', async function (req, res, next) {
 }); 
 
 /* send reset link by email */
-router.get('/cricemailreset/:mailid', async function (req, res, next) {
+router.get('/bhoolgaya/:mailid', async function (req, res, next) {
   setHeader(res);
   var {mailid} = req.params;
   mailid = mailid.toLowerCase();
