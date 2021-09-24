@@ -485,9 +485,9 @@ export default function Customer() {
 	function handleRecharge(newRadio) {
 		let myExpiry = new Date(customerData.expiryDate);
 		switch (newRadio) {
-			case 'MONTHLY': myExpiry.setMonth(myExpiry.getMonth()+1); break;
+			case 'LIFETIME' : myExpiry = new Date(2031, 1, 1); break;
 			case 'YEARLY': 	myExpiry.setYear(myExpiry.getFullYear()+1); break;
-			case 'NOEXPIRY' : myExpiry = new Date(2031, 1, 1); break;
+			case 'MONTHLY': myExpiry.setMonth(myExpiry.getMonth()+1); break;
 		}
 		setNewExpiry(myExpiry);
 		setRadioRecharge(newRadio);
@@ -505,7 +505,7 @@ export default function Customer() {
 				<RadioGroup row aria-label="radioselection" name="radioselection" value={radioRecharge} 
 					onChange={() => {handleRecharge(event.target.value); }}
 				>
-					<FormControlLabel className={classes.filterRadio} value="NOEXPIRY" control={<Radio color="primary"/>} label="Lifetime" />
+					<FormControlLabel className={classes.filterRadio} value="LIFETIME" control={<Radio color="primary"/>} label="Lifetime" />
 					<FormControlLabel className={classes.filterRadio} value="YEARLY"   control={<Radio color="primary"/>} label="Yearly" />
 					<FormControlLabel className={classes.filterRadio} value="MONTHLY"  control={<Radio color="primary"/>} label="Monthly" />
 				</RadioGroup>
@@ -519,7 +519,7 @@ export default function Customer() {
 		</Box>
 	)}
 	
-	function handleAddNewCustomer() {
+	function addNewCustomerSubmit() {
 		alert("New Customer to be added");
 	}
 	
@@ -566,7 +566,7 @@ export default function Customer() {
 		setAddUser(true);	
 	}
 	
-	function handleAddNewUser() {
+	function addNewUserSubmit() {
 		alert("Add new user");
 	}
 	
@@ -588,7 +588,7 @@ export default function Customer() {
 			<VsCancel align="right" onClick={() => {setNewCustomer(false)}} />
 			<Typography className={classes.title}>{"Add new Customer"}</Typography>
 			<BlankArea />
-			<ValidatorForm className={gClasses.form} onSubmit={handleAddNewCustomer}>
+			<ValidatorForm className={gClasses.form} onSubmit={addNewCustomerSubmit}>
 				{/*<TextValidator variant="outlined" fullWidth
 				id="referral" label="Referral Code" name="referral"
 				// defaultValue={userName}
@@ -604,7 +604,7 @@ export default function Customer() {
 			<RadioGroup row aria-label="radioselection" name="radioselection" value={radioCustomerPlan} 
 				onChange={() => {setRadioCustomerPlan(event.target.value); }}
 			>
-				<FormControlLabel className={classes.filterRadio} value="NOEXPIRY" control={<Radio color="primary"/>} label="Lifetime" />
+				<FormControlLabel className={classes.filterRadio} value="LIFETIME" control={<Radio color="primary"/>} label="Lifetime" />
 				<FormControlLabel className={classes.filterRadio} value="YEARLY" 	 control={<Radio color="primary"/>} label="Yearly" />
 				<FormControlLabel className={classes.filterRadio} value="MONTHLY"  control={<Radio color="primary"/>} label="Monthly" />
 			</RadioGroup>
@@ -676,7 +676,7 @@ export default function Customer() {
 				</RadioGroup>
 			</FormControl>
 			<BlankArea/>
-			<ValidatorForm className={gClasses.form} onSubmit={handleAddNewUser}>
+			<ValidatorForm className={gClasses.form} onSubmit={addNewUserSubmit}>
       <TextValidator variant="outlined" required 
 				id="userName" label="User Name" name="username"
 				value={userName}

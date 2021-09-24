@@ -724,6 +724,19 @@ export function getOnlyDate(t) {
 	return outStr;
 }
 
+export function getDateTime(t) {
+	let outStr =getOnlyDate(t) + ' ';
+	t = new Date(t);		//?????????????????? why required
+	let tmp;
+	
+	tmp = t.getHours();
+	outStr += ((tmp < 10) ? "0" : "") + tmp.toString() + ":"
+	tmp = t.getMinutes();
+	outStr += ((tmp < 10) ? "0" : "") + tmp.toString();
+
+	return outStr;
+}
+
 export async function downloadVisit() { 
   try {
 		let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/visit/downloadvisit`;
@@ -744,4 +757,19 @@ export async function downloadVisit() {
   
   console.log("Debug complete");
 
+}
+
+
+export async function getPatientDocument(cid, pid) {
+	let myData = [];
+	try {
+		let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/list/${cid}/${pid}`;
+		let resp = await axios.get(myUrl);
+		myData = resp.data;
+		//console.log(resp.data);
+	} catch (e) {
+		console.log(e);
+		//setDocumentArray([]);
+	}
+	return myData;
 }

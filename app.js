@@ -14,6 +14,10 @@ Razorpay = require("razorpay");
 //docx = require("docx");
 fs = require('fs');
 axios = require('axios');
+multer = require('multer');
+
+
+
 
 app = express();
 
@@ -26,6 +30,7 @@ PASSWORDLINKVALIDTIME=10			// Password link valid time in minutes
 
 
 //
+BASELINK='http://localhost:3000';
 if (PRODUCTION) {
 	console.log("Using cloud  base  link");
   BASELINK='https://viraagdental.herokuapp.com';
@@ -33,6 +38,9 @@ if (PRODUCTION) {
 	console.log("Using local base  link");
   BASELINK='http://localhost:3000';
 }
+console.log(BASELINK);
+ARCHIVEDIR= (PRODUCTION) ? "public/" : "public/" ;       // binary will be stored here
+
 PORT = process.env.PORT || 4000;
 VISITTYPE = {pending: 'pending', cancelled: 'cancelled', over: 'over'};
 
@@ -64,6 +72,8 @@ appointmentRouter = require('./routes/appointment');
 infoRouter = require('./routes/info');
 quoteRouter = require('./routes/quote');
 customerRouter = require('./routes/customer');
+imageRouter = require('./routes/image');
+
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -100,6 +110,7 @@ app.use('/appointment', appointmentRouter);
 app.use('/info', infoRouter);
 app.use('/quote', quoteRouter);
 app.use('/customer', customerRouter);
+app.use('/image', imageRouter);
 
 
 //Schema
@@ -226,6 +237,18 @@ CustomerSchema = mongoose.Schema({
 	enabled:Boolean
 });
 
+ImageSchema = mongoose.Schema({
+	cid: 		String,
+	pid:		Number,
+	displayName: String,
+	title: 	String,
+	name:		String,
+	desc: 	String,
+	type:		String,
+	date:		Date,
+	image: 	{ data: Buffer, contentType: String }
+});
+
 // models
 User = mongoose.model("user", UserSchema);
 M_Medicine = mongoose.model('Medicine', MedicineSchema);
@@ -238,7 +261,7 @@ M_Info = mongoose.model('Info', InfoSchema);
 M_Quote = mongoose.model('Quote', QuoteSchema);
 M_Customer = mongoose.model('Customer', CustomerSchema);
 M_NextVisit = mongoose.model('NextVisit', NextVisitSchema);
-
+M_Image = mongoose.model('image', ImageSchema);
 router = express.Router();
 
 db_connection = false;      // status of mongoose connection

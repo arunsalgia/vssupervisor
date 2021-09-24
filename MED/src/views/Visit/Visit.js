@@ -50,6 +50,8 @@ import Avatar from "@material-ui/core/Avatar"
 
 import {DisplayYesNo, DisplayPageHeader, ValidComp, BlankArea,
 DisplayPatientDetails,
+DisplayDocumentList,
+DisplayImage,
 } from "CustomComponents/CustomComponents.js"
 
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
@@ -73,6 +75,7 @@ import { callYesNo,
 	validateInteger,
 	updatePatientByFilter,
 	dispAge, dispEmail, dispMobile,
+	getPatientDocument
 } from "views/functions.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -166,6 +169,15 @@ const yesNoModal = dynamicModal('60%');
 
 const COUNTPERPAGE=10;
 
+
+const SupportedMimeTypes = [
+"image/png",  "image/jpeg", "application/pdf"
+]
+
+const SupportedExtensions = [
+"PNG",  "JPG", "PDF"
+];
+
 const str1by4 = String.fromCharCode(188)
 const str1by2 = String.fromCharCode(189)
 const str3by4 = String.fromCharCode(190)
@@ -208,6 +220,16 @@ export default function Visit() {
   
   const classes = useStyles();
 	const gClasses = globalStyles();
+	
+	const [showDocument, setShowDocument] = useState(false);
+	const [documentArray, setDocumentArray] = useState([]);
+	
+	const [dlMime, setDlMime] = useState("");
+	const [dlFile, setDlFile] = useState("");
+	const [isPdf, setIsPdf] = useState(false);
+	const [dlSrc, setDlSrc] = useState("");
+	const [dlDoc, setDlDoc] = useState({});
+	const [viewImage, setViewImage] = useState(false);
 	
 	const [medicineArray, setMedicineArray] = useState([])
 	const [notesArray, setNotesArry] = useState([]);
@@ -324,7 +346,16 @@ export default function Visit() {
 			<h1>Hey some async call in progress ! </h1>
 			);  
 	}
-	
+
+	async function getPatientVisit(rec) {
+		try {
+			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/list/${userCid}/${rec.pid}`)
+			setVisitArray(resp.data);
+		} catch (e) {
+			console.log(e)
+			setVisitArray([]);
+		}
+	}
 	async function getAllMedicines() {
 		if (medicineArray.length == 0) {
 			try {
@@ -1414,34 +1445,82 @@ export default function Visit() {
 		setCurrentPatient(rec.displayName);
 		setCurrentPatientData(rec);
 		await getPatientVisit(rec);
+		let ddd = await getPatientDocument(userCid, rec.pid);
+		setDocumentArray(ddd);
 	}
 	
-	async function getPatientVisit(pRec) {
-		//let pRec = patientArray.find(x => x.displayName == name);
-		console.log("in pat visit");
+	function dummy() {}
+	
+	async function handleFileView(d) {	
 		try {
-			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/list/${userCid}/${pRec.pid}`)
-			setVisitArray(resp.data);
-			console.log(resp.data);
-		} catch(e) {
-			setVisitArray([]);
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/downloadimage/${userCid}/${d.pid}/${d.title}`
+			let resp = await axios.get(myUrl);
+			if (d.type === "PDF") {
+				// pdf file
+				// file={`data:application/pdf;base64,${this.state.base64}`}
+				const b64 = Buffer.from(resp.data.data).toString('base64');
+				console.log(b64)
+				setDlFile(b64);
+				setIsPdf(true);
+			} else {
+				//image file
+				const b64 = Buffer.from(resp.data.data).toString('base64');
+				//console.log(b64);
+				setDlFile(b64);
+				setIsPdf(false);
+			} 
+			setDlDoc(d);
+			let idx = SupportedExtensions.indexOf(d.type);
+			setDlMime(SupportedMimeTypes[idx]);
+			setViewImage(true);
+		} catch (e) {
 			console.log(e);
 		}
 	}
 	
-  return (
+	function DisplayMedicalReports() {
+	return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		{(!showDocument) &&
+		<Typography align="right" className={classes.link}>
+		<Link href="#" variant="body2" onClick={() => {setShowDocument(true); }}>Show Medical Reports</Link>
+		</Typography>
+		}
+		{(showDocument) && 
+			<div>
+			<Typography align="right" className={classes.link}>
+			<Link href="#" variant="body2" onClick={() => {setShowDocument(false); }}>Hide Medical Reports</Link>
+			</Typography>
+			{(viewImage && !isPdf) && 
+				<div>
+				<DisplayImage 
+					title={dlDoc.title} mime={dlMime} file={dlFile}
+					handleCancel={() => setViewImage(false)}
+				/> 
+				</div>
+			}
+			<DisplayDocumentList 
+				documentArray={documentArray}
+				viewHandle={handleFileView}
+			/>
+			</div>
+		}
+	</Box>
+	)}
+	
+ return (
  <div className={gClasses.webPage} align="center" key="main">
 	<DisplayPageHeader headerName="Visits" groupName="" tournament=""/>
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
 	{(!selectPatient) && 
 		<Typography align="right" className={classes.link}>
-			<Link href="#" variant="body2" onClick={() => { setCurrentAppt(null); setCurrentPatient(""); setVisitArray([]); setSelectPatient(true); }}>Select Patient</Link>
+			<Link href="#" variant="body2" onClick={() => { setShowDocument(false); setViewImage(false); setDocumentArray([]); setCurrentAppt(null); setCurrentPatient(""); setVisitArray([]); setSelectPatient(true); }}>Select Patient</Link>
 		</Typography>
 	}
 	{(selectPatient) && 
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<VsCancel align="right"onClick={() => {setSelectPatient(false)}} />
+			<VsCancel align="right" onClick={() => {setSelectPatient(false)}} />
 			<Typography>
 				<span className={classes.patientName}>Select Patient</span>
 			</Typography>
@@ -1463,6 +1542,7 @@ export default function Visit() {
 			<Typography align="center" className={classes.modalHeader}>
 			{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
 			</Typography>
+			<DisplayMedicalReports />
 			{/*<DisplayPatientInfo />*/}
 			<DisplayNewVisitBtn />
 			<DisplayVisitUpdateButton />

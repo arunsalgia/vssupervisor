@@ -2,11 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Table from '@material-ui/core/Table';
@@ -22,6 +20,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import Box from '@material-ui/core/Box';
+import Link from '@material-ui/core/Link';
+import VsCancel from "CustomComponents/VsCancel";
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {red, blue, green, deepOrange, yellow} from '@material-ui/core/colors';
@@ -31,15 +31,26 @@ import {
   currentAPLVersion, latestAPLVersion,
 	getImageName,
 	dispOnlyAge, dispAge, dispEmail, dispMobile,
+	getOnlyDate,
 } from "views/functions.js";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import Divider from "@material-ui/core/Divider";
-import CancelIcon from '@material-ui/icons/Cancel';
 import globalStyles from "assets/globalStyles";
 import VsButton from "CustomComponents/VsButton";
 
+//Icons
+import IconButton from '@material-ui/core/IconButton';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CancelIcon from '@material-ui/icons/Cancel';
+
 const useStyles = makeStyles((theme) => ({
-  paper: {
+  title: {
+		fontSize: theme.typography.pxToRem(20),
+		fontWeight: theme.typography.fontWeightBold,
+		color: blue[700],
+	},
+	paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
     flexDirection: 'column',
@@ -123,13 +134,16 @@ const useStyles = makeStyles((theme) => ({
     // minWidth: 650,
   },
   th: { 
-    spacing: 0,
+    border: 5,
     align: "center",
     padding: "none",
-    backgroundColor: '#EEEEEE',
-    color: deepOrange[700],
-    // border: "1px solid black",
-    fontWeight: theme.typography.fontWeightBold,
+		fontSize: theme.typography.pxToRem(13),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: '#FFA726',
+		backgroundColor: deepOrange[200],
+		borderWidth: 1,
+		borderColor: 'black',
+		borderStyle: 'solid',
   },
   td : {
     spacing: 0,
@@ -138,6 +152,23 @@ const useStyles = makeStyles((theme) => ({
     padding: "none",
     height: 10,
   },
+	allBlue: {
+		backgroundColor: blue[100],
+	},
+	tdBlue : {
+    border: 5,
+    align: "center",
+    padding: "none",
+		borderWidth: 1,
+		backgroundColor: blue[100],
+		borderColor: 'black',
+		borderStyle: 'solid',
+  },
+	apptName: {
+		fontSize: theme.typography.pxToRem(15),
+		fontWeight: theme.typography.fontWeightBold,
+		color: blue[700]
+	},  
   ngHeader: {
     fontSize: theme.typography.pxToRem(15),
     fontWeight: theme.typography.fontWeightRegular,
@@ -630,5 +661,140 @@ export function DisplayPatientName(props) {
 return (
 <Typography></Typography>
 )}
+
+
+export function DisplayDocumentList(props) {
+ const classes = useStyles();
+ if (props.documentArray.length === 0) 
+	 return <Box className={classes.allBlue} width="100%"><Typography>No Reports avaialble</Typography></Box>
+ 
+ //console.log(props.documentArray);
+let _view = (props.viewHandle == null);
+let _reload = (props.reloadHandle == null);
+let _del = (props.deleteHandle == null);
+let cmdCount = 0;
+if (!_view) ++cmdCount;
+if (!_reload) ++cmdCount;
+if (!_del) ++cmdCount;
+return (	
+<Box className={classes.allBlue} width="100%">
+		<TableContainer>
+		<Table style={{ width: '100%' }}>
+		<TableHead>
+			<TableRow align="center">
+				<TableCell key={"TH1"} colSpan={5+cmdCount} component="th" scope="row" align="center" padding="none"
+				className={classes.th} >
+				Medical Reports
+				</TableCell>
+			</TableRow>
+			<TableRow align="center">
+				<TableCell key={"TH21"} component="th" scope="row" align="center" padding="none"
+				className={classes.th} >
+				Date
+				</TableCell>
+				<TableCell key={"TH22"} component="th" scope="row" align="center" padding="none"
+				className={classes.th} >
+					Title
+				</TableCell>
+				<TableCell key={"TH23"} component="th" scope="row" align="center" padding="none"
+				className={classes.th} >
+				Description
+				</TableCell>
+				<TableCell key={"TH24"} component="th" scope="row" align="center" padding="none"
+				className={classes.th} >
+				Type
+				</TableCell>
+				<TableCell key={"TH25"} component="th" scope="row" align="center" padding="none"
+				className={classes.th} >
+				Name
+				</TableCell>
+				{(cmdCount > 0) &&
+					<TableCell colSpan={3} key={"TH31"} component="th" scope="row" align="center" padding="none"
+					className={classes.th} >
+					cmds
+					</TableCell>
+				}
+			</TableRow>
+		</TableHead>
+		<TableBody>  
+		{props.documentArray.map( (a, index) => {
+			//let myExpiry = getOnlyDate(a.expiryDate);
+			let myClass = classes.tdBlue;
+			return(
+				<TableRow align="center" key={"TROW"+index}>
+				<TableCell key={"TD1"+index} align="center" component="td" scope="row" align="center" padding="none"
+					className={myClass}>
+					<Typography className={classes.apptName}>
+						{getOnlyDate(a.date)}
+					</Typography>
+				</TableCell>
+				<TableCell key={"TD2"+index} align="center" component="td" scope="row" align="center" padding="none"
+					className={myClass}>
+					<Typography className={classes.apptName}>
+						{a.title}
+					</Typography>
+				</TableCell>
+				<TableCell key={"TD3"+index} align="center" component="td" scope="row" align="center" padding="none"
+					className={myClass}>
+					<Typography className={classes.apptName}>
+						{a.desc}
+					</Typography>
+				</TableCell>
+				<TableCell key={"TD4"+index} align="center" component="td" scope="row" align="center" padding="none"
+					className={myClass}>
+					<Typography className={classes.apptName}>
+						{a.type}
+					</Typography>
+				</TableCell>
+				<TableCell key={"TD5"+index} align="center" component="td" scope="row" align="center" padding="none"
+					className={myClass}>
+					<Typography className={classes.apptName}>
+						{a.name}
+					</Typography>
+				</TableCell>
+				{(!_view) &&
+				<TableCell key={"TD11"+index} align="center" component="td" scope="row" align="center" padding="none"
+					className={myClass}>
+						<Typography className={classes.link}>
+							<Link href="#" variant="body2" onClick={() => {props.viewHandle(a)}}>View</Link>
+						</Typography>
+				</TableCell>
+				}
+				{(!_reload) &&
+				<TableCell key={"TD12"+index} align="center" component="td" scope="row" align="center" padding="none"
+					className={myClass}>
+						<Typography className={classes.link}>
+						<Link href="#" variant="body2" onClick={() => {props.reloadHandle(a)}}>Reload</Link>
+						</Typography>
+				</TableCell>
+				}
+				{(!_del) &&
+				<TableCell key={"TD13"+index} align="center" component="td" scope="row" align="center" padding="none"
+					className={myClass}>
+						<IconButton color="secondary" size="small" onClick={() => {props.deleteHandle(a)}} >
+							<DeleteIcon	 />
+						</IconButton>
+				</TableCell>
+				}
+				</TableRow>
+		)})}
+		</TableBody> 
+		</Table>
+		</TableContainer>
+	</Box>	
+)}
+	
+export function DisplayImage(props) {
+const classes = useStyles();
+//console.log(props);
+return(	
+<Box align="center" className={classes.tdBlue} width="100%">
+	<Typography className={classes.title}>{"Medical Report Title: "+props.title}</Typography>
+	<VsCancel align="right" onClick={props.handleCancel} />
+	<BlankArea />
+	<img src={`data:${props.mime};base64,${props.file}`}/>
+</Box>
+)}
+	
 
 
