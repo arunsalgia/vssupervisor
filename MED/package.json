@@ -27,6 +27,7 @@
     "js-file-download": "^0.4.12",
     "lodah": "0.0.1-security",
     "lodash": "^4.17.20",
+    "material-design-icons": "^3.0.1",
     "moment": "^2.29.1",
     "month-year-picker": "^0.2.5-alpha-1",
     "node-cron": "^2.0.3",

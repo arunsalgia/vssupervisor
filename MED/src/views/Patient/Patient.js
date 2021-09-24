@@ -583,7 +583,7 @@ export default function Patient() {
 		}
 		<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
 		{patientArray.map( (m, index) => 
-			<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={3} lg={3} >
+			<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={4} lg={4} >
 			<DisplayPatientDetails 
 				patient={m} 
 				button1={<VsButton name="Appt"  color='green' onClick={() => { handleAppointmentConfirm(m)}} />}

@@ -21,6 +21,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import Box from '@material-ui/core/Box';
 import Link from '@material-ui/core/Link';
+import PDFViewer from 'pdf-viewer-reactjs';
+
 import VsCancel from "CustomComponents/VsCancel";
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
@@ -796,5 +798,15 @@ return(
 </Box>
 )}
 	
-
+export function DisplayPDF() {
+	return(	
+	<Box align="center"  className={classes.tdBlue} width="100%">
+		<Typography className={classes.title}>{"Medical Report Title: "+props.title}</Typography>
+		<VsCancel align="right" onClick={props.handleCancel} />
+		<BlankArea />
+		<PDFViewer 
+			document={{base64: props.file }}
+		/>
+	</Box>
+	)}
 

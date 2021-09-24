@@ -1527,7 +1527,7 @@ export default function Visit() {
 		<DisplayFilter />
 		<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
 			{patientArray.map( (m, index) => 
-				<Grid key={"PAT"+index} item xs={12} sm={6} md={3} lg={3} >
+				<Grid key={"PAT"+index} item xs={12} sm={6} md={4} lg={4} >
 				<DisplayPatientDetails 
 					patient={m} 
 					button1={<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />}

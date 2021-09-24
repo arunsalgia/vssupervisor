@@ -23,8 +23,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import PDFViewer from 'pdf-viewer-reactjs';
-import Modal from 'react-modal';
+import Modal from 'react-modal'; 
 
 
 // icons
@@ -42,6 +41,7 @@ import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
 	DisplayPatientDetails,
 	DisplayDocumentList,
 	DisplayImage,
+	DisplayPDF,
 } from "CustomComponents/CustomComponents.js"
 
 import { 
@@ -403,6 +403,7 @@ export default function Document() {
 				const b64 = Buffer.from(resp.data.data).toString('base64');
 				console.log(b64)
 				setDlFile(b64);
+				console.log(b64.length);
 				setIsPdf(true);
 				//var array = new Uint8Array(resp.data.data);
 				//var blob = new Blob([array]);
@@ -581,11 +582,13 @@ export default function Document() {
     // File content to be displayed after
     // file upload is complete
   async function  addNewDocumentSubmit()  {
+		// validate file is selected
 		if (!state.selectedFile) {
 			setRegisterStatus(101);
 			return;
 		}
 		
+		// if new doc thena validate title is not duplicate
 		if (!edit) {
 			let tmp = documentArray.filter(x => x.title.toLowerCase() === title.toLowerCase())
 			if (tmp.length > 0) {
@@ -594,25 +597,17 @@ export default function Document() {
 			}
 		}
 		
+		// check for supported file types
 		if (!SupportedMimeTypes.includes(state.selectedFile.type)) {
 			setRegisterStatus(102);
 			return;
 		}
 
     // All okay. now prepare to send 
-		const formData = new FormData();
-	
 		// Update the formData object
-		formData.append(
-      "file",
-      state.selectedFile,
-      state.selectedFile.name
-    );
-	
-				
-		// Details of the uploaded file
-		//console.log(formData);
-		
+		const formData = new FormData();
+		formData.append("file", state.selectedFile, state.selectedFile.name);
+
 		// Request made to the back end api
 		// Send formData object
 		try {
@@ -630,17 +625,7 @@ export default function Document() {
   
 	
 	
-	function DisplayPDF() {
-	return(	
-	<Box className={classes.tdPending} width="100%">
-		<Typography className={classes.title}>{"Medical Report Title: "+dlDoc.title}</Typography>
-		<VsCancel align="right" onClick={() => setViewImage(false)} />
-		<BlankArea />
-		<PDFViewer 
-			document={{base64: {setDlFile} }}
-		/>
-	</Box>
-	)}
+	
 	
 	function DisplayFilter() {
 	return (	
@@ -678,6 +663,17 @@ export default function Document() {
 		setDocumentArray(ddd);
 	}
 	
+	async function addNewPatient() {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/new/${userCid}/${emurName}`;
+			let resp = await axios.get(myUrl);
+			closeModal();
+			setPatientArray([resp.data]);
+		} catch(e) {
+			console.log(e);
+			setModalRegister(401);
+		}
+	}
 	
 	function ModalResisterStatus() {
     // console.log(`Status is ${modalRegister}`);
@@ -776,7 +772,7 @@ export default function Document() {
 				<DisplayFilter />
 				<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
 					{patientArray.map( (m, index) => 
-						<Grid key={"PAT"+index} item xs={12} sm={6} md={3} lg={3} >
+						<Grid key={"PAT"+index} item xs={12} sm={6} md={4} lg={4} >
 						<DisplayPatientDetails 
 							patient={m} 
 							button1={<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />}
@@ -797,12 +793,17 @@ export default function Document() {
 					handleCancel={() => setViewImage(false)}
 				/> 
 			}
-			{(viewImage && isPdf) && <DisplayPDF />}
+			{(viewImage && isPdf) && 
+				<DisplayPDF 
+					title={dlDoc.title} file={dlFile}
+					handleCancel={() => setViewImage(false)}
+				/>
+			}
 			{(!newDocument) &&
 			<div  align="right">
 			<Link href="#" variant="body2" onClick={() => {setRegisterStatus(0); setEdit(false); setTitle(""); setDesc(""); setState({selectedFile: null}); setNewDocument(true)}}>{"Add new Medical Report"}</Link>
 			</div>
-		}
+			}
 			{(newDocument) &&
 			<Box className={classes.tdPending} width="100%">
 				<VsCancel align="right" onClick={() => {setNewDocument(false)}} />
