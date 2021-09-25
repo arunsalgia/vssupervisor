@@ -8,6 +8,7 @@ const {
 	getLoginName, getDisplayName,
 	svrToDbText, dbToSvrText,
 	getMaster, setMaster,
+	base64ToString,
 } = require('./functions'); 
 
 const MYFONT="Arial";
@@ -37,7 +38,7 @@ function setMedQty(num) {
 			medQty.push({num: i, str: medStr(i)});
 		}
 	}
-	console.log(medQty);
+	//console.log(medQty);
 	return medQty[num].str;
 }
 
@@ -50,11 +51,27 @@ router.use('/', function(req, res, next) {
 });
 
 
+function decodeVisitInfo(jsonData) {
+	let myData = JSON.parse(jsonData);
+
+	// convert base64 to string
+	for(let i=0; i<myData.visit.medicines.length; ++i) {
+		myData.visit.medicines[i].name = base64ToString(myData.visit.medicines[i].name);
+	}
+	for(let i=0; i<myData.visit.userNotes.length; ++i) {
+		myData.visit.userNotes[i].name = base64ToString(myData.visit.userNotes[i].name);
+	}
+	for(let i=0; i<myData.visit.remarks.length; ++i) {
+		myData.visit.remarks[i].name = base64ToString(myData.visit.remarks[i].name);
+	}
+	return myData;
+}
+
 router.get('/printdoc/:cid/:jsonData', async function(req, res, next) {
   setHeader(res);
 	var {cid, jsonData } = req.params;
 	
-	let myData = JSON.parse(jsonData);
+	let myData = decodeVisitInfo(jsonData);
 	console.log(myData);
 
 	let xxx = myData.visit;
@@ -178,6 +195,7 @@ router.get('/printdoc/:cid/:jsonData', async function(req, res, next) {
 	
 	let myDate = reviewDate.getDate();
 	let myMonth = reviewDate.getMonth();
+	++myMonth;	// (change 0-11 to 1-12)
 	let myYear = reviewDate.getFullYear();
 	
 	let dateStr = "";
@@ -484,7 +502,7 @@ function rightAlignedPara(text) {
 
 //{name: 'Crocin',  dose1: 3, dose2: 2, dose3: 4, time: 7, unit: "Day(s)"}
 function medicinePara(med) {
-	console.log(med);
+	//console.log(med);
 	let tmp = 	med.name + "  ";			// fixedString(med.name,30);
 	tmp += setMedQty(med.dose1)+" -- "+setMedQty(med.dose2)+" -- "+setMedQty(med.dose3)+"  ";
 	tmp += "for "+med.time+" "+med.unit + "(s)";

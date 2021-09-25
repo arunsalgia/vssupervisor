@@ -381,6 +381,7 @@ export default function Document() {
 			case 102: myMsg = "Only document of type JPG/PNG/PDF supported"; break;
 			case 103: myMsg = "Medical Report Title already exists"; break;
 			case 104: myMsg = "Error loading document"; break;
+			case 105: myMsg = "Medical report file size permitted only up to 1MB"; break;
 			default:  myMsg = "Unknown error"; break;
 		}
 		return (
@@ -552,7 +553,14 @@ export default function Document() {
 	
 	// On file select (from the pop up)
 	function onFileChange(event) {
-		setState({ selectedFile: event.target.files[0] });
+		if ((event.target.files[0].size / (1024*1024)) > 1) {
+			console.log(event.target.files[0].size / (1024*1024));
+			setRegisterStatus(105);
+		} else {
+			setRegisterStatus(0);
+			setState({ selectedFile: event.target.files[0] });
+			console.log(event.target.files[0]);
+		}
 	};
     
     // On file upload (click the upload button)

@@ -319,7 +319,8 @@ export function CricDreamTabs() {
 		window.sessionStorage.setItem("cid", "");
 		window.sessionStorage.setItem("userName", "");
 		window.sessionStorage.setItem("userType", "");
-	 
+		window.sessionStorage.setItem("currentLogin", "");
+		
     cdRefresh();  
   };
 

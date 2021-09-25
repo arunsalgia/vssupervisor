@@ -798,7 +798,8 @@ return(
 </Box>
 )}
 	
-export function DisplayPDF() {
+export function DisplayPDF(props) {
+	const classes = useStyles();
 	return(	
 	<Box align="center"  className={classes.tdBlue} width="100%">
 		<Typography className={classes.title}>{"Medical Report Title: "+props.title}</Typography>

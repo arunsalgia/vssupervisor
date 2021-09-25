@@ -16,7 +16,16 @@ router.use('/', function(req, res, next) {
 
 // send list of in chunks of blocks.
 // Each Block will contain #medicines which is configured in MEDBLOCK
-
+function getDob(age) {
+	let myBirthYear;
+	if (age === 0) {
+		myBirthYear = new Date(1900, 1, 1, 0, 0);
+	} else {
+		myBirthYear = new Date();
+		myBirthYear = myBirthYear.setYear(myBirthYear.getFullYear()-age);
+	}
+	return myBirthYear;
+}
 
 async function getNewPid() {
 	// 2021 08 30 001
@@ -67,6 +76,7 @@ router.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(re
 	mRec.email= pEmail;
 	mRec.mobile = pMobile;
 	mRec.age = age;
+	mRec.dob = getDob(age);
 	mRec.gender = pGender;
 	mRec.enabled = true;
 	mRec.pid = newPid;
@@ -104,6 +114,7 @@ router.get('/edit/:cid/:oldName/:pName/:pAge/:pGender/:pEmail/:pMobile', async f
 	mRec.email= svrToDbText(pEmail);
 	mRec.mobile = pMobile;
 	mRec.age = Number(pAge);
+	mRec.dob = getDob(Number(pAge));
 	mRec.gender = pGender;
 	mRec.enabled = true;
 	console.log(mRec);
@@ -134,6 +145,7 @@ router.get('/new/:cid/:pName', async function(req, res, next) {
 	mRec.email= svrToDbText("-");
 	mRec.mobile = 0;
 	mRec.age = 0;
+	mRec.dob = getDob(0);
 	mRec.gender = 'Male';
 	mRec.enabled = true;
 	mRec.pid = newPid;
@@ -154,6 +166,7 @@ router.get('/update/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function
 
   if (tmp) {
 		tmp.age = Number(pAge);
+		tmp.dob = getDob(Number(pAge));
 		tmp.gender = pGender;
 		tmp.email = email;
 		tmp.mobile = pMobile;
@@ -303,6 +316,17 @@ router.get('/visitcount/:cid/:pid', async function(req, res, next) {
 	sendok(res, finalData);
 });
 
+
+router.get('/setdob', async function(req, res, next) { 
+  setHeader(res);
+  
+	let allPatients = await M_Patient.find({});
+	for(let i=0; i<allPatients.length; ++i) {
+		allPatients[i].dob = getDob(allPatients[i].age);
+		allPatients[i].save();
+	}
+	sendok(res, "Done");
+});
 
 async function getPatient(filter) {
 	//console.log(filter);

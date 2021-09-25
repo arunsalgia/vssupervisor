@@ -77,7 +77,7 @@ import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 
 //colors 
 import { 
-red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen,
+red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen, blueGrey, lime,
 } from '@material-ui/core/colors';
 
 import { 
@@ -264,7 +264,7 @@ const useStyles = makeStyles((theme) => ({
 		borderStyle: 'solid',
   },
 	tdVisit : {
-		backgroundColor: lightGreen[300],
+		backgroundColor: lime[300],
     border: 5,
     align: "center",
     padding: "none",
@@ -315,7 +315,7 @@ const useStyles = makeStyles((theme) => ({
 		border: 5,
     align: "center",
     padding: "none",
-		backgroundColor: '#FFFFFF',
+		backgroundColor: blueGrey[300],
 		borderWidth: 1,
 		borderColor: 'black',
 		borderStyle: 'solid',
@@ -780,17 +780,19 @@ function ModalResisterStatus() {
 	//console.log(menuData);
 	return (
 		<div align = "center">
-			<DisplayCloseModal />
 			<Typography>{menuData.date + " " + month + " " + year}</Typography>
+			<DisplayCloseModal />
 			<BlankArea />
-			<Button 
+			{/*<Button 
 			variant="contained" color="primary" className={gClasses.submit}
 			onClick={() => { setHoliday(menuData, (menuData.dayType != HOLIDAYTYPE) ? "OFF" : "ON") }}
 			>{(menuData.dayType != HOLIDAYTYPE) ? "Clinic Off" : "Clinic On"}</Button>
 			<Button 
 				variant="contained" color="primary" className={gClasses.submit}
 				onClick={() => { handleDailyAppointments(menuData) }}
-			>Appointment</Button>
+			>Appointment</Button>*/}
+			<VsButton name={(menuData.dayType != HOLIDAYTYPE) ? "Clinic Off" : "Clinic On"}  onClick={() => { setHoliday(menuData, (menuData.dayType != HOLIDAYTYPE) ? "OFF" : "ON") }} />
+			<VsButton name="Appointment"  onClick={() => { handleDailyAppointments(menuData) }} />
 		</div>
 	)}
 	

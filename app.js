@@ -153,6 +153,7 @@ PatientSchema = mongoose.Schema({
   mobile: String,
 	gender: String,
 	age: Number,
+	dob: Date,
 	enabled: Boolean,
 	cid: String,
 });
