@@ -324,19 +324,6 @@ export function CricDreamTabs() {
     cdRefresh();  
   };
 
-  function Show_Supervisor_Options() {
-    //if (localStorage.getItem("userPlan") == process.env.REACT_APP_SUPERUSER) {  
-      return (
-        <div>
-        <MenuItem onClick={handlePatient}>Patient</MenuItem>
-        <MenuItem onClick={handleMedicine}>Medicine</MenuItem>
-        <Divider />
-        </div>)
-    //} else {
-   //   return null;
-   // }
-  }
-
   function DisplayCdItems() {
 		//console.log("CD Value", value);
     switch(value) {
@@ -511,7 +498,11 @@ export function CricDreamTabs() {
           {/* <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
             <MenuIcon />
           </IconButton> */}
-          {/*<IconButton
+					<Typography>
+						<span className={classes.doctor}>+</span>
+						<span className={classes.ankit}> Viraag Dental</span>
+					</Typography>
+          <IconButton
             aria-label="account of current user"
             aria-controls="menu-appbar"
             aria-haspopup="true"
@@ -519,20 +510,11 @@ export function CricDreamTabs() {
             color="inherit"
           >
             <HomeIcon className={classes.icon}/>
-          </IconButton>*/}
-					<Typography>
-						<span className={classes.doctor}>+</span>
-						<span className={classes.ankit}> Viraag Dental</span>
-						</Typography>
+          </IconButton>
           <Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
 					<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
 					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>}
 					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>}
-						{/*<div align="right">
-					<Typography align="right">
-						<span className={classes.ankit}>Arun Salgia</span>
-						</Typography>
-						</div>*/}
           {/* <IconButton
             aria-label="account of current group"
             aria-controls="group-appbar"

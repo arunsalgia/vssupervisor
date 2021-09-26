@@ -148,7 +148,7 @@ export default function SignIn() {
 			 window.sessionStorage.setItem("cid", response.data.cid);
 			 
 			//window.sessionStorage.setItem("admin", true)
-			setTab(process.env.REACT_APP_PATIENT);
+			setTab(process.env.REACT_APP_HOME);
 			 
 			//setUser({ uid: myUID, admin: true })
 			
