@@ -716,7 +716,8 @@ function ModalResisterStatus() {
 	if (apptMatrix.length == 0) return null;
 	return(
 	<div>
-	<Typography className={classes.th}>{"Appointments of month "+month + ' ' + year}</Typography>
+	<Typography className={classes.th}>{"Appointment calender of "+month + ' ' + year}</Typography>
+	<BlankArea />
 	<TableContainer>
 	<Table
 		className={classes.table}
@@ -913,7 +914,7 @@ function ModalResisterStatus() {
 		<DisplayNewAppointment />
 		</div>
 	}
-	<DislayAllAppointmentsOfToday />
+	<DisplayBlockAppointments myArray={apptArray} />
 	</div>
 	)}
 	
@@ -999,8 +1000,6 @@ function ModalResisterStatus() {
 		<CssBaseline />
 		<VsCancel align="right" onClick={handleNewAppointmentCancel} />
 		<Typography className={classes.switchText}>New Appointment</Typography>
-		{/*<DisplayOldSearch />*/}
-		{/*(directoryMode) &&	<DisplayFilter handler={selectPatientForNewAppointment}/>}*/}
 		<BlankArea />
 		{(currentPatient != "") &&
 			<div>
@@ -1044,33 +1043,6 @@ function ModalResisterStatus() {
 			</div>
 		}
 		</Box>
-	)}
-	
-	function DisplayOldSearch() {
-	return (
-	<div>
-		<div>
-		<TextField padding={5}  variant="outlined" label="Patient" autoFocus
-			value={searchText}
-			onChange={(event) => setSearchText(event.target.value)}
-			InputProps={{
-				endAdornment: (
-					<InputAdornment position="end">
-						<SearchIcon onClick={selectFilter}/>
-					</InputAdornment>
-			)}}
-		/>
-		</div>
-		<div>
-		<VsSelect label="Patient" id="Patient" value={currentPatient} 
-			onChange={(event) => updatePatient(event.target.value)}
-			menu={patientArray.map(x =>	
-				<MenuItem key={x.displayName} value={x.displayName}>
-				{x.displayName + " (Id:"+ x.pid+") ("+ ((x.age > 0) ? x.age+x.gender.substr(0,1) : "new")+")"}
-				</MenuItem>)}
-		/>	
-		</div>
-		</div>
 	)}
 	
 	async function selectFilter() {
@@ -1123,37 +1095,6 @@ function ModalResisterStatus() {
 		}
 	}
 	
-	function oldDisplayNewSearch() {
-	return (
-		<div>
-		<Grid key="DisplaySearch" container justify="center" alignItems="center" >
-		<Grid item xs={2} sm={2} md={2} lg={2} >
-			<FormControlLabel align="right" className={classes.radio} label="New"
-			control={
-				<SwitchBtn color="primary" className={classes.radio} checked={registeredPatient} 
-				onChange={toggleRegisteredPatient}  
-				/>
-			}
-			/>
-		</Grid>
-		<Grid item xs={7} sm={7} md={7} lg={7} >
-			<TextField padding={5} variant="outlined" fullWidth label="New Patient name" autoFocus
-			value={searchText}
-			onChange={(event) => setSearchText(event.target.value)}
-			/>
-		</Grid>
-		<Grid item xs={3} sm={3} md={3} lg={3} >
-		<Button variant="contained" color="primary" className={gClasses.submit}
-		onClick={findNewPatient}
-		>
-		New Patient
-		</Button>		
-		</Grid>
-		</Grid>
-		{(newErrorMessage != "") && <Typography className={gClasses.error}>{newErrorMessage}</Typography>}
-		</div>
-	)}
-	
 	async function updatePatient(name) {
 		//console.log(name);
 		//console.log(patientArray);
@@ -1163,12 +1104,6 @@ function ModalResisterStatus() {
 		setCurrentPatientData(pRec);
 	}
 	
-	function toggleRegisteredPatient() {
-		setRegisteredPatient(!registeredPatient)
-		setSearchText("");
-		setNewErrorMessage("");
-		setPatientArray([]);
-	}
 	
 	async function handleNewAppointmentSubmit() {
 		//console.log(aptDate);
@@ -1232,7 +1167,12 @@ function ModalResisterStatus() {
 	
 	
 	async function handleEditAppt(appt) {
-			console.log(appt);
+		console.log(appt);
+		setCurrentPatient(appt.displayName);
+		setCurrentPatientData(appt);
+		setAptDate(appt.apptTime);
+		setAptTime(appt.apptTime);
+		setNewAppointment(true);
 	}
 	
 	
@@ -1281,10 +1221,6 @@ function ModalResisterStatus() {
 					className={classes.th} >
 					Patient
 					</TableCell>
-					{/*<TableCell key={"TH22"} component="th" scope="row" align="center" padding="none"
-					className={classes.th} >
-					Age
-					</TableCell>*/}
 					<TableCell key={"TH23"} component="th" scope="row" align="center" padding="none"
 					className={classes.th} >
 					Date
@@ -1321,9 +1257,9 @@ function ModalResisterStatus() {
 					case VISITTYPE.cancelled: myVisit = "Cancelled"; myClass = classes.tdCancel; break;
 					default: myVisit = "Visit"; myClass = classes.tdVisit; break;
 				}
+				let visitAppt = (a.visit !== VISITTYPE.pending);
 				let editAppt = (a.visit !== VISITTYPE.pending);
 				let cancelAppt = (a.visit !== VISITTYPE.pending);
-				let visitAppt = (a.visit !== VISITTYPE.pending);
 				let myName = a.displayName + (isMobile() ? "" : " (ID: " + a.pid + ")");
 				return(
 					<TableRow key={"TROW"+index}>
@@ -1333,12 +1269,6 @@ function ModalResisterStatus() {
 							{myName}
 						</Typography>
 					</TableCell>
-					{/*<TableCell key={"TD2"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={myClass}>
-						<Typography className={classes.apptName}>
-							{a.data.age + "  " + a.data.gender.substr(0,1)}
-						</Typography>
-					</TableCell>*/}
 					<TableCell key={"TD3"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 						<Typography className={classes.apptName}>
@@ -1373,7 +1303,7 @@ function ModalResisterStatus() {
 					</TableCell>
 					<TableCell key={"TD13"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
-						<VsCancel onClick={() => { handleCancelAppt(a) } } />
+						<VsCancel disabled={cancelAppt} onClick={() => { handleCancelAppt(a) } } />
 					</TableCell>
 					</TableRow>
 				)}
@@ -1384,48 +1314,6 @@ function ModalResisterStatus() {
 		</Box>		
 	)}
 	
-	function org_DislayAllAppointmentsOfToday() {
-		//console.log(HOURSTR);
-		//console.log(MINUTESTR);
-	return(	
-		<div>
-		{HOURSTR.map( h => {
-			//console.log("Hour is ", h);
-			return (
-			<div>
-			{MINUTESTR.map( m => {
-				//console.log("Min is ", m);
-				let tmpArray = apptArray.filter(x => x.hour == Number(h) && x.minute == Number(m));
-				if (tmpArray.length == 0) return null;
-				//console.log(h, m, tmpArray.length);
-				let myPanel = h + m;
-				return (
-					<Accordion key={"AC"+myPanel} className={(expandedPanel == myPanel) ? classes.selectedAccordian : classes.normalAccordian} 
-						expanded={expandedPanel === myPanel} onChange={handleAccordionChange(myPanel)}>
-					<AccordionSummary key={"AS"+myPanel} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-						<Typography className={classes.accordianSummary}>
-							{"Appointment(s) of " + h + ":" + m + " ( Count: " + tmpArray.length + " )"}
-						</Typography>
-					</AccordionSummary>
-					<AccordionDetails key={"AD"+myPanel} className={classes.allAppt}>
-						<DisplayBlockAppointments myArray={tmpArray} hrStr={h} mnStr={m} />
-					</AccordionDetails>
-      </Accordion>
-					
-			)}
-			)}
-			</div>
-		)}
-		)}
-		</div>
-	)}
-
-	function DislayAllAppointmentsOfToday() {
-		//console.log(HOURSTR);
-		//console.log(MINUTESTR);
-	return(	
-		<DisplayBlockAppointments myArray={apptArray} />
-	)}
 
 	
 	const LoadingIndicator = props => {
@@ -1600,25 +1488,8 @@ function ModalResisterStatus() {
 		}
 	}
 	
-	async function orgselectFilter() {
-		//setApptMatrix([]);
-		//setMasterApptArray([]);
-		//setApptArray([]);
-		setCurrentPatient("");
-		setCurrentPatientData({});
-		//setNewAppointment(false);
-		//setBeforeToday(true);
-		setPatientArray([]);
-		console.log("Clearing current pat");
-		let myText = document.getElementById("filter").value;
-		//console.log(myText);
-		setSearchText(myText);
-		let ppp = await updatePatientByFilter(searchText, userCid);
-		setPatientArray(ppp);
-	}
-
 	
-	function DisplayPatientVisit(props) {
+	function org_DisplayPatientVisit(props) {
 		{/*if (apptArray.length === 0)
 		return (<Typography>No appointment</Typography>);*/}
 	
@@ -1757,7 +1628,7 @@ function ModalResisterStatus() {
 			}
 			{(currentPatient !== "") &&
 			<div>
-				<Typography className={classes.title}>{"Appointments of "+currentPatient}</Typography>
+				<Typography className={classes.title}>{"Appointments of "+currentPatient+" (Id: "+currentPatientData.pid+" )" }</Typography>
 				<DisplayNewApptBtn />
 				{(newAppointment)  && <DisplayNewAppointment />}
 				<DisplayBlockAppointments myArray={apptArray} />
@@ -1800,7 +1671,6 @@ function ModalResisterStatus() {
 			className={classes.dateTimeBlock}
 		/>
 		<BlankArea />
-		{/*<DisplayMonthYear /> */}
 		{(monthlyMode) && <DisplayApptMatrix />}
 		{(!monthlyMode) && <DisplayDailyAppointments />}
 	</div>

@@ -11,6 +11,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
+import { useLoading, Audio } from '@agney/react-loading';
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
@@ -218,6 +219,9 @@ export default function Visit() {
   const classes = useStyles();
 	const gClasses = globalStyles();
 	
+	
+	const [startLoading, setStartLoading] = useState(false);
+	
 	const [showDocument, setShowDocument] = useState(false);
 	const [documentArray, setDocumentArray] = useState([]);
 	
@@ -328,7 +332,7 @@ export default function Visit() {
 		checkPatient();
   }, []);
 
-	
+
   const [expandedPanel, setExpandedPanel] = useState(false);
   const handleAccordionChange = (panel) => (event, isExpanded) => {
     // console.log({ event, isExpanded });
@@ -813,6 +817,9 @@ export default function Visit() {
 	
 	
 	function DisplayNewVisitBtn() {
+		if (sessionStorage.getItem("userType") !== "Doctor") return null;
+		
+		// only doctor permitted to add new visit
 		//console.log(visitArray);
 		let disp = false;
 		if (visitArray.length == 0)
@@ -1411,6 +1418,7 @@ export default function Visit() {
 	
 	
 	async function handleFileView(d) {	
+		setStartLoading(true);
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/downloadimage/${userCid}/${d.pid}/${d.title}`
 			let resp = await axios.get(myUrl);
@@ -1435,6 +1443,7 @@ export default function Visit() {
 		} catch (e) {
 			console.log(e);
 		}
+		setStartLoading(false);
 	}
 	
 	function DisplayMedicalReports() {
@@ -1647,12 +1656,12 @@ export default function Visit() {
 		<Typography className={classes.heading}>{((x.visitNumber == 0) ? "(New)" : "V"+x.visitNumber)+' '+x.visitDate.substr(0,15)}</Typography>
 	</Grid>
 	<Grid item xs={1} sm={1} md={1} lg={1} >
-		{(x.visitNumber === 0) &&
+		{((sessionStorage.getItem("userType") === "Doctor") && (x.visitNumber === 0)) &&
 			<IconButton align="right" color="secondary" size="small" onClick={handleDeleteNew} >
 			<DeleteIcon />
 			</IconButton>
 		}
-		{(visitArray[0].visitNumber > 0) &&
+		{((sessionStorage.getItem("userType") === "Doctor") && (visitArray[0].visitNumber > 0)) &&
 			<IconButton color="primary" size="small" onClick={() => { handleCopyNew(x.visitNumber)}} >
 			<FileCopyIcon />
 			</IconButton>
@@ -1694,7 +1703,7 @@ export default function Visit() {
 		<div align="left">
 			<Typography align="center" className={classes.modalHeader}>
 			{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
-			</Typography>
+			</Typography>	
 			<DisplayMedicalReports />
 			{/*<DisplayPatientInfo />*/}
 			<DisplayNewVisitBtn />

@@ -6,6 +6,7 @@
   "main": "dist/index.js",
   "proxy": "https://ankitipl.herokuapp.com",
   "dependencies": {
+    "@agney/react-loading": "^0.1.2",
     "@capacitor/android": "^2.4.7",
     "@capacitor/core": "^2.4.7",
     "@ionic/cli": "^6.13.1",

@@ -493,7 +493,7 @@ export function CricDreamTabs() {
 								<MenuItem onClick={handlePatient}>Patient</MenuItem>
 								<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
 								<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
-								<MenuItem onClick={handleDocument}>Med. Report</MenuItem>	
+								<MenuItem onClick={handleDocument}>Report</MenuItem>	
                 <Divider/>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
 									<div>

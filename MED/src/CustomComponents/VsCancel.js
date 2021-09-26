@@ -13,9 +13,14 @@ function disabled() {
 
 export default function VsCancel(props) {
 let _align = (props.align == null) ? "center" : props.align;
+let myDisabled=false;
+if (props.disabled != null) {
+	myDisabled = props.disabled;
+}
+//console.log(myDisabled);
 return(	
 <div align={props.align}>
-	<IconButton color="secondary"  size="small" onClick={props.onClick} >
+	<IconButton color="secondary"  disabled={myDisabled} size="small" onClick={props.onClick} >
 		<CancelIcon />
 	</IconButton>
 </div>
