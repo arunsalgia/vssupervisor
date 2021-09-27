@@ -223,7 +223,8 @@ QuoteSchema = mongoose.Schema({
 CustomerSchema = mongoose.Schema({
 	name: String,
 	//displayNamename: String,
-	
+	clinicName: String,
+	welcomeMessage: String,
 	plan: String,
 	email: String,
 	mobile: String,

@@ -14,6 +14,14 @@ router.get('/list', async function(req, res, next) {
 	sendok(res, rec);
 });
 
+router.get('/getinfo/:cid', async function(req, res, next) {
+  setHeader(res);
+	var {cid} = req.params;
+	
+	let rec = await M_Customer.findOne({_id: cid});
+	if (rec)	sendok(res, rec);
+	else      senderr(res, 601, "Invalid cid");
+})
 
 router.get('/add/:userName', async function(req, res, next) {
   setHeader(res);

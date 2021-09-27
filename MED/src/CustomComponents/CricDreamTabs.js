@@ -514,6 +514,7 @@ export function CricDreamTabs() {
           <Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
 					<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
 					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>}
+					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleDocument}>Report</Button>}
 					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>}
           {/* <IconButton
             aria-label="account of current group"

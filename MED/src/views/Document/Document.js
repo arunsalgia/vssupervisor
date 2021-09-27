@@ -42,6 +42,7 @@ import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
 	DisplayDocumentList,
 	DisplayImage,
 	DisplayPDF,
+	LoadingMessage,
 } from "CustomComponents/CustomComponents.js"
 
 import { 
@@ -317,6 +318,7 @@ export default function Document() {
 	const classes = useStyles();
 	const gClasses = globalStyles();
 	
+	const [startLoading, setStartLoading] = useState(false);
 	const [emurName, setEmurName] = useState("");
 	const [modalRegister, setModalRegister] = useState(0);
 	
@@ -393,26 +395,18 @@ export default function Document() {
 	
 	async function handleFileView(d) {	
 		//console.log(d.title);
+		//setStartLoading(true);
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/downloadimage/${userCid}/${currentPatientData.pid}/${d.title}`
 			let resp = await axios.get(myUrl);
 			//console.log(resp.data.data);
 			
 			if (d.type === "PDF") {
-				// pdf file
-				// file={`data:application/pdf;base64,${this.state.base64}`}
 				const b64 = Buffer.from(resp.data.data).toString('base64');
-				console.log(b64)
+				//console.log(b64)
 				setDlFile(b64);
-				console.log(b64.length);
+				//console.log(b64.length);
 				setIsPdf(true);
-				//var array = new Uint8Array(resp.data.data);
-				//var blob = new Blob([array]);
-				//setDlFile(blob);
-				//
-				//var blob = new Blob([array], {type: 'application/pdf'});
-				//var blobURL = URL.createObjectURL(blob);
-				//window.open(blobURL);
 			} else {
 				//image file
 				const b64 = Buffer.from(resp.data.data).toString('base64');
@@ -428,6 +422,7 @@ export default function Document() {
 		} catch (e) {
 			console.log(e);
 		}
+		//setStartLoading(false);
 	}
 	
 	async function deleteDoc(d) {
@@ -795,6 +790,7 @@ export default function Document() {
 			<Typography align="center" className={classes.modalHeader}>
 			{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
 			</Typography>
+			{(startLoading) && <LoadingMessage />}
 			{(viewImage && !isPdf) && 
 				<DisplayImage 
 					title={dlDoc.title} mime={dlMime} file={dlFile}

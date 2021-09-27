@@ -54,6 +54,7 @@ import {DisplayYesNo, DisplayPageHeader, ValidComp, BlankArea,
 DisplayPatientDetails,
 DisplayDocumentList,
 DisplayImage, DisplayPDF,
+LoadingMessage,
 } from "CustomComponents/CustomComponents.js"
 
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
@@ -1426,7 +1427,7 @@ export default function Visit() {
 				// pdf file
 				// file={`data:application/pdf;base64,${this.state.base64}`}
 				const b64 = Buffer.from(resp.data.data).toString('base64');
-				console.log(b64)
+				//console.log(b64)
 				setDlFile(b64);
 				setIsPdf(true);
 			} else {
@@ -1454,6 +1455,7 @@ export default function Visit() {
 		<Link href="#" variant="body2" onClick={() => {setShowDocument(true); }}>Show Medical Reports</Link>
 		</Typography>
 		}
+		{(startLoading) && <LoadingMessage />}
 		{(showDocument) && 
 			<div>
 			<Typography align="right" className={classes.link}>

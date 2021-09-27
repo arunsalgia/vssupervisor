@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
+import axios from "axios";
 import VsButton from "CustomComponents/VsButton";
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
@@ -108,13 +109,22 @@ const useStyles = makeStyles((theme) => ({
       fontSize: theme.typography.pxToRem(15),
       color: theme.palette.text.secondary,
     },
-    groupName:  {
+    clinicName:  {
       // right: 0,
-      fontSize: '16px',
+      fontSize: theme.typography.pxToRem(28),
       fontWeight: theme.typography.fontWeightBold,
       color: deepOrange[700],
       alignItems: 'center',
-      marginTop: '0px',
+      marginTop: '5px',
+			marginBottom: '5px',
+    },
+		itemMessage:  {
+      // right: 0,
+      fontSize: theme.typography.pxToRem(14),
+      fontWeight: theme.typography.fontWeightBold,
+      //color: blue[700],
+      alignItems: 'center',
+
     },
     error:  {
         // right: 0,
@@ -153,21 +163,33 @@ const useStyles = makeStyles((theme) => ({
 
 
 //const PATIENTMSG="The patient's anatomy always always should be respected, even if it is absolutely contrary - the decision is contrary to best medical advice and what the physician wahts";
-const PATIENTMSG=      "The patient's anatomy always always should be respected, even if it is absolutely contrary";
-const APPOINTMENTMSG = "Events do not just happen, but arrive by appointment. Don't make an wish, make appointment"
-const VISITMSG =       "Remember visit to Dentist is a two-way street, you are in in clinic for your health and so is he/she."
-const REPORTMSG =      "The medical report card helps give us a focus and it frames the dialogue for moving forward";
+const PATIENTMSG=      "The patient's anatomy always always should be respected, even if it is absolutely contrary.";
+const APPOINTMENTMSG = "Events do not just happen, but arrive by appointment. Don't make a wish, make an appointment."
+const VISITMSG =       "Remember visit to Dentist is a two-way street, you are in clinic for your Dental health and so is the Doctor."
+const REPORTMSG =      "The medical report card helps give us a focus and it frames the dialogue for moving forward.";
+const MEDICINEMSG =    "Wherever the art of Medicine is loved, there is also a love of Humanity.";
+
+const cardStyle = {padding: "5px 10px", margin: "4px 4px", backgroundColor: blue[100], color: 'black', fontSize:'14px', borderRadius:7, border: 2};	
 
 export default function Home() {
     // const { setUser } = useContext(UserContext);
     // window.onbeforeunload = () => setUser("")
 	const classes = useStyles();
 	const gClasses = globalStyles();
-	var cardStyle = {padding: "5px 10px", margin: "4px 4px", backgroundColor: blue[100], color: 'black', fontSize:'14px', borderRadius:7, border: 2};	
-
+	const [custInfo, setCustInfo] = useState({});
 
     useEffect(() => {
-
+		const getCustomerInfo = async () => {		
+			try {
+				var myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/customer/getinfo/${sessionStorage.getItem("cid")}`
+				var resp = await axios.get(myURL);
+				setCustInfo(resp.data)
+			} catch (e) {
+				console.log(e);
+			}
+		}
+		console.log(sessionStorage.getItem("cid"));
+		getCustomerInfo();
     }, [])
 
 	function ShowAllCards() {
@@ -183,13 +205,13 @@ export default function Home() {
         alt="green iguana"
       />*/}
 			<CardIcon color="warning">
-			<Avatar alt="Remy Sharp" src={`${process.env.PUBLIC_URL}/image/PATIENT.JPG`} className={classes.bigAvatar} />
+			<Avatar variant="rounded" alt="Remy Sharp" src={`${process.env.PUBLIC_URL}/image/PATIENT.JPG`} className={classes.bigAvatar} />
 			</CardIcon>
       <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
+        <Typography color="primary" gutterBottom variant="h5" component="div">
           Patient
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography className={classes.itemMessage} variant="body2" >
 				{PATIENTMSG}
         </Typography>
       </CardContent>
@@ -207,13 +229,13 @@ export default function Home() {
         alt="green iguana"
       />*/}
 			<CardIcon color="warning">
-			<Avatar alt="Remy Sharp" src={`${process.env.PUBLIC_URL}/image/APPOINTMENT.JPG`} className={classes.bigAvatar} />
+			<Avatar variant="rounded" alt="Remy Sharp" src={`${process.env.PUBLIC_URL}/image/APPOINTMENT.JPG`} className={classes.bigAvatar} />
 			</CardIcon>
       <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
+        <Typography color="primary"  gutterBottom variant="h5" component="div">
           Appointment
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography className={classes.itemMessage} variant="body2" >
 				{APPOINTMENTMSG}
         </Typography>
       </CardContent>
@@ -222,7 +244,7 @@ export default function Home() {
       </CardActions>
     </Card>
 		</GridItem>
-					<GridItem key="db_gi_ub3" xs={12} sm={6} md={6}>
+			<GridItem key="db_gi_ub3" xs={12} sm={6} md={6}>
 			<Card style={cardStyle} key="db_card_ub1">
       {/*<CardMedia
         component="img"
@@ -231,13 +253,13 @@ export default function Home() {
         alt="green iguana"
       />*/}
 			<CardIcon color="warning">
-			<Avatar alt="Remy Sharp" src={`${process.env.PUBLIC_URL}/image/VISIT.JPG`} className={classes.bigAvatar} />
+			<Avatar variant="rounded" alt="Remy Sharp" src={`${process.env.PUBLIC_URL}/image/VISIT.JPG`} className={classes.bigAvatar} />
 			</CardIcon>
       <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
+        <Typography color="primary"  gutterBottom variant="h5" component="div">
           Visit
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography className={classes.itemMessage} variant="body2" >
 				{VISITMSG}
         </Typography>
       </CardContent>
@@ -246,7 +268,7 @@ export default function Home() {
       </CardActions>
     </Card>
 		</GridItem>
-			<GridItem key="db_gi_ub4" xs={12} sm={6} md={6}>
+		<GridItem key="db_gi_ub4" xs={12} sm={6} md={6}>
 			<Card style={cardStyle} key="db_card_ub1">
       {/*<CardMedia
         component="img"
@@ -254,14 +276,14 @@ export default function Home() {
         image={`${process.env.PUBLIC_URL}/image/PATIENT.JPG`}
         alt="green iguana"
       />*/}
-			<CardIcon color="warning">
-			<Avatar alt="Remy Sharp" src={`${process.env.PUBLIC_URL}/image/REPORT.JPG`} className={classes.bigAvatar} />
+			<CardIcon variant="rounded" color="warning">
+			<Avatar variant="rounded" alt="Remy Sharp" src={`${process.env.PUBLIC_URL}/image/REPORT.JPG`} className={classes.bigAvatar} />
 			</CardIcon>
       <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
+        <Typography color="primary"  gutterBottom variant="h5" component="div">
           Reports
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography className={classes.itemMessage} variant="body2">
 				{REPORTMSG}
         </Typography>
       </CardContent>
@@ -270,16 +292,35 @@ export default function Home() {
       </CardActions>
     </Card>
 		</GridItem>
+		<GridItem key="db_gi_ub5" xs={12} sm={6} md={6}>
+			<Card style={cardStyle} key="db_card_ub1">
+			<CardIcon variant="rounded" color="warning">
+			<Avatar variant="rounded" alt="Remy Sharp" src={`${process.env.PUBLIC_URL}/image/MEDICINE.JPG`} className={classes.bigAvatar} />
+			</CardIcon>
+      <CardContent>
+        <Typography color="primary"  gutterBottom variant="h5" component="div">
+          Medicine
+        </Typography>
+        <Typography className={classes.itemMessage} variant="body2">
+				{MEDICINEMSG}
+        </Typography>
+      </CardContent>
+      <CardActions>
+       <VsButton name="Medicine Directory" onClick={() => {setTab(process.env.REACT_APP_MEDICINE)}}/>
+      </CardActions>
+    </Card>
+		</GridItem>
 	</GridContainer>
   )}
 
   
-
+	console.log(custInfo);
+	
 	return (
 	<div className={gClasses.webPage} align="center" key="main">
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
-	<DisplayPageHeader headerName="Welcome to Clinic of Arun Salgia" groupName="" tournament=""/>
+	<Typography className={classes.clinicName}>{custInfo.welcomeMessage}</Typography>
 	<BlankArea />
 	<ShowAllCards />
 	</Container>

@@ -811,3 +811,10 @@ export function DisplayPDF(props) {
 	</Box>
 	)}
 
+export function LoadingMessage() {
+return(
+<div align="center">
+	<Typography>Sorry to keep you waiting. Just give a moment. Loading information from server.....</Typography>
+</div>
+)}
+

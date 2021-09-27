@@ -454,12 +454,13 @@ export default function Appointment() {
   useEffect(() => {	
 		const checkPatient = async () => {		
 			// check if appointment has been called from Patient view
+			let newDirMode = true;
 			try {
 				let dirPatient = JSON.parse(sessionStorage.getItem("shareData"));
 				sessionStorage.setItem("shareData", "");		// clean up
 				console.log(dirPatient);
 				
-				setDirectoryMode(false);
+				newDirMode = false;
 				setCurrentPatient(dirPatient.displayName);
 				setCurrentPatientData(dirPatient);
 				let allPat = [];
@@ -470,24 +471,28 @@ export default function Appointment() {
 				// no share data. Thus called directly
 				//console.log("direct");
 			}
-			
+			return newDirMode;
 		}
 
+		const getData = async (month, year) => {
+			let dirMode = await checkPatient();
+			setDirectoryMode(dirMode);
+			if (dirMode) {
+				let myCounts = await getMonthlyAppointmentCounts(month, year);
+				await generateMatrix(month, year, myCounts);
+			}
+		}
 		
-		 userCid = sessionStorage.getItem("cid");
+		userCid = sessionStorage.getItem("cid");
 		// make year
 		WEEKENDS = [0, 6];			//JSON.parse(`${process.env.REACT_APP_WEEKENDS}`)
 		let x = `${process.env.REACT_APP_WEEKENDS}`;
-		//console.log("ST", x);
 		
 		let istart = Number(`${process.env.REACT_APP_STARTTIME}`);
 		let iend = Number(`${process.env.REACT_APP_ENDTIME}`);
 		HOURSTR = ALLHOURSTR.slice(istart, iend);
 		
 		setApptHour(HOURSTR[0]);
-		//console.log(WEEKENDS);
-		//console.log(HOURSTR);
-		//console.log(istart, iend);
 		
 		let tmp = new Date();
 		let yyyy = tmp.getFullYear();
@@ -502,7 +507,7 @@ export default function Appointment() {
 		let mmm = tmp.getMonth();
 		setMonth(MONTHSTR[mmm]);
 		
-		checkPatient();
+		getData(MONTHSTR[mmm], yyyy.toString());
   }, []);
 
 function ModalResisterStatus() {
@@ -1345,10 +1350,12 @@ function ModalResisterStatus() {
 		initCommon();
 	}
 	
-	function toggleDirectoryMode() {
+	async function toggleDirectoryMode() {
 		let newMode = !directoryMode;
 		if (newMode)	{
 			initDirectoryModeData();
+			let myCounts = await getMonthlyAppointmentCounts(month, year);
+			await generateMatrix(month, year, myCounts);
 		} else {
 			initFilterModeData();
 		}
