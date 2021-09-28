@@ -289,7 +289,7 @@ async function cancelOldAppt() {
 	}
 }
 
-cron.schedule('5 9 * * *', async () => {	
+cron.schedule('5,45 0,9,13 * * *', async () => {	
   if (!db_connection) {
     return;
   }

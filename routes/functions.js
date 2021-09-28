@@ -498,6 +498,24 @@ function base64ToString(base64string) {
 	return decodedString
 }
 
+// return -1 if myDate < today
+// returns 0 if my date = today
+// return 1 if myDAte > today
+
+function checkDate(myDate) {
+		let today = new Date();
+		if (myDate.getFullYear()  < today.getFullYear()) return -1;
+		if (myDate.getFullYear()  > today.getFullYear()) return 1;
+		
+		if (myDate.getMonth() < today.getMonth()) return -1;
+		if (myDate.getMonth() > today.getMonth()) return 1;
+		
+		if (myDate.getDate() < today.getDate()) return -1;
+		if (myDate.getDate() > today.getDate()) return 1;
+		
+		return (0);	// date is same
+}
+
 module.exports = {
 	ALPHABETSTR,
   getLoginName, getDisplayName,
@@ -521,5 +539,6 @@ module.exports = {
   calculateBonus,
 	rechargeCount,
 	numberDate, intToString,
-	stringToBase64, base64ToString
+	stringToBase64, base64ToString,
+	checkDate,
 }; 

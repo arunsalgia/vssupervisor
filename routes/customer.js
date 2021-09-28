@@ -1,5 +1,7 @@
 var router = express.Router();
-
+const { 
+	checkDate,
+} = require('./functions');
 
 router.use('/', function(req, res, next) {
   setHeader(res);
@@ -84,6 +86,19 @@ router.get('/test', async function(req, res, next) {
 	}
 	
 	sendok(res, "done");
+});
+
+cron.schedule('15,57 0,9,13 * * *', async () => {	
+  if (!db_connection) {
+    return;
+  }
+	// check for expiry
+	console.log("Check for expiry");
+	let allCustomers = await M_Customer.find({});
+	for(let i = 0; i < allCustomers.length; ++i) {
+		let isExpired = checkDate(allCustomers[i].expiryDate);
+		console.log(allCustomers[i].name, isExpired);
+	}
 });
 
 function sendok(res, usrmsg) { res.send(usrmsg); }

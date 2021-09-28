@@ -321,6 +321,7 @@ export default function Visit() {
 				// now get all visits of patient
 				getPatientVisit(myPatient);
 				let ddd = await getPatientDocument(userCid, myPatient.pid);
+				console.log("Docs", ddd);
 				setDocumentArray(ddd);
 			} catch {
 				// no share data. Thus called directly

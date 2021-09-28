@@ -523,7 +523,7 @@ export function JumpButtonOnly(props) {
 }
 
 export function CricDreamLogo () {
-  let mylogo = `${process.env.PUBLIC_URL}/VS.ICO`;
+  let mylogo = `${process.env.PUBLIC_URL}/VD.ICO`;
   const classes = useStyles();
   return (
     <Avatar variant="square" className={classes.avatar}  src={mylogo}/>
