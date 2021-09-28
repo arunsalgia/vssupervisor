@@ -320,6 +320,8 @@ export default function Visit() {
 				}
 				// now get all visits of patient
 				getPatientVisit(myPatient);
+				let ddd = await getPatientDocument(userCid, myPatient.pid);
+				setDocumentArray(ddd);
 			} catch {
 				// no share data. Thus called directly
 				console.log("direct");
@@ -1602,7 +1604,7 @@ export default function Visit() {
 	return (
 	<Grid className={classes.noPadding} key={"FOLLOWUP"} container justify="center" alignItems="center" >
 		<Grid item xs={4} sm={4} md={2} lg={2} >
-		<Typography className={classes.title}>Follow up</Typography>
+		<Typography className={classes.title}>Next Review After</Typography>
 		</Grid>
 		<Grid item xs={4} sm={4} md={1} lg={1} >
 			<Select labelId='time' id='time' name="time" padding={10}

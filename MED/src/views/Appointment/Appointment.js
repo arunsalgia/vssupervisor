@@ -722,7 +722,6 @@ function ModalResisterStatus() {
 	return(
 	<div>
 	<Typography className={classes.th}>{"Appointment calender of "+month + ' ' + year}</Typography>
-	<BlankArea />
 	<TableContainer>
 	<Table
 		className={classes.table}

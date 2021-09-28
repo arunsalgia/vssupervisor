@@ -321,7 +321,6 @@ export default function Home() {
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
 	<Typography className={classes.clinicName}>{custInfo.welcomeMessage}</Typography>
-	<BlankArea />
 	<ShowAllCards />
 	</Container>
 	</div>
