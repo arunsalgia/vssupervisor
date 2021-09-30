@@ -41,6 +41,7 @@ import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Typography from '@material-ui/core/Typography';
 import Avatar from "@material-ui/core/Avatar"
 import { useHistory } from "react-router-dom";
+import lodash from 'lodash';
 
 // import CardAvatar from "components/Card/CardAvatar.js";
 // import { UserContext } from "../../UserContext";
@@ -62,148 +63,68 @@ import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 //import CancelIcon from '@material-ui/icons/Cancel';
 
-import {red, blue, yellow, orange } from '@material-ui/core/colors';
+import {red, blue, yellow, orange, deepOrange, pink } from '@material-ui/core/colors';
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 
-const AVATARHEIGHT=4;
 const useStyles = makeStyles((theme) => ({
-	boxStyle: {padding: "5px 10px", margin: "4px 2px", backgroundColor: blue[300] },
-	radio: {
-		fontSize: theme.typography.pxToRem(20),
-		fontWeight: theme.typography.fontWeightBold,
-		color: "blue",
-	},
 	filterRadio: {
-		fontSize: theme.typography.pxToRem(14),
-		fontWeight: theme.typography.fontWeightBold,
-		color: '#000000',	
-	},
-    root: {
-      width: '100%',
-    }, 
-		link: {
-			backgroundColor: 'transparent',
-		},
-		switchText: {
 			fontSize: theme.typography.pxToRem(14),
 			fontWeight: theme.typography.fontWeightBold,
-    }, 
-    info: {
-			backgroundColor: yellow[500],	
-			color: blue[700],
-			height: theme.spacing(AVATARHEIGHT),
-			width: theme.spacing(AVATARHEIGHT),
-			fontSize: '12px',
-			fontWeight: theme.typography.fontWeightBold,
-			borderWidth: 1,
-			borderColor: 'black',
-			borderStyle: 'solid',
-    }, 
-		noinfo: {
-			backgroundColor: '#FFFFFF',	
-			color: '#000000',
-			height: theme.spacing(AVATARHEIGHT),
-			width: theme.spacing(AVATARHEIGHT),
-			fontSize: '12px',
-			fontWeight: theme.typography.fontWeightBold,
-			borderWidth: 1,
-			borderColor: 'black',
-			borderStyle: 'solid',
-		},       
-    td : {
-			border: 5,
-			align: "center",
-			padding: "none",
-			borderWidth: 1,
-			borderColor: 'black',
-			borderStyle: 'solid',
-			backgroundColor: '#00E5FF',
-		},
-		th : {
-			border: 5,
-			align: "center",
-			padding: "none",
-			borderWidth: 1,
-			borderColor: 'black',
-			borderStyle: 'solid',
-			backgroundColor: '#FF7043',
-		},
-		header: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-    }, 
-    error:  {
-      // right: 0,
-      fontSize: '12px',
-      color: red[700],
-      // position: 'absolute',
-      alignItems: 'center',
-      marginTop: '0px',
-		},
-		editdelete: {
-			marginLeft:  '50px',
-			marginRight: '50px',
-			paddings: '20px',
-		},
-		NoPatients: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			color: blue[700]
-		},  
-		radio: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			color: "blue",
-		},
-		messageText: {
-			color: '#4CC417',
-			fontSize: 12,
-			// backgroundColor: green[700],
-    },
-    symbolText: {
-        color: '#4CC417',
-        // backgroundColor: green[700],
-    },
-    button: {
-			margin: theme.spacing(0, 1, 0),
-    },
-    heading: {
-      fontSize: theme.typography.pxToRem(15),
-      flexBasis: '33.33%',
-      flexShrink: 0,
-    },
-    secondaryHeading: {
-      fontSize: theme.typography.pxToRem(15),
-      color: theme.palette.text.secondary,
-    },
-  }));
-
-const ROWSPERPAGE=10;
-const BOTTONCOL=13;
-
-const ALPHABETSTR = [
-"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-"K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-"U", "V", "W", "X", "Y", "Z"
-];
-
-const NUMBERINT=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-const GENDERARRAY=["Male", "Female", "Other"];
-
-const addEditModal = (isMobile()) ? dynamicModal('90%') : dynamicModal('40%');
-const yesNoModal = dynamicModal('60%');
-
-let modalName="";
-function setModalName(ggg) { modalName = ggg; }
-let modalAge= 0;
-function setModalAge(ggg) { modalAge = ggg };
-let modalGender="Male";
-function setModalGender(ggg) { modalGender = ggg; }
-let modalEmail="nomail@mail.com";
-function setModalEmail(ggg) { modalEmail = ggg; }
-let modalMobile="9999999999";
-function setModalMobile(ggg) { modalMobile= ggg; }
+			color: '#000000',	
+	},
+	th: { 
+		border: 5,
+    align: "center",
+    padding: "none",
+		fontSize: theme.typography.pxToRem(13),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: '#FFA726',
+		backgroundColor: deepOrange[200],
+		borderWidth: 1,
+		borderColor: 'black',
+		borderStyle: 'solid',
+	},
+	apptName: {
+		fontSize: theme.typography.pxToRem(15),
+		fontWeight: theme.typography.fontWeightBold,
+	},  
+	tdBonus: {
+    border: 5,
+    align: "center",
+    padding: "none",
+		borderWidth: 1,
+		backgroundColor: blue[100],
+		borderColor: 'black',
+		borderStyle: 'solid',
+  },
+	tdWallet : {
+		backgroundColor: pink[100],
+    border: 5,
+    align: "center",
+    padding: "none",
+		borderWidth: 1,
+		borderColor: 'black',
+		borderStyle: 'solid',
+  },
+  wallet : {
+    spacing: 0,
+    // border: 5,
+    align: "center",
+    padding: "none",
+    height: 10,
+    backgroundColor: '#B3E5FC',
+  },
+  bonus : {
+    spacing: 0,
+    // border: 5,
+    align: "center",
+    padding: "none",
+    height: 10,
+    backgroundColor: '#FFC0CB',
+  },
+}));
+  
 
 
 let searchText = "";
@@ -211,38 +132,121 @@ function setSearchText(sss) { searchText = sss;}
 
 
 var userCid;
-export default function Patient() {
+export default function Doctor() {
 
   const classes = useStyles();
 	const gClasses = globalStyles();
 
 	const [doctorArray, setDoctorArray] = useState([]);
 	const [masterDoctorArray, setMasterDoctorArray] = useState([])
+	const [categary, setCategary] = useState([]);
+	const [radioValue, setRadioValue] = useState("All");
 	
-
   useEffect(() => {
 		const getDoctors = async () => {
+			try {
 			var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/doctor/list`);
-			setMasterDoctorArray(response.data);
-			setDoctorArray(response.data);
-			console.log(response.data);
+				setMasterDoctorArray(response.data);
+				setDoctorArray(response.data);
+				let allCat = [...new Set(response.data.map(item => item.type))]; // [ 'A', 'B']
+				allCat = ["All"].concat(allCat);
+				console.log(allCat);
+				setCategary(allCat);
+			} catch (e) {
+				console.log(e);
+			}
 		}
-		getDoctors();
 		userCid = sessionStorage.getItem("cid");
+		getDoctors();
   }, [])
 
-	
-	function dummy() {};
-	
-	function DisplayDoctors() {
-		return null;
+	function handleRadioChange(v) {
+		console.log(v);
+		setRadioValue(v);
+		let tmp = (v === "All") ? [].concat(masterDoctorArray) : masterDoctorArray.filter(x => x.type === v);
+		setDoctorArray(tmp);
 	}
 	
+	function DisplayFilterRadios() {
+	return (	
+		<FormControl component="fieldset">
+		<RadioGroup row aria-label="radioselection" name="radioselection" value={radioValue} 
+			onChange={() => {handleRadioChange(event.target.value); }}
+		>
+		{categary.map( (a, index) =>
+			<FormControlLabel className={classes.filterRadio} value={a}	control={<Radio color="primary"/>} label={a} />
+		)}
+		</RadioGroup>
+	</FormControl>
+	)}
+	
+	function DisplayRadios() {
+	return (
+		<Box className={classes.allAppt} border={1} width="100%">
+			<TableContainer>
+			<Table style={{ width: '100%' }}>
+			<TableHead>
+				<TableRow align="center">
+					<TableCell key={"TH1"} component="th" scope="row" align="center" padding="none"
+					className={classes.th} colSpan={1}>
+					{"Doctors Directory"}
+					</TableCell>
+				</TableRow>
+				<TableRow align="center">
+					<TableCell key={"TH3"} component="th" scope="row" align="center" padding="none"
+						className={classes.th} colSpan={1}>
+						<DisplayFilterRadios />
+					</TableCell>
+				</TableRow>
+			</TableHead>
+			</Table>
+			</TableContainer>
+		</Box>		
+	)}
+	
+
+	function DisplayDoctor(props) {
+	console.log(doctorArray);
+	return(
+		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<div align="center" >
+		<Typography>
+		<span className={gClasses.patientName}>{props.doctor.name}</span>
+		</Typography>
+		</div>
+		<div align="left" >
+		<Typography>
+		<span className={gClasses.patientInfo}>{props.doctor.type}</span>
+		</Typography>
+		<Typography>
+		<span className={gClasses.patientInfo}>{props.doctor.clinicName}</span>
+		</Typography>
+		<Typography className={gClasses.patientInfo}> 
+			{props.doctor.addr1}
+		</Typography>
+		<Typography className={gClasses.patientInfo}> 
+			{props.doctor.addr2}
+		</Typography>
+		<Typography className={gClasses.patientInfo}> 
+			{props.doctor.addr3}
+		</Typography>
+		<Typography className={gClasses.patientInfo}> 
+			{"Email: "+ props.doctor.email}
+		</Typography>
+		<Typography className={gClasses.patientInfo}> 
+			{"Mobile: "+ props.doctor.mobile}
+		</Typography>
+		<BlankArea />
+		</div>
+		</Box>
+	)}
+
 	function handleWelcome() {
 		sessionStorage.setItem("currentLogin",""); 
 		cdRefresh();
 		console.log("Calling welcome");
 	}
+	
 	
   return (
   <div className={gClasses.webPage} align="center" key="main">
@@ -260,7 +264,17 @@ export default function Patient() {
 		</div>
 		<BlankArea />
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<DisplayDoctors />
+			<DisplayRadios />
+			<BlankArea />
+			<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
+			{doctorArray.map( (d, index) => 
+				<Grid key={"DR"+d.name} item xs={12} sm={6} md={4} lg={4} >
+				<DisplayDoctor 
+					doctor={d} 
+				/>
+				</Grid>
+			)}
+		</Grid>
 		</Box>	
 		</ Container>
   </div>

@@ -111,13 +111,13 @@ const useStyles = makeStyles((theme) => ({
 	},
 	loginButton: {
 		position: "fixed",
-		top: "2%",
+		top: "8%",
 		right: "2%"
 	},
 	doctorButton: {
 		position: "fixed",
 		top: "2%",
-		right: "12%"
+		right: "2%"
 	},
 	background: {
 		backgroundImage:  `${process.env.PUBLIC_URL}/image/WELCOME.JPG`,
