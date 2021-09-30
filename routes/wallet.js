@@ -312,12 +312,12 @@ router.get('/details/:userid', async function (req, res, next) {
     let { userid } = req.params;
     
     let userTrans=[];
-    let myTrans = await Wallet.find({uid: userid}).sort({ "transNumber": -1 });
+    let myTrans = await M_Wallet.find({cid: userid}).sort({ "transNumber": -1 });
     myTrans.forEach(tRec => {
       if (tRec.amount != 0) {
         let tDate = new Date(tRec.transNumber);
         userTrans.push({
-		  isWallet: tRec.isWallet,
+					isWallet: tRec.isWallet,
           date: getDate(tDate),			//cricDate(tDate), 
           amount: tRec.amount,
           type: tRec.transType,

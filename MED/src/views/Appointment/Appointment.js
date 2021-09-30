@@ -454,7 +454,7 @@ export default function Appointment() {
   useEffect(() => {	
 		const checkPatient = async () => {		
 			// check if appointment has been called from Patient view
-			let newDirMode = true;
+			let newDirMode = defaultDirectoryMode;
 			try {
 				let dirPatient = JSON.parse(sessionStorage.getItem("shareData"));
 				sessionStorage.setItem("shareData", "");		// clean up
@@ -476,6 +476,7 @@ export default function Appointment() {
 
 		const getData = async (month, year) => {
 			let dirMode = await checkPatient();
+			console.log(dirMode);
 			setDirectoryMode(dirMode);
 			if (dirMode) {
 				let myCounts = await getMonthlyAppointmentCounts(month, year);

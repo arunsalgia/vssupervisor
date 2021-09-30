@@ -236,123 +236,8 @@ function akshuUpdUser(userRec) {
   arun_user[userRec.uid] = userRec;
 } 
 
-// will buffer only emabled group
-async function akshuGetGroup(gid) {
-  let retGroup = arun_group[gid];
-  if (retGroup) return retGroup;
-
-  if (debugTest) console.log(`Read group ${gid} from database`);
-
-  retGroup = await IPLGroup.findOne({gid: gid, enable: true});
-  if (retGroup)
-    arun_group[gid] = retGroup;
-  return(retGroup);
-} 
 
 
-async function akshuGetGroupMembers(gid) {
-  // let x = Object.keys(arun_groupMember);
-  // console.log(x);
-
-  let retGroupMember = arun_groupMember[gid];
-  if (retGroupMember) {
-    return retGroupMember;
-  } 
-
-  if (debugTest) console.log(`Read group members of Group ${gid} from database`);
-  let myGroup = await akshuGetGroup(gid);
-  if (!myGroup) return [];
-
-  retGroupMember = await GroupMember.find({gid: gid});
-  if (retGroupMember.length === myGroup.memberCount) {
-    // only if all members joined, buffer this for future reference
-    // console.log("buffering");
-    arun_groupMember[gid] = retGroupMember;
-  }
-  return(retGroupMember);
-} 
-
-async function akshuGetGroupUsers(gid) {
-	let retUserMembers = [];
-
-	let myGroupMembers = await akshuGetGroupMembers(gid)
-	for(gm=0; gm < myGroupMembers.length; ++gm) {
-		let tmp = await akshuGetUser(myGroupMembers[gm].uid);
-		if (tmp) retUserMembers.push(tmp);
-	}
-  return retUserMembers;
-} 
-
-function akshuUpdGroup(groupRec) {
-  if (groupRec.enable)
-    arun_group[groupRec.gid] = groupRec;
-} 
-
-// delete the entry of this group from buffer
-function akshuDelGroup(groupRec) {
-  delete arun_group[groupRec.gid];
-  return;
-} 
-
-
-
-function akshuUpdGroupMember(gmRec) {
-  let x = arun_groupMember[gmRec.gid];
-  if (x) {
-    let tmp = _.filter(x, u => u.uid !== gmRec.uid);
-    tmp.push(gmRec);
-    arun_groupMember[gmRec.gid] = tmp;
-    // console.log(arun_groupMember);
-  } 
-}
-
-async function akshuGetAuction(gid) {
-  // let x = Object.keys(arun_auction);
-  // console.log(x);
-
-  let retVal = arun_auction[gid];
-  if (retVal) return retVal;
-
-  // not in buffer 
-  
-  if (debugTest) console.log(`Read Auction of Group ${gid} from database`);
-  
-  let myGroup = await akshuGetGroup(gid);
-  if (!myGroup) return [];
-  
-  retVal = await Auction.find({gid: gid});
-  if (myGroup.auctionStatus === "OVER")  {
-    // console.log("buffering");
-    arun_auction[gid] = retVal;
-  } 
-  return(retVal);
-} 
-
-
-async function akshuGetTournament(gid) {
-  let retVal = arun_tournament[gid];
-  if (retVal) return retVal;
-  
-  if (debugTest) console.log(`Read Tournament of group ${gid} from database`);
-  let myGroup = await akshuGetGroup(gid);
-  if (!myGroup)  return;
-
-  retVal = await Tournament.findOne({name: myGroup.tournament})
-  if (retVal)
-    arun_tournament[gid] = retVal;
-  return(retVal);
-} 
-
-async function getTournamentType(myGid) {
-  // let xxx = await IPLGroup.findOne({gid: myGid});
-	// let tRec = await Tournament.findOne({name: xxx.tournament});
-	// let tmp = tRec.type;
-	// return(tmp);
-  let tType = "";
-  let myTournament = await akshuGetTournament(myGid);
-  if (myTournament) tType = myTournament.type;
-  return tType;
-}
 
 async function getMaster(key) {
   let retVal =  arun_master.find(x => x.msKey === key);
@@ -380,45 +265,21 @@ async function setMaster(key, value) {
 
 
   
-function calculateBonus(refillAmount) {
-  let bonusAmount = 0;
-  for(let i=0; i<BonusDetails.length; ++i) {
-    if (refillAmount >= BonusDetails[i].amount) {
-      bonusAmount = Math.floor(refillAmount * BonusDetails[i].bonusPercent/100.0);
-      break;
-    } 
-  }
-  // console.log(bonusAmount);
-  return bonusAmount;
-}
 
-// break up of group fee from wallet and bonus
-function feeBreakup(memberfee) {
-  // console.log(memberfee);
-  let bonusAmount = 0;
-  for(let i=0; i<FeeDetails.length; ++i) {
-    if (memberfee >= FeeDetails[i].amount) {
-      bonusAmount = Math.floor(memberfee * FeeDetails[i].bonusPercent/100.0);
-      break;
-    } 
-  }
-  // console.log(bonusAmount);
-  return {wallet: (memberfee-bonusAmount), bonus: bonusAmount};
-}
+
 
 async function getUserBalance(userid) {
   let tmp = {wallet: 0, bonus: 0};
-  let myUid = Number(userid);
 
-  let xxx = await Wallet.aggregate([
-    {$match: {uid: myUid, isWallet: true}},
-    {$group : {_id : "$uid", balance : {$sum : "$amount"}}}
+  let xxx = await M_Wallet.aggregate([
+    {$match: {cid: userid, isWallet: true}},
+    {$group : {_id : "$cid", balance : {$sum : "$amount"}}}
   ]);
   if (xxx.length === 1) tmp.wallet = xxx[0].balance;
 
-  xxx = await Wallet.aggregate([
-    {$match: {uid: myUid, isWallet: false}},
-    {$group : {_id : "$uid", balance : {$sum : "$amount"}}}
+  xxx = await M_Wallet.aggregate([
+    {$match: {cid: userid, isWallet: false}},
+    {$group : {_id : "$cid", balance : {$sum : "$amount"}}}
   ]);
   if (xxx.length === 1) tmp.bonus = xxx[0].balance;
 
@@ -527,16 +388,11 @@ module.exports = {
   getMaster, setMaster,
   // get
   akshuGetUser,
-  akshuGetGroup, akshuGetGroupMembers, akshuGetGroupUsers,
-  akshuGetAuction,
-  akshuGetTournament, getTournamentType,
+ 
   // update
   akshuUpdUser,
-  akshuUpdGroup, akshuUpdGroupMember,
   // delete
-  akshuDelGroup,
-  feeBreakup, getUserBalance,
-  calculateBonus,
+  getUserBalance,
 	rechargeCount,
 	numberDate, intToString,
 	stringToBase64, base64ToString,
