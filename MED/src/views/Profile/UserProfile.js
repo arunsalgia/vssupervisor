@@ -140,26 +140,14 @@ export default function Profile() {
     const profileInfo = async () => {
       try {
         // get user details
-        var userRes = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricprofile/${localStorage.getItem("uid")}`);
-        setProfile(userRes.data); // master data for comparision if changed by user
+        var userRes = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricprofile/${sessionStorage.getItem("uid")}`);
+        setProfile(userRes.data); // master data for comparison if changed by user
         // setLoginName(userRes.data.loginName);
-        setUserCode(userRes.data.userCode);
-        setCopyState({value: userRes.data.userCode})
-        //setUserCode("ArunCode123456");
+        setUserCode(sessionStorage.getItem("cid"));
+        setCopyState({value: sessionStorage.getItem("cid")})
         setUserName(userRes.data.userName);
-        setGroupName(userRes.data.defaultGroup);
         let tmp = decrypt(userRes.data.email);
         setEmail(tmp);
-
-        // get wallet transaction and also calculate balance
-        // let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
-        // setTransactions(response.data);
-        // let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
-        // setEmptyRows(myempty);
-
-        // let myBalance = response.data.reduce((accum,item) => accum + item.amount, 0);
-        // setBalance(myBalance);
-
       } catch (e) {
           console.log(e)
       }
@@ -201,7 +189,7 @@ export default function Profile() {
     if ((profile.email !== myEmail) || (profile.userName !== userName)) {
       // console.log("New EMail or user name");
       let tmp1 = encrypt(myEmail)
-      let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricupdateprofile/${localStorage.getItem("uid")}/${myUserName}/${tmp1}`);
+      let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricupdateprofile/${sessionStorage.getItem("uid")}/${myUserName}/${tmp1}`);
       
       localStorage.setItem("userName", myUserName);
       setRegisterStatus(response.status);
@@ -432,7 +420,7 @@ export default function Profile() {
     let tmp1 = encrypt(x.currentPassword);
     let tmp2 = encrypt(x.newPassword);
 
-    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricreset/${localStorage.getItem("uid")}/${tmp1}/${tmp2}`);
+    let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricreset/${sessionStorage.getItem("uid")}/${tmp1}/${tmp2}`);
     if (response.status === 200) {
       setRegisterStatus(200);
     } else {
@@ -868,7 +856,7 @@ export default function Profile() {
   }
   
 
-  let headerText = localStorage.getItem("userName") + "\`s Profile";
+  let headerText = sessionStorage.getItem("userName") + "\`s Profile";
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />

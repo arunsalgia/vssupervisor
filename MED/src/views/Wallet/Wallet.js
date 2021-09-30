@@ -102,17 +102,17 @@ export default function Wallet(props) {
       try {
         // get user details
         // get wallet transaction and also calculate balance
-        var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${localStorage.getItem("uid")}`);
+        var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${sessionStorage.getItem("uid")}`);
         setTransactions(response.data);
         setMasterTransactions(response.data);
-		localStorage.setItem("saveTransactions", JSON.stringify(response.data));
+				sessionStorage.setItem("saveTransactions", JSON.stringify(response.data));
 		
         // let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
         // setEmptyRows(myempty);
 
-        response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${localStorage.getItem("uid")}`);
+        response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${sessionStorage.getItem("uid")}`);
         setBalance(response.data);
-		localStorage.setItem("saveBalance", JSON.stringify(response.data));
+				sessionStorage.setItem("saveBalance", JSON.stringify(response.data));
       } catch (e) {
           console.log(e)
       }

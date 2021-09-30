@@ -333,12 +333,12 @@ router.get('/cricprofile/:userId', async function (req, res, next) {
   // console.log(userRec);
   if (userRec) {
     sendok(res, {
-	  userCode: userRec._id,
+			userCode: userRec._id,
       loginName: userRec.userName,
       userName: userRec.displayName,
       email: encrypt(dbdecrypt(userRec.email)),
       password: encrypt(dbdecrypt(userRec.password)),
-    });
+		});
   } else
     senderr(res, 601, `Invalid user id ${userId}`);
 });

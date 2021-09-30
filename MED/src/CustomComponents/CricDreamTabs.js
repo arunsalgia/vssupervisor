@@ -29,6 +29,7 @@ import Medicine from "views/Medicine/Medicine.js"
 import Patient from "views/Patient/Patient.js" 
 import NextVisit from "views/NextVisit/NextVisit";
 import Document from "views/Document/Document.js" 
+import Wallet from "views/Wallet/Wallet.js"
 
 import Customer from "views/SuperUser/Customer";
 import Sample from "views/SuperUser/Sample.js"
@@ -42,7 +43,6 @@ import Sample from "views/SuperUser/Sample.js"
 //import Match from "views/UpcomingMatch/UpcomingMatch"
 //import Group from "views/Group/Group"
 
-//import Wallet from "views/Wallet/Wallet.js"
 //import AddWallet from "views/Wallet/AddWallet";
 //import WithdrawWallet from "views/Wallet/WithdrawWallet";
 // import KycBank from "views/Wallet/KycBank";
@@ -70,6 +70,7 @@ import {cdRefresh, specialSetPos, upGradeRequired, isMobile,
   downloadApk, clearBackupData,
   checkIdle, setIdle,
   internalToText, textToInternal,
+	handleLogout,
 } from "views/functions.js"
 import { LocalSee } from '@material-ui/icons';
 
@@ -206,21 +207,7 @@ export function CricDreamTabs() {
       setValue(parseInt(localStorage.getItem("menuValue")));
       setIdle(false);
     }
-		
-		
-    // Version check is now done in Home component
-    // if (value === parseInt(process.env.REACT_APP_HOME))
-    //   checkVersion();  
-    
-		
     setMenuValue();
-
-    // console.log("Params",
-    //   sessionStorage.getItem("param1"),
-    //   sessionStorage.getItem("param2"),
-    //   sessionStorage.getItem("param3")
-    // );
-
 }, []);
 
 
@@ -306,23 +293,14 @@ export function CricDreamTabs() {
 	const handleDocument = () => { handleClose(); setMenuValue(905);}
 	
   const handleProfile = () => { handleClose(); setMenuValue(101);}
+	const handleWallet = () => { handleClose(); setMenuValue(102);}
 	const handleContactUs = () => { handleClose(); setMenuValue(202);}
 	
 	const handleSample = () => { handleClose(); setMenuValue(801);}
 	const handleCustomer = () => { handleClose(); setMenuValue(802);}
 	
 
-  const handleLogout = () => {
-    handleClose();
-		
-		window.sessionStorage.setItem("uid", "")
-		window.sessionStorage.setItem("cid", "");
-		window.sessionStorage.setItem("userName", "");
-		window.sessionStorage.setItem("userType", "");
-		window.sessionStorage.setItem("currentLogin", "");
-		
-    cdRefresh();  
-  };
+  
 
   function DisplayCdItems() {
 		//console.log("CD Value", value);
@@ -332,7 +310,7 @@ export function CricDreamTabs() {
       case 3: return <Visit/>; 
 			
       case 101: return <Profile />;
-      case 102: return <ContactUs />;
+      case 102: return <Wallet />;
 
 			case 801: return <Sample />
 			case 802: return <Customer />
@@ -476,6 +454,9 @@ export function CricDreamTabs() {
                 onClose={handleClose}
               >
                 <MenuItem onClick={handleProfile}>Profile</MenuItem>
+								{(window.sessionStorage.getItem("userType") === "Doctor") &&
+									<MenuItem onClick={handleWallet}>Wallet</MenuItem>
+								}
                 <Divider/>
 								<MenuItem onClick={handlePatient}>Patient</MenuItem>
 								<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
@@ -491,7 +472,7 @@ export function CricDreamTabs() {
 								}
                 <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>       
                 <Divider/>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                <MenuItem onClick={() => {handleClose(); handleLogout(); }}>Logout</MenuItem>
               </Menu>
             </div>
           )}

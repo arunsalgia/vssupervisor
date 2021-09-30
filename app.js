@@ -73,7 +73,7 @@ infoRouter = require('./routes/info');
 quoteRouter = require('./routes/quote');
 customerRouter = require('./routes/customer');
 imageRouter = require('./routes/image');
-
+walletRouter = require('./routes/wallet');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -111,7 +111,7 @@ app.use('/info', infoRouter);
 app.use('/quote', quoteRouter);
 app.use('/customer', customerRouter);
 app.use('/image', imageRouter);
-
+app.use('/wallet', walletRouter);
 
 //Schema
 
@@ -239,6 +239,20 @@ CustomerSchema = mongoose.Schema({
 	enabled:Boolean
 });
 
+DoctorSchema = mongoose.Schema({
+	name: String,
+	type: String,		// dentist, physician, orthopaedic
+	clinicName: String,
+	email: String,
+	mobile: String,
+	
+	addr1: String,
+	addr2: String,
+	addr3: String,
+	
+	enabled:Boolean
+});
+
 ImageSchema = mongoose.Schema({
 	cid: 		String,
 	pid:		Number,
@@ -250,6 +264,18 @@ ImageSchema = mongoose.Schema({
 	date:		Date,
 	image: 	{ data: Buffer, contentType: String }
 });
+
+WalletSchema = mongoose.Schema({
+  cid: String,
+  isWallet: Boolean,
+  transNumber: Number,
+  transDate: String,
+  transType: String,
+  transSubType: String,
+  transLink: Number,
+  amount: Number,
+  transStatus: Boolean,
+})
 
 // models
 User = mongoose.model("user", UserSchema);
@@ -264,6 +290,9 @@ M_Quote = mongoose.model('Quote', QuoteSchema);
 M_Customer = mongoose.model('Customer', CustomerSchema);
 M_NextVisit = mongoose.model('NextVisit', NextVisitSchema);
 M_Image = mongoose.model('image', ImageSchema);
+M_Wallet = mongoose.model('wallet', WalletSchema);
+M_Doctor = mongoose.model('doctor', DoctorSchema);
+
 router = express.Router();
 
 db_connection = false;      // status of mongoose connection

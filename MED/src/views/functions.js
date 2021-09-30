@@ -797,3 +797,12 @@ export function base64ToString(base64string) {
 	//console.log("The decoded string:", decodedString);
 	return decodedString
 }
+
+export function handleLogout() {
+	window.sessionStorage.setItem("uid", "")
+	window.sessionStorage.setItem("cid", "");
+	window.sessionStorage.setItem("userName", "");
+	window.sessionStorage.setItem("userType", "");
+	window.sessionStorage.setItem("currentLogin", "");
+	cdRefresh();  
+};
