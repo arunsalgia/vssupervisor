@@ -276,6 +276,33 @@ router.get('/cricresetpassword/:userCode/:newPwd', async function (req, res, nex
 	
 });
 
+router.get('/cricreset/:userCode/:oldPwd/:newPwd', async function (req, res, next) {
+  setHeader(res);
+  console.log("in crioc reset");
+  var {userCode, oldPwd, newPwd } = req.params;
+  var errcode = 0;
+  let uRec;
+	//let x = decrypt(userCode).split("/");
+	
+	// confirm uid is correct and old password matches
+	try {
+		uRec = await User.findOne({ uid:  userCode});
+		if (uRec) {
+			if (uRec.password !== svrToDbText(oldPwd)) errorCode = 602;
+		}
+	} catch (e) {
+		errcode = 601;
+	}
+	
+	if (errcode === 0) {		
+		uRec.password = svrToDbText(newPwd);
+		await uRec.save();
+		sendok(res, uRec);
+	} else {
+		senderr(res, errcode, "Invalid User name or password");
+	}
+});
+
 
 router.get('/profile/:userId', async function (req, res, next) {
   // CricRes = res;
