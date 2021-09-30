@@ -495,6 +495,43 @@ router.get('/withdraw/:userId/:amount/:details', async function (req, res, next)
   sendok(res, myTrans);
 }); 
 
+router.get('/test', async function (req, res, next) {
+  setHeader(res);
+   /*
+	  cid: String,
+  isWallet: Boolean,
+  transNumber: Number,
+  transDate: String,
+  transType: String,
+  transSubType: String,
+  transLink: Number,
+  amount: Number,
+  transStatus: Boolean,
+	 */
+	 
+	let myRec = new M_Wallet();
+	myRec.cid = '613dd7074e86491f500862e7';
+	myRec.isWallet = false;
+	myRec.transNumber = 202109301123345;
+	myRec.transDate = new Date();
+	myRec.transType = 'bonus';
+	myRec.amount = 100;
+	transStatus = true;
+	myRec.save();
+	
+	myRec = new M_Wallet();
+	myRec.cid = '613dd7074e86491f500862e7';
+	myRec.isWallet = true;
+	myRec.transNumber = 202109301123346;
+	myRec.transDate = new Date();
+	myRec.transType = 'wallet';
+	myRec.amount = 1890;
+	transStatus = true;
+	myRec.save();
+	
+	sendok(res, "Done");
+});
+
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
 function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }

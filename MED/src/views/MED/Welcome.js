@@ -114,6 +114,11 @@ const useStyles = makeStyles((theme) => ({
 		top: "2%",
 		right: "2%"
 	},
+	doctorButton: {
+		position: "fixed",
+		top: "2%",
+		right: "12%"
+	},
 	background: {
 		backgroundImage:  `${process.env.PUBLIC_URL}/image/WELCOME.JPG`,
 	},
@@ -294,12 +299,20 @@ const Welcome = () => {
 	
 	function ContinueLoginButton() {
 	return (
+		<div>
+		<Button variant="contained" color="primary" 
+		onClick={() => {sessionStorage.setItem("currentLogin","DOCTOR"); cdRefresh();}}
+		className={classes.doctorButton}
+		>
+		Doctor Directory
+		</Button>
 		<Button variant="contained" color="primary" 
 		onClick={handleLogin}
 		className={classes.loginButton}
 		>
 		Continue to Login
 		</Button>
+		</div>
 	)};
 	
 	function DisplayQOD() {

@@ -11,6 +11,7 @@ import axios from "axios";
 import SignIn from "views/Login/SignIn"
 import SignUp from "views/Login/SignUp.js";
 import Welcome from "views/MED/Welcome";
+import Doctor from "views/MED/Doctor";
 import ResetPassword from "views/Login/ResetPassword";
 //import Session from "views/Session/Session"
 //import JoinGroup from "views/Group/JoinGroup.js"
@@ -135,6 +136,9 @@ function AppRouter() {
 		else if (sessionStorage.getItem("currentLogin") ===  "FORGOT") {
 			return <ForgotPassword />
 		} 
+		else if (sessionStorage.getItem("currentLogin") ===  "DOCTOR") {
+			return <Doctor />
+		} 
 		else  {
 			let myLink = checkResetPasswordRequest();
 			console.log("Link", myLink);
@@ -144,7 +148,7 @@ function AppRouter() {
 				//console.log(history, hist);
 				return (<ResetPassword />);
 			} else {
-				console.log("Aboyt to call Welcome");
+				//console.log("About to call Welcome");
 				return (<Welcome/>)
 			}
 		} 

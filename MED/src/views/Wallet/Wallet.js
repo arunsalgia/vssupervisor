@@ -29,7 +29,7 @@ import axios from "axios";
 //import useScript from './useScript';
 import { setTab }from "CustomComponents/CricDreamTabs";
 import { BlankArea, DisplayBalance } from 'CustomComponents/CustomComponents';
-import { getMinimumBalance, isMobile } from 'views/functions';
+import { getMinimumBalance, isMobile, getDateTime } from 'views/functions';
 import { WALLETTYPE } from 'views/globals';
 
 // import classes from '*.module.css';
@@ -67,9 +67,8 @@ const useStyles = makeStyles((theme) => ({
 	apptName: {
 		fontSize: theme.typography.pxToRem(15),
 		fontWeight: theme.typography.fontWeightBold,
-		color: blue[700]
 	},  
-	tdWallet : {
+	tdBonus: {
     border: 5,
     align: "center",
     padding: "none",
@@ -78,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
 		borderColor: 'black',
 		borderStyle: 'solid',
   },
-	tdBonus : {
+	tdWallet : {
 		backgroundColor: pink[100],
     border: 5,
     align: "center",
@@ -179,7 +178,7 @@ export default function Wallet(props) {
     
 		userCid = sessionStorage.getItem("cid");
 		WalletInfo();
-    minimumAmount()
+    //minimumAmount()
   }, []);
 
   function ShowResisterStatus() {
@@ -219,83 +218,9 @@ export default function Wallet(props) {
   };
 
 
-  function handleAddWallet() {
-    setTab(process.env.REACT_APP_ADDWALLET);
-  }
-
-  function handleWithdraw() {
-    if (balance.wallet <= minBalance)
-      alert(minMessage);
-    else
-      setTab(process.env.REACT_APP_WITHDRAWWALLET);
-  }
-
-
-  function WalletButton() {
-    return (
-      <div>
-      <Button type="submit" variant="contained" color="primary"
-        onClick={handleAddWallet}
-        className={gClasses.button}>Add to Wallet
-      </Button>
-      <Button type="submit" variant="contained" color="primary" 
-       onClick={handleWithdraw}
-        className={gClasses.button}>Withdraw
-     </Button>
-     </div>
-    )
-  }
-
-  function allData() {
-    // console.log(" All");
-    setTransactions(masterTransactions);
-    setPage(0);
-  }
-
-  function walletData() {
-    let tmp = masterTransactions.filter(x => x.isWallet === true);
-    // console.log(" Wallet", tmp.length);
-    setTransactions(tmp);
-    setPage(0);
-  }
-
-  function bonusData() {
-    let tmp = masterTransactions.filter(x => x.isWallet === false);
-    // console.log(" Bonus", tmp.length);
-    setTransactions(tmp);
-    setPage(0);
-  }
-
-  function SelectButton() {
-  return(
-    <Grid key="walletType" align="center" container>
-    <Grid item xs={4} sm={4} md={4} lg={4} >
-    <Button key="mt_t20" variant="contained" color="primary" size="small"
-    className={gClasses.button} 
-    onClick={allData}>
-    All
-    </Button>
-    </Grid>
-    <Grid item xs={4} sm={4} md={4} lg={4} >
-    <Button key="mt_odi" variant="contained" color="primary" size="small"
-    className={gClasses.button} 
-    onClick={walletData}>
-    Wallet
-    </Button>
-    </Grid>
-    <Grid item xs={4} sm={4} md={4} lg={4} >
-    <Button key="mt_test" variant="contained" color="primary" size="small"
-    className={gClasses.button} 
-    onClick={bonusData}>
-    Bonus
-    </Button>
-    </Grid>
-    </Grid>      
-  )};
-  
 
 	function handleRadioChange(v) {
-		console.log(v);
+		//console.log(v);
 		setRadioValue(v);
 		let myArray;
 		switch (v) {
@@ -358,27 +283,29 @@ export default function Wallet(props) {
 				let myDate = getDateTime(a.date);
 				let myType;
 				let myClass; 
-				switch (a.visit) {
+				switch (a.type) {
 					case WALLETTYPE.bonus: myType = "Bonus"; myClass = classes.tdWallet; break;
 					case WALLETTYPE.wallet: myType = "Wallet"; myClass = classes.tdBonus; break;
 				}
+				//console.log(a);
+				//console.log(a.type, myType, WALLETTYPE  )
 				return(
-					<TableRow key={"TROW"+index}>
+					<TableRow align="center" key={"TROW"+index}>
 					<TableCell key={"TD1"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
-						<Typography className={classes.apptName}>
+						<Typography>
 							{myDate}
 						</Typography>
 					</TableCell>
 					<TableCell key={"TD2"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
-						<Typography className={classes.apptName}>
+						<Typography>
 							{myType}
 						</Typography>
 					</TableCell>
 					<TableCell key={"TD3"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
-						<Typography className={classes.apptName}>
+						<Typography>
 							{a.amount}
 						</Typography>
 					</TableCell>

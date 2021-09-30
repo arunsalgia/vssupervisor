@@ -17,8 +17,6 @@ axios = require('axios');
 multer = require('multer');
 
 
-
-
 app = express();
 
 PRODUCTION=(process.env.PRODUCTION.toUpperCase() === "TRUE");   
@@ -74,6 +72,7 @@ quoteRouter = require('./routes/quote');
 customerRouter = require('./routes/customer');
 imageRouter = require('./routes/image');
 walletRouter = require('./routes/wallet');
+doctorRouter = require('./routes/doctor');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -112,6 +111,7 @@ app.use('/quote', quoteRouter);
 app.use('/customer', customerRouter);
 app.use('/image', imageRouter);
 app.use('/wallet', walletRouter);
+app.use('/doctor', doctorRouter); 
 
 //Schema
 
