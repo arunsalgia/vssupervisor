@@ -45,6 +45,8 @@ import IconButton from '@material-ui/core/IconButton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CancelIcon from '@material-ui/icons/Cancel';
+//import PreviewIcon from '@material-ui/icons/Preview';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -636,7 +638,6 @@ return (
 		<span className={gClasses.patientName}>{props.patient.displayName}</span>
 		</Typography>
 		</div>
-		<BlankArea />
 		<div align="left" >
 		<Typography>
 			<span className={gClasses.patientInfo}>Id: </span>
@@ -655,11 +656,13 @@ return (
 			<span className={gClasses.patientInfo2}>{dispMobile(props.patient.mobile)}</span>
 		</Typography>
 		<BlankArea />
+		<div align="right">
 		{(!_button1) && props.button1}
 		{(!_button2) && props.button2}
 		{(!_button3) && props.button3}
 		{(!_button4) && props.button4}
 		{(!_button5) && props.button5}
+		</div>
 	</div>
 	</Box>
 )}
@@ -679,7 +682,6 @@ return (
 		<span className={gClasses.patientName}>{props.medicine.name}</span>
 		</Typography>
 		</div>
-		<BlankArea />
 		<div align="left" >
 		<Typography>
 			<span className={gClasses.patientInfo}>Description: </span>
@@ -690,11 +692,13 @@ return (
 			<span className={gClasses.patientInfo2}>{props.medicine.precaution}</span>
 		</Typography>
 		<BlankArea />
+		<div align="right">
 		{(!_button1) && props.button1}
 		{(!_button2) && props.button2}
 		{(!_button3) && props.button3}
 		{(!_button4) && props.button4}
 		{(!_button5) && props.button5}
+		</div>
 	</div>
 	</Box>
 )}
@@ -709,6 +713,7 @@ return (
 
 export function DisplayDocumentList(props) {
  const classes = useStyles();
+ const gClasses = globalStyles();
  if (props.documentArray.length === 0) 
 	 return <Box className={classes.allBlue} width="100%"><Typography>No Reports avaialble</Typography></Box>
  
@@ -799,9 +804,9 @@ return (
 				{(!_view) &&
 				<TableCell key={"TD11"+index} align="center" component="td" scope="row" align="center" padding="none"
 					className={myClass}>
-						<Typography className={classes.link}>
-							<Link href="#" variant="body2" onClick={() => {props.viewHandle(a)}}>View</Link>
-						</Typography>
+						<IconButton className={gClasses.blue} size="small" onClick={() => {props.viewHandle(a)}} >
+							<VisibilityIcon	 />
+						</IconButton>
 				</TableCell>
 				}
 				{(!_reload) &&
@@ -832,9 +837,8 @@ export function DisplayImage(props) {
 const classes = useStyles();
 //console.log(props);
 return(	
-<Box align="center" className={classes.tdBlue} width="100%">
+<Box align="center" width="100%">
 	<Typography className={classes.title}>{"Medical Report Title: "+props.title}</Typography>
-	<VsCancel align="right" onClick={props.handleCancel} />
 	<BlankArea />
 	<img src={`data:${props.mime};base64,${props.file}`}/>
 </Box>
@@ -843,9 +847,8 @@ return(
 export function DisplayPDF(props) {
 	const classes = useStyles();
 	return(	
-	<Box align="center"  className={classes.tdBlue} width="100%">
+	<Box align="center" width="100%">
 		<Typography className={classes.title}>{"Medical Report Title: "+props.title}</Typography>
-		<VsCancel align="right" onClick={props.handleCancel} />
 		<BlankArea />
 		<PDFViewer 
 			document={{base64: props.file }}

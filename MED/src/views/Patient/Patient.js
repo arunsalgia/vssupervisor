@@ -499,7 +499,7 @@ export default function Patient() {
 		<CssBaseline />
 		<DisplayPageHeader headerName="Patient Directory" groupName="" tournament=""/>
 		<BlankArea />
-		<Grid className={gClasses.noPadding} key="PatientFilter" container alignItems="center" >
+		<Grid className={gClasses.vgSpacing} key="PatientFilter" container alignItems="center" >
 			<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
 			<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
 			<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
@@ -516,7 +516,6 @@ export default function Patient() {
 			</Grid>
 			<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
 		</Grid>
-		<BlankArea />
 		<DisplayAllPatients />
 		<Drawer className={classes.drawer}
 			anchor="right"

@@ -25,8 +25,8 @@ const globalStyles = makeStyles((theme) => ({
 		color: 'blue',
 	},
 	vgSpacing: {
-		padding: "20px 20px", 
-		margin: "20px 20px", 
+		padding: "10px 10px", 
+		margin: "10px 10px", 
 	},
 	boxStyle: {
 		padding: "5px 10px", 

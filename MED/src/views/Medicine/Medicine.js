@@ -328,7 +328,7 @@ export default function Medicine() {
 		<CssBaseline />
 		<DisplayPageHeader headerName="Medicine Directory" groupName="" tournament=""/>
 		<BlankArea />
-				<Grid className={gClasses.noPadding} key="MedicineFilter" container alignItems="center" >
+		<Grid className={gClasses.vgSpacing} key="MedicineFilter" container alignItems="center" >
 			<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
 			<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
 			<TextField id="filter"  padding={5} fullWidth label="Search Medicine by name" 
@@ -345,9 +345,8 @@ export default function Medicine() {
 			</Grid>
 			<Grid key={"F6"} item xs={false} sm={false} md={1} lg={1} />
 		</Grid>
-		<BlankArea />
 		<DisplayAllMedicines />
-				<Drawer className={classes.drawer}
+		<Drawer className={classes.drawer}
 			anchor="right"
 			variant="temporary"
 			open={isDrawerOpened}

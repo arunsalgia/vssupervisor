@@ -11,6 +11,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
+import { useLoading, Audio } from '@agney/react-loading';
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
@@ -26,6 +27,7 @@ import Box from '@material-ui/core/Box';
 import Modal from 'react-modal';
 import { borders } from '@material-ui/system';
 import {dynamicModal } from "assets/dynamicModal";
+import cloneDeep from 'lodash/cloneDeep';
 
 // styles
 import globalStyles from "assets/globalStyles";
@@ -52,6 +54,7 @@ import {DisplayYesNo, DisplayPageHeader, ValidComp, BlankArea,
 DisplayPatientDetails,
 DisplayDocumentList,
 DisplayImage, DisplayPDF,
+LoadingMessage,
 } from "CustomComponents/CustomComponents.js"
 
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
@@ -79,7 +82,8 @@ import { callYesNo,
 	validateInteger,
 	updatePatientByFilter,
 	dispAge, dispEmail, dispMobile,
-	getPatientDocument
+	getPatientDocument,
+	stringToBase64,
 } from "views/functions.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -216,6 +220,9 @@ export default function Visit() {
   const classes = useStyles();
 	const gClasses = globalStyles();
 	
+	
+	const [startLoading, setStartLoading] = useState(false);
+	
 	const [showDocument, setShowDocument] = useState(false);
 	const [documentArray, setDocumentArray] = useState([]);
 	
@@ -313,6 +320,9 @@ export default function Visit() {
 				}
 				// now get all visits of patient
 				getPatientVisit(myPatient);
+				let ddd = await getPatientDocument(userCid, myPatient.pid);
+				console.log("Docs", ddd);
+				setDocumentArray(ddd);
 			} catch {
 				// no share data. Thus called directly
 				console.log("direct");
@@ -326,7 +336,7 @@ export default function Visit() {
 		checkPatient();
   }, []);
 
-	
+
   const [expandedPanel, setExpandedPanel] = useState(false);
   const handleAccordionChange = (panel) => (event, isExpanded) => {
     // console.log({ event, isExpanded });
@@ -789,31 +799,6 @@ export default function Visit() {
 	)}
 
 
-	function orgDisplayAllVisits() {
-	return (
-	<div align="left">
-		{visitArray.map(x =>	
-			<Accordion className={(expandedPanel === "V"+x.visitNumber)? classes.normalAccordian : classes.selectedAccordian} 
-				key={"AM"+x.visitNumber} expanded={expandedPanel === "V"+x.visitNumber} 
-				onChange={handleAccordionChange("V"+x.visitNumber)}>
-			<AccordionSummary key={"AS"+x.visitNumber} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-			<Grid key={"MG"+x.visitNumber} container justify="center" alignItems="center" >
-			<Grid item xs={11} sm={11} md={11} lg={11} >
-				<Typography className={classes.heading}>{((x.visitNumber == 0) ? "(New)" : "V"+x.visitNumber)+' '+x.visitDate.substr(0,15)}</Typography>
-			</Grid>
-			<Grid item xs={1} sm={1} md={1} lg={1} >
-				<DisplayVisitCopyRemoveButton visitNumber={x.visitNumber} />
-			</Grid>
-			</Grid>
-			</AccordionSummary>
-			<AccordionDetails key={"AD"+x.visitNumber}>
-				<DisplayMedNotesRem visitNumber={x.visitNumber}/>
-			</AccordionDetails>
-			</Accordion>
-		)}	
-	</div>
-	)}
-	
 		
 	function DisplayVisitCopyRemoveButton(props) {
 		if (props.visitNumber == 0) {
@@ -836,6 +821,9 @@ export default function Visit() {
 	
 	
 	function DisplayNewVisitBtn() {
+		if (sessionStorage.getItem("userType") !== "Doctor") return null;
+		
+		// only doctor permitted to add new visit
 		//console.log(visitArray);
 		let disp = false;
 		if (visitArray.length == 0)
@@ -920,24 +908,11 @@ export default function Visit() {
 	
 	
 	
-	function DisplayVisitUpdateButton() {
-	if  ((visitArray.length > 0) && (visitArray[0].visitNumber === 0)) 
-		return (
-			<div align="left">
-			<VsButton name="Update New Visit"  onClick={updateVisit} />
-			<VsButton name="Generate Visit Document"  onClick={generateVisit} />
-			<VsButton name="Download Visit Document"  onClick={printVisit} />
-			<VisitRegisterStatus />
-			</div>
-		)
-	else
-		return null;
-	}
-	
 	
 	function handleCopyNew(num) {
 		let today = new Date();
 		
+		/*
 		let tmpArray = [{
 			enabled: true,
 			medicines: [],
@@ -952,6 +927,7 @@ export default function Visit() {
 		
 		let selectedVisit = visitArray.find(x => x.visitNumber === num);
 		
+
 		selectedVisit.medicines.forEach(m => {
 			tmpArray[0].medicines.push(m);
 		});
@@ -963,7 +939,13 @@ export default function Visit() {
 		selectedVisit.userNotes.forEach(u => {
 			tmpArray[0].userNotes.push(u);
 		});
+		*/
 		
+		let selectedVisit = visitArray.find(x => x.visitNumber === num);
+		let newVisit = cloneDeep(selectedVisit);
+		newVisit.visitNumber = 0;
+		newVisit.visitDate = new Date().toString();
+		let tmpArray = [newVisit];
 		tmpArray = tmpArray.concat(visitArray);
 		setVisitArray(tmpArray);
 		handleAccordionChange("");
@@ -1008,27 +990,24 @@ export default function Visit() {
 			if ((m.dose1 + m.dose2 + m.dose3) == 0) {
 				errcode = 1013;
 				break;
-			}
-			
+			}	
 		};
 		return (errcode);
 	}
 	
 	async function generateVisit() {
-				//console.log("Update today's visit", visitArray[0].medicines);
 		let errcode = validateNewVisit();
 
 		if (errcode !== 0) { setVisitError(errcode); return; }
 		
-		let newVisit = visitArray.length;
+		//let newVisitNumber = visitArray.length;
+		let newVisit = getenrateVisitInfo();	
 		let newVisitInfo = JSON.stringify(
 		{
 			appointment: currentAppt,
-			visit:       visitArray[0],
+			visit:       newVisit,
 			nextVisit:   {after: nextVisitTime, unit: nextVisitUnit},
 		});
-		
-		
 		try {
 			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/printdoc/${userCid}/${newVisitInfo}`);
 			setVisitRegister(200);
@@ -1047,7 +1026,7 @@ export default function Visit() {
 		}
 	}
 	
-	async function updateVisit() {
+	async function org_updateVisit() {
 		//console.log("Update today's visit", visitArray[0].medicines);
 		let errcode = validateNewVisit();
 
@@ -1070,10 +1049,54 @@ export default function Visit() {
 		setVisitError(errcode);
 	}
 	
+	function getenrateVisitInfo() {
+		let newVisit = cloneDeep(visitArray[0]);
+
+		// remove blank lines
+		newVisit.remarks = newVisit.remarks.filter(x => x.name.trim() !== "");
+		newVisit.userNotes = newVisit.userNotes.filter(x => x.name.trim() !== "");
+
+		// convert string to base64
+		for(let i=0; i<newVisit.medicines.length; ++i) {
+			newVisit.medicines[i].name = stringToBase64(newVisit.medicines[i].name);
+		}
+		for(let i=0; i<newVisit.userNotes.length; ++i) {
+			newVisit.userNotes[i].name = stringToBase64(newVisit.userNotes[i].name);
+		}
+		for(let i=0; i<newVisit.remarks.length; ++i) {
+			newVisit.remarks[i].name = stringToBase64(newVisit.remarks[i].name);
+		}
+		
+		return newVisit;
+	}
+	
+	async function updateVisit() {
+		let errcode = validateNewVisit();
+
+		if (errcode == 0) {	
+			let newVisitNumber = visitArray.length;
+			let newVisit = getenrateVisitInfo();	
+			let newVisitInfo = JSON.stringify(
+			{
+				appointment: currentAppt,
+				visit:       newVisit,
+				nextVisit:   {after: nextVisitTime, unit: nextVisitUnit},
+			});
+			try {
+				await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/updatenewvisit/${userCid}/${newVisitNumber}/${newVisitInfo}`)
+				setVisitRegister(100);
+			} catch (e) {
+				console.log(e)
+				setVisitRegister(101);
+			}
+		} else {
+			setVisitError(errcode);
+		}
+	}
+	
+
 	// user notes function here
-	
-	
-	
+
 	function EditUserNotesButton(props) {
 		//console.log("editUN", props);
 		if (props.visitNumber > 0)	return null;
@@ -1226,53 +1249,6 @@ export default function Visit() {
 	}
 	
 	
-	
-	function org_DisplayEditRemark() {
-	return(
-		<Container component="DisplayEditRemark" maxWidth="md">
-		<DisplayCloseModal />
-		<Typography align="center" className={classes.modalHeader}>Edit Medical Test</Typography>
-		<BlankArea />
-		<ValidatorForm align="center" className={gClasses.form} >
-			<DisplayStandardInput myArray={remarkArray} myDesc={"Remark"} />
-			<BlankArea />
-			<ModalResisterStatus />
-			<BlankArea />
-			{/*<Button
-				type="submit"
-				variant="contained"
-				color="primary"
-				className={gClasses.submit}
-			>
-			Update
-			</Button>*/}
-			<VsButton name="Update" onClick={updateRemark} />
-		</ValidatorForm>
-		</Container>
-	)}
-	
-	
-	function orgEditRemarkButton(props) {
-		//console.log("editUN", props);
-		if (props.visitNumber > 0)	return null;
-		return (
-			<IconButton color="primary" size="small" onClick={() => { handleEditRemark(props.visitNumber, props.remarkNumber)}} >
-			<EditIcon />
-			</IconButton>
-		)		
-	}
-	
-	function oldDeleteRemarkButton(props) {
-		//console.log("delUN", props);
-		if (props.visitNumber > 0)	return null;
-		return (
-			<IconButton color="secondary" size="small" onClick={() => { handleDeleteRemark(props.visitNumber, props.remarkNumber)}} >
-			<DeleteIcon />
-			</IconButton>
-		)		
-	}
-	
-	
 	// handle Notes display  / add / edit / delete
 	
 	
@@ -1293,8 +1269,8 @@ export default function Visit() {
 		setEmedDose3(tmp.medicines[mNumber].dose3);
 		setEmedTime (tmp.medicines[mNumber].time);
 		setEmedUnit (tmp.medicines[mNumber].unit);
-		let dummy = medicineArray.find(x => x.name == tmp.medicines[mNumber].name);
-		setStandard(dummy != null);
+		let ttt = medicineArray.find(x => x.name == tmp.medicines[mNumber].name);
+		setStandard(ttt != null);
 		setModalRegister(0);
 		openModal("MEDICINE");	
 	}
@@ -1444,9 +1420,9 @@ export default function Visit() {
 		setDocumentArray(ddd);
 	}
 	
-	function dummy() {}
 	
 	async function handleFileView(d) {	
+		setStartLoading(true);
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/downloadimage/${userCid}/${d.pid}/${d.title}`
 			let resp = await axios.get(myUrl);
@@ -1454,7 +1430,7 @@ export default function Visit() {
 				// pdf file
 				// file={`data:application/pdf;base64,${this.state.base64}`}
 				const b64 = Buffer.from(resp.data.data).toString('base64');
-				console.log(b64)
+				//console.log(b64)
 				setDlFile(b64);
 				setIsPdf(true);
 			} else {
@@ -1471,6 +1447,7 @@ export default function Visit() {
 		} catch (e) {
 			console.log(e);
 		}
+		setStartLoading(false);
 	}
 	
 	function DisplayMedicalReports() {
@@ -1481,6 +1458,7 @@ export default function Visit() {
 		<Link href="#" variant="body2" onClick={() => {setShowDocument(true); }}>Show Medical Reports</Link>
 		</Typography>
 		}
+		{(startLoading) && <LoadingMessage />}
 		{(showDocument) && 
 			<div>
 			<Typography align="right" className={classes.link}>
@@ -1507,7 +1485,197 @@ export default function Visit() {
 	</Box>
 	)}
 	
- return (
+	function ArunMedicines(props) {
+	let x = props.visitRec;
+	return (
+	<div>
+	<Typography className={classes.title}>Prescription</Typography>
+	<Box borderColor="primary.main" borderRadius={7} border={2}>
+	{x.medicines.map( (m, index) =>
+		<Grid className={classes.noPadding} key={"MED"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
+		<Grid item xs={4} sm={4} md={6} lg={6} >
+			<Typography className={classes.heading}>{m.name}</Typography>
+		</Grid>
+		<Grid item xs={4} sm={4} md={2} lg={2} >
+			<Typography className={classes.heading}>{dose(m.dose1, m.dose2, m.dose3)}</Typography>
+		</Grid>
+		<Grid item xs={2} sm={2} md={2} lg={2} >
+			<Typography className={classes.heading}>{m.time+m.unit}</Typography>
+		</Grid>
+		<Grid item xs={1} sm={1} md={1} lg={1} >
+			{(x.visitNumber === 0) &&
+				<IconButton color="primary" size="small" onClick={() => { handleEditMedicine(x.visitNumber, index)}} >
+				<EditIcon />
+				</IconButton>
+			}
+		</Grid>
+		<Grid item xs={1} sm={1} md={1} lg={1} >
+			{(x.visitNumber === 0) &&
+				<IconButton color="secondary" size="small" onClick={() => { handleDeleteMedicine(x.visitNumber, index)}} >
+				<DeleteIcon />
+				</IconButton>
+			}
+		</Grid>
+	</Grid>
+	)}
+	</Box>
+	{(x.visitNumber === 0) && 
+		<Typography align="right" className={gClasses.link}>
+		<Link href="#" onClick={handleAddNewMedicine} variant="body2">Add Prescription</Link>
+		</Typography>
+	}
+	</div>
+	)}
+	
+	function ArunNotes(props) {
+	let x = props.visitRec;
+	return (
+	<div>
+	<Typography className={classes.title}>User Notes</Typography>
+	<Box borderColor="primary.main" borderRadius={7} border={2}>
+	{x.userNotes.map( (un, index) =>
+		<Grid className={classes.noPadding} key={"NOTES"+x.visitNumber+"notes"+index} container justify="center" alignItems="center" >
+		<Grid item xs={10} sm={10} md={10} lg={10} >
+			<Typography className={classes.heading}>{un.name}</Typography>
+		</Grid>
+		<Grid item xs={1} sm={1} md={1} lg={1} >
+		{(x.visitNumber === 0) &&
+			<IconButton color="primary" size="small" onClick={() => { handleEditUserNotes(x.visitNumber, index)}} >
+			<EditIcon />
+			</IconButton>
+		}
+		</Grid>
+		<Grid item xs={1} sm={1} md={1} lg={1} >
+		{(x.visitNumber === 0) &&
+			<IconButton color="secondary" size="small" onClick={() => { handleDeleteNotes(x.visitNumber, index)}} >
+			<DeleteIcon />
+			</IconButton>
+		}
+		</Grid>
+		</Grid>
+	)}
+	</Box>
+	{(x.visitNumber === 0) &&
+		<Typography align="right" className={gClasses.link}>
+		<Link href="#" onClick={handleAddUserNotes} variant="body2">Add User Note</Link>
+		</Typography>
+	}
+	</div>
+	)}
+	
+	function ArunRemarks(props) {
+	let x = props.visitRec;
+	return (
+	<div>
+	<Typography className={classes.title}>Examination Advised</Typography>
+	<Box borderColor="primary.main" borderRadius={7} border={2}>
+	{x.remarks.map( (r, index) =>
+		<Grid className={classes.noPadding} key={"REM"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
+		<Grid item xs={10} sm={10} md={10} lg={10} >
+			<Typography className={classes.heading}>{r.name}</Typography>
+		</Grid>
+		<Grid item xs={1} sm={1} md={1} lg={1} >
+		{(x.visitNumber === 0) &&
+			<IconButton color="primary" size="small" onClick={() => { handleEditRemark(x.visitNumber, index)}} >
+			<EditIcon />
+			</IconButton>
+		}
+		</Grid>
+		<Grid item xs={1} sm={1} md={1} lg={1} >
+			{(x.visitNumber === 0) &&
+				<IconButton color="secondary" size="small" onClick={() => { handleDeleteRemark(x.visitNumber, index)}} >
+				<DeleteIcon />
+				</IconButton>
+			}
+		</Grid>
+	</Grid>
+	)}
+	</Box>
+	{(x.visitNumber === 0) && 
+		<Typography align="right" className={gClasses.link}>
+		<Link href="#" onClick={handleAddNewRemark} variant="body2">Add Medical Examination</Link>
+		</Typography>
+	}	
+	</div>
+	)}
+	
+	function ArunFollowup(props) {
+	let x = props.visitRec;
+	if (x.visitNumber !== 0) return null;
+	return (
+	<Grid className={classes.noPadding} key={"FOLLOWUP"} container justify="center" alignItems="center" >
+		<Grid item xs={4} sm={4} md={2} lg={2} >
+		<Typography className={classes.title}>Next Review After</Typography>
+		</Grid>
+		<Grid item xs={4} sm={4} md={1} lg={1} >
+			<Select labelId='time' id='time' name="time" padding={10}
+			variant="outlined" required fullWidth label="Time" 
+			value={nextVisitTime}
+			placeholder="Arun"
+			inputProps={{
+				name: 'Time',
+				id: 'filled-age-native-simple',
+			}}
+			onChange={(event) => setNextVisitTime(event.target.value)}
+			>
+			{timeArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
+			</Select>
+		</Grid>
+		<Grid item xs={4} sm={4} md={1} lg={1} >
+			<Select labelId='unit' id='unit' name="unit" padding={10}
+				variant="outlined" required fullWidth label="Unit" 
+				value={nextVisitUnit}
+				inputProps={{
+					name: 'Unit',
+					id: 'filled-age-native-simple',
+				}}
+				onChange={(event) => setNextVisitUnit(event.target.value)}
+			>
+			{unitArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
+			</Select>
+		</Grid>
+		<Grid item xs={false} sm={false} md={8} lg={8} />
+	</Grid>
+	)}
+	
+	
+	function ArunVisitUpdateButton(props) {
+	let x = props.visitRec;
+	if  (x.visitNumber !== 0) return null;
+	
+	return (
+		<div align="right">
+		<VsButton name="Update New Visit"  onClick={updateVisit} />
+		<VsButton name="Generate Visit Document"  onClick={generateVisit} />
+		<VsButton name="Download Visit Document"  onClick={printVisit} />
+		<VisitRegisterStatus />
+		</div>
+	);
+	}
+	
+	function ArunVisitSummary(props) {
+	let x = props.visitRec;
+	return (
+	<Grid key={"MG"+x.visitNumber} container justify="center" alignItems="center" >
+	<Grid item xs={11} sm={11} md={11} lg={11} >
+		<Typography className={classes.heading}>{((x.visitNumber == 0) ? "(New)" : "V"+x.visitNumber)+' '+x.visitDate.substr(0,15)}</Typography>
+	</Grid>
+	<Grid item xs={1} sm={1} md={1} lg={1} >
+		{((sessionStorage.getItem("userType") === "Doctor") && (x.visitNumber === 0)) &&
+			<IconButton align="right" color="secondary" size="small" onClick={handleDeleteNew} >
+			<DeleteIcon />
+			</IconButton>
+		}
+		{((sessionStorage.getItem("userType") === "Doctor") && (visitArray[0].visitNumber > 0)) &&
+			<IconButton color="primary" size="small" onClick={() => { handleCopyNew(x.visitNumber)}} >
+			<FileCopyIcon />
+			</IconButton>
+		}
+	</Grid>
+	</Grid>
+	)}
+	
+	return (
  <div className={gClasses.webPage} align="center" key="main">
 	<DisplayPageHeader headerName="Visits" groupName="" tournament=""/>
 	<Container component="main" maxWidth="lg">
@@ -1540,174 +1708,28 @@ export default function Visit() {
 		<div align="left">
 			<Typography align="center" className={classes.modalHeader}>
 			{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
-			</Typography>
+			</Typography>	
 			<DisplayMedicalReports />
 			{/*<DisplayPatientInfo />*/}
 			<DisplayNewVisitBtn />
-			<DisplayVisitUpdateButton />
 			{visitArray.map(x =>	
 				<Accordion className={(expandedPanel === "V"+x.visitNumber)? classes.normalAccordian : classes.selectedAccordian} 
 					key={"AM"+x.visitNumber} expanded={expandedPanel === "V"+x.visitNumber} 
 					onChange={handleAccordionChange("V"+x.visitNumber)}>
 				<AccordionSummary key={"AS"+x.visitNumber} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-				<Grid key={"MG"+x.visitNumber} container justify="center" alignItems="center" >
-				<Grid item xs={11} sm={11} md={11} lg={11} >
-					<Typography className={classes.heading}>{((x.visitNumber == 0) ? "(New)" : "V"+x.visitNumber)+' '+x.visitDate.substr(0,15)}</Typography>
-				</Grid>
-				<Grid item xs={1} sm={1} md={1} lg={1} >
-					{/*  button to copy old visit and delete for new visit */}
-					{(x.visitNumber == 0) &&
-						<IconButton align="right" color="secondary" size="small" onClick={handleDeleteNew} >
-						<DeleteIcon />
-						</IconButton>
-					}
-					{(visitArray[0].visitNumber > 0) &&
-						<IconButton color="primary" size="small" onClick={() => { handleCopyNew(x.visitNumber)}} >
-						<FileCopyIcon />
-						</IconButton>
-					}
-				</Grid>
-				</Grid>
+				<ArunVisitSummary visitRec={x} />
 				</AccordionSummary>
 				<AccordionDetails key={"AD"+x.visitNumber}>
 					<Container component="main" maxWidth="lg">
-					{/* Display Prescription */}
-					<Typography className={classes.title}>Prescription</Typography>
-					<Box borderColor="primary.main" borderRadius={7} border={2}>
-					{x.medicines.map( (m, index) =>
-						<Grid className={classes.noPadding} key={"MED"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
-						<Grid item xs={4} sm={4} md={6} lg={6} >
-							<Typography className={classes.heading}>{m.name}</Typography>
-						</Grid>
-						<Grid item xs={4} sm={4} md={2} lg={2} >
-							<Typography className={classes.heading}>{dose(m.dose1, m.dose2, m.dose3)}</Typography>
-						</Grid>
-						<Grid item xs={2} sm={2} md={2} lg={2} >
-							<Typography className={classes.heading}>{m.time+m.unit}</Typography>
-						</Grid>
-						<Grid item xs={1} sm={1} md={1} lg={1} >
-							{(x.visitNumber === 0) &&
-								<IconButton color="primary" size="small" onClick={() => { handleEditMedicine(x.visitNumber, index)}} >
-								<EditIcon />
-								</IconButton>
-							}
-						</Grid>
-						<Grid item xs={1} sm={1} md={1} lg={1} >
-							{(x.visitNumber === 0) &&
-								<IconButton color="secondary" size="small" onClick={() => { handleDeleteMedicine(x.visitNumber, index)}} >
-								<DeleteIcon />
-								</IconButton>
-							}
-						</Grid>
-					</Grid>
-					)}
-					</Box>
-					{(x.visitNumber === 0) && 
-						<Typography align="right" className={gClasses.link}>
-						<Link href="#" onClick={handleAddNewMedicine} variant="body2">Add Prescription</Link>
-						</Typography>
-					}
-					{/* Display User Notes */}
+					<ArunVisitUpdateButton visitRec={x} />		{/* only for visitNUmber 0 i.e. new visit */}
+					<ArunMedicines visitRec={x} />
 					<BlankArea />
-					<Typography className={classes.title}>User Notes</Typography>
-					<Box borderColor="primary.main" borderRadius={7} border={2}>
-					{x.userNotes.map( (un, index) =>
-						<Grid className={classes.noPadding} key={"NOTES"+x.visitNumber+"notes"+index} container justify="center" alignItems="center" >
-						<Grid item xs={10} sm={10} md={10} lg={10} >
-							<Typography className={classes.heading}>{un.name}</Typography>
-						</Grid>
-						<Grid item xs={1} sm={1} md={1} lg={1} >
-						{(x.visitNumber === 0) &&
-							<IconButton color="primary" size="small" onClick={() => { handleEditUserNotes(x.visitNumber, index)}} >
-							<EditIcon />
-							</IconButton>
-						}
-						</Grid>
-						<Grid item xs={1} sm={1} md={1} lg={1} >
-						{(x.visitNumber === 0) &&
-							<IconButton color="secondary" size="small" onClick={() => { handleDeleteNotes(x.visitNumber, index)}} >
-							<DeleteIcon />
-							</IconButton>
-						}
-						</Grid>
-					</Grid>
-					)}
-					</Box>
-					{(x.visitNumber === 0) &&
-						<Typography align="right" className={gClasses.link}>
-						<Link href="#" onClick={handleAddUserNotes} variant="body2">Add User Note</Link>
-						</Typography>
-					}
-					{/* Display Medical examinations */}
+					<ArunNotes visitRec={x} />
 					<BlankArea />
-					<Typography className={classes.title}>Examination Advised</Typography>
-					<Box borderColor="primary.main" borderRadius={7} border={2}>
-					{x.remarks.map( (r, index) =>
-						<Grid className={classes.noPadding} key={"REM"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
-						<Grid item xs={10} sm={10} md={10} lg={10} >
-							<Typography className={classes.heading}>{r.name}</Typography>
-						</Grid>
-						<Grid item xs={1} sm={1} md={1} lg={1} >
-						{(x.visitNumber === 0) &&
-							<IconButton color="primary" size="small" onClick={() => { handleEditRemark(x.visitNumber, index)}} >
-							<EditIcon />
-							</IconButton>
-						}
-						</Grid>
-						<Grid item xs={1} sm={1} md={1} lg={1} >
-							{(x.visitNumber === 0) &&
-								<IconButton color="secondary" size="small" onClick={() => { handleDeleteRemark(x.visitNumber, index)}} >
-								<DeleteIcon />
-								</IconButton>
-							}
-						</Grid>
-					</Grid>
-					)}
-					</Box>
-					{(x.visitNumber === 0) && 
-						<Typography align="right" className={gClasses.link}>
-						<Link href="#" onClick={handleAddNewRemark} variant="body2">Add Medical Examination</Link>
-						</Typography>
-					}					
+					<ArunRemarks visitRec={x} />
 					<BlankArea />
-					{/* Follow up visit */}
-					{(x.visitNumber === 0) &&
-						<Grid className={classes.noPadding} key={"FOLLOWUP"} container justify="center" alignItems="center" >
-							<Grid item xs={4} sm={4} md={2} lg={2} >
-							<Typography className={classes.title}>Follow up</Typography>
-							</Grid>
-							<Grid item xs={4} sm={4} md={1} lg={1} >
-								<Select labelId='time' id='time' name="time" padding={10}
-								variant="outlined" required fullWidth label="Time" 
-								value={nextVisitTime}
-								placeholder="Arun"
-								inputProps={{
-									name: 'Time',
-									id: 'filled-age-native-simple',
-								}}
-								onChange={(event) => setNextVisitTime(event.target.value)}
-								>
-								{timeArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
-								</Select>
-							</Grid>
-							<Grid item xs={4} sm={4} md={1} lg={1} >
-								<Select labelId='unit' id='unit' name="unit" padding={10}
-									variant="outlined" required fullWidth label="Unit" 
-									value={nextVisitUnit}
-									inputProps={{
-										name: 'Unit',
-										id: 'filled-age-native-simple',
-									}}
-									onChange={(event) => setNextVisitUnit(event.target.value)}
-								>
-								{unitArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
-								</Select>
-							</Grid>
-							<Grid item xs={false} sm={false} md={8} lg={8} />
-						</Grid>
-					}
-					</Container>
-					{/*<DisplayMedNotesRem visitNumber={x.visitNumber}/>*/}
+					<ArunFollowup visitRec={x} />
+					</Container> 
 				</AccordionDetails>
 				</Accordion>
 			)}	

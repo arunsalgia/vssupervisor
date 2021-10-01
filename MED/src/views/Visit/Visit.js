@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
-import IconButton from '@material-ui/core/IconButton';
 import axios from "axios";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SwitchBtn from '@material-ui/core/Switch';
@@ -12,6 +10,7 @@ import FormControl from '@material-ui/core/FormControl';
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import { useLoading, Audio } from '@agney/react-loading';
+import Drawer from '@material-ui/core/Drawer';
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
@@ -32,6 +31,13 @@ import cloneDeep from 'lodash/cloneDeep';
 // styles
 import globalStyles from "assets/globalStyles";
 import modalStyles from "assets/modalStyles";
+
+// icons
+import IconButton from '@material-ui/core/IconButton';
+import SearchIcon from '@material-ui/icons/Search';
+import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
+import CancelIcon from '@material-ui/icons/Cancel';
+import EventNoteIcon from '@material-ui/icons/EventNote';
 
 
 import Switch from "@material-ui/core/Switch";
@@ -56,8 +62,6 @@ DisplayDocumentList,
 DisplayImage, DisplayPDF,
 LoadingMessage,
 } from "CustomComponents/CustomComponents.js"
-
-import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 
 import {
 SupportedMimeTypes, SupportedExtensions,
@@ -219,7 +223,13 @@ export default function Visit() {
   
   const classes = useStyles();
 	const gClasses = globalStyles();
-	
+
+	const [isDrawerOpened, setIsDrawerOpened] = useState("");
+	const [selectPatient, setSelectPatient] = useState(false);
+  const [patientArray, setPatientArray] = useState([])
+	const [patientMasterArray, setPatientMasterArray] = useState([])
+	const [currentPatient, setCurrentPatient] = useState("");
+	const [currentPatientData, setCurrentPatientData] = useState({});
 	
 	const [startLoading, setStartLoading] = useState(false);
 	
@@ -237,10 +247,6 @@ export default function Visit() {
 	const [notesArray, setNotesArry] = useState([]);
 	const [remarkArray, setRemarkArray] = useState([{name: "Rem1"}, {name: "Rem2"}]);
 	
-	const [selectPatient, setSelectPatient] = useState(false);
-  const [patientArray, setPatientArray] = useState([])
-	const [currentPatient, setCurrentPatient] = useState("");
-	const [currentPatientData, setCurrentPatientData] = useState({});
 	const [currentAppt, setCurrentAppt] = useState(null);
 	const [visitArray, setVisitArray] = useState([])
 
@@ -324,15 +330,15 @@ export default function Visit() {
 				console.log("Docs", ddd);
 				setDocumentArray(ddd);
 			} catch {
-				// no share data. Thus called directly
-				console.log("direct");
+				let ppp = await getAllPatients();
+				setPatientArray(ppp);
+				setPatientMasterArray(ppp);
 			}
 			
 		}
+		userCid = sessionStorage.getItem("cid");
 		setMedQty();
 		getAllMedicines();
-		userCid = sessionStorage.getItem("cid");
-		// find out if we have 
 		checkPatient();
   }, []);
 
@@ -343,6 +349,17 @@ export default function Visit() {
     setExpandedPanel(isExpanded ? panel : false);
   };
   
+	
+	async  function getAllPatients() {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/list/${userCid}`;
+			let resp = await axios.get(myUrl);
+			return resp.data;
+		} catch (e) {
+			return [];
+		}	
+	}
+	
 	//progress
 	const LoadingIndicator = props => {
 		const { promiseInProgress } = usePromiseTracker();
@@ -822,21 +839,9 @@ export default function Visit() {
 	
 	function DisplayNewVisitBtn() {
 		if (sessionStorage.getItem("userType") !== "Doctor") return null;
-		
-		// only doctor permitted to add new visit
-		//console.log(visitArray);
-		let disp = false;
-		if (visitArray.length == 0)
-			disp = true;
-		else if (visitArray[0].visitNumber > 0)
-			disp = true;
-		
-		if (!disp)	return null;
-			
+		if ((visitArray.length > 0) && (visitArray[0].visitNumber === 0)) return null;
 		return (
-			<Typography align="right" className={classes.link}>
-				<Link href="#" variant="body2" onClick={handleCreateNewVisit}>Add New Visit</Link>
-			</Typography>
+			<VsButton align="right" name="Add New Visit" onClick={handleCreateNewVisit} />
 		)
 	}
 	
@@ -1382,105 +1387,49 @@ export default function Visit() {
 	</Container>
 	)}
 	
-	function DisplayFilter() {
-	return (	
-	<Grid className={classes.noPadding} key="Filter" container justify="center" alignItems="center" >
-		<Grid item xs={false} sm={false} md={3} lg={3} />
-		<Grid item xs={9} sm={9} md={6} lg={6} >
-			<TextField id="filter"  padding={5} variant="outlined" fullWidth label="Patient Name / Id" 
-				defaultValue={searchText}
-				InputProps={{
-					endAdornment: (
-						<InputAdornment position="end">
-							<SearchIcon onClick={selectFilter}/>
-						</InputAdornment>
-				)}}
-			/>
-		</Grid>
-		<Grid item xs={3} sm={3} md={3} lg={3} >
-			<VsButton name="New Patient" onClick={() => { setEmurName(""); openModal("NEWPATIENT")}} />	
-		</Grid>	
-	</Grid>
-	)}
-	
-	async function selectFilter() {
-		let myText = document.getElementById("filter").value;
-		//console.log(myText);
-		setSearchText(myText);
-		let ppp = await updatePatientByFilter(searchText, userCid);
-		setPatientArray(ppp);
-	}
-	
-	async function handleSelectPatient(rec) {
-		setSelectPatient(false);
-		setCurrentPatient(rec.displayName);
-		setCurrentPatientData(rec);
-		await getPatientVisit(rec);
-		let ddd = await getPatientDocument(userCid, rec.pid);
-		setDocumentArray(ddd);
-	}
+
 	
 	
-	async function handleFileView(d) {	
-		setStartLoading(true);
+	async function handleFileView(d) {
+		let pdfReport;
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/downloadimage/${userCid}/${d.pid}/${d.title}`
 			let resp = await axios.get(myUrl);
+			setStartLoading(true);
 			if (d.type === "PDF") {
 				// pdf file
 				// file={`data:application/pdf;base64,${this.state.base64}`}
 				const b64 = Buffer.from(resp.data.data).toString('base64');
 				//console.log(b64)
 				setDlFile(b64);
-				setIsPdf(true);
+				pdfReport = true;
 			} else {
 				//image file
 				const b64 = Buffer.from(resp.data.data).toString('base64');
 				//console.log(b64);
 				setDlFile(b64);
-				setIsPdf(false);
+				pdfReport = false
 			} 
 			setDlDoc(d);
 			let idx = SupportedExtensions.indexOf(d.type);
 			setDlMime(SupportedMimeTypes[idx]);
 			setViewImage(true);
+			setStartLoading(false);			
+			setIsDrawerOpened((d.type === "PDF") ? "PDF" : "IMG");
 		} catch (e) {
 			console.log(e);
 		}
-		setStartLoading(false);
 	}
 	
 	function DisplayMedicalReports() {
 	return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-		{(!showDocument) &&
-		<Typography align="right" className={classes.link}>
-		<Link href="#" variant="body2" onClick={() => {setShowDocument(true); }}>Show Medical Reports</Link>
-		</Typography>
-		}
-		{(startLoading) && <LoadingMessage />}
+		<VsButton align="right" 
+			name={(showDocument) ? "Hide Document" : "Show Document"} 
+			onClick={() =>{setShowDocument(!showDocument); }}
+		/>
 		{(showDocument) && 
-			<div>
-			<Typography align="right" className={classes.link}>
-			<Link href="#" variant="body2" onClick={() => {setShowDocument(false); }}>Hide Medical Reports</Link>
-			</Typography>
-			{(viewImage && !isPdf) && 
-				<DisplayImage 
-					title={dlDoc.title} mime={dlMime} file={dlFile}
-					handleCancel={() => setViewImage(false)}
-				/> 
-			}
-			{(viewImage && isPdf) && 
-				<DisplayPDF 
-					title={dlDoc.title} file={dlFile}
-					handleCancel={() => setViewImage(false)}
-				/>
-			}
-			<DisplayDocumentList 
-				documentArray={documentArray}
-				viewHandle={handleFileView}
-			/>
-			</div>
+			<DisplayDocumentList documentArray={documentArray} viewHandle={handleFileView} />
 		}
 	</Box>
 	)}
@@ -1675,34 +1624,93 @@ export default function Visit() {
 	</Grid>
 	)}
 	
+	function handleSelectNewPatient() {
+		setShowDocument(false); 
+		setViewImage(false); 
+		setDocumentArray([]); 
+		setCurrentAppt(null); 
+		setCurrentPatient(""); 
+		setVisitArray([]); 
+		setSelectPatient(true);
+	}
+	
+	function DisplayAllPatients() {
 	return (
- <div className={gClasses.webPage} align="center" key="main">
-	<DisplayPageHeader headerName="Visits" groupName="" tournament=""/>
+	<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
+	{patientArray.map( (m, index) => 
+		<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={3} lg={3} >
+		<DisplayPatientDetails 
+			patient={m} 
+			button1={
+				<IconButton color={'primary'} size="small" onClick={() => { handleSelectPatient(m)}}  >
+					<EventNoteIcon />
+				</IconButton>
+			}
+		/>
+		</Grid>
+	)}
+	</Grid>	
+	)}
+	
+	function setFilter(myArray, filterStr) {
+		filterStr = filterStr.trim().toLowerCase();
+		let tmpArray;
+		if (validateInteger(filterStr)) {
+			// it is integer. Thus has to be Id
+			tmpArray = patientMasterArray.filter(x => x.pid === filterStr);
+		} else {
+			tmpArray = patientMasterArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+		}
+		setPatientArray(tmpArray);
+	}
+	
+	function filterPatients(filterStr) {
+		setSearchText(filterStr);
+		setFilter(patientMasterArray, filterStr);
+	}
+
+
+	async function handleSelectPatient(rec) {
+		console.log("Select");
+		setCurrentPatient(rec.displayName);
+		setCurrentPatientData(rec);
+		await getPatientVisit(rec);
+		let ddd = await getPatientDocument(userCid, rec.pid);
+		setDocumentArray(ddd);
+		setSelectPatient(false);
+	}
+	
+	console.log(selectPatient);
+	
+	return (
+	<div className={gClasses.webPage} align="center" key="main">
+	<DisplayPageHeader headerName="Doctor Visit" groupName="" tournament=""/>
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
-	{(!selectPatient) && 
-		<Typography align="right" className={classes.link}>
-			<Link href="#" variant="body2" onClick={() => { setShowDocument(false); setViewImage(false); setDocumentArray([]); setCurrentAppt(null); setCurrentPatient(""); setVisitArray([]); setSelectPatient(true); }}>Select Patient</Link>
-		</Typography>
-	}
-	{(selectPatient) && 
-		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<VsCancel align="right" onClick={() => {setSelectPatient(false)}} />
-			<Typography>
-				<span className={classes.patientName}>Select Patient</span>
-			</Typography>
-		<DisplayFilter />
-		<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
-			{patientArray.map( (m, index) => 
-				<Grid key={"PAT"+index} item xs={12} sm={6} md={4} lg={4} >
-				<DisplayPatientDetails 
-					patient={m} 
-					button1={<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />}
-					/>
-				</Grid>
-			)}
+	{(currentPatient === "") && 
+		<div>
+		<Grid className={gClasses.vgSpacing} key="PatientFilter" container alignItems="center" >
+		<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
+		<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
+			<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
+				defaultValue={searchText}
+				onChange={(event) => filterPatients(event.target.value)}
+				InputProps={{endAdornment: (<InputAdornment position="end"><SearchIcon/></InputAdornment>)}}
+			/>
 		</Grid>
-		</Box>
+		<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
+			<Typography>Click button to add new patient</Typography>
+		</Grid>
+		<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
+			<VsButton name="New Patient" /> 
+		</Grid>
+		<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
+		</Grid>
+		<DisplayAllPatients />
+		</div>
+	}
+	{(currentPatient !== "") &&
+		<VsButton align="right" name="Select Patient" onClick={() => { setCurrentPatient("")}} />	
 	}
 	{(currentPatient !== "") &&
 		<div align="left">
@@ -1711,6 +1719,7 @@ export default function Visit() {
 			</Typography>	
 			<DisplayMedicalReports />
 			{/*<DisplayPatientInfo />*/}
+			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 			<DisplayNewVisitBtn />
 			{visitArray.map(x =>	
 				<Accordion className={(expandedPanel === "V"+x.visitNumber)? classes.normalAccordian : classes.selectedAccordian} 
@@ -1733,8 +1742,31 @@ export default function Visit() {
 				</AccordionDetails>
 				</Accordion>
 			)}	
+			</Box>
 		</div>
 	}
+	<Drawer className={classes.drawer}
+		anchor="right"
+		variant="temporary"
+		open={isDrawerOpened !== ""}
+	>
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
+	{(startLoading) && <LoadingMessage />}
+	{(isDrawerOpened === "PDF") &&
+		<DisplayPDF 
+			title={dlDoc.title} file={dlFile}
+			handleCancel={() => setViewImage(false)}
+		/>
+	}
+	{(isDrawerOpened === "IMG") &&
+		<DisplayImage 
+			title={dlDoc.title} mime={dlMime} file={dlFile}
+			handleCancel={() => setViewImage(false)}
+		/> 
+	}
+	</Box>
+	</Drawer>
 	</Container>
 	<Modal
 		isOpen={modalIsOpen == "NEWPATIENT"}
