@@ -10,39 +10,18 @@ import Modal from 'react-modal';
 import Box from '@material-ui/core/Box';
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
+import Drawer from '@material-ui/core/Drawer';
 
-import Switch from "@material-ui/core/Switch";
-//import  from '@material-ui/core/Container';
-//import  from '@material-ui/core/CssBaseline';
+
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Select from "@material-ui/core/Select";
-import MenuItem from '@material-ui/core/MenuItem';
 import Link from '@material-ui/core/Link';
-import Button from '@material-ui/core/Button';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-// import FormControlLabel from '@material-ui/core/FormControlLabel';
-// import Radio from '@material-ui/core/Radio';
-import Card from "components/Card/Card.js";
-import CardBody from "components/Card/CardBody.js";
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Typography from '@material-ui/core/Typography';
-import Avatar from "@material-ui/core/Avatar"
-// import CardAvatar from "components/Card/CardAvatar.js";
-// import { useHistory } from "react-router-dom";
-// import { UserContext } from "../../UserContext";
+
 import { getImageName } from "views/functions.js"
-import {DisplayPageHeader, ValidComp, BlankArea, NothingToDisplay, DisplayBalance} from "CustomComponents/CustomComponents.js"
+import {DisplayPageHeader, ValidComp, BlankArea, DisplayMedicineDetails} from "CustomComponents/CustomComponents.js"
 
 // styles
 import globalStyles from "assets/globalStyles";
@@ -52,7 +31,7 @@ import {dynamicModal } from "assets/dynamicModal";
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
-//import CancelIcon from '@material-ui/icons/Cancel';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 import {red, blue, yellow, orange } from '@material-ui/core/colors';
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
@@ -188,37 +167,45 @@ export default function Medicine() {
   const classes = useStyles();
 	const gClasses = globalStyles();
 	
-	const [newMedicine, setNewMedicine] = useState(false);
-	const [addEdit, setAddEdit] = useState("ADD");
-	
+	const [medicineMasterArray, setMedicineMasterArray] = useState([]);
 	const [medicineArray, setMedicineArray] = useState([]);
+	const [isDrawerOpened, setIsDrawerOpened] = useState(false);
+	const [isAdd, setIsAdd] = useState(false);
+	const [radioValue, setRadioValue] = useState("Male");
+
+	const [newMedicine, setNewMedicine] = useState(false);
+	
 	const [registerStatus, setRegisterStatus] = useState(0);
 	
 	const [oldMedicineName, setOldMedicineName] = useState("");
 	const	[medicineName, setMedicineName] = useState("");
 	const [medicineDesc, setMedicineDesc] = useState("");
 	const [medicinePrecaution, setMedicinePrecaution] = useState("");
-	
-	const [modalIsOpen,setIsOpen] = useState("");
-	function openModal(fun) { setIsOpen(fun); }
-  function closeModal() { setIsOpen(""); }	
-  function afterOpenModal() { }
-	
-	
-	
-	const [rowsPerPage, setRowsPerPage] = useState(ROWSPERPAGE);
-  const [page, setPage] = useState(0);
+
 	
 
   useEffect(() => {
-      const us = async () => {
-		
-      }
-			userCid = sessionStorage.getItem("cid");
-			us();
+		const us = async () => {
+			let mmm = await getAllMedicines();
+			setMedicineArray(mmm);
+			setMedicineMasterArray(mmm);
+		}
+		userCid = sessionStorage.getItem("cid");
+		us();
   }, [])
 
 
+	async  function getAllMedicines() {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/list/${userCid}`;
+			let resp = await axios.get(myUrl);
+			return resp.data;
+		} catch (e) {
+			return [];
+		}	
+	}
+	
+	
 	function ShowResisterStatus() {
 	//console.log(`Status is ${registerStatus}`);
 	let myMsg = "";
@@ -233,31 +220,18 @@ export default function Medicine() {
 	return(
       <div align="center"><Typography className={gClasses.error}>{myMsg}</Typography></div>
 	)}
-
-	// Start of function s/ component
-
-	function DisplayCloseModal() {
-	return ( 
-		<VsCancel align="right" onClick={closeModal} />
-	)}
 	
-	async function handleAddEditSelect() {
-		console.log(medicineName, medicineDesc, medicinePrecaution);
-		
+	async function handleAddEditSubmit() {
 		let myUrl;
 		let resp;
-		
-		if (addEdit === "ADD") {
+		if (isAdd) {
 			try {
 				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/add/${userCid}/${medicineName}/${medicineDesc}/${medicinePrecaution}`;
 				await axios.get(myUrl);
-				// now successfully added. come out of if then 
-				let newMed = {name: medicineName, description: medicineDesc, precaution: medicinePrecaution};
 			} catch (e) {
 				console.log(e);
 				setRegisterStatus(e.response.status);
 				return;
-				// do not close the modal
 			}
 		} else {
 			try {
@@ -268,70 +242,23 @@ export default function Medicine() {
 				console.log(e);
 				setRegisterStatus(e.response.status);
 				return;
-				// do not close the modal
 			}
 		}
+		setIsDrawerOpened(false);
 		
-		setNewMedicine(false);
-		updateMedicineByFilter(searchText);
+		let mmm = await getAllMedicines();
+		setMedicineMasterArray(mmm);
+		setFilter(mmm, searchText);
 	}
-	
-
-	
-//================
-
-	function DisplayFilter() {
-	return (	
-		<Grid className={classes.noPadding} key="Filter" container justify="center" alignItems="center" >
-			<Grid item xs={3} sm={3} md={3} lg={3} />
-			<Grid item xs={6} sm={6} md={6} lg={6} >
-				<TextField id="filter"  padding={5} variant="outlined" fullWidth label="Medicine Name" 
-				defaultValue={searchText}
-				//onChange={(event) => setSearchText(event.target.value)}
-				InputProps={{
-					endAdornment: (
-						<InputAdornment position="end">
-							<SearchIcon onClick={selectFilter}/>
-						</InputAdornment>
-				)}}
-			/>
-			</Grid>
-			<Grid item xs={3} sm={3} md={3} lg={3} />
-		</Grid>
-	)}
-	
-	async function selectFilter() {
-		let myText = document.getElementById("filter").value;
-		//console.log(myText);
-		setSearchText(myText);
-		await updateMedicineByFilter(searchText);
-	}
-	
-	async function updateMedicineByFilter(filter) {
-		try {
-			var resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/filter/${userCid}/${filter}`)
-			//console.log(resp.data);
-			setMedicineArray(resp.data);
-		} catch (e) {
-			console.log("Filter error");
-			setMedicineArray([]);
-		}
-	}
-	
-	function DisplayNewMedicineBtn() {
-	return (
-		<Typography align="right" className={classes.link}>
-			<Link href="#" variant="body2" onClick={handleAdd}>Add New Medicine</Link>
-		</Typography>
-	)}
 	
 	function handleAdd() {
-		//console.log("handleAdd");
 		setMedicineName("");
-
+		setMedicineDesc("");
+		setMedicinePrecaution("")
+		
 		setRegisterStatus(0);
-		setAddEdit("ADD");
-		setNewMedicine(true);
+		setIsAdd(true);
+		setIsDrawerOpened(true);
 	}
 	
 	function handleEdit(rec) {
@@ -340,17 +267,19 @@ export default function Medicine() {
 		setMedicineDesc(rec.description);
 		setMedicinePrecaution(rec.precaution);
 
-		
 		setRegisterStatus(0);
-		setAddEdit("EDIT");
-		setNewMedicine(true);
+		setIsAdd(false);
+		setIsDrawerOpened(true);
 	}
 
 	async function handleCancel(rec) {
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/delete/${userCid}/${rec.name}`;
 			await axios.get(myUrl);
-			let tmpArray = [].concat(medicineArray);
+			let tmpArray = [].concat(medicineMasterArray);
+			tmpArray = tmpArray.filter(x => x.name !== rec.name);
+			setMedicineMasterArray(tmpArray);
+			tmpArray = [].concat(medicineArray);
 			tmpArray = tmpArray.filter(x => x.name !== rec.name);
 			setMedicineArray(tmpArray);
 		} catch(e) {
@@ -358,74 +287,96 @@ export default function Medicine() {
 		}
 	}
 	
+	
+	function DisplayAllMedicines() {
+	return (
+	<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
+	{medicineArray.map( (m, index) => 
+		<Grid key={"MED"+m.pid} item xs={12} sm={6} md={3} lg={3} >
+		<DisplayMedicineDetails 
+			medicine={m} 
+			button1={
+				<IconButton className={gClasses.blue} size="small" onClick={() => {handleEdit(m)}}  >
+					<EditIcon  />
+				</IconButton>
+			}
+			button2={
+				<IconButton color="secondary" size="small" onClick={() => {handleCancel(m)}}  >
+					<CancelIcon />
+				</IconButton>
+			}
+		/>
+		</Grid>
+	)}
+	</Grid>	
+	)}
+	
+	function setFilter(myArray, filterStr) {
+		filterStr = filterStr.trim().toLowerCase();
+		let tmpArray = myArray.filter(x => x.name.toLowerCase().includes(filterStr));
+		setMedicineArray(tmpArray);
+	}
+	
+	function filterMedicine(filterStr) {
+		setSearchText(filterStr);
+		setFilter(medicineMasterArray, filterStr);
+	}
+	
   return (
   <div className={gClasses.webPage} align="center" key="main">
 		<Container component="main" maxWidth="lg">
 		<CssBaseline />
-		<DisplayPageHeader headerName="Medicines" groupName="" tournament=""/>
+		<DisplayPageHeader headerName="Medicine Directory" groupName="" tournament=""/>
 		<BlankArea />
-		<DisplayFilter />
+				<Grid className={gClasses.noPadding} key="MedicineFilter" container alignItems="center" >
+			<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
+			<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
+			<TextField id="filter"  padding={5} fullWidth label="Search Medicine by name" 
+				defaultValue={searchText}
+				onChange={(event) => filterMedicine(event.target.value)}
+				InputProps={{endAdornment: (<InputAdornment position="end"><SearchIcon/></InputAdornment>)}}
+			/>
+			</Grid>
+			<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
+				<Typography>Click button to add new Medicine</Typography>
+			</Grid>
+			<Grid key={"F5"} item xs={4} sm={4} md={2} lg={2} >
+				<VsButton name="New Medicine" onClick={handleAdd} />
+			</Grid>
+			<Grid key={"F6"} item xs={false} sm={false} md={1} lg={1} />
+		</Grid>
 		<BlankArea />
-		{(!newMedicine) && <DisplayNewMedicineBtn />}
-		{(newMedicine) &&
+		<DisplayAllMedicines />
+				<Drawer className={classes.drawer}
+			anchor="right"
+			variant="temporary"
+			open={isDrawerOpened}
+		>
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<VsCancel align="right" onClick={() => {setNewMedicine(false)}} />
-			<Typography className={classes.header}>{(addEdit == "ADD") ? "Add New Medicine" : "Edit Medicine"}</Typography>
-			<BlankArea />
-			<ValidatorForm className={classes.form} onSubmit={handleAddEditSelect}>
-			<Grid spacing={4} key="AddEdit" container justify="center" alignItems="center" >
-			<Grid item xs={12} sm={12} md={3} lg={3} >
-			<TextValidator variant="outlined" required fullWidth      
-				id="newMedicineName" label="Name" type="text"
-				value={medicineName}
-				onChange={() => {setMedicineName(event.target.value); }}
+		<VsCancel align="right" onClick={() => { setIsDrawerOpened(false)}} />
+		<ValidatorForm align="center" className={classes.form} onSubmit={handleAddEditSubmit}>
+			<Typography className={gClasses.title}>{(isAdd) ? "Add Medicine" : "Edit Medicine"}</Typography>
+			<TextValidator fullWidth  className={gClasses.vgSpacing}
+				id="newPatientName" label="Name" type="text"
+				value={medicineName} 
+				onChange={() => { setMedicineName(event.target.value) }}
       />
-			</Grid>
-			<Grid item xs={12} sm={12} md={3} lg={3} >
-			<TextValidator variant="outlined" fullWidth       
-				id="newMedicineDesc" label="Description" 
+			<TextValidator  fullWidth className={gClasses.vgSpacing}
+				id="newPatientAge" label="Description"
 				value={medicineDesc}
-				onChange={() => { setMedicineDesc(event.target.value) }}
+				onChange={() => { setMedicineDesc(event.target.value) }}			
       />
-			</Grid>
-			<Grid item xs={12} sm={12} md={3} lg={3} >
-			<TextValidator variant="outlined" fullWidth       
-				id="newMedicineDesc" label="Precaution" 
-				value={medicinePrecaution}
+			<TextValidator   fullWidth   className={gClasses.vgSpacing} 
+				id="newPatientEmail" label="Precaution"
+				value={medicinePrecaution} 
 				onChange={() => { setMedicinePrecaution(event.target.value) }}
       />
-			</Grid>
-			<Grid item xs={12} sm={12} md={3} lg={3} >
-			<VsButton name={(addEdit === "ADD") ? "Add New" : "Update"} />
-			</Grid>
-			</Grid>
 			<ShowResisterStatus />
 			<BlankArea />
-			</ValidatorForm>    
-		</Box>	
-		}
-		<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
-		{medicineArray.map( (m, index) => 
-		<Grid key={"MED"+index} item xs={12} sm={12} md={3} lg={3} >
-			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<div align="left" >
-			<Typography>
-			<span className={classes.medicineName}>{m.name}</span>
-			</Typography>
-			<Typography className={classes.medicineInfo}> 
-				{"Description: " + m.description}
-			</Typography>
-			<Typography className={classes.medicineInfo}> 
-				{"Precaution : "+m.precaution}
-			</Typography>
-			<BlankArea />
-			<VsButton key={"EDIT"+index} name="Edit" onClick={() => { handleEdit(m)}} />
-			<VsButton key={"CAN"+index} name="Del" color='red' onClick={() => { handleCancel(m)}} />
-			</div>
+			<VsButton name={(isAdd) ? "Add" : "Update"} />
+			</ValidatorForm>    		
 			</Box>
-		</Grid>
-		)}
-		</Grid>
+		</Drawer>
 		</Container>
   </div>
   );    

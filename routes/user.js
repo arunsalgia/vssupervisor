@@ -203,8 +203,7 @@ router.get('/cricsignup/:cid/:uName/:uPassword/:uEmail/:mobileNumber/:referalCod
 
 //=============== LOGIN
 
-router.get('/jaijiendra/:uName/:uPassword', async function (req, res, next) {
-  // CricRes = res;
+router.get('/jaijinendra/:uName/:uPassword', async function (req, res, next) {
   setHeader(res);
   var {uName, uPassword } = req.params;
   var isValid = false;
@@ -220,8 +219,15 @@ router.get('/jaijiendra/:uName/:uPassword', async function (req, res, next) {
 		//console.log(isValid);
   }
 	
-  if (isValid) sendok(res, uRec);
-  else         senderr(res, 602, "Invalid User name or password");
+  if (isValid) {
+		let myDoctor = await M_Doctor.findOne({cid: uRec.cid});
+		let myCustomer = await M_Customer.findOne({_id: uRec.cid});
+		sendok(res, {user: uRec, doctor: myDoctor, customer: myCustomer});
+		//sendok(res, "OK");
+		console.log("Done");
+	}
+  else        
+		senderr(res, 602, "Invalid User name or password");
 });
 
 

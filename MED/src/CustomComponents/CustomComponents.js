@@ -631,21 +631,63 @@ export function DisplayPatientDetails(props) {
 	//console.log(_button1, _button2, _button3, _button4, _button5);
 return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-	<div align="left" >
+		<div align="center" >
 		<Typography>
 		<span className={gClasses.patientName}>{props.patient.displayName}</span>
 		</Typography>
+		</div>
+		<BlankArea />
+		<div align="left" >
 		<Typography>
-		<span className={gClasses.patientInfo}>{"Id: " + props.patient.pid}</span>
+			<span className={gClasses.patientInfo}>Id: </span>
+			<span className={gClasses.patientInfo2}>{props.patient.pid}</span>
 		</Typography>
-		<Typography className={gClasses.patientInfo}> 
-			{"Age: " + dispAge(props.patient.age, props.patient.gender)}
+		<Typography> 
+			<span className={gClasses.patientInfo}>Age: </span>
+			<span className={gClasses.patientInfo2}>{dispAge(props.patient.age, props.patient.gender)}</span>
 		</Typography>
-		<Typography className={gClasses.patientInfo}> 
-			{"Email: "+ dispEmail(props.patient.email)}
+		<Typography > 
+			<span className={gClasses.patientInfo}>Email: </span>
+			<span className={gClasses.patientInfo2}>{dispEmail(props.patient.email)}</span>
 		</Typography>
-		<Typography className={gClasses.patientInfo}> 
-			{"Mobile: "+ dispMobile(props.patient.mobile)}
+		<Typography > 
+			<span className={gClasses.patientInfo}>Mob.: </span>
+			<span className={gClasses.patientInfo2}>{dispMobile(props.patient.mobile)}</span>
+		</Typography>
+		<BlankArea />
+		{(!_button1) && props.button1}
+		{(!_button2) && props.button2}
+		{(!_button3) && props.button3}
+		{(!_button4) && props.button4}
+		{(!_button5) && props.button5}
+	</div>
+	</Box>
+)}
+
+export function DisplayMedicineDetails(props) {
+	const gClasses = globalStyles();
+	let _button1 = (props.button1 == null);
+	let _button2 = (props.button2 == null);
+	let _button3 = (props.button3 == null);
+	let _button4 = (props.button4 == null);
+	let _button5 = (props.button5 == null);
+	//console.log(_button1, _button2, _button3, _button4, _button5);
+return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<div align="center" >
+		<Typography>
+		<span className={gClasses.patientName}>{props.medicine.name}</span>
+		</Typography>
+		</div>
+		<BlankArea />
+		<div align="left" >
+		<Typography>
+			<span className={gClasses.patientInfo}>Description: </span>
+			<span className={gClasses.patientInfo2}>{props.medicine.description}</span>
+		</Typography>
+		<Typography> 
+			<span className={gClasses.patientInfo}>Precaution: </span>
+			<span className={gClasses.patientInfo2}>{props.medicine.precaution}</span>
 		</Typography>
 		<BlankArea />
 		{(!_button1) && props.button1}

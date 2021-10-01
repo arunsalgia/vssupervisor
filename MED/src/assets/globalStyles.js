@@ -9,14 +9,30 @@ import { makeStyles } from '@material-ui/core/styles';
 
 
 const globalStyles = makeStyles((theme) => ({
+	green: {
+		color: green[900],
+	},
+	blue: {
+		color: 'blue',
+	},
   root: {
     width: '100%',
     backgroundColor: '#FAF5E9',
   },
+	title: {
+		fontSize: theme.typography.pxToRem(18),
+		fontWeight: theme.typography.fontWeightBold,	
+		color: 'blue',
+	},
+	vgSpacing: {
+		padding: "20px 20px", 
+		margin: "20px 20px", 
+	},
 	boxStyle: {
 		padding: "5px 10px", 
 		margin: "4px 2px", 
-		backgroundColor: blue[300] 
+		
+		//backgroundColor: blue[300] 
 	},
 	select: {
 		padding: "none", 
@@ -24,12 +40,16 @@ const globalStyles = makeStyles((theme) => ({
 		margin: "none",
 	},
 	patientName: {
-		fontSize: theme.typography.pxToRem(16),
+		fontSize: theme.typography.pxToRem(18),
 		fontWeight: theme.typography.fontWeightBold,	
 		color: 'blue',
 	},
 	patientInfo: {
 		fontSize: theme.typography.pxToRem(14),
+	},
+	patientInfo2: {
+		fontSize: theme.typography.pxToRem(14),
+		fontWeight: theme.typography.fontWeightBold,
 	},
 	selectForm: {
     margin: theme.spacing(1),
@@ -47,7 +67,7 @@ const globalStyles = makeStyles((theme) => ({
 	webPage: {
 		width: '100%',
 		height: '100%',
-		backgroundColor: '#FFF9C4',
+		backgroundColor: 'white',
 	},
 	signInWelcome: {
 		align: "center",

@@ -132,7 +132,7 @@ export default function SignIn() {
     let response = ""
     try { 
       let enPassword = encrypt(myPassword);
-      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/jaijiendra/${myUserName}/${enPassword}`); 
+      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/jaijinendra/${myUserName}/${enPassword}`); 
       setError("", false);
     } catch (err) {
       setError("Invalid Username / Password", true);
@@ -141,11 +141,16 @@ export default function SignIn() {
 
     if (response.status === 200) {
 			console.log("Signinresponse", response.data);
+			
+			let userData = response.data.user;
+      window.sessionStorage.setItem("uid", userData.uid)
+      window.sessionStorage.setItem("userName", userData.displayName);
+      window.sessionStorage.setItem("userType", userData.userType);
+			window.sessionStorage.setItem("cid", userData.cid);
 
-      window.sessionStorage.setItem("uid", response.data.uid)
-      window.sessionStorage.setItem("userName", response.data.displayName);
-      window.sessionStorage.setItem("userType", response.data.userType);
-			 window.sessionStorage.setItem("cid", response.data.cid);
+			window.sessionStorage.setItem("customerData", JSON.stringify(response.data.customer));
+			
+			window.sessionStorage.setItem("doctorData", JSON.stringify(response.data.doctor));
 			 
 			//window.sessionStorage.setItem("admin", true)
 			setTab(process.env.REACT_APP_HOME);

@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
-import IconButton from '@material-ui/core/IconButton';
+
 import axios from "axios";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SwitchBtn from '@material-ui/core/Switch';
@@ -13,7 +12,7 @@ import VsCancel from "CustomComponents/VsCancel";
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import FormControl from '@material-ui/core/FormControl';
-
+import Drawer from '@material-ui/core/Drawer';
 import Switch from "@material-ui/core/Switch";
 //import  from '@material-ui/core/Container';
 //import  from '@material-ui/core/CssBaseline';
@@ -43,10 +42,18 @@ import Typography from '@material-ui/core/Typography';
 import Avatar from "@material-ui/core/Avatar"
 import { useHistory } from "react-router-dom";
 
+// icons
+import IconButton from '@material-ui/core/IconButton';
+import SearchIcon from '@material-ui/icons/Search';
+import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
+import CancelIcon from '@material-ui/icons/Cancel';
+import EventNoteIcon from '@material-ui/icons/EventNote';
+						
 // import CardAvatar from "components/Card/CardAvatar.js";
 // import { UserContext } from "../../UserContext";
 import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFilter,
 	dispOnlyAge, dispAge, dispEmail, dispMobile,
+	validateInteger,
  } from "views/functions.js"
 import {DisplayYesNo, DisplayPageHeader, BlankArea,
 DisplayPatientDetails,
@@ -62,12 +69,18 @@ import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 //import CancelIcon from '@material-ui/icons/Cancel';
 
-import {red, blue, yellow, orange } from '@material-ui/core/colors';
+import {red, blue, yellow, orange, green } from '@material-ui/core/colors';
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 
+const drawerWidth=800;
 const AVATARHEIGHT=4;
 const useStyles = makeStyles((theme) => ({
+	drawer: {
+		width: '40%',
+		flexShrink: 0
+		//backgroundColor: "rgba(0,0,0,0.6)" Don't target here
+	},
 	boxStyle: {padding: "5px 10px", margin: "4px 2px", backgroundColor: blue[300] },
 	radio: {
 		fontSize: theme.typography.pxToRem(20),
@@ -182,35 +195,16 @@ const useStyles = makeStyles((theme) => ({
 const ROWSPERPAGE=10;
 const BOTTONCOL=13;
 
-const ALPHABETSTR = [
-"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-"K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-"U", "V", "W", "X", "Y", "Z"
-];
-
 const NUMBERINT=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 const GENDERARRAY=["Male", "Female", "Other"];
 
 const addEditModal = (isMobile()) ? dynamicModal('90%') : dynamicModal('40%');
 const yesNoModal = dynamicModal('60%');
 
-let modalName="";
-function setModalName(ggg) { modalName = ggg; }
-let modalAge= 0;
-function setModalAge(ggg) { modalAge = ggg };
-let modalGender="Male";
-function setModalGender(ggg) { modalGender = ggg; }
-let modalEmail="nomail@mail.com";
-function setModalEmail(ggg) { modalEmail = ggg; }
-let modalMobile="9999999999";
-function setModalMobile(ggg) { modalMobile= ggg; }
-
 
 let searchText = "";
 function setSearchText(sss) { searchText = sss;}
 
-
-const defaultDirectoryMode=true;
 var userCid;
 
 export default function Patient() {
@@ -218,25 +212,13 @@ export default function Patient() {
   const classes = useStyles();
 	const gClasses = globalStyles();
 
+	const [patientMasterArray, setPatientMasterArray] = useState([]);
 	const [patientArray, setPatientArray] = useState([]);
-	const [newPatient, setNewPatient] = useState(false);
+	const [isDrawerOpened, setIsDrawerOpened] = useState(false);
+	const [isAdd, setIsAdd] = useState(false);
 	const [radioValue, setRadioValue] = useState("Male");
-	const [addEdit, setAddEdit] = useState("ADD");
 	
-	const [modalIsOpen,setIsOpen] = useState("");
-	function openModal(fun) { setIsOpen(fun); }
-  function closeModal() { setIsOpen(""); }	
-  function afterOpenModal() { }
-	
-	const [directoryMode, setDirectoryMode] = useState(defaultDirectoryMode);
-	const [buttonArray, setButtonArray] = useState([]);
-	const [patientChar, setPatientChar] = useState("A");
-
-
-	const [patientDelete, setPatientDelete] = useState({});
-	const [patientAppointment, setPatientAppointment] = useState({});
-	
-	
+	const [patientRec, setPatientRec] = useState({});
 	const [registerStatus, setRegisterStatus] = useState(0);
 	
 	const [oldPatientName, setOldPatientName] = useState("");
@@ -246,23 +228,31 @@ export default function Patient() {
 	const	[patientEmail, setPatientEmail] = useState("");
 	const	[patientMobile, setPatientMobile] = useState(0);
 	
-	//const [rowsPerPage, setRowsPerPage] = useState(ROWSPERPAGE);
   const [page, setPage] = useState(0);
 	
-	const [expandedPanel, setExpandedPanel] = useState(false);
-  const handleAccordionChange = (panel) => (event, isExpanded) => {
-    // console.log({ event, isExpanded });
-    setExpandedPanel(isExpanded ? panel : false);
-  };
 	
   useEffect(() => {
 		const us = async () => {
+			let ppp = await getAllPatients();
+			setPatientMasterArray(ppp);
+			setPatientArray(ppp);
 		}
+		userCid = sessionStorage.getItem("cid");
 		us();
 		sessionStorage.setItem("YESNOMODAL", "");
-		userCid = sessionStorage.getItem("cid");
   }, [])
 
+	
+	async  function getAllPatients() {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/list/${userCid}`;
+			let resp = await axios.get(myUrl);
+			return resp.data;
+		} catch (e) {
+			return [];
+		}	
+	}
+	
 	
 	function ShowResisterStatus() {
     //console.log(`Status is ${registerStatus}`);
@@ -292,7 +282,7 @@ export default function Patient() {
 		console.log(myData);
 		if (myData != null) {
 			if ((myData.pending > 0) || (myData.visit > 0)) {
-				setPatientDelete(rec);
+				setPatientRec(rec);
 
 				let pmsg = (myData.pending > 0) ? `${myData.pending} pending appointments` : "";
 				let vmsg = (myData.visit > 0)   ? `${myData.visit} visits` : "";
@@ -322,12 +312,6 @@ export default function Patient() {
 		}
 	}
 	
-	function DisplayCloseModal() {
-	return (
-		<VsCancel align="right" onClick={closeModal} />
-	)}
-	
-	
 	
 	async function handleDeleteConfirm(rec) {
 		console.log("Delete of "+rec.displayName);
@@ -355,50 +339,21 @@ export default function Patient() {
 	function yesNoHandler(id, action) {
 		//console.log("Id is " + id + "  Action is " + action);
 		if ((id === "delete") && (action === "YES"))	{
-			handleDeleteConfirm(patientDelete);
+			handleDeleteConfirm(patientRec);
 			return;
 		}
 		if ((id === "visit") && (action === "YES"))	{
-			handleVisitConfirm(patientDelete);
+			handleVisitConfirm(patientRec);
 			return;
 		}
 		
 		if ((id === "appointment") && (action === "YES"))	{
-			handleAppointmentConfirm(patientDelete);
+			handleAppointmentConfirm(patientRec);
 			return;
 		}
 	}
 	//==========================
 	
-	function DisplayFilter() {
-	return (	
-		<Grid className={classes.noPadding} key="Filter" container justify="center" alignItems="center" >
-			<Grid item xs={3} sm={3} md={3} lg={3} />
-			<Grid item xs={6} sm={6} md={6} lg={6} >
-				<TextField id="filter"  padding={5} variant="outlined" fullWidth label="Patient Name / Id" 
-				defaultValue={searchText}
-				//onChange={(event) => setSearchText(event.target.value)}
-				InputProps={{
-					endAdornment: (
-						<InputAdornment position="end">
-							<SearchIcon onClick={selectFilter}/>
-						</InputAdornment>
-				)}}
-			/>
-			</Grid>
-			<Grid item xs={3} sm={3} md={3} lg={3} />
-		</Grid>
-	)}
-	
-	async function selectFilter() {
-		let myText = document.getElementById("filter").value;
-		//console.log(myText);
-		setSearchText(myText);
-		let ppp = await updatePatientByFilter(searchText,userCid);
-		setPatientArray(ppp);
-	}
-	
-
 	function handleAdd() {
 		//console.log("handleAdd");
 		setPatientName("");
@@ -409,13 +364,11 @@ export default function Patient() {
 		setPatientMobile("");
 		
 		setRegisterStatus(0);
-		setAddEdit("ADD");
-		setNewPatient(true);
+		setIsAdd(true);
+		setIsDrawerOpened(true);
 	}
 	
 	function handleEdit(rec) {
-		//console.log("handleAdd");
-
 		setOldPatientName(rec.displayName);
 		setPatientName(rec.displayName);		
 		setPatientAge(dispOnlyAge(rec.age));
@@ -425,8 +378,8 @@ export default function Patient() {
 		setPatientMobile(dispMobile(rec.mobile));
 		
 		setRegisterStatus(0);
-		setAddEdit("EDIT");
-		setNewPatient(true);
+		setIsAdd(false);
+		setIsDrawerOpened(true);
 	}
 
 	function handleCancel(rec) {
@@ -450,16 +403,8 @@ export default function Patient() {
 		setTab(process.env.REACT_APP_VISIT);
 	}
 	
-	function DisplayNewPatientBtn() {
-	return (
-		<Typography align="right" className={classes.link}>
-			<Link href="#" variant="body2" onClick={handleAdd}>Add New Patient</Link>
-		</Typography>
-	)}
-	
-	
+
 	async function handleAddEditSubmit() {
-		
 		console.log("Addedit", patientName, patientAge, patientGender, patientEmail, patientMobile);
 		let myAge = (patientAge !== "") ? patientAge : 0;
 		let myMobile = (patientMobile !== "") ? patientMobile : 0;
@@ -470,7 +415,7 @@ export default function Patient() {
 		
 		let resp;
 		let myUrl;
-		if (addEdit === "ADD") {
+		if (isAdd) {
 			try {
 				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/add/${userCid}/${patientName}/${myAge}/${patientGender}/${myEmail}/${myMobile}`;
 				resp = await axios.get(myUrl);
@@ -489,111 +434,138 @@ export default function Patient() {
 				return;
 			}			
 		}
-		setNewPatient(false);
-		let ppp = await updatePatientByFilter(searchText, userCid); 
-		setPatientArray(ppp);
+		setIsDrawerOpened(false);
+
+		let ppp = await getAllPatients();
+		setPatientMasterArray(ppp);
+		setFilter(ppp, searchText);
+		setIsDrawerOpened(false);
 		return; 
-		
-		//console.log("redisplay required here");
-		// refresh display as per mode directory / filter
-		if (directoryMode) {
-			await updatePatientArray(myName.substr(0, 1).toUpperCase());
-		} else {
-			let ppp = await updatePatientByFilter(searchText, userCid); 
-			setPatientArray(ppp);
-		}
-		return;
-		
-		await getPatientCount();
-		await fetchPatientsByAlphabet(modalName.substr(0, 1).toUpperCase());
-		await getPatientCount();
-		await fetchPatientsByAlphabet(modalName.substr(0, 1).toUpperCase());
 	}
 	
+	function DisplayAllPatients() {
+	return (
+	<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
+	{patientArray.map( (m, index) => 
+		<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={3} lg={3} >
+		<DisplayPatientDetails 
+			patient={m} 
+			button1={
+				<IconButton color={'primary'} size="small" onClick={() => { handleAppointmentConfirm(m)}}  >
+					<EventNoteIcon />
+				</IconButton>
+			}
+			button2={
+				<IconButton className={gClasses.green} size="small" onClick={() => {handleVisit(m)}}  >
+					<LocalHospitalIcon />
+				</IconButton>
+			}
+			button3={
+				<IconButton className={gClasses.blue} size="small" onClick={() => {handleEdit(m)}}  >
+					<EditIcon  />
+				</IconButton>
+			}
+			button4={
+				<IconButton color="secondary" size="small" onClick={() => {handleCancel(m)}}  >
+					<CancelIcon />
+				</IconButton>
+			}
+		/>
+		</Grid>
+	)}
+	</Grid>	
+	)}
+	
+	function setFilter(myArray, filterStr) {
+		filterStr = filterStr.trim().toLowerCase();
+		let tmpArray;
+		if (validateInteger(filterStr)) {
+			// it is integer. Thus has to be Id
+			tmpArray = patientMasterArray.filter(x => x.pid === filterStr);
+		} else {
+			tmpArray = patientMasterArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+		}
+		setPatientArray(tmpArray);
+	}
+	
+	function filterPatients(filterStr) {
+		setSearchText(filterStr);
+		setFilter(patientMasterArray, filterStr);
+	}
 	
   return (
   <div className={gClasses.webPage} align="center" key="main">
 		<Container component="main" maxWidth="lg">
 		<CssBaseline />
-		<DisplayPageHeader headerName="Patients" groupName="" tournament=""/>
+		<DisplayPageHeader headerName="Patient Directory" groupName="" tournament=""/>
 		<BlankArea />
-		<DisplayFilter />
+		<Grid className={gClasses.noPadding} key="PatientFilter" container alignItems="center" >
+			<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
+			<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
+			<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
+				defaultValue={searchText}
+				onChange={(event) => filterPatients(event.target.value)}
+				InputProps={{endAdornment: (<InputAdornment position="end"><SearchIcon/></InputAdornment>)}}
+			/>
+			</Grid>
+			<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
+				<Typography>Click button to add new patient</Typography>
+			</Grid>
+			<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
+				<VsButton name="New Patient" onClick={handleAdd} />
+			</Grid>
+			<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
+		</Grid>
 		<BlankArea />
-		{(!newPatient) && <DisplayNewPatientBtn />}
-		{(newPatient) &&
+		<DisplayAllPatients />
+		<Drawer className={classes.drawer}
+			anchor="right"
+			variant="temporary"
+			open={isDrawerOpened}
+		>
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<VsCancel align="right" onClick={() => {setNewPatient(false)}} />
-			<Typography className={classes.header}>{(addEdit == "ADD") ? "Add New Patient" : "Edit Patient"}</Typography>
-			<BlankArea />
-			<ValidatorForm className={classes.form} onSubmit={handleAddEditSubmit}>
-			<Grid spacing={4} key="AddEdit" container justify="center" alignItems="center" >
-			<Grid item xs={12} sm={12} md={6} lg={6} >
-			<TextValidator variant="outlined" required fullWidth autoFocus      
+		<VsCancel align="right" onClick={() => { setIsDrawerOpened(false)}} />
+		<ValidatorForm align="center" className={classes.form} onSubmit={handleAddEditSubmit}>
+			<Typography className={gClasses.title}>{(isAdd) ? "Add Patient" : "Edit Patient"}</Typography>
+			<TextValidator fullWidth  className={gClasses.vgSpacing}
 				id="newPatientName" label="Name" type="text"
 				value={patientName} 
 				onChange={() => { setPatientName(event.target.value) }}
       />
-			</Grid>
-			<Grid item xs={3} sm={3} md={3} lg={3} >
-			<TextValidator variant="outlined" fullWidth       
+			<TextValidator  fullWidth className={gClasses.vgSpacing}
 				id="newPatientAge" label="Age" type="number"
 				value={patientAge}
 				onChange={() => { setPatientAge(event.target.value) }}
 				validators={['minNumber:1', 'maxNumber:99']}
-        errorMessages={['Age to be above 1', 'Age to be less than 100']}
-				
+        errorMessages={['Age to be above 1', 'Age to be less than 100']}				
       />
-			</Grid>
-			<Grid item xs={9} sm={9} md={3} lg={3} >
 			<FormControl component="fieldset">
 				<RadioGroup row aria-label="radioselection" name="radioselection" value={radioValue} 
 					onChange={() => {setRadioValue(event.target.value); }}
 				>
-					<FormControlLabel className={classes.filterRadio} value="Male" 		control={<Radio color="primary"/>} label="Male" />
-					<FormControlLabel className={classes.filterRadio} value="Female" 	control={<Radio color="primary"/>} label="Female" />
-					<FormControlLabel className={classes.filterRadio} value="Other"   control={<Radio color="primary"/>} label="Other" />
-				</RadioGroup>
+				<FormControlLabel className={classes.filterRadio} value="Male" 		control={<Radio color="primary"/>} label="Male" />
+				<FormControlLabel className={classes.filterRadio} value="Female" 	control={<Radio color="primary"/>} label="Female" />
+				<FormControlLabel className={classes.filterRadio} value="Other"   control={<Radio color="primary"/>} label="Other" />
+			</RadioGroup>
 			</FormControl>
-			</Grid>
-
-			<Grid item xs={6} sm={6} md={6} lg={6} >
-			<TextValidator variant="outlined"  fullWidth      
+			<TextValidator   fullWidth   className={gClasses.vgSpacing} 
 				id="newPatientEmail" label="Email" type="email"
 				value={patientEmail} 
 				onChange={() => { setPatientEmail(event.target.value) }}
       />
-			</Grid>
-			<Grid item xs={6} sm={6} md={3} lg={3} >
-			<TextValidator variant="outlined" fullWidth      
+			<TextValidator    fullWidth  className={gClasses.vgSpacing} 
 				id="newPatientMobile" label="Mobile" type="number"
 				value={patientMobile} 
 				onChange={() => { setPatientMobile(event.target.value) }}
 				validators={['minNumber:1000000000', 'maxNumber:9999999999']}
         errorMessages={['Invalid Mobile number','Invalid Mobile number']}
       />	
-			</Grid>
-			<Grid item xs={12} sm={12} md={3} lg={3} >
-			<VsButton name={(addEdit === "ADD") ? "Add New" : "Update"} />
-			</Grid>
-			</Grid>
 			<ShowResisterStatus />
 			<BlankArea />
-			</ValidatorForm>    
-		</Box>	
-		}
-		<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
-		{patientArray.map( (m, index) => 
-			<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={4} lg={4} >
-			<DisplayPatientDetails 
-				patient={m} 
-				button1={<VsButton name="Appt"  color='green' onClick={() => { handleAppointmentConfirm(m)}} />}
-				button2={<VsButton name="Visit" color='green' onClick={() => { handleVisit(m)}} />}
-				button3={<VsButton name="Edit" onClick={() => { handleEdit(m)}} />}
-				button4={<VsButton name="Del" color='red' onClick={() => { handleCancel(m)}} />}
-			/>
-			</Grid>
-		)}
-		</Grid>
+			<VsButton name={(isAdd) ? "Add" : "Update"} />
+			</ValidatorForm>    		
+			</Box>
+		</Drawer>
 		</ Container>
   </div>
   );    

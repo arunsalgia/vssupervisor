@@ -240,6 +240,7 @@ CustomerSchema = mongoose.Schema({
 });
 
 DoctorSchema = mongoose.Schema({
+	cid: String,
 	name: String,
 	type: String,		// dentist, physician, orthopaedic
 	clinicName: String,
