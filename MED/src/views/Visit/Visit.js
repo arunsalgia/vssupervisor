@@ -1396,6 +1396,7 @@ export default function Visit() {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/downloadimage/${userCid}/${d.pid}/${d.title}`
 			let resp = await axios.get(myUrl);
 			setStartLoading(true);
+			setIsDrawerOpened((d.type === "PDF") ? "PDF" : "IMG");
 			if (d.type === "PDF") {
 				// pdf file
 				// file={`data:application/pdf;base64,${this.state.base64}`}
@@ -1415,7 +1416,6 @@ export default function Visit() {
 			setDlMime(SupportedMimeTypes[idx]);
 			setViewImage(true);
 			setStartLoading(false);			
-			setIsDrawerOpened((d.type === "PDF") ? "PDF" : "IMG");
 		} catch (e) {
 			console.log(e);
 		}
@@ -1657,7 +1657,7 @@ export default function Visit() {
 		let tmpArray;
 		if (validateInteger(filterStr)) {
 			// it is integer. Thus has to be Id
-			tmpArray = patientMasterArray.filter(x => x.pid === filterStr);
+			tmpArray = patientMasterArray.filter(x => x.pidStr.includes(filterStr));
 		} else {
 			tmpArray = patientMasterArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
 		}
@@ -1680,7 +1680,7 @@ export default function Visit() {
 		setSelectPatient(false);
 	}
 	
-	console.log(selectPatient);
+
 	
 	return (
 	<div className={gClasses.webPage} align="center" key="main">
@@ -1753,13 +1753,13 @@ export default function Visit() {
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
 	{(startLoading) && <LoadingMessage />}
-	{(isDrawerOpened === "PDF") &&
+	{((!startLoading) && (isDrawerOpened === "PDF")) &&
 		<DisplayPDF 
 			title={dlDoc.title} file={dlFile}
 			handleCancel={() => setViewImage(false)}
 		/>
 	}
-	{(isDrawerOpened === "IMG") &&
+	{((!startLoading) && (isDrawerOpened === "IMG")) &&
 		<DisplayImage 
 			title={dlDoc.title} mime={dlMime} file={dlFile}
 			handleCancel={() => setViewImage(false)}

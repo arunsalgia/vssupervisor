@@ -5,6 +5,7 @@ const {
 	svrToDbText, dbToSvrText,
 	dbencrypt, dbdecrypt,
 	getMaster, setMaster,
+	getNewPid, getCustomerNumber,
 } = require('./functions'); 
 
 router.use('/', function(req, res, next) {
@@ -27,25 +28,6 @@ function getDob(age) {
 	return myBirthYear;
 }
 
-async function getNewPid() {
-	// 2021 08 30 001
-	var d = new Date();
-	//console.log(d);
-	let tmp = d.getFullYear() *100 + d.getMonth()+1;
-	//console.log(tmp);
-	let startnum = (tmp*100 + d.getDate())*1000;
-	d.setDate( d.getDate() + 1 );
-	//console.log(d);
-	tmp = d.getFullYear() *100 + d.getMonth()+1;
-	let endnum = (tmp*100 + d.getDate())*1000;
-	//console.log(startnum, endnum);
-	let rec;
-	let myFilter = {"$gte": startnum, "$lt": endnum };
-	rec = await M_Patient.find({ pid: myFilter }).limit(1).sort({ pid: -1 });
-	let myNum = (rec.length > 0) ? rec[0].pid + 1 : startnum + 1;
-	//console.log(myNum);
-	return myNum;
-}
 
 
 router.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {
@@ -317,13 +299,18 @@ router.get('/visitcount/:cid/:pid', async function(req, res, next) {
 });
 
 
-router.get('/setdob', async function(req, res, next) { 
+router.get('/test', async function(req, res, next) { 
   setHeader(res);
   
-	let allPatients = await M_Patient.find({});
-	for(let i=0; i<allPatients.length; ++i) {
-		allPatients[i].dob = getDob(allPatients[i].age);
-		allPatients[i].save();
+	let allRecs = await M_Info.find({});
+	for(let i=0; i<allRecs.length; ++i) {
+		let customerNumber = await getCustomerNumber(allRecs[i].cid);
+		let tmp = Math.floor(allRecs[i].pid / 1000) * 100 + (allRecs[i].pid % 100);
+		let sss = tmp.toString().substr(2);
+		let pid2 = customerNumber*CUSTMF + Number(sss);
+		console.log(customerNumber, allRecs[i].pid, tmp, sss, pid2);
+		allRecs[i].pid = pid2;
+		//allRecs[i].save();
 	}
 	sendok(res, "Done");
 });

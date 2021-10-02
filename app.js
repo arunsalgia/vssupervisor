@@ -137,7 +137,6 @@ MasterSettingsSchema = mongoose.Schema ({
 })
 
 MedicineSchema = mongoose.Schema({
-	id: String,
 	name: String,
 	description: String,
 	precaution: String,
@@ -147,6 +146,7 @@ MedicineSchema = mongoose.Schema({
 
 PatientSchema = mongoose.Schema({
   pid: Number,
+	pidStr: String,
   name: String,
   displayName: String,
   email: String,
@@ -221,20 +221,14 @@ QuoteSchema = mongoose.Schema({
 });
 
 CustomerSchema = mongoose.Schema({
+	customerNumber: Number,
 	name: String,
-	//displayNamename: String,
 	clinicName: String,
 	welcomeMessage: String,
 	plan: String,
 	email: String,
 	mobile: String,
-	
 	fee: Number,
-	
-	addr1: String,
-	addr2: String,
-	addr3: String,
-	
 	expiryDate: Date,
 	enabled:Boolean
 });
@@ -318,7 +312,7 @@ ERR_NODB = "No connection to CricDream database";
 
 allUSER = 99999999;
 serverTimer = 0;
-
+CUSTMF=100000000;
 // make mongoose connection
 
 // Create the database connection 

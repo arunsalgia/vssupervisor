@@ -481,7 +481,7 @@ export default function Patient() {
 		let tmpArray;
 		if (validateInteger(filterStr)) {
 			// it is integer. Thus has to be Id
-			tmpArray = patientMasterArray.filter(x => x.pid === filterStr);
+			tmpArray = patientMasterArray.filter(x => x.pidStr.includes(filterStr));
 		} else {
 			tmpArray = patientMasterArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
 		}

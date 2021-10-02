@@ -40,51 +40,15 @@ router.get('/add/:userName', async function(req, res, next) {
 
 router.get('/test', async function(req, res, next) {
   setHeader(res);
-	let i;
-	
-	// all medicine
-	let allRecs = await M_Medicine.find({})
-	for(i=0; i<allRecs.length; ++i) {
-		allRecs[i].cid = "613dd7074e86491f500862e7";
-		allRecs[i].save();
+	let i, cNum;
+
+	let allRecs = await M_Customer.find({})
+	for(i=0,cNum=100; i<allRecs.length; ++i, ++cNum) {
+		allRecs[i].customerNumber = cNum;
+		//allRecs[i].save();
+		//console.log(allRecs[i]);
 	}
-	
-	// all patient
-	allRecs = await M_Patient.find({})
-	for(i=0; i<allRecs.length; ++i) {
-		allRecs[i].cid = "613dd7074e86491f500862e7";
-		allRecs[i].save();
-	}
-	
-	// all visit
-	allRecs = await M_Visit.find({})
-	for(i=0; i<allRecs.length; ++i) {
-		allRecs[i].cid = "613dd7074e86491f500862e7";
-		allRecs[i].save();
-	}
-	
-	// all holiday
-	allRecs = await M_Holiday.find({})
-	for(i=0; i<allRecs.length; ++i) {
-		allRecs[i].cid = "613dd7074e86491f500862e7";
-		allRecs[i].save();
-	}
-	
-	
-	// all appointment
-	allRecs = await M_Appointment.find({})
-	for(i=0; i<allRecs.length; ++i) {
-		allRecs[i].cid = "613dd7074e86491f500862e7";
-		allRecs[i].save();
-	}
-	
-	// all info
-	allRecs = await M_Info.find({})
-	for(i=0; i<allRecs.length; ++i) {
-		allRecs[i].cid = "613dd7074e86491f500862e7";
-		allRecs[i].save();
-	}
-	
+
 	sendok(res, "done");
 });
 

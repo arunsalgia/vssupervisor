@@ -82,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 //const PATIENTMSG="The patient's anatomy always always should be respected, even if it is absolutely contrary - the decision is contrary to best medical advice and what the physician wahts";
-const PATIENTMSG=      "The patient's anatomy always always should be respected, even if it is absolutely contrary.";
+const PATIENTMSG=      "The patient's anatomy always always should be respected by the Doctor, even if it is absolutely contrary.";
 const APPOINTMENTMSG = "Events do not just happen, but arrive by appointment. Don't make a wish, make an appointment."
 const VISITMSG =       "Remember visit to Dentist is a two-way street, you are in clinic for your Dental health and so is the Doctor."
 const REPORTMSG =      "The medical report card helps give us a focus and it frames the dialogue for moving forward.";

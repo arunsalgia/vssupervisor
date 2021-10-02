@@ -198,15 +198,6 @@ async function sendCricHtmlMail (dest, mailSubject, mailText) {
   }
 } 
 
-async function GroupMemberCount(groupid) {
-  let memberCount = 0;
-  let xxx = await GroupMember.aggregate([
-    {$match: {gid: parseInt(groupid)}},
-    {$group : {_id : "$gid", num_members : {$sum : 1}}}
-  ]);
-  if (xxx.length === 1) memberCount = xxx[0].num_members;
-  return(memberCount);
-}
 
 /** calculate #time refill done by user till now **/
 async function rechargeCount(userid) {
@@ -263,8 +254,27 @@ async function setMaster(key, value) {
   return
 }
 
+async function getCustomerNumber(userCid) {
+	let customerRec = await M_Customer.findOne({_id: userCid});
+	return ((customerRec) ? customerRec.customerNumber : 0);
+}
 
-  
+async function getNewPid(userCid) {
+	let newPid = 0;
+	let customerNumber = await getCustomerNumber(userCid);
+
+	if (customerNumber > 0) {
+		let d = new Date();
+		let offset = d.getYear() *100 + d.getMonth()+1;
+		offset = (offset*100 + d.getDate())*100;
+		let startnum = customerNumber*CUSTMF + offset;
+		let endnum = (customerNumber+1)*CUSTMF
+		let myFilter = {"$gte": startnum, "$lt": endnum };
+		let rec = await M_Patient.find({ pid: myFilter }).limit(1).sort({ pid: -1 });
+		newPid = (rec.length > 0) ? rec[0].pid + 1 : startnum + 1;
+	}
+	return myNum;
+} 
 
 
 
@@ -382,7 +392,6 @@ module.exports = {
   getLoginName, getDisplayName,
   encrypt, decrypt, dbencrypt, dbdecrypt,
   dbToSvrText, svrToDbText,
-  GroupMemberCount,
   sendCricMail, sendCricHtmlMail,
   // master
   getMaster, setMaster,
@@ -397,4 +406,5 @@ module.exports = {
 	numberDate, intToString,
 	stringToBase64, base64ToString,
 	checkDate,
+	getNewPid, getCustomerNumber,
 }; 
