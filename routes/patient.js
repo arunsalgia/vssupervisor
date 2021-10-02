@@ -302,7 +302,7 @@ router.get('/visitcount/:cid/:pid', async function(req, res, next) {
 router.get('/test', async function(req, res, next) { 
   setHeader(res);
   
-	let allRecs = await M_Info.find({});
+	let allRecs = await M_Visit.find({});
 	for(let i=0; i<allRecs.length; ++i) {
 		let customerNumber = await getCustomerNumber(allRecs[i].cid);
 		let tmp = Math.floor(allRecs[i].pid / 1000) * 100 + (allRecs[i].pid % 100);

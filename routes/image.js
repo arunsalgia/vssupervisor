@@ -19,7 +19,6 @@ const upload = multer({ storage: storage }).single('file');
 /* GET users listing. */
 router.use('/', function(req, res, next) {
   setHeader(res);
-	console.log("in image")
   if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
   next('route');
 });
@@ -29,8 +28,6 @@ router.get('/list/:cid', async function(req, res, next) {
 	var {cid} = req.params;
 	
 	let rec = await M_Image.find({cid: cid}, {title: 1, name: 1, desc: 1, type: 1, date: 1, pid: 1, displayName: 1}).sort({date: -1});
-	//let rec = await M_Image.find({cid: cid}).sort({date: -1});
-	console.log(rec);
 	sendok(res, rec);
 });
 
@@ -41,9 +38,7 @@ router.get('/list/:cid/:pid', async function(req, res, next) {
 	let rec = await M_Image.find({cid: cid, pid: pid}, 
 		{title: 1, name: 1, desc: 1, type: 1, date: 1, pid: 1, displayName: 1})
 		.sort({date: -1});
-		
-	//let rec = await M_Image.find({cid: cid}).sort({date: -1});
-	console.log(rec);
+
 	sendok(res, rec);
 });
 
@@ -129,7 +124,7 @@ router.post('/uploadimage/:cid/:pid/:displayName/:fileName/:title/:desc', async 
     // now delete the file
     deletefile(filePath);
 
-    return  sendok(res, 'File uploaded');                //res.send('File uploaded!');
+    return  sendok(res, myRec);                //res.send('File uploaded!');
 	});
     
 	return;

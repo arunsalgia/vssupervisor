@@ -38,7 +38,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EventNoteIcon from '@material-ui/icons/EventNote';
-
+import AddIcon from '@material-ui/icons/AddCircleOutline';
 
 import Switch from "@material-ui/core/Switch";
 //import  from '@material-ui/core/Container';
@@ -71,10 +71,10 @@ str1by4, str1by2, str3by4
 // icons
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import DeleteIcon from '@material-ui/icons/Delete';
+//import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
-//import CancelIcon from '@material-ui/icons/Cancel';
+import DeleteIcon from '@material-ui/icons/Cancel';
 
 //colours 
 import { red, blue 
@@ -180,9 +180,6 @@ const addEditModal = dynamicModal('60%');
 const yesNoModal = dynamicModal('60%');
 
 const COUNTPERPAGE=10;
-
-
-
 
 
 let test=[];
@@ -378,6 +375,7 @@ export default function Visit() {
 			setVisitArray([]);
 		}
 	}
+	
 	async function getAllMedicines() {
 		if (medicineArray.length == 0) {
 			try {
@@ -504,206 +502,6 @@ export default function Visit() {
       </div>
     )
   }
-	
-	function DisplayStandardInput(props) {
-		return (
-		<div key="StdInp" align="left" >
-			<FormControlLabel align="right"
-				className={classes.radio}
-        control={
-          <SwitchBtn
-						className={classes.radio}
-            checked={standard}
-            onChange={() => {setStandard(!standard) }}
-            color="primary"
-          />
-        }
-        label="Standard"
-      />
-			{standard &&
-			<Select labelId='team' id='team' name="team" padding={10}
-				variant="outlined" required fullWidth label={props.myDesc}
-				value={emurName}
-				inputProps={{
-					name: 'Group',
-					id: 'filled-age-native-simple',
-				}}
-				onChange={(event) => setEmurName(event.target.value)}
-			>
-				{props.myArray.map(x =>	<MenuItem key={x.name} value={x.name}>{x.name}</MenuItem>)}
-			</Select>
-			}
-			{!standard &&
-			<TextValidator variant="outlined" required fullWidth color="primary"
-				id="newName" label={props.myDesc} name="newName"
-				onChange={(event) => setEmurName(event.target.value)}
-				autoFocus
-				value={emurName}
-			/>
-			}
-		</div>
-		);
-	}
-	
-	function DisplayAddNew() {
-		let show = false;
-		if (visitArray.length > 0)
-		if (visitArray[0].visitNumber > 0)
-			show = true;
-		
-		if (show)
-			return (
-				<Typography align="right" className={gClasses.link} className={gClasses.root}>
-					<Link href="#"  onClick={handleCreateNewVisit} variant="body2">Add New</Link>
-				</Typography>
-			);
-		else
-			return null;
-	}
-	
-	function handleMedicineUpdate() {
-		/*
-		console.log("Edit medicine submitted");
-		console.log(emurVisitNumber, emurNumber);
-		console.log(emurName);
-		console.log(emedDose1, emedDose2, emedDose3);
-		console.log(emedTime, emedUnit);
-		*/
-		
-		if ((emedDose1+emedDose2+emedDose3) == 0) {
-				setModalRegister(101);
-				return;
-		}
-		if (emurName == "") {
-			setModalRegister(102);
-				return;
-		}
-		
-		let tmp = [].concat(visitArray);
-		tmp[0].medicines[emurNumber].name = emurName;
-		tmp[0].medicines[emurNumber].dose1 = emedDose1;
-		tmp[0].medicines[emurNumber].dose2 = emedDose2;
-		tmp[0].medicines[emurNumber].dose3 = emedDose3;
-		tmp[0].medicines[emurNumber].unit = emedUnit;
-		tmp[0].medicines[emurNumber].time = emedTime;
-		setVisitArray(tmp);
-
-		//setModalRegister(100);
-		closeModal();
-
-	}
-	
-	function DisplayEditMedicine() {
-	
-	return(
-		<Container component="DisplayEditMedicine" maxWidth="md">
-		<DisplayCloseModal />
-		<Typography align="center" className={classes.modalHeader}>Edit Medicine</Typography>
-		<BlankArea />
-		<ValidatorForm align="center" className={gClasses.form} >
-			<DisplayStandardInput myArray={medicineArray} myDesc={"Medicine Name"} />
-			<BlankArea />
-			<Grid key="editmed" container justify="center" alignItems="center" >
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Typography className={classes.heading}>Dose1</Typography>
-				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Select labelId='dose1' id='dose1' name="dose1" padding={10}
-						variant="outlined" required fullWidth label="Dose 1" 
-						value={emedDose1}
-						inputProps={{
-							name: 'Group',
-							id: 'filled-age-native-simple',
-						}}
-						onChange={(event) => setEmedDose1(event.target.value)}
-						>
-					{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
-					</Select>
-				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Typography className={classes.heading}>Dose2</Typography>
-				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Select labelId='dose2' id='dose2' name="dose2" padding={10}
-						variant="outlined" required fullWidth label="Dose 2" 
-						value={emedDose2}
-						inputProps={{
-							name: 'Group',
-							id: 'filled-age-native-simple',
-						}}
-						onChange={(event) => setEmedDose2(event.target.value)}
-						>
-					{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
-					</Select>
-				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Typography className={classes.heading}>Dose3</Typography>
-				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Select labelId='dose3' id='dose3' name="dose3" padding={10}
-						variant="outlined" required fullWidth label="Dose 3" 
-						value={emedDose3}
-						inputProps={{
-							name: 'Group',
-							id: 'filled-age-native-simple',
-						}}
-						onChange={(event) => setEmedDose3(event.target.value)}
-						>
-					{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
-					</Select>
-				</Grid>
-			</Grid>
-			<BlankArea />
-			<Grid key="edittime" container justify="center" alignItems="center" >
-				<Grid item xs={2} sm={2} md={2} lg={2} />
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Typography className={classes.heading}>for</Typography>
-				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Select labelId='time' id='time' name="time" padding={10}
-						variant="outlined" required fullWidth label="Time" 
-						value={emedTime}
-						placeholder="Arun"
-						inputProps={{
-							name: 'Group',
-							id: 'filled-age-native-simple',
-						}}
-						onChange={(event) => setEmedTime(event.target.value)}
-						>
-					{timeArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
-					</Select>
-				</Grid>
-				<Grid item xs={4} sm={4} md={4} lg={4} >
-					<Select labelId='unit' id='unit' name="unit" padding={10}
-						variant="outlined" required fullWidth label="Unit" 
-						value={emedUnit}
-						inputProps={{
-							name: 'Group',
-							id: 'filled-age-native-simple',
-						}}
-						onChange={(event) => setEmedUnit(event.target.value)}
-						>
-					{unitArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
-					</Select>
-				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} />
-			</Grid>
-			<ModalResisterStatus />
-			<BlankArea />
-			{/*<Button
-				type="submit"
-				variant="contained"
-				color="primary"
-				className={gClasses.submit}
-			>
-			Update
-			</Button>*/}
-			<VsButton name="Update" onClick={handleMedicineUpdate} />
-		</ValidatorForm>
-		</Container>
-	)}
-	
-	
 	
 //============ starts from here
 	
@@ -1031,29 +829,6 @@ export default function Visit() {
 		}
 	}
 	
-	async function org_updateVisit() {
-		//console.log("Update today's visit", visitArray[0].medicines);
-		let errcode = validateNewVisit();
-
-		if (errcode == 0) {
-			let newVisit = visitArray.length;
-			let newVisitInfo = JSON.stringify(
-			{
-				appointment: currentAppt,
-				visit:       visitArray[0],
-				nextVisit:   {after: nextVisitTime, unit: nextVisitUnit},
-			});
-			try {
-				await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/updatenewvisit/${userCid}/${newVisit}/${newVisitInfo}`)
-				setVisitRegister(100);
-			} catch (e) {
-				console.log(e)
-				setVisitRegister(101);
-			}
-		} else
-		setVisitError(errcode);
-	}
-	
 	function getenrateVisitInfo() {
 		let newVisit = cloneDeep(visitArray[0]);
 
@@ -1100,7 +875,7 @@ export default function Visit() {
 	}
 	
 
-	// user notes function here
+	// Buttons 
 
 	function EditUserNotesButton(props) {
 		//console.log("editUN", props);
@@ -1111,156 +886,115 @@ export default function Visit() {
 			</IconButton>
 		)		
 	}
+		
+	function EditMedicineButton(props) {
+	if (props.visitNumber > 0) return null;
+	return (
+		<IconButton color="primary" size="small" onClick={() => { handleEditMedicine(props.visitNumber, props.medicineNumber)}} >
+		<EditIcon />
+		</IconButton>
+	)}
 	
 
-	// Add medicine, notes and remarks
+	//Arun Salgia new add / edit / delete Notes
 	
 	function handleAddUserNotes() {
-		//console.log("In handleAddUserNotes");
-		let tmpArray = [].concat(visitArray);
-		tmpArray[0].userNotes.push({name: ""});
-		//console.log(tmpArray[0]);
-		setVisitArray(tmpArray);
+		setEmurName("");
+		setIsDrawerOpened("ADDNOTE");
 	}
 	
+	function handleEditUserNotes(vNumber, notesNumber) {
+		let tmp = visitArray.find( x => x.visitNumber == vNumber);
+		setEmurVisitNumber(vNumber);
+		setEmurNumber(notesNumber);
+		setEmurName(tmp.userNotes[notesNumber].name);
+		setModalRegister(0);
+		setIsDrawerOpened("EDITNOTE");
+	}
+	
+	function updateUserNotes() {
+		let tmp = [].concat(visitArray);
+		let index = emurNumber;
+		if (isDrawerOpened === "ADDNOTE") {
+			tmp[0].userNotes.push({name: ""});
+			index = tmp[0].userNotes.length - 1;
+		}
+		tmp[0].userNotes[index].name = emurName;
+		console.log(tmp[0].userNotes);
+		setVisitArray(tmp);
+		setIsDrawerOpened("");
+	}
+	
+	function handleDeleteNotes(vNumber, mNumber) {
+		console.log("handleDeleteMedicine "+vNumber+" Notes "+mNumber);
+		if (vNumber == 0) {
+			var tmp = [].concat(visitArray);
+			tmp[0].userNotes = tmp[0].userNotes.filter(function(value, index, arr){ 
+        return index !== mNumber;
+			});
+			setVisitArray(tmp);
+		}
+	}
+	
+
+	//Arun Salgia new add / edit / delete Remarks
 	
 	function handleAddNewRemark() {
-		//console.log("In handleAddNewRemark");
-		let tmpArray = [].concat(visitArray);
-		let obj = {name: ""};
-		tmpArray[0].remarks.push(obj);
-		setVisitArray(tmpArray);
-		//console.log(tmpArray[0].remarks);
-		//console.log("In handleAddNewRemark over");
+		setEmurName("");
+		setModalRegister(0);
+		setIsDrawerOpened("ADDREM");
 	}
-	
-	
-	function handleAddNewMedicine() {
-		let tmp = {
-			dose1: 2, dose2: 0, dose3: 0,
-			name: "", time: 1, unit: unitArray[0]
-		};
-		let tmpArray = [].concat(visitArray);
-		tmpArray[0].medicines.push(tmp);
-		setVisitArray(tmpArray);
-	}
-	
-	
-	// edit medicine, remark, user notes
 	
 	function handleEditRemark(vNumber, remarkNumber) {
-		//console.log("handleEditRemark "+vNumber+" Notes "+remarkNumber);
 		let tmp = visitArray.find( x => x.visitNumber == vNumber);
 
 		setEmurVisitNumber(vNumber);
 		setEmurNumber(remarkNumber);
 		setEmurName(tmp.remarks[remarkNumber].name)
 		setModalRegister(0);
-		openModal("REMARK");	
+		setIsDrawerOpened("EDITREM");
 	}
-	
-	function DisplayEditRemark() {
-	return(
-		<Container component="DisplayEditRemark" maxWidth="md">
-		<DisplayCloseModal />
-		<Typography align="center" className={classes.modalHeader}>Edit Medical Test</Typography>
-		<BlankArea />
-		<ValidatorForm align="center" className={gClasses.form} >
-			{/*<DisplayStandardInput myArray={remarkArray} myDesc={"Remark"} />*/}
-			<Grid key="EditRemark" container justify="center" alignItems="center" >
-				<Grid item xs={10} sm={10} md={10} lg={10} >
-					<TextValidator variant="outlined" required fullWidth color="primary"
-						id="newName" label="Medical Test" name="newName"
-						onChange={(event) => setEmurName(event.target.value)}
-						autoFocus
-						value={emurName}
-					/>
-				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					{/*<Button
-						type="submit"
-						variant="contained"
-						color="primary"
-						className={gClasses.submit}
-					>Update</Button>*/}
-					<VsButton name="Update" onClick={updateRemark} />
-				</Grid>
-			</Grid>
-			<ModalResisterStatus />
-		</ValidatorForm>
-		</Container>
-	)}
 	
 	function updateRemark() {
 		let tmp = [].concat(visitArray);
-		tmp[0].remarks[emurNumber].name = emurName;
-		//console.log(tmp[0].remarks);
+		let index = emurNumber;
+		if (isDrawerOpened === "ADDREM") {
+			tmp[0].remarks.push({name: ""});
+			index = tmp[0].remarks.length - 1;
+		}
+		tmp[0].remarks[index].name = emurName;
 		setVisitArray(tmp);
-		setModalRegister(300);
-		closeModal();
+		setIsDrawerOpened("");
 	}
 	
+	function handleDeleteRemark(vNumber, mNumber) {
+		console.log("handleDeleteMedicine "+vNumber+" Remark "+mNumber);
+		if (vNumber == 0) {
+			var tmp = [].concat(visitArray);
+			tmp[0].remarks = tmp[0].remarks.filter(function(value, index, arr){ 
+        return index !== mNumber;
+			});
+			setVisitArray(tmp);
+			console.log(tmp[0].remarks);
+		}
+	}
 	
-	function handleEditUserNotes(vNumber, notesNumber) {
-		console.log("handleEditUserNotes "+vNumber+" Notes "+notesNumber);
-		let tmp = visitArray.find( x => x.visitNumber == vNumber);
-		setEmurVisitNumber(vNumber);
-		setEmurNumber(notesNumber);
-		setEmurName(tmp.userNotes[notesNumber].name);
+
+	//Arun Salgia new add / edit / delete medicine
+	
+	function handleAddNewMedicine() {
+		setEmurName("");
+		setEmedDose1(0);
+		setEmedDose2(0);
+		setEmedDose3(0);
+		setEmedTime(2);
+		setEmedUnit(unitArray[1]);
 		setModalRegister(0);
-		openModal("NOTES");	
+		setIsDrawerOpened("ADDMED");
 	}
 	
-	function DisplayEditUserNotes() {
-	return(
-		<Container component="DisplayEditRemark" maxWidth="md">
-		<DisplayCloseModal />
-		<Typography align="center" className={classes.modalHeader}>Edit User Notes</Typography>
-		<BlankArea />
-		<ValidatorForm align="center" className={gClasses.form} >
-			<Grid key="EditRemark" container justify="center" alignItems="center" >
-				<Grid item xs={10} sm={10} md={10} lg={10} >
-					<TextValidator variant="outlined" required fullWidth color="primary"
-						id="newName" label="User Note" name="newName"
-						onChange={(event) => setEmurName(event.target.value)}
-						autoFocus
-						value={emurName}
-					/>
-				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					{/*<Button
-						type="submit"
-						variant="contained"
-						color="primary"
-						className={gClasses.submit}
-					>Update</Button>*/}
-					<VsButton name="Update" onClick={updateUserNotes} />
-				</Grid>
-			</Grid>
-			<ModalResisterStatus />
-		</ValidatorForm>
-		</Container>
-	)}
-	
-	function updateUserNotes() {
-		console.log(emurVisitNumber, emurNumber);
-		console.log(emurName);
-		let tmp = [].concat(visitArray);
-		tmp[0].userNotes[emurNumber].name = emurName;
-		console.log(tmp[0].userNotes);
-		setVisitArray(tmp);
-		setModalRegister(200);
-		closeModal();
-	}
-	
-	
-	// handle Notes display  / add / edit / delete
-	
-	
-	// handle Medicine display  / add / edit / delete
-	
-	async function handleEditMedicine(vNumber, mNumber) {
-		await getAllMedicines();
+	function handleEditMedicine(vNumber, mNumber) {
+		//await getAllMedicines();
 		console.log("handleEditMedicine "+vNumber+" Medicine "+mNumber);
 		let tmp = visitArray[0];
 		setEditMedicine(tmp.medicines[mNumber]);
@@ -1277,10 +1011,36 @@ export default function Visit() {
 		let ttt = medicineArray.find(x => x.name == tmp.medicines[mNumber].name);
 		setStandard(ttt != null);
 		setModalRegister(0);
-		openModal("MEDICINE");	
+		setIsDrawerOpened("EDITMED");
 	}
-	
-	
+
+	function handleMedicineUpdate() {
+		if ((emedDose1+emedDose2+emedDose3) == 0) {
+				setModalRegister(101);
+				return;
+		}
+		if (emurName == "") {
+			setModalRegister(102);
+				return;
+		}
+		
+		let tmp = [].concat(visitArray);
+		let index = emurNumber;
+		if (isDrawerOpened === "ADDMED") {
+			tmp[0].medicines.push({name: "", dose1: 0, dose2: 0, dose3: 0, unit: "", time: 0});
+			index = tmp[0].medicines.length - 1;
+		}
+		console.log()
+		tmp[0].medicines[index].name = emurName;
+		tmp[0].medicines[index].dose1 = emedDose1;
+		tmp[0].medicines[index].dose2 = emedDose2;
+		tmp[0].medicines[index].dose3 = emedDose3;
+		tmp[0].medicines[index].unit = emedUnit;
+		tmp[0].medicines[index].time = emedTime;
+		setVisitArray(tmp);
+
+		setIsDrawerOpened("");
+	}
 	
 	function handleDeleteMedicine(vNumber, mNumber) {
 		console.log("handleDeleteMedicine "+vNumber+" Medicine "+mNumber);
@@ -1293,40 +1053,6 @@ export default function Visit() {
 			console.log(tmp[0].medicines);
 		}
 	}
-	
-	function handleDeleteRemark(vNumber, mNumber) {
-		console.log("handleDeleteMedicine "+vNumber+" Remark "+mNumber);
-		if (vNumber == 0) {
-			var tmp = [].concat(visitArray);
-			tmp[0].remarks = tmp[0].remarks.filter(function(value, index, arr){ 
-        return index !== mNumber;
-			});
-			setVisitArray(tmp);
-			console.log(tmp[0].remarks);
-		}
-	}
-	
-	function handleDeleteNotes(vNumber, mNumber) {
-		console.log("handleDeleteMedicine "+vNumber+" Notes "+mNumber);
-		if (vNumber == 0) {
-			var tmp = [].concat(visitArray);
-			tmp[0].userNotes = tmp[0].userNotes.filter(function(value, index, arr){ 
-        return index !== mNumber;
-			});
-			setVisitArray(tmp);
-			console.log(tmp[0].userNotes);
-		}
-	}
-	
-	function EditMedicineButton(props) {
-	if (props.visitNumber > 0) return null;
-
-	return (
-		<IconButton color="primary" size="small" onClick={() => { handleEditMedicine(props.visitNumber, props.medicineNumber)}} >
-		<EditIcon />
-		</IconButton>
-	)}
-	
 	
 	// handle visits
 	
@@ -1469,9 +1195,11 @@ export default function Visit() {
 	)}
 	</Box>
 	{(x.visitNumber === 0) && 
-		<Typography align="right" className={gClasses.link}>
-		<Link href="#" onClick={handleAddNewMedicine} variant="body2">Add Prescription</Link>
-		</Typography>
+		<div align="right">
+		<IconButton  color="primary" size="small" onClick={handleAddNewMedicine} >
+			<AddIcon />
+		</IconButton>
+		</div>
 	}
 	</div>
 	)}
@@ -1505,9 +1233,11 @@ export default function Visit() {
 	)}
 	</Box>
 	{(x.visitNumber === 0) &&
-		<Typography align="right" className={gClasses.link}>
-		<Link href="#" onClick={handleAddUserNotes} variant="body2">Add User Note</Link>
-		</Typography>
+		<div align="right">
+		<IconButton  color="primary" size="small" onClick={handleAddUserNotes} >
+			<AddIcon />
+		</IconButton>
+		</div>
 	}
 	</div>
 	)}
@@ -1541,9 +1271,11 @@ export default function Visit() {
 	)}
 	</Box>
 	{(x.visitNumber === 0) && 
-		<Typography align="right" className={gClasses.link}>
-		<Link href="#" onClick={handleAddNewRemark} variant="body2">Add Medical Examination</Link>
-		</Typography>
+		<div align="right">
+		<IconButton  color="primary" size="small" onClick={handleAddNewRemark} >
+			<AddIcon />
+		</IconButton>
+		</div>
 	}	
 	</div>
 	)}
@@ -1677,6 +1409,7 @@ export default function Visit() {
 		await getPatientVisit(rec);
 		let ddd = await getPatientDocument(userCid, rec.pid);
 		setDocumentArray(ddd);
+		setShowDocument(false);
 		setSelectPatient(false);
 	}
 	
@@ -1713,7 +1446,7 @@ export default function Visit() {
 		<VsButton align="right" name="Select Patient" onClick={() => { setCurrentPatient("")}} />	
 	}
 	{(currentPatient !== "") &&
-		<div align="left">
+		<Box align="left" >
 			<Typography align="center" className={classes.modalHeader}>
 			{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
 			</Typography>	
@@ -1743,7 +1476,7 @@ export default function Visit() {
 				</Accordion>
 			)}	
 			</Box>
-		</div>
+		</Box>
 	}
 	<Drawer className={classes.drawer}
 		anchor="right"
@@ -1765,74 +1498,168 @@ export default function Visit() {
 			handleCancel={() => setViewImage(false)}
 		/> 
 	}
+	{((isDrawerOpened === "ADDMED") || (isDrawerOpened === "EDITMED")) &&
+		<ValidatorForm align="center" className={gClasses.form} >
+			<Typography align="center" className={classes.modalHeader}>
+				{(isDrawerOpened === "ADDMED") ? "New Medicine" : "Edit Medicine"}
+			</Typography>
+			<BlankArea />
+			<div key="StdInp" align="left" >
+			<FormControlLabel align="right" className={classes.radio} label="Standard"
+        control={
+          <SwitchBtn className={classes.radio} checked={standard} onChange={() => {setStandard(!standard) }} color="primary" />
+        } 
+      />
+			{standard &&
+				<Select labelId='team' id='team' name="team" padding={10}
+					required fullWidth label="Medicine"
+					value={emurName}
+					className={gClasses.vgSpacing}
+					inputProps={{
+						name: 'Group',
+						id: 'filled-age-native-simple',
+					}}
+					onChange={(event) => setEmurName(event.target.value)}
+					>
+					{medicineArray.map(x =>	<MenuItem key={x.name} value={x.name}>{x.name}</MenuItem>)}
+				</Select>
+			}
+			{!standard &&
+			<TextValidator variant="outlined" required fullWidth color="primary"
+				id="newName" label="Medicine" name="newName"
+				onChange={(event) => setEmurName(event.target.value)}
+				value={emurName}
+			/>
+			}
+			</div>
+			<BlankArea />
+			<Grid key="editmed" container justify="center" alignItems="left" >
+			<Grid className={gClasses.vgSpacing} item xs={1} sm={1} md={1} lg={1} >
+			<Typography className={classes.heading}>Dose1:</Typography>
+			</Grid>
+			<Grid className={gClasses.vgSpacing} item xs={2} sm={2} md={2} lg={2} >
+			<Select labelId='dose1' id='dose1' name="dose1" 
+				required fullWidth label="Dose 1" 
+				value={emedDose1}
+				inputProps={{
+					name: 'Group',
+					id: 'filled-age-native-simple',
+				}}
+				onChange={(event) => setEmedDose1(event.target.value)}
+				>
+			{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
+			</Select>
+			</Grid>
+			<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
+			<Typography className={classes.heading}>Dose2</Typography>
+			</Grid>
+			<Grid item className={gClasses.vgSpacing}  xs={2} sm={2} md={2} lg={2} >
+			<Select labelId='dose2' id='dose2' name="dose2" 
+				required fullWidth label="Dose 2" 
+				value={emedDose2}
+				inputProps={{
+					name: 'Group',
+					id: 'filled-age-native-simple',
+				}}
+				onChange={(event) => setEmedDose2(event.target.value)}
+				>
+			{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
+			</Select>
+			</Grid>
+			<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
+			<Typography className={classes.heading}>Dose3</Typography>
+			</Grid>
+			<Grid item className={gClasses.vgSpacing}  xs={2} sm={2} md={2} lg={2} >
+			<Select labelId='dose3' id='dose3' name="dose3" 
+				required fullWidth label="Dose 3" 
+				value={emedDose3}
+				inputProps={{
+					name: 'Group',
+					id: 'filled-age-native-simple',
+				}}
+				onChange={(event) => setEmedDose3(event.target.value)}
+				>
+			{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
+			</Select>
+			</Grid>
+			<Grid className={gClasses.vgSpacing}  item xs={1} sm={1} md={1} lg={1} />
+			<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
+			<Typography className={classes.heading}>for</Typography>
+			</Grid>
+			<Grid className={gClasses.vgSpacing} item xs={2} sm={2} md={2} lg={2} >
+			<Select labelId='time' id='time' name="time"
+				variant="outlined" required fullWidth label="Time" 
+				value={emedTime}
+				placeholder="Arun"
+				inputProps={{
+					name: 'Group',
+					id: 'filled-age-native-simple',
+				}}
+				onChange={(event) => setEmedTime(event.target.value)}
+				>
+			{timeArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
+			</Select>
+			</Grid>
+			<Grid className={gClasses.vgSpacing}  item xs={2} sm={2} md={2} lg={2} >
+			<Select labelId='unit' id='unit' name="unit" 
+				variant="outlined" required fullWidth label="Unit" 
+				value={emedUnit}
+				inputProps={{
+					name: 'Group',
+					id: 'filled-age-native-simple',
+				}}
+				onChange={(event) => setEmedUnit(event.target.value)}
+				>
+			{unitArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
+			</Select>
+			</Grid>
+			</Grid>
+			<ModalResisterStatus />
+			<BlankArea />
+			<VsButton onClick={handleMedicineUpdate} 
+			name= {(isDrawerOpened === "ADDMED") ? "Add" : "Update"}
+			/>
+		</ValidatorForm>
+	}
+	{((isDrawerOpened === "ADDNOTE") || (isDrawerOpened === "EDITNOTE")) &&
+		<ValidatorForm align="center" className={gClasses.form} >
+			<Typography align="center" className={classes.modalHeader}>
+				{(isDrawerOpened === "ADDNOTE") ? "New Note" : "Edit Note"}
+			</Typography>
+			<BlankArea />
+			<TextValidator required fullWidth color="primary"
+				id="newName" label="Note" name="newName"
+				onChange={(event) => setEmurName(event.target.value)}
+				value={emurName}
+			/>
+			<ModalResisterStatus />
+			<BlankArea />
+			<VsButton onClick={updateUserNotes} 
+			name= {(isDrawerOpened === "ADDNOTE") ? "Add" : "Update"}
+			/>
+		</ValidatorForm>
+	}
+	{((isDrawerOpened === "ADDREM") || (isDrawerOpened === "EDITREM")) &&
+		<ValidatorForm align="center" className={gClasses.form} >
+			<Typography align="center" className={classes.modalHeader}>
+				{(isDrawerOpened === "ADDREM") ? "New Remark" : "Edit Remark"}
+			</Typography>
+			<BlankArea />
+			<TextValidator required fullWidth color="primary"
+				id="newName" label="Remark" name="newName"
+				onChange={(event) => setEmurName(event.target.value)}
+				value={emurName}
+			/>
+			<ModalResisterStatus />
+			<BlankArea />
+			<VsButton onClick={updateRemark} 
+			name= {(isDrawerOpened === "ADDNOTE") ? "Add" : "Update"}
+			/>
+		</ValidatorForm>
+	}
 	</Box>
 	</Drawer>
-	</Container>
-	<Modal
-		isOpen={modalIsOpen == "NEWPATIENT"}
-		shouldCloseOnOverlayClick={false}
-		onAfterOpen={afterOpenModal}
-		onRequestClose={closeModal}
-		style={modalStyles}
-		contentLabel="Example Modal"
-		aria-labelledby="modalTitle"
-		aria-describedby="modalDescription"
-		ariaHideApp={false}
-	>
-		<DisplayNewPatient />
-	</Modal>
-	<Modal
-		isOpen={modalIsOpen == "REMARK"}
-		shouldCloseOnOverlayClick={false}
-		onAfterOpen={afterOpenModal}
-		onRequestClose={closeModal}
-		style={modalStyles}
-		contentLabel="Example Modal"
-		aria-labelledby="modalTitle"
-		aria-describedby="modalDescription"
-		ariaHideApp={false}
-	>
-		<DisplayEditRemark />
-	</Modal>
-	<Modal
-		isOpen={modalIsOpen == "MEDICINE"}
-		shouldCloseOnOverlayClick={false}
-		onAfterOpen={afterOpenModal}
-		onRequestClose={closeModal}
-		style={modalStyles}
-		contentLabel="Example Modal"
-		aria-labelledby="modalTitle"
-		aria-describedby="modalDescription"
-		ariaHideApp={false}
-	>
-		<DisplayEditMedicine />
-	</Modal>		
-	<Modal
-		isOpen={modalIsOpen == "NOTES"}
-		shouldCloseOnOverlayClick={false}
-		onAfterOpen={afterOpenModal}
-		onRequestClose={closeModal}
-		style={modalStyles}
-		contentLabel="Example Modal"
-		aria-labelledby="modalTitle"
-		aria-describedby="modalDescription"
-		ariaHideApp={false}
-	>
-		<DisplayEditUserNotes />
-	</Modal>	
-	<Modal
-		isOpen={modalIsOpen == "ERROR"}
-		shouldCloseOnOverlayClick={false}
-		onAfterOpen={afterOpenModal}
-		onRequestClose={closeModal}
-		style={modalStyles}
-		contentLabel="Example Modal"
-		aria-labelledby="modalTitle"
-		aria-describedby="modalDescription"
-		ariaHideApp={false}
-	>
-		<DisplayVisitError />
-	</Modal>						
+	</Container>			
   </div>
   );    
 }

@@ -46,7 +46,6 @@ function setMedQty(num) {
 router.use('/', function(req, res, next) {
   setHeader(res);
   if (!db_connection) { senderr(res, DBERROR,  ERR_NODB); return; }
-	console.log("In visit");
   next('route');
 });
 
