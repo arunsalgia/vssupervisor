@@ -118,6 +118,13 @@ router.get('/pendinglist/date/:cid/:year/:month/:date/:days', async function (re
 	publishAppointments(res, myFilter);
 });		
 
+router.get('/pendinglist/all/:cid', async function (req, res) {
+  setHeader(res);
+  var { cid } = req.params;
+
+	publishAppointments(res, { cid: cid, visit: VISITTYPE.pending })
+});		
+
 router.get('/list/pid/:cid/:pid', async function (req, res) {
   setHeader(res);
   var { cid, pid } = req.params;

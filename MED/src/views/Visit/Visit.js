@@ -1525,7 +1525,7 @@ export default function Visit() {
 				</Select>
 			}
 			{!standard &&
-			<TextValidator variant="outlined" required fullWidth color="primary"
+			<TextValidator required fullWidth color="primary"
 				id="newName" label="Medicine" name="newName"
 				onChange={(event) => setEmurName(event.target.value)}
 				value={emurName}
@@ -1588,7 +1588,7 @@ export default function Visit() {
 			</Grid>
 			<Grid className={gClasses.vgSpacing} item xs={2} sm={2} md={2} lg={2} >
 			<Select labelId='time' id='time' name="time"
-				variant="outlined" required fullWidth label="Time" 
+				required fullWidth label="Time" 
 				value={emedTime}
 				placeholder="Arun"
 				inputProps={{
@@ -1602,7 +1602,7 @@ export default function Visit() {
 			</Grid>
 			<Grid className={gClasses.vgSpacing}  item xs={2} sm={2} md={2} lg={2} >
 			<Select labelId='unit' id='unit' name="unit" 
-				variant="outlined" required fullWidth label="Unit" 
+				required fullWidth label="Unit" 
 				value={emedUnit}
 				inputProps={{
 					name: 'Group',
@@ -1657,6 +1657,7 @@ export default function Visit() {
 			/>
 		</ValidatorForm>
 	}
+	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
 	</Box>
 	</Drawer>
 	</Container>			

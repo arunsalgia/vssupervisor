@@ -15,6 +15,9 @@ const globalStyles = makeStyles((theme) => ({
 	blue: {
 		color: 'blue',
 	},
+	bgRed: {
+		backgroundColor: 'red',
+	},
   root: {
     width: '100%',
     backgroundColor: '#FAF5E9',
