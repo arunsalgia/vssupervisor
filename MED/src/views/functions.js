@@ -806,3 +806,25 @@ export function handleLogout() {
 	window.sessionStorage.setItem("currentLogin", "");
 	cdRefresh();  
 };
+
+export function compareDate(d1, d2) {
+	if (d1.getFullYear() < d2.getFullYear()) return -1;
+	if (d1.getFullYear() > d2.getFullYear()) return 1;
+	
+	if (d1.getMonth() < d2.getMonth()) return -1;
+	if (d1.getMonth() > d2.getMonth()) return 1;
+	
+	if (d1.getDate() < d2.getDate()) return -1;
+	if (d1.getDate() > d2.getDate()) return 1;
+	return 0;
+};
+
+export function makeTimeString(hr, min) {
+	let AMPM = (hr < 12) ? "AM" : "PM";
+	if (hr > 12) hr -= 12;
+	let tStr = ((hr < 10) ? "0" : "") + hr + ":";
+	tStr += ((min < 10) ? "0" : "") + min + " ";
+	tStr += AMPM;
+	//console.log(hr, min, tStr);
+	return tStr;
+};

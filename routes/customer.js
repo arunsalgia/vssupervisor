@@ -44,12 +44,19 @@ router.get('/test', async function(req, res, next) {
 
 	let allRecs = await M_Customer.find({})
 	for(i=0,cNum=100; i<allRecs.length; ++i, ++cNum) {
-		allRecs[i].customerNumber = cNum;
+		//allRecs[i].customerNumber = cNum;
 		//allRecs[i].save();
 		//console.log(allRecs[i]);
+		allRecs[i].day0 = [];
+		allRecs[i].day1 = [9, 10, 11, 12, 13, 16, 17, 18, 19];
+		allRecs[i].day2 = [9, 10, 11, 12, 13, 16, 17, 18, 19];
+		allRecs[i].day3 = [9, 10, 11, 12, 13, 16, 17, 18, 19];
+		allRecs[i].day4 = [9, 10, 11, 12, 13, 16, 17, 18, 19];
+		allRecs[i].day5 = [9, 10, 11, 12, 13];
+		allRecs[i].day6 =  (allRecs[i].customerNumber === 100) ? [] : [9, 10, 11, 12, 13, 16, 17, 18, 19];
+		allRecs[i].save();
 	}
-
-	sendok(res, "done");
+	sendok(res, "all days done");
 });
 
 cron.schedule('15,57 0,9,13 * * *', async () => {	

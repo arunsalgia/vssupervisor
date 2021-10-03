@@ -4,7 +4,13 @@ const {  akshuGetUser, GroupMemberCount,
 } = require('./functions'); 
 var router = express.Router();
 
-
+function getOrderNumber(year, month, date, hours, minutes) {
+	let chkOrder = ((year* 100) + month)*100 + date;
+	console.log("Chkorder", chkOrder);
+	chkOrder = ((chkOrder * 100) + hours) * 100 + minutes;
+	console.log(chkOrder);
+	return chkOrder;
+}
 
 /* GET users listing. */
 router.use('/', function(req, res, next) {
@@ -93,11 +99,37 @@ router.get('/list/date/:cid/:year/:month/:date', async function (req, res) {
 	publishAppointments(res, {cid: cid, date: Number(date), month: Number(month), year: Number(year)})
 });		
 
+
+router.get('/pendinglist/date/:cid/:year/:month/:date/:days', async function (req, res) {
+  setHeader(res);
+  var {cid, date, month, year, days } = req.params;
+	let iDate = Number(date);
+	let iMonth = Number(month);
+	let iYear = Number(year);
+	let iDays = Number(days);
+	
+	let startOrder = getOrderNumber(iYear, iMonth, iDate, 0, 0);
+	
+	let endDate = new Date(iYear, iMonth, iDate +iDays);
+	let endOrder = getOrderNumber(
+		endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 
+		0, 0);
+	let myFilter = { cid: cid, visit: VISITTYPE.pending, order: { $lte: endOrder, $gte: startOrder} }
+	publishAppointments(res, myFilter);
+});		
+
 router.get('/list/pid/:cid/:pid', async function (req, res) {
   setHeader(res);
   var { cid, pid } = req.params;
 	//console.log(cid, pid);
 	publishAppointments(res, { cid: cid, pid: Number(pid) })
+});		
+
+router.get('/pendinglist/pid/:cid/:pid', async function (req, res) {
+  setHeader(res);
+  var { cid, pid } = req.params;
+	//console.log(cid, pid);
+	publishAppointments(res, { cid: cid, pid: Number(pid), visit: VISITTYPE.pending})
 });		
 
 router.get('/pendinglist/date/:cid/:year/:month/:date', async function (req, res) {

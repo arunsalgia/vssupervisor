@@ -26,6 +26,8 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Box from '@material-ui/core/Box';
 import Modal from 'react-modal';
+import VsButton from "CustomComponents/VsButton";
+import VsCancel from "CustomComponents/VsCancel"
 import { borders } from '@material-ui/system';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormLabel from '@material-ui/core/FormLabel';
@@ -36,6 +38,7 @@ import Radio from '@material-ui/core/Radio';
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import moment from "moment";
+import {setTab} from "CustomComponents/CricDreamTabs.js"
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Avatar from "@material-ui/core/Avatar"
@@ -56,7 +59,9 @@ import Link from '@material-ui/core/Link';
 // import { useHistory } from "react-router-dom";
 // import { UserContext } from "../../UserContext";
 
-import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo} from "CustomComponents/CustomComponents.js"
+import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
+DisplayPatientDetails,
+} from "CustomComponents/CustomComponents.js"
 
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 
@@ -67,21 +72,24 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
-import CancelIcon from '@material-ui/icons/Cancel';
+//import CancelIcon from '@material-ui/icons/Cancel';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 
 //colors 
 import { 
-red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen,
+red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen, blueGrey, lime,
 } from '@material-ui/core/colors';
 
 import { 
 	isMobile, callYesNo,
 	disablePastDt, disableFutureDt, disableAllDt,
 	validateInteger,
-	//encrypt, decrypt, 
+	encrypt, decrypt, 
 	left, right,
 	intString,
+	updatePatientByFilter,
+	dispAge, dispEmail, dispMobile,
+	ordinalSuffix,
 } from "views/functions.js";
 
 
@@ -90,8 +98,26 @@ const useStyles = makeStyles((theme) => ({
 		width: '100%',
 	}, 
 	dateTime: {
-			color: blue[700],
-			fontWeight: theme.typography.fontWeightBold,
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		backgroundColor: pink[100],
+		align: 'center',
+		width: (isMobile()) ? '60%' : '20%',
+	}, 
+	dateTimeNormal: {
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(14),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: pink[100],
+		align: 'center',
+		//width: (isMobile()) ? '60%' : '20%',
+	}, 
+	dateTimeBlock: {
+		color: 'blue',
+		//fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: pink[100],
 	}, 
 	info: {
 			color: blue[700],
@@ -238,7 +264,7 @@ const useStyles = makeStyles((theme) => ({
 		borderStyle: 'solid',
   },
 	tdVisit : {
-		backgroundColor: lightGreen[100],
+		backgroundColor: lime[300],
     border: 5,
     align: "center",
     padding: "none",
@@ -289,7 +315,7 @@ const useStyles = makeStyles((theme) => ({
 		border: 5,
     align: "center",
     padding: "none",
-		backgroundColor: '#FFFFFF',
+		backgroundColor: blueGrey[300],
 		borderWidth: 1,
 		borderColor: 'black',
 		borderStyle: 'solid',
@@ -368,14 +394,17 @@ let aptTime = new Date(2021, 9, 1, 10, 0);
 function setAptTime(d) { aptTime = d; }
 
 
-const userCid = sessionStorage.getItem("cid");
+var userCid
 export default function Appointment() {
   const classes = useStyles();
 	const gClasses = globalStyles();
 	
+	const [emurName, setEmurName] = useState("");
+	const [modalRegister, setModalRegister] = useState(0)
 	const [radioValue, setRadioValue] = useState("all");
 	
 	const [directoryMode, setDirectoryMode] = useState(defaultDirectoryMode);
+	const [monthYearDate, setMonthYearDate] = useState(new Date());
 	
   const [expandedPanel, setExpandedPanel] = useState(false);
   const handleAccordionChange = (panel) => (event, isExpanded) => {
@@ -392,6 +421,7 @@ export default function Appointment() {
     //subtitle.style.color = '#f00';
   }
 	
+	const [selectPatient, setSelectPatient] = useState(false);
 	const [year, setYear] = useState("2021");
 	const [month, setMonth] = useState("September");
 	const [lastDayOfMonth, setLastDayOfMonth] = useState(0);
@@ -424,12 +454,13 @@ export default function Appointment() {
   useEffect(() => {	
 		const checkPatient = async () => {		
 			// check if appointment has been called from Patient view
+			let newDirMode = defaultDirectoryMode;
 			try {
 				let dirPatient = JSON.parse(sessionStorage.getItem("shareData"));
 				sessionStorage.setItem("shareData", "");		// clean up
 				console.log(dirPatient);
 				
-				setDirectoryMode(false);
+				newDirMode = false;
 				setCurrentPatient(dirPatient.displayName);
 				setCurrentPatientData(dirPatient);
 				let allPat = [];
@@ -438,25 +469,31 @@ export default function Appointment() {
 				await getAppointmentsByPid(dirPatient.pid)
 			} catch {
 				// no share data. Thus called directly
-				console.log("direct");
+				//console.log("direct");
 			}
-			
+			return newDirMode;
 		}
 
+		const getData = async (month, year) => {
+			let dirMode = await checkPatient();
+			console.log(dirMode);
+			setDirectoryMode(dirMode);
+			if (dirMode) {
+				let myCounts = await getMonthlyAppointmentCounts(month, year);
+				await generateMatrix(month, year, myCounts);
+			}
+		}
 		
+		userCid = sessionStorage.getItem("cid");
 		// make year
 		WEEKENDS = [0, 6];			//JSON.parse(`${process.env.REACT_APP_WEEKENDS}`)
 		let x = `${process.env.REACT_APP_WEEKENDS}`;
-		console.log("ST", x);
 		
 		let istart = Number(`${process.env.REACT_APP_STARTTIME}`);
 		let iend = Number(`${process.env.REACT_APP_ENDTIME}`);
 		HOURSTR = ALLHOURSTR.slice(istart, iend);
 		
 		setApptHour(HOURSTR[0]);
-		//console.log(WEEKENDS);
-		//console.log(HOURSTR);
-		//console.log(istart, iend);
 		
 		let tmp = new Date();
 		let yyyy = tmp.getFullYear();
@@ -471,9 +508,62 @@ export default function Appointment() {
 		let mmm = tmp.getMonth();
 		setMonth(MONTHSTR[mmm]);
 		
-		checkPatient();
+		getData(MONTHSTR[mmm], yyyy.toString());
   }, []);
 
+function ModalResisterStatus() {
+    // console.log(`Status is ${modalRegister}`);
+		let regerr = true;
+    let myMsg;
+    switch (modalRegister) {
+      case 0:
+        myMsg = "";
+				regerr = false;
+        break;
+      case 100:
+        myMsg = "Medicine successfully updated";
+				regerr = false;
+        break;
+      case 101:
+        myMsg = `All the doses cannot be 0`;
+        break;
+      case 102:
+        myMsg = `No Medicine selected`;
+        break;
+      case 200:
+        myMsg = "Note successfully updated";
+				regerr = false;
+        break;
+      case 201:
+        myMsg = `All notes cannot be 0`;
+        break;
+      case 202:
+        myMsg = `Notes cannot be blank`;
+        break;
+      case 300:
+        myMsg = "Remark successfully updated";
+				regerr = false;
+        break;
+      case 301:
+        myMsg = `All notes cannot be 0`;
+        break;
+      case 302:
+        myMsg = `Remark cannot be blank`;
+        break;
+			case 401:
+        myMsg = `Patient name already in database`;
+        break;
+      default:
+          myMsg = "Unknown Error";
+          break;
+    }
+    return(
+      <div>
+        <Typography className={(regerr) ? gClasses.error : gClasses.nonerror}>{myMsg}</Typography>
+      </div>
+    )
+  }
+	
 	function DisplayMonthYear() {
 	return (
 	<Grid className={classes.noPadding} key="MonthYear" container justify="center" alignItems="center" >
@@ -506,14 +596,10 @@ export default function Appointment() {
 					{YEARSTR.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
 				</Select>
 			</Grid>
-			<Grid item xs={2} sm={2} md={2} lg={2} >
-				<Button variant="contained" color="primary" className={gClasses.submit}
-					onClick={handleMonthYearSelect}
-				>
-				Select
-				</Button>
+			<Grid item xs={1} sm={1} md={1} lg={1} >
+				<VsButton name="Select" onClick={handleMonthYearSelect} />
 			</Grid>	
-			<Grid item xs={2} sm={2} md={2} lg={2} />
+			<Grid item xs={3} sm={3} md={3} lg={3} />
 		</Grid>	
 	)}
 
@@ -636,7 +722,7 @@ export default function Appointment() {
 	if (apptMatrix.length == 0) return null;
 	return(
 	<div>
-	<Typography className={classes.th}>{"Appointments of month "+month + ' ' + year}</Typography>
+	<Typography className={classes.th}>{"Appointment calender of "+month + ' ' + year}</Typography>
 	<TableContainer>
 	<Table
 		className={classes.table}
@@ -700,27 +786,25 @@ export default function Appointment() {
 	//console.log(menuData);
 	return (
 		<div align = "center">
-			<DisplayCloseModal />
 			<Typography>{menuData.date + " " + month + " " + year}</Typography>
+			<DisplayCloseModal />
 			<BlankArea />
-			<Button 
+			{/*<Button 
 			variant="contained" color="primary" className={gClasses.submit}
 			onClick={() => { setHoliday(menuData, (menuData.dayType != HOLIDAYTYPE) ? "OFF" : "ON") }}
 			>{(menuData.dayType != HOLIDAYTYPE) ? "Clinic Off" : "Clinic On"}</Button>
 			<Button 
 				variant="contained" color="primary" className={gClasses.submit}
 				onClick={() => { handleDailyAppointments(menuData) }}
-			>Appointment</Button>
+			>Appointment</Button>*/}
+			<VsButton name={(menuData.dayType != HOLIDAYTYPE) ? "Clinic Off" : "Clinic On"}  onClick={() => { setHoliday(menuData, (menuData.dayType != HOLIDAYTYPE) ? "OFF" : "ON") }} />
+			<VsButton name="Appointment"  onClick={() => { handleDailyAppointments(menuData) }} />
 		</div>
 	)}
 	
 	function DisplayCloseModal() {
 	return (
-		<div align="right">
-		<IconButton color="secondary"  size="small" onClick={closeModal} >
-			<CancelIcon />
-		</IconButton>
-		</div>
+		<VsCancel align="right" onClick={closeModal} />
 	)}
 	
 	async function setHoliday(mData, todo) {
@@ -804,28 +888,68 @@ export default function Appointment() {
 	function DisplayDailyAppointments() {
 	return(
 	<div>
-	<Typography className={classes.title}>{"Appointments of "+menuData.date+' '+month + ' ' + year}</Typography>
+	<Typography className={classes.title}>{"Appointments of "+ordinalSuffix(menuData.date)+' '+month + ' ' + year}</Typography>
 	<DisplayNewApptBtn />
-	{(newAppointment) && <DisplayNewAppointment />}
-	<DislayAllAppointmentsOfToday />
+	{(newAppointment) && 
+		<div>
+		{(!selectPatient) &&
+			<Typography align="right" className={classes.link}>
+				<Link href="#" variant="body2" onClick={() => { setCurrentPatient(""); setSelectPatient(true); }}>Select Patient</Link>
+			</Typography>
+		}
+		{(selectPatient) &&
+			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+			<VsCancel align="right" onClick={() => {setSelectPatient(false)}} />
+			<Typography>
+					<span className={classes.patientName}>Select Patient</span>
+			</Typography>
+			<DisplayFilter />
+			<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
+				{patientArray.map( (m, index) => 
+					<Grid key={"PAT"+index} item xs={12} sm={6} md={4} lg={4} >
+					<DisplayPatientDetails 
+						patient={m} 
+						button1={<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />}
+					/>
+					</Grid>
+				)}
+			</Grid>
+			</Box>
+		}
+		<DisplayNewAppointment />
+		</div>
+	}
+	<DisplayBlockAppointments myArray={apptArray} />
 	</div>
 	)}
 	
 	function DisplayNewApptBtn() {
-		//console.log("in appt btn");
+		//console.log("NEW APPT Step 1");
 		if (newAppointment) return null;
-		//console.log("now show btn");
 		
 		if (directoryMode) {
-			console.log(menuData);
+			//console.log(menuData);
 			// check if old date. If old date do not allow new appointment
-			let selDate = new Date(Number(year), MONTHSTR.indexOf(month), menuData.date);
+			let selDate = new Date(Number(year), MONTHSTR.indexOf(month), menuData.date, 0, 0, 0);
+			
 			let today = new Date();
 			today.setHours(0);
 			today.setMinutes(0);
 			today.setSeconds(0);
-			if (selDate.getTime() < today.getTime) return;
+			
+			//console.log(today.getTime());
+			//console.log(selDate.getTime());
+			let s = Math.floor(selDate.getTime() / 1000);
+			let t = Math.floor(today.getTime() / 1000);
+			
+			if (s < t) return null;
+
+			// clear up current patient/$
+			//setCurrentPatient("");
+			//setCurrentPatientData({});
 		}
+
+		
 		return (
 			<Typography align="right" className={gClasses.link}>
 				<Link href="#" onClick={() => { 
@@ -862,8 +986,8 @@ export default function Appointment() {
 	}
 	
 	function DisplayNewAppointment() {
-	console.log("NewAppt", currentPatientData);
-	console.log("dir mode", directoryMode);
+	//console.log("NewAppt", currentPatientData);
+	//console.log("dir mode", directoryMode);
 	
 	if (directoryMode) {
 		setAptDate(new Date(Number(year), MONTHSTR.indexOf(month), menuData.date))
@@ -879,14 +1003,8 @@ export default function Appointment() {
 	return(
 		<Box className={classes.newAppt} border={1} >
 		<CssBaseline />
-		<div align="right">
-				<IconButton align="right" color="secondary"  size="small" onClick={handleNewAppointmentCancel} >
-					<CancelIcon />
-				</IconButton>
-		</div>
+		<VsCancel align="right" onClick={handleNewAppointmentCancel} />
 		<Typography className={classes.switchText}>New Appointment</Typography>
-		{/*<DisplayOldSearch />*/}
-		{(directoryMode) &&	<DisplayFilter handler={selectPatientForNewAppointment}/>}
 		<BlankArea />
 		{(currentPatient != "") &&
 			<div>
@@ -894,24 +1012,27 @@ export default function Appointment() {
 				{currentPatient + " (Id: " + currentPatientData.pid  + ") " + currentPatientData.age + currentPatientData.gender.substr(0,1)}
 			</Typography>*/}
 			<Grid key="DateTime" container justify="right" alignItems="center" >
-				<Grid item xs={6} sm={6} md={6} lg={6} >
+				<Grid item xs={false} sm={false} md={1} lg={1} />
+				<Grid item xs={12} sm={12} md={3} lg={3} >
 					<Typography className={classes.apptName}>
-					{currentPatient + " (Id: " + currentPatientData.pid  + ") " + currentPatientData.age + currentPatientData.gender.substr(0,1)}
+					{currentPatient + " (Id: " + currentPatientData.pid  + ") " + dispAge(currentPatientData.age, currentPatientData.gender)}
 					</Typography>
 				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
+				<Grid item xs={12} sm={12} md={2} lg={2} >
 					<Datetime 
+						className={classes.dateTimeBlock}
+						inputProps={{className: classes.dateTimeNormal}}
 						timeFormat={false} 
 						initialValue={aptDate}
 						dateFormat="DD/MM/yyyy"
 						isValidDate={(directoryMode) ? disableAllDt : disablePastDt}
-						className={classes.dateTime}
 						onClose={handleDate}
 					/>
 				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
+				<Grid item xs={12} sm={12} md={2} lg={2} >
 					<Datetime 
-						className={classes.dateTime}
+						className={classes.dateTimeBlock}
+						inputProps={{className: classes.dateTimeNormal}}
 						dateFormat={false} 
 						timeFormat="HH:mm"
 						initialValue={aptTime}
@@ -919,44 +1040,14 @@ export default function Appointment() {
 						onClose={handleTime}
 					/>
 				</Grid>
-				<Grid item xs={2} sm={2} md={2} lg={2} >
-					<Button 
-						variant="contained" color="primary" className={gClasses.submit}
-						onClick={handleNewAppointmentSubmit}
-						>Add New
-					</Button>
+				<Grid item xs={12} sm={12} md={2} lg={2} >
+					<VsButton name="Add New" onClick={handleNewAppointmentSubmit} />
 				</Grid>
-			</Grid>
+				<Grid item xs={false} sm={false} md={2} lg={2} />			
+				</Grid>
 			</div>
 		}
 		</Box>
-	)}
-	
-	function DisplayOldSearch() {
-	return (
-	<div>
-		<div>
-		<TextField padding={5}  variant="outlined" label="Patient" autoFocus
-			value={searchText}
-			onChange={(event) => setSearchText(event.target.value)}
-			InputProps={{
-				endAdornment: (
-					<InputAdornment position="end">
-						<SearchIcon onClick={selectFilter}/>
-					</InputAdornment>
-			)}}
-		/>
-		</div>
-		<div>
-		<VsSelect label="Patient" id="Patient" value={currentPatient} 
-			onChange={(event) => selectPatient(event.target.value)}
-			menu={patientArray.map(x =>	
-				<MenuItem key={x.displayName} value={x.displayName}>
-				{x.displayName + " (Id:"+ x.pid+") ("+ ((x.age > 0) ? x.age+x.gender.substr(0,1) : "new")+")"}
-				</MenuItem>)}
-		/>	
-		</div>
-		</div>
 	)}
 	
 	async function selectFilter() {
@@ -971,7 +1062,8 @@ export default function Appointment() {
 		if (filter != "") {
 			// if it is complete numeric then it must by ID
 			subcmd = (validateInteger(filter))	? "listbyid" : subcmd = "listbyname";
-		} else {
+		} 
+		else {
 			subcmd = "list"
 		}
 		
@@ -984,7 +1076,8 @@ export default function Appointment() {
 			//});
 			//console.log(tmp);
 			setPatientArray(tmp);
-		} catch (e) {
+		} 
+		catch (e) {
 			console.log(e);
 			setPatientArray([]);
 		}
@@ -1007,38 +1100,7 @@ export default function Appointment() {
 		}
 	}
 	
-	function DisplayNewSearch() {
-	return (
-		<div>
-		<Grid key="DisplaySearch" container justify="center" alignItems="center" >
-		<Grid item xs={2} sm={2} md={2} lg={2} >
-			<FormControlLabel align="right" className={classes.radio} label="New"
-			control={
-				<SwitchBtn color="primary" className={classes.radio} checked={registeredPatient} 
-				onChange={toggleRegisteredPatient}  
-				/>
-			}
-			/>
-		</Grid>
-		<Grid item xs={7} sm={7} md={7} lg={7} >
-			<TextField padding={5} variant="outlined" fullWidth label="New Patient name" autoFocus
-			value={searchText}
-			onChange={(event) => setSearchText(event.target.value)}
-			/>
-		</Grid>
-		<Grid item xs={3} sm={3} md={3} lg={3} >
-		<Button variant="contained" color="primary" className={gClasses.submit}
-		onClick={findNewPatient}
-		>
-		New Patient
-		</Button>		
-		</Grid>
-		</Grid>
-		{(newErrorMessage != "") && <Typography className={gClasses.error}>{newErrorMessage}</Typography>}
-		</div>
-	)}
-	
-	async function selectPatient(name) {
+	async function updatePatient(name) {
 		//console.log(name);
 		//console.log(patientArray);
 		let pRec = patientArray.find(x => x.displayName == name);
@@ -1047,40 +1109,32 @@ export default function Appointment() {
 		setCurrentPatientData(pRec);
 	}
 	
-	function toggleRegisteredPatient() {
-		setRegisteredPatient(!registeredPatient)
-		setSearchText("");
-		setNewErrorMessage("");
-		setPatientArray([]);
-	}
 	
 	async function handleNewAppointmentSubmit() {
-		console.log(aptDate);
-		console.log(aptTime);
+		//console.log(aptDate);
+		//console.log(aptTime);
 		let myYear = aptDate.getFullYear();
 		let myMonth = aptDate.getMonth();
 		let myDate =  aptDate.getDate();
 		let myHour = aptTime.getHours();
 		let myMin = aptTime.getMinutes();
-		console.log(myYear, myMonth, myDate, myHour, myMin);
+		//console.log(myYear, myMonth, myDate, myHour, myMin);
 		
-		let myAllAppts = apptArray.filter(x => x.data.pid == currentPatientData.pid);
-			//console.log(myAllAppts);
-			//console.log(currentPatientData);
-			let sameTime = myAllAppts.filter(x => x.visit === VISITTYPE.pending &&
-				x.year == myYear && x.month == myMonth && x.date === myDate &&
-				x.hour == myHour && x.minute == myMin);
-				//console.log("SAME", sameTime);
-				//x.hour === Number(apptHour) && x.minute === Number(apptMinute));
-			if (sameTime.length > 0) {
-				//alert("Duplicate appointment.");
-				callYesNo(openModal, "sametime", 
-					`Duplicate Appoint of ${currentPatientData.displayName}`, 
-					`Appointment already exists of specified time.`, 
-					"Ok", "", false);
-			} else {
-				handleAddApptConfirm();
-			}
+		// check if appointment of same date and time for the user already there (type pending)
+		let sameTime = masterApptArray.filter(x => x.visit === VISITTYPE.pending &&
+			x.year == myYear && x.month == myMonth && x.date === myDate &&
+			x.hour == myHour && x.minute == myMin && x.pid === currentPatientData.pid);
+			//console.log("SAME", sameTime);
+			//x.hour === Number(apptHour) && x.minute === Number(apptMinute));
+		if (sameTime.length > 0) {
+			//alert("Duplicate appointment.");
+			callYesNo(openModal, "sametime", 
+				`Duplicate Appoint of ${currentPatientData.displayName}`, 
+				`Appointment already exists of specified time.`, 
+				"Ok", "", false);
+			return;	
+		}
+			handleAddApptConfirm();
 	}	
 	
 	function handleNewAppointmentCancel() {
@@ -1099,7 +1153,7 @@ export default function Appointment() {
 		console.log(appt);
 		setCancelAppt(appt);
 		callYesNo(openModal, "cancel", 
-				`Cancel Appointment of ${appt.data.displayName}`, 
+				`Cancel Appointment of ${appt.displayName}`, 
 				`Are you sure you want to cancel?`, 
 				"Yes", "No", false);
 		return;
@@ -1107,17 +1161,25 @@ export default function Appointment() {
 	
 	
 	async function handleVisitAppt(appt) {
-			console.log(appt);
+		let myData = {
+			caller: "APPOINTMENT",
+			patient: null,
+			appointment: appt
+		}
+		sessionStorage.setItem("shareData", JSON.stringify(myData));
+		setTab(process.env.REACT_APP_VISIT);
 	}
 	
 	
 	async function handleEditAppt(appt) {
-			console.log(appt);
+		console.log(appt);
+		setCurrentPatient(appt.displayName);
+		setCurrentPatientData(appt);
+		setAptDate(appt.apptTime);
+		setAptTime(appt.apptTime);
+		setNewAppointment(true);
 	}
 	
-	async function handleEditAppt(appt) {
-			console.log(appt);
-	}
 	
 	function handleChange(v) {
 		console.log(v);
@@ -1141,6 +1203,7 @@ export default function Appointment() {
 	)}
 	
 	function DisplayBlockAppointments(props) {
+	let colCount = isMobile() ? 6 : 7;
 	return (
 		<Box className={classes.allAppt} border={1} width="100%">
 			<TableContainer>
@@ -1148,13 +1211,13 @@ export default function Appointment() {
 			<TableHead>
 				<TableRow align="center">
 					<TableCell key={"TH1"} component="th" scope="row" align="center" padding="none"
-					className={classes.th} colSpan={8}>
+					className={classes.th} colSpan={colCount}>
 					{"Appointment List"}
 					</TableCell>
 				</TableRow>
 				<TableRow align="center">
 					<TableCell key={"TH3"} component="th" scope="row" align="center" padding="none"
-						className={classes.th} colSpan={8}>
+						className={classes.th} colSpan={colCount}>
 						<DisplayFilterRadios />
 					</TableCell>
 				</TableRow>
@@ -1162,10 +1225,6 @@ export default function Appointment() {
 					<TableCell key={"TH21"} component="th" scope="row" align="center" padding="none"
 					className={classes.th} >
 					Patient
-					</TableCell>
-					<TableCell key={"TH22"} component="th" scope="row" align="center" padding="none"
-					className={classes.th} >
-					Age
 					</TableCell>
 					<TableCell key={"TH23"} component="th" scope="row" align="center" padding="none"
 					className={classes.th} >
@@ -1175,10 +1234,12 @@ export default function Appointment() {
 					className={classes.th} >
 					Time
 					</TableCell>
+					{(!isMobile()) && 
 					<TableCell key={"TH25"} component="th" scope="row" align="center" padding="none"
 					className={classes.th} >
 					Status
 					</TableCell>
+					}
 					<TableCell key={"TH26"} component="th" scope="row" align="center" padding="none"
 					className={classes.th} colSpan={3}>
 					cmd
@@ -1191,7 +1252,7 @@ export default function Appointment() {
 
 				let myDate = ooo.substr(6,2) + "-" + 
 					intString(Number(ooo.substr(4,2))+1, 2) + "-" + 
-					ooo.substr(0, 4);
+					(isMobile() ? ooo.substr(2, 2) : ooo.substr(0, 4));
 
 				let myTime = ooo.substr(8,2) + ":" + ooo.substr(10,2)
 				let myVisit;
@@ -1201,21 +1262,16 @@ export default function Appointment() {
 					case VISITTYPE.cancelled: myVisit = "Cancelled"; myClass = classes.tdCancel; break;
 					default: myVisit = "Visit"; myClass = classes.tdVisit; break;
 				}
+				let visitAppt = (a.visit !== VISITTYPE.pending);
 				let editAppt = (a.visit !== VISITTYPE.pending);
 				let cancelAppt = (a.visit !== VISITTYPE.pending);
-				let visitAppt = (a.visit !== VISITTYPE.pending);
+				let myName = a.displayName + (isMobile() ? "" : " (ID: " + a.pid + ")");
 				return(
 					<TableRow key={"TROW"+index}>
 					<TableCell key={"TD1"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 						<Typography className={classes.apptName}>
-							{a.data.displayName + " (ID: " + a.data.pid + ")"}
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD2"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={myClass}>
-						<Typography className={classes.apptName}>
-							{a.data.age + "  " + a.data.gender.substr(0,1)}
+							{myName}
 						</Typography>
 					</TableCell>
 					<TableCell key={"TD3"+index} align="center" component="td" scope="row" align="center" padding="none"
@@ -1230,12 +1286,14 @@ export default function Appointment() {
 							{myTime}
 						</Typography>
 					</TableCell>
+					{(!isMobile()) &&
 					<TableCell key={"TD5"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 							<Typography className={classes.apptName}>
 							{myVisit}
 							</Typography>
 					</TableCell>
+					}
 					<TableCell key={"TD11"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 						<IconButton color="primary" disabled={visitAppt} size="small" onClick={() => { handleVisitAppt(a) } } >
@@ -1250,9 +1308,7 @@ export default function Appointment() {
 					</TableCell>
 					<TableCell key={"TD13"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
-						<IconButton color="secondary" disabled={cancelAppt}  size="small" onClick={() => { handleCancelAppt(a) } } >
-							<CancelIcon />
-						</IconButton>
+						<VsCancel disabled={cancelAppt} onClick={() => { handleCancelAppt(a) } } />
 					</TableCell>
 					</TableRow>
 				)}
@@ -1263,48 +1319,6 @@ export default function Appointment() {
 		</Box>		
 	)}
 	
-	function org_DislayAllAppointmentsOfToday() {
-		//console.log(HOURSTR);
-		//console.log(MINUTESTR);
-	return(	
-		<div>
-		{HOURSTR.map( h => {
-			//console.log("Hour is ", h);
-			return (
-			<div>
-			{MINUTESTR.map( m => {
-				//console.log("Min is ", m);
-				let tmpArray = apptArray.filter(x => x.hour == Number(h) && x.minute == Number(m));
-				if (tmpArray.length == 0) return null;
-				//console.log(h, m, tmpArray.length);
-				let myPanel = h + m;
-				return (
-					<Accordion key={"AC"+myPanel} className={(expandedPanel == myPanel) ? classes.selectedAccordian : classes.normalAccordian} 
-						expanded={expandedPanel === myPanel} onChange={handleAccordionChange(myPanel)}>
-					<AccordionSummary key={"AS"+myPanel} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-						<Typography className={classes.accordianSummary}>
-							{"Appointment(s) of " + h + ":" + m + " ( Count: " + tmpArray.length + " )"}
-						</Typography>
-					</AccordionSummary>
-					<AccordionDetails key={"AD"+myPanel} className={classes.allAppt}>
-						<DisplayBlockAppointments myArray={tmpArray} hrStr={h} mnStr={m} />
-					</AccordionDetails>
-      </Accordion>
-					
-			)}
-			)}
-			</div>
-		)}
-		)}
-		</div>
-	)}
-
-	function DislayAllAppointmentsOfToday() {
-		//console.log(HOURSTR);
-		//console.log(MINUTESTR);
-	return(	
-		<DisplayBlockAppointments myArray={apptArray} />
-	)}
 
 	
 	const LoadingIndicator = props => {
@@ -1325,6 +1339,7 @@ export default function Appointment() {
 		setCurrentPatientData({});
 		setBeforeToday(true);
 		setPatientArray([]);
+		setSelectPatient(false);
 	}
 	
 	function initDirectoryModeData() {
@@ -1335,10 +1350,12 @@ export default function Appointment() {
 		initCommon();
 	}
 	
-	function toggleDirectoryMode() {
+	async function toggleDirectoryMode() {
 		let newMode = !directoryMode;
 		if (newMode)	{
 			initDirectoryModeData();
+			let myCounts = await getMonthlyAppointmentCounts(month, year);
+			await generateMatrix(month, year, myCounts);
 		} else {
 			initFilterModeData();
 		}
@@ -1365,13 +1382,52 @@ export default function Appointment() {
 		setApptArray(fArray);
 	}
 	
-	function DisplayFilter(props) {
+	
+	async function addNewPatient() {
+		//let myName=document.getElementById("emurName").value;
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/new/${userCid}/${emurName}`;
+			let resp = await axios.get(myUrl);
+			closeModal();
+			setPatientArray([resp.data]);
+		} catch(e) {
+			console.log(e);
+			setModalRegister(401);
+		}
+	}
+	
+	function DisplayNewPatient() {
 	return (	
-		<Grid className={classes.noPadding} key="Filter" container justify="center" alignItems="center" >
-			<Grid item xs={6} sm={6} md={6} lg={6} >
-				<TextField id="filter"  padding={5} variant="outlined" fullWidth label="Patient Name or Id" 
+	<Container component="main" maxWidth="md">
+		<VsCancel align="right" onClick={closeModal} />
+		<Typography align="center" className={classes.modalHeader}>"Input new Patient Name"</Typography>
+		<BlankArea />
+			<ValidatorForm align="center" className={gClasses.form} onSubmit={addNewPatient} >
+			<Grid key="NewPatirnt" container justify="center" alignItems="center" >
+				<Grid item xs={10} sm={10} md={10} lg={10} >
+					<TextValidator variant="outlined" required fullWidth color="primary"
+						id="emurName" label="New Patient Name" name="emurName"
+						onChange={(event) => setEmurName(event.target.value)}
+						autoFocus
+						value={emurName}
+					/>
+				</Grid>
+				<Grid item xs={2} sm={2} md={2} lg={2} >
+					<VsButton name="New Patient" />
+				</Grid>
+			</Grid>
+			</ValidatorForm>
+			<ModalResisterStatus />
+	</Container>
+	)}
+	
+	function DisplayFilter() {
+	return (	
+	<Grid className={classes.noPadding} key="Filter" container justify="center" alignItems="center" >
+		<Grid item xs={false} sm={false} md={3} lg={3} />
+		<Grid item xs={9} sm={9} md={6} lg={6} >
+			<TextField id="filter"  padding={5} variant="outlined" fullWidth label="Patient Name / Id" 
 				defaultValue={searchText}
-				//onChange={(event) => setSearchText(event.target.value)}
 				InputProps={{
 					endAdornment: (
 						<InputAdornment position="end">
@@ -1379,23 +1435,20 @@ export default function Appointment() {
 						</InputAdornment>
 				)}}
 			/>
-			</Grid>
-			<Grid item xs={6} sm={6} md={6} lg={6} >
-				<Select labelId='patient' id='patient' name="patient" padding={10} key="patient" 
-					variant="outlined" required fullWidth label="Patient"
-					className={gClasses.select}
-					value={currentPatient}
-					inputProps={{
-							name: 'GETPATIENT',
-							id: 'GETPATIENT',
-					}}
-					onChange={(event) => props.handler(event.target.value)}
-				>
-					{patientArray.map(x =>	<MenuItem key={x.pid} value={x.displayName}>{x.displayName + " (Id: " + x.pid  + ") " + x.age + x.gender.substr(0,1)}</MenuItem>)}
-				</Select>
-			</Grid>
 		</Grid>
+		<Grid item xs={3} sm={3} md={3} lg={3} >
+			<VsButton name="New Patient" onClick={() => { setEmurName(""); openModal("NEWPATIENT")}} />	
+		</Grid>	
+	</Grid>
 	)}
+	
+	async function selectFilter() {
+		let myText = document.getElementById("filter").value;
+		//console.log(myText);
+		setSearchText(myText);
+		let ppp = await updatePatientByFilter(searchText, userCid);
+		setPatientArray(ppp)
+	}
 	
 	async function getAppointmentsByPid(myPid) {
 		//let myData = [];
@@ -1442,34 +1495,8 @@ export default function Appointment() {
 		}
 	}
 	
-	async function selectFilter() {
-		//setApptMatrix([]);
-		//setMasterApptArray([]);
-		//setApptArray([]);
-		setCurrentPatient("");
-		setCurrentPatientData({});
-		//setNewAppointment(false);
-		//setBeforeToday(true);
-		setPatientArray([]);
-		console.log("Clearing current pat");
-		let myText = document.getElementById("filter").value;
-		//console.log(myText);
-		setSearchText(myText);
-		await updatePatientByFilter(searchText);
-	}
 	
-	async function updatePatientByFilter(filter) {
-		try {
-			var resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/patient/filter/${userCid}/${filter}`)
-			//console.log(resp.data);
-			setPatientArray(resp.data);
-		} catch (e) {
-			console.log("Filter error");
-			setPatientArray([]);
-		}
-	}
-	
-	function DisplayPatientVisit(props) {
+	function org_DisplayPatientVisit(props) {
 		{/*if (apptArray.length === 0)
 		return (<Typography>No appointment</Typography>);*/}
 	
@@ -1491,7 +1518,7 @@ export default function Appointment() {
 					<TableCell key={"TD1"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={classes.td}>
 						<Typography className={classes.apptName}>
-							{a.data.displayName + " (ID: " + a.data.pid + ")"}
+							{a.data.displayName + " (ID: " + a.pid + ")"}
 						</Typography>
 					</TableCell>
 					<TableCell key={"TD4"+index} align="center" component="td" scope="row" align="center" padding="none"
@@ -1520,9 +1547,7 @@ export default function Appointment() {
 					</TableCell>
 					<TableCell key={"TD6"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={classes.td}>
-						<IconButton color="secondary"  size="small" onClick={() => { handleCancelAppt(a) } } >
-							<CancelIcon />
-						</IconButton>
+						<VsCancel onClick={() => { handleCancelAppt(a) } } />
 					</TableCell>
 					</TableRow>
 				)}
@@ -1533,17 +1558,84 @@ export default function Appointment() {
 		</Box>		
 	)}
 	
-	//{((currentPatient !== "") && apptArray.length == 0) && <Typography className={classes.zeroAppt}>No appointments</Typography>}
 	
+	async function handleSelectPatient(rec) {
+		setSelectPatient(false);
+		setCurrentPatient(rec.displayName);
+		setCurrentPatientData(rec);
+		if (directoryMode) {
+			
+		} else {
+			await getPatientAppt(rec);
+		}
+	}
+	
+	async function getPatientAppt(rec) {
+		//let myData = [];
+		try {
+			var resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/list/pid/${userCid}/${rec.pid}`);
+			//console.log(resp.data);
+			let newRadio = "all";
+			setRadioValue(newRadio);
+			let tmpArray = resp.data
+			tmpArray.sort((a, b) => { return b.order - a.order;});
+			setMasterApptArray(tmpArray);
+			updateRadioFilter(tmpArray, newRadio);
+		} catch (e) {
+			console.log(e);
+			setMasterApptArray([])
+			setApptArray([]);
+		}
+		//return myData;
+	}
+
 	function DisplayFilterMode() {
-		//setBeforeToday(false);
 	return (
 		<div>
-			<DisplayFilter  handler={selectCurrentPatient}/>
-			<BlankArea />
+			{(!selectPatient) &&
+				<Typography align="right" className={classes.link}>
+					<Link href="#" variant="body2" onClick={() => { setCurrentPatient(""); setApptArray([]); setSelectPatient(true); }}>Select Patient</Link>
+				</Typography>
+			}
+			{(selectPatient) &&
+				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+				<VsCancel align="right" onClick={() => {setSelectPatient(false)}} />
+				<Typography>
+						<span className={gClasses.patientName}>Select Patient</span>
+				</Typography>
+				<DisplayFilter />
+				<Grid className={classes.noPadding} key="AllPatients" container alignItems="center" >
+					{patientArray.map( (m, index) => 
+						<Grid key={"PAT"+index} item xs={12} sm={12} md={4} lg={4} >
+						<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+						<div align="left" >
+						<Typography>
+						<span className={gClasses.patientName}>{m.displayName}</span>
+						</Typography>
+						<Typography>
+						<span className={gClasses.patientInfo}>{"Id: " + m.pid}</span>
+						</Typography>
+						<Typography className={gClasses.patientInfo}> 
+							{"Age: " + dispAge(m.age, m.gender)}
+						</Typography>
+						<Typography className={gClasses.patientInfo}> 
+							{"Email: "+dispEmail(m.email)}
+						</Typography>
+						<Typography className={gClasses.patientInfo}> 
+							{"Mobile: "+dispMobile(m.mobile)}
+						</Typography>
+						<BlankArea />
+						<VsButton name="Select"  color='green' onClick={() => { handleSelectPatient(m)}} />
+						</div>
+						</Box>
+						</Grid>
+					)}
+				</Grid>
+				</Box>
+			}
 			{(currentPatient !== "") &&
 			<div>
-				<Typography className={classes.title}>{"Appointments of "+currentPatient}</Typography>
+				<Typography className={classes.title}>{"Appointments of "+currentPatient+" (Id: "+currentPatientData.pid+" )" }</Typography>
 				<DisplayNewApptBtn />
 				{(newAppointment)  && <DisplayNewAppointment />}
 				<DisplayBlockAppointments myArray={apptArray} />
@@ -1552,10 +1644,40 @@ export default function Appointment() {
 		</div>
 	)}
 	
+	async function handleMonthYear(d) {
+		setMonthlyMode(true);	
+		let myDate = d.toDate();
+		setMonthYearDate(myDate);
+		//alert(myDate);
+		
+		let myMonth = MONTHSTR[myDate.getMonth()];
+		let myYear = myDate.getFullYear().toString();
+		setYear(myYear)
+		setMonth(myMonth);
+
+		// last day
+		//let tmp = new Date(Number(year), MONTHSTR.indexOf(month)+1, 0)
+		//setLastDayOfMonth(tmp.getDate());
+
+		let myCounts = await getMonthlyAppointmentCounts(myMonth, myYear)
+		await generateMatrix(myMonth, myYear, myCounts);
+
+	}
+	
 	function DisplayDirectoryMode() {
 	return(
 	<div>
-		<DisplayMonthYear />
+		<BlankArea />
+		<Datetime 
+			timeFormat={false} 
+			initialValue={monthYearDate}
+			dateFormat="MMMM yyyy"
+			inputProps={{className: classes.dateTime}}
+			closeOnSelect={true}
+			onClose={handleMonthYear}
+			className={classes.dateTimeBlock}
+		/>
+		<BlankArea />
 		{(monthlyMode) && <DisplayApptMatrix />}
 		{(!monthlyMode) && <DisplayDailyAppointments />}
 	</div>
@@ -1580,14 +1702,13 @@ export default function Appointment() {
 			</Grid>
 			<Grid item xs={5} sm={5} md={5} lg={5} >
 				<div align="left">
-				<Typography padding="none" className={classes.switchText}>Appointment Directory</Typography>
+				<Typography padding="none" className={classes.switchText}>Appointment Calender</Typography>
 				</div>
 			</Grid>
 		</Grid>
 	)}
 	
-	// Yes not handler
-	
+	// Yes no handler
 		
 	async function handleAddApptConfirm() {
 		
@@ -1604,13 +1725,15 @@ export default function Appointment() {
 		myOrder = (myOrder + myHour)*100 + myMin;
 		let tmp = {
 			cid: userCid,
-			data: currentPatientData,
+			//data: currentPatientData,
 			year: myYear,
 			month: myMonth,
 			date: myDate,
 			hour: myHour,
 			minute: myMin,
 			order: myOrder,
+			pid: currentPatientData.pid,
+			displayName: currentPatientData.displayName,
 			visit: VISITTYPE.pending,
 			apptTime: new Date(myYear, myMonth, myDate,
 								myHour, myMin, 0),
@@ -1637,14 +1760,19 @@ export default function Appointment() {
 			console.log(e);
 			return;
 		}
+		
+		if (directoryMode) {
+			setCurrentPatient("");
+			setCurrentPatientData({});
+		}
 	}
   
 	async function handleCancelApptConfirm() {
 		//console.log(cancelAppt);
 		try {
-			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/cancel/${userCid}/${cancelAppt.data.pid}/${cancelAppt.order}`;
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/cancel/${userCid}/${cancelAppt.pid}/${cancelAppt.order}`;
 			let resp = await axios.get(myUrl);
-			//let tmpArray = apptArray.find(x => x.data.pid != cancelAppt.data.pid ||	x.order != cancelAppt.order);
+			//let tmpArray = apptArray.find(x => x.pid != cancelAppt.pid ||	x.order != cancelAppt.order);
 			//console.log(tmpArray);
 			//setApptArray(tmpArray);
 			let tmpArray = [].concat(masterApptArray);
@@ -1667,10 +1795,6 @@ export default function Appointment() {
 	function yesNoHandler(id, action) {
 		closeModal();
 		console.log("Id is " + id + "  Action is " + action);
-		if ((id === "duplicate") && (action === "YES"))	{
-			handleAddApptConfirm();
-			return;
-		}
 		
 		if ((id === "cancel") && (action === "YES"))	{
 			handleCancelApptConfirm();
@@ -1678,42 +1802,6 @@ export default function Appointment() {
 		}
 	}
 	
-	function VsSelect(props) {
-	let myHelp = (props.help !== null) ? props.help : "";
-	let _fullWidth = (props.fullWidth) ? true : false;
-	//console.log(props.id, props.fullWidth, _fullWidth);
-	return (
-	<FormControl className={gClasses.selectForm}>
-		<InputLabel className={gClasses.selectEmpty} shrink id="selectlabel">{props.label}</InputLabel>
-		{(_fullWidth) && 
-			<Select
-			labelId="selectlabel"
-			id={props.id}
-			defaultValue={props.value}
-			onChange={props.onChange}
-			variant="outlined"
-			fullWidth
-			className={gClasses.selectEmpty}
-			>
-			{props.menu}
-			</Select>
-		}
-		{(!_fullWidth) && 
-			<Select
-			labelId="selectlabel"
-			id={props.id}
-			defaultValue={props.value}
-			onChange={props.onChange}
-			variant="outlined"
-			fullWidth
-			className={gClasses.selectEmpty}
-			>
-			{props.menu}
-			</Select>
-		}
-		{(myHelp != "") && <FormHelperText>{myHelp}</FormHelperText>}
-	</FormControl>
-	)}
 	
 	
 	return (
@@ -1725,6 +1813,19 @@ export default function Appointment() {
 		{(directoryMode) && <DisplayDirectoryMode />}
 		{(!directoryMode) && <DisplayFilterMode />}
 		</Container>
+		<Modal
+			isOpen={modalIsOpen == "NEWPATIENT"}
+			shouldCloseOnOverlayClick={false}
+			onAfterOpen={afterOpenModal}
+			onRequestClose={closeModal}
+			style={modalStyles}
+			contentLabel="Example Modal"
+			aria-labelledby="modalTitle"
+			aria-describedby="modalDescription"
+			ariaHideApp={false}
+		>
+			<DisplayNewPatient />
+		</Modal>
 		<Modal
 			isOpen={modalIsOpen == "TABLECELL"}
 			shouldCloseOnOverlayClick={false}

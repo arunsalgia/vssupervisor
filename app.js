@@ -230,7 +230,14 @@ CustomerSchema = mongoose.Schema({
 	mobile: String,
 	fee: Number,
 	expiryDate: Date,
-	enabled:Boolean
+	enabled:Boolean,
+	day0: [Number],
+	day1: [Number],
+	day2: [Number],
+	day3: [Number],
+	day4: [Number],
+	day5: [Number],
+	day6: [Number]
 });
 
 DoctorSchema = mongoose.Schema({

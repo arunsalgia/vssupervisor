@@ -91,6 +91,18 @@ router.get('/yearly/:cid/:year', async function (req, res) {
 });		
 
 
+router.get('/fromtoday/:cid', async function (req, res) {
+  setHeader(res);
+  var {cid} = req.params;
+	let d = new Date();
+	d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+	
+	let hRec = await M_Holiday.find({cid: cid, holidayDate: {$gte: d} });
+
+	sendok(res, hRec);
+});		
+
+
 router.get('/isholiday/:cid/:year/:month/:date', async function (req, res) {
   setHeader(res);
   var { cid, year, month, date } = req.params;

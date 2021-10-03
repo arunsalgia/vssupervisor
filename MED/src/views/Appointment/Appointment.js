@@ -65,15 +65,22 @@ DisplayPatientDetails,
 
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 
+import {WEEKSTR, MONTHSTR, SHORTMONTHSTR, 
+str1by4, str1by2,  str3by4,
+} from 'views/globals';
 
 // icons
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import DeleteIcon from '@material-ui/icons/Delete';
+//import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
-//import CancelIcon from '@material-ui/icons/Cancel';
+import DeleteIcon from '@material-ui/icons/Cancel';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
+import EventNoteIcon from '@material-ui/icons/EventNote';
+import AddIcon from '@material-ui/icons/AddCircleOutline';
+import LeftIcon from '@material-ui/icons/ChevronLeft';
+import RightIcon from '@material-ui/icons/ChevronRight';
 
 //colors 
 import { 
@@ -90,13 +97,35 @@ import {
 	updatePatientByFilter,
 	dispAge, dispEmail, dispMobile,
 	ordinalSuffix,
+	compareDate, makeTimeString,
 } from "views/functions.js";
+
 
 
 const useStyles = makeStyles((theme) => ({
 	root: {
 		width: '100%',
 	}, 
+	selIndex: {
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(14),
+		fontWeight: theme.typography.fontWeightBold,
+	},
+	slotTitle: {
+		color: 'green',
+		fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		padding: "10px 10px", 
+		margin: "10px 10px", 
+	},
+	unselIndex: {
+		fontSize: theme.typography.pxToRem(14),
+	},
+	slotboxStyle: {
+		borderColor: 'blue', 
+		borderRadius: 7, 
+		border: 1,
+	},
 	dateTime: {
 		color: 'blue',
 		fontSize: theme.typography.pxToRem(28),
@@ -336,9 +365,6 @@ const VISITTYPE = {pending: "pending", cancelled: "cancelled", visit: ""};
 const ROWSPERPAGE = 10;
 let dense = false;
 
-const str1by4 = String.fromCharCode(188)
-const str1by2 = String.fromCharCode(189)
-const str3by4 = String.fromCharCode(190)
 
 const DUMMYDAY={date: 0, dayType: "", apptCount: 0};
 const HOLIDAYTYPE="HO";
@@ -367,12 +393,10 @@ const ALLHOURSTR = [
 let HOURSTR=[];
 const MINUTESTR = ["00", "15", "30", "45"];
 
-const WEEKSTR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTHSTR = ["January", "February", "March", "April", "May", "June",
-							"July", "August", "September", "October", "November", "December"];						
+
+					
 let YEARSTR = ["2020", "2021", "2022"];
 
-let WEEKENDS=[1, 2, 6];		// sat and sun are week ends
 
 let test=[];
 let medQty=[];
@@ -393,11 +417,20 @@ function setAptDate(d) { aptDate = d; }
 let aptTime = new Date(2021, 9, 1, 10, 0);
 function setAptTime(d) { aptTime = d; }
 
+var workingHours;
+var timeSlots;
+const NUMBEROFDAYS = (isMobile()) ? 3 : 5;
+var userCid;
+var customerData;
 
-var userCid
 export default function Appointment() {
   const classes = useStyles();
 	const gClasses = globalStyles();
+
+  const [patientArray, setPatientArray] = useState([])
+	const [patientMasterArray, setPatientMasterArray] = useState([]);
+	const [currentPatient, setCurrentPatient] = useState("");
+	const [currentPatientData, setCurrentPatientData] = useState({});
 	
 	const [emurName, setEmurName] = useState("");
 	const [modalRegister, setModalRegister] = useState(0)
@@ -429,7 +462,7 @@ export default function Appointment() {
 	const [beforeToday, setBeforeToday] = useState(true);
 	
 	const [apptMatrix, setApptMatrix] = useState([]);
-	const [holidayArray, setHoildayArray] = useState([]);
+	const [holidayArray, setHolidayArray] = useState([]);
 	const [menuData, setMenuData] = useState({});
 	const [apptCountArray, setApptCountArray] = useState([]);
 	
@@ -439,9 +472,6 @@ export default function Appointment() {
 	//const [searchText, setSearchText] = useState("");
 	const [newErrorMessage, setNewErrorMessage] = useState("");
 	const [newAppointment, setNewAppointment] = useState(false);
-  const [patientArray, setPatientArray] = useState([])
-	const [currentPatient, setCurrentPatient] = useState("");
-	const [currentPatientData, setCurrentPatientData] = useState({});
 	
 	//const [currentAppointment, setCurrentAppointment] = useState({});
 	
@@ -451,7 +481,25 @@ export default function Appointment() {
 	const [apptArray, setApptArray] = useState([]);
 	const [masterApptArray, setMasterApptArray] = useState([]);
 	
+	//const [dateArray, setDateArray] = useState([]);
+	const [currentIndex, setCurrentIndex] = useState(0);
+	const [allTimeSlots, setAllTimeSlots] = useState([]);
+	
   useEffect(() => {	
+		customerData = JSON.parse(sessionStorage.getItem("customerData"));
+		userCid = sessionStorage.getItem("cid");
+		let holidays;
+		const getHolidays  = async () => {
+			try {
+				let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/holiday/fromtoday/${userCid}`);
+				holidays = resp.data
+			} catch(e) {
+				holidays = [];
+				console.log(e);
+			}
+			setHolidayArray(holidays);
+			return holidays;
+		}
 		const checkPatient = async () => {		
 			// check if appointment has been called from Patient view
 			let newDirMode = defaultDirectoryMode;
@@ -468,50 +516,193 @@ export default function Appointment() {
 				setPatientArray(allPat);
 				await getAppointmentsByPid(dirPatient.pid)
 			} catch {
-				// no share data. Thus called directly
-				//console.log("direct");
+				let ppp = await getAllPatients();
+				setPatientArray(ppp);
+				setPatientMasterArray(ppp);
 			}
 			return newDirMode;
 		}
-
-		const getData = async (month, year) => {
-			let dirMode = await checkPatient();
-			console.log(dirMode);
-			setDirectoryMode(dirMode);
-			if (dirMode) {
-				let myCounts = await getMonthlyAppointmentCounts(month, year);
-				await generateMatrix(month, year, myCounts);
+		const makeSlots  = async () => {
+			let holidays =  await getHolidays();
+			//console.log(holidays);
+			// working hours and time slots
+			let d;
+			let slotData = [];
+			for(let i=0; i<NUMBEROFDAYS; ++i) {
+				d = (i === 0) ? getFirstDate(holidays) : getNextDate(d, holidays);
+				slotData.push(prepareData(d));
 			}
+			setAllTimeSlots(slotData);
+			setCurrentIndex(0);
 		}
-		
-		userCid = sessionStorage.getItem("cid");
-		// make year
-		WEEKENDS = [0, 6];			//JSON.parse(`${process.env.REACT_APP_WEEKENDS}`)
-		let x = `${process.env.REACT_APP_WEEKENDS}`;
-		
-		let istart = Number(`${process.env.REACT_APP_STARTTIME}`);
-		let iend = Number(`${process.env.REACT_APP_ENDTIME}`);
-		HOURSTR = ALLHOURSTR.slice(istart, iend);
-		
-		setApptHour(HOURSTR[0]);
-		
-		let tmp = new Date();
-		let yyyy = tmp.getFullYear();
-		setYear(yyyy.toString());
-		
-		YEARSTR=[];	
-		YEARSTR.push((yyyy-1).toString());
-		YEARSTR.push((yyyy+0).toString());
-		YEARSTR.push((yyyy+1).toString());
-		
-		// make month
-		let mmm = tmp.getMonth();
-		setMonth(MONTHSTR[mmm]);
-		
-		getData(MONTHSTR[mmm], yyyy.toString());
+		checkPatient();
+		makeSlots();
   }, []);
 
-function ModalResisterStatus() {
+	function prepareData(d) {
+		let morningSlots = [];
+		let afternoonSlots = [];
+		let eveningSlots = [];
+		let workingHours;
+		
+		switch (d.getDay()) {
+			case 0: workingHours = customerData.day0; break;
+			case 1: workingHours = customerData.day1; break;
+			case 2: workingHours = customerData.day2; break;
+			case 3: workingHours = customerData.day3; break;
+			case 4: workingHours = customerData.day4; break;
+			case 5: workingHours = customerData.day5; break;
+			case 6: workingHours = customerData.day6; break;			
+		}
+		let myYear = d.getFullYear();
+		let myMonth = d.getMonth();
+		let myDate = d.getDate();
+		let myDay = d.getDay();
+		// for mrning slots
+		for(let hr=9; hr<12; ++hr) {
+			if (workingHours.includes(hr)) {
+				let t0 = makeTimeString(hr, 0);
+				let t1 = makeTimeString(hr, 15);
+				let t2 = makeTimeString(hr, 30);
+				let t3 = makeTimeString(hr, 45);
+				morningSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t0, available: true
+				});
+				morningSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t1, available: true
+				});
+				morningSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t2, available: true
+				});
+				morningSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t3, available: true
+				});
+			}
+		}
+		// for afternoon slots
+		for(let hr=12; hr<16; ++hr) {
+			if (workingHours.includes(hr)) {
+				let t0 = makeTimeString(hr, 0);
+				let t1 = makeTimeString(hr, 15);
+				let t2 = makeTimeString(hr, 30);
+				let t3 = makeTimeString(hr, 45);
+
+				afternoonSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t0, available: true
+				});
+				afternoonSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t1, available: true
+				});
+				afternoonSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t2, available: true
+				});
+				afternoonSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t3, available: true
+				});
+			}
+		}
+		// evening slots
+		for(let hr=16; hr<24; ++hr) {
+			if (workingHours.includes(hr)) {
+				let t0 = makeTimeString(hr, 0);
+				let t1 = makeTimeString(hr, 15);
+				let t2 = makeTimeString(hr, 30);
+				let t3 = makeTimeString(hr, 45);	
+				
+				eveningSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t0, available: true
+				});
+				eveningSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t1, available: true
+				});
+				eveningSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t2, available: true
+				});
+				eveningSlots.push({year: myYear, month: myMonth, date: myDate,
+				dateTime: d, day: myDay,
+				slot: t3, available: true
+				});
+			}
+		}
+	
+		return {dateTime: d, year: myYear, month: myMonth, date: myDate,
+			day: myDay, morningSlots: morningSlots, afternoonSlots: afternoonSlots,
+			eveningSlots: eveningSlots
+		}
+	}
+	
+	function clinicOff(d, myHoildays) {
+		let tmp = myHoildays.filter(x => x.date === d.getDate() &&
+				x.month === d.getMonth() && x.year === d.getFullYear());
+		if (tmp.length > 0) return true;
+			
+		// check if doctor's weekend on this date
+		let isClosed = false;
+		switch (d.getDay()) {
+			case 0: isClosed = customerData.day0.length === 0; break;
+			case 1: isClosed = customerData.day1.length === 0; break;
+			case 2: isClosed = customerData.day2.length === 0; break;
+			case 3: isClosed = customerData.day3.length === 0; break;
+			case 4: isClosed = customerData.day4.length === 0; break;
+			case 5: isClosed = customerData.day5.length === 0; break;
+			case 6: isClosed = customerData.day6.length === 0; break;
+		}
+		return isClosed;
+	}
+	
+	function getNextDate(d, myHoildays) {
+		let done = false
+		//console.log("I",d)
+		while (!done) {
+			d = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 0 , 0);
+			if (clinicOff(d, myHoildays)) {console.log("OFF",d); continue; }
+			break;
+		}
+		//console.log("O",d)
+		return d;
+	}
+
+	function getPrevDate(d, myHoildays) {
+		let today = new Date();
+		let done = false
+		while (!done) {
+			d = new Date(d.getFullYear(), d.getMonth(), d.getDate()-1, 0 , 0);
+			if (compareDate(d, today) < 0) return null;
+			if (clinicOff(d, myHoildays)) continue;
+			break;
+		}
+		return d;
+	}
+	
+	function getFirstDate(myHoildays) {
+		//console.log(myHoildays);
+		let d = new Date();
+		let firstDate = new Date(d.getFullYear(), d.getMonth(), d.getDate()-1);
+		return getNextDate(d, myHoildays);
+	}
+	
+	async function getAllPatients() {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/list/${userCid}`;
+			let resp = await axios.get(myUrl);
+			return resp.data;
+		} catch (e) {
+			return [];
+		}	
+	}
+	
+	function ModalResisterStatus() {
     // console.log(`Status is ${modalRegister}`);
 		let regerr = true;
     let myMsg;
@@ -714,7 +905,7 @@ function ModalResisterStatus() {
 		} catch (e) {
 			console.log(e);
 		}	
-		setHoildayArray(tmp);
+		setHolidayArray(tmp);
 		return tmp;
 	}
 	
@@ -819,7 +1010,7 @@ function ModalResisterStatus() {
 				let ha = [].concat(holidayArray);
 				ha.push(resp.data);
 				//console.log(resp.data);
-				setHoildayArray(ha);
+				setHolidayArray(ha);
 				tmp[mData.row][mData.col].dayType	= HOLIDAYTYPE;
 			} catch (e) {
 					console.log(e)
@@ -831,7 +1022,7 @@ function ModalResisterStatus() {
 			try {
 				let resp = await axios.get(myurl);
 				let ha = holidayArray.filter(x => x.date != mData.date);
-				setHoildayArray(ha);
+				setHolidayArray(ha);
 				tmp[mData.row][mData.col].dayType	= HOLIDAYTYPE;
 				
 				let d = new Date(Number(year), MONTHSTR.indexOf(month), mData.date);
@@ -1450,114 +1641,7 @@ function ModalResisterStatus() {
 		setPatientArray(ppp)
 	}
 	
-	async function getAppointmentsByPid(myPid) {
-		//let myData = [];
-		try {
-			var resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/list/pid/${userCid}/${myPid}`);
-			//console.log(resp.data);
-			let newRadio = "all";
-			setRadioValue(newRadio);
-			let tmpArray = resp.data
-			tmpArray.sort((a, b) => { return b.order - a.order;});
-			setMasterApptArray(tmpArray);
-			updateRadioFilter(tmpArray, newRadio);
-		} catch (e) {
-			console.log(e);
-			setMasterApptArray([])
-			setApptArray([]);
-		}
-		//return myData;
-	}
 
-	async function selectCurrentPatient(name) {
-		setCurrentPatient(name);
-		//console.log(name);
-		let tmp = patientArray.find(x => x.displayName === name);
-		setCurrentPatientData(tmp);
-		//console.log(tmp);
-		getAppointmentsByPid(tmp.pid);
-		return;
-		
-		// now get the appoints
-		try {
-			var resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/list/pid/${userCid}/${tmp.pid}`);
-			//console.log(resp.data);
-			let newRadio = "all";
-			setRadioValue(newRadio);
-			let tmpArray = resp.data
-			tmpArray.sort((a, b) => { return b.order - a.order;});
-			setMasterApptArray(tmpArray);
-			updateRadioFilter(tmpArray, newRadio);
-		} catch (e) {
-			console.log(e);
-			setMasterApptArray([])
-			setApptArray([]);
-		}
-	}
-	
-	
-	function org_DisplayPatientVisit(props) {
-		{/*if (apptArray.length === 0)
-		return (<Typography>No appointment</Typography>);*/}
-	
-	return (
-		<Box className={classes.allAppt} border={1} width="100%">
-			<TableContainer>
-			<Table style={{ width: '100%' }}>
-			<TableBody>  
-			{apptArray.map( (a, index) => {
-				let ooo = a.order.toString();
-				let myDate = ooo.substr(6, 2) + "-" + ooo.substr(4, 2) + "-" + ooo.substr(0, 4);
-				let myTime = ooo.substr(8, 2) + ":" + ooo.substr(10, 2);
-				let myVisit = "Over";
-				if (a.visit === "pending")	myVisit = "Pending";
-				if (a.visit === "cancelled")	myVisit = "Cancelled";
-				
-				return(
-					<TableRow key={"TROW"+index}>
-					<TableCell key={"TD1"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={classes.td}>
-						<Typography className={classes.apptName}>
-							{a.data.displayName + " (ID: " + a.pid + ")"}
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD4"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={classes.td}>
-						<Typography className={classes.apptName}>
-							{a.data.age + "  " + a.data.gender.substr(0,1)}
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD2"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={classes.td}>
-						<Typography className={classes.apptName}>
-							{myDate + " " + myTime}
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD7"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={classes.td}>
-						<Typography className={classes.apptName}>
-							{myVisit}
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD3"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={classes.td}>
-						<IconButton color="primary"  size="small" onClick={() => { handleEditAppt(a) } } >
-							<EditIcon	 />
-						</IconButton>
-					</TableCell>
-					<TableCell key={"TD6"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={classes.td}>
-						<VsCancel onClick={() => { handleCancelAppt(a) } } />
-					</TableCell>
-					</TableRow>
-				)}
-			)}
-			</TableBody> 
-			</Table>
-			</TableContainer>
-		</Box>		
-	)}
-	
 	
 	async function handleSelectPatient(rec) {
 		setSelectPatient(false);
@@ -1801,44 +1885,224 @@ function ModalResisterStatus() {
 			return;
 		}
 	}
+	//==================================
 	
+	async function prevDate() {
+		let d = getPrevDate(allTimeSlots[0].dateTime, holidayArray);
+		if (d !== null) {
+			let x = [prepareData(d)];
+			for (let i=0; i<(NUMBEROFDAYS-1); ++i) {
+				x.push(allTimeSlots[i]);
+			}
+			setAllTimeSlots(x);
+			let index = currentIndex + 1;
+			if (index === NUMBEROFDAYS) index = NUMBEROFDAYS - 1;
+			setCurrentIndex(index);
+		}
+	}
 	
+	async function nextDate() {
+		let x = [];
+		for (let i=1; i<NUMBEROFDAYS; ++i) {
+			x.push(allTimeSlots[i]);
+		}
+		let d = getNextDate(allTimeSlots[NUMBEROFDAYS-1].dateTime, holidayArray);
+		let newData = prepareData(d);
+		x.push(newData);
+		console.log(x);
+		setAllTimeSlots(x);
+		let index = currentIndex - 1;
+		if (index < 0) index = 0;
+		setCurrentIndex(index);
+
+	}
 	
+	function DisplayAppointments() {
 	return (
-  <div className={gClasses.webPage} align="center" key="main">
-		{/*<DisplayPageHeader headerName="Patient Directory" groupName="" tournament=""/>*/}
+	<div>
+	<Box className={gClasses.boxStyle} borderColor="blue" borderRadius={7} border={1} >
+	<Grid className={gClasses.noPadding} key="ALLDATE" container alignItems="center" >
+		<Grid item xs={1} sm={1} md={1} lg={1} >
+			<IconButton color={'primary'} onClick={prevDate}  >
+					<LeftIcon />
+				</IconButton>
+		</Grid>
+		{allTimeSlots.map( (t, index) => {
+			let dStr = (compareDate(t.dateTime, new Date()) !== 0) 
+				? t.date + "/" + (t.month + 1) + "/" + t.year
+				: "Today";
+			let freeSlots = t.morningSlots.length + 
+				t.afternoonSlots.length +
+				t.eveningSlots.length;
+			let myClass = (index === currentIndex) ? classes.selIndex : classes.unselIndex;
+		return (
+		<Grid item xs={3} sm={3} md={2} lg={2} >
+			<div>
+			<Typography className={myClass} onClick={() => {setCurrentIndex(index)}}>{dStr}</Typography>
+			<Typography className={myClass} onClick={() => {setCurrentIndex(index)}}>{WEEKSTR[t.day]}</Typography>
+			<Typography className={myClass} onClick={() => {setCurrentIndex(index)}}>{freeSlots+" Slots"}</Typography>
+			</div>
+		</Grid>
+		)}
+		)}
+		<Grid item xs={1} sm={1} md={1} lg={1} >
+			<IconButton color={'primary'} onClick={nextDate}  >
+			<RightIcon />
+			</IconButton>
+		</Grid>
+	</Grid>	
+	</Box>
+	<BlankArea />
+	{/*  Show morningSlots slots */}
+	{(allTimeSlots[currentIndex].morningSlots.length > 0) &&
+	<Grid className={gClasses.noPadding} key="MORNING" container alignItems="center" >
+	<Grid item xs={12} sm={12} md={12} lg={12} >
+	<Typography className={classes.slotTitle} >Morning Slots</Typography>
+	</Grid>
+	{allTimeSlots[currentIndex].morningSlots.map( (t, index) => {
+		return (
+			<Grid item xs={4} sm={4} md={2} lg={2} >
+				<Box className={gClasses.boxStyle} borderColor="blue" borderRadius={7} border={1} >
+				<Typography>{t.slot}</Typography>
+				</Box>
+			</Grid>
+		)}
+	)}
+	</Grid>	
+	}
+	{/*  Show afternoon  slots */}
+	{(allTimeSlots[currentIndex].afternoonSlots.length > 0) &&
+	<Grid key="AFTERNOON" container alignItems="center" >
+	<Grid item xs={12} sm={12} md={12} lg={12} >
+	<Typography className={classes.slotTitle} >Afternoon Slots</Typography>
+	</Grid>
+	{allTimeSlots[currentIndex].afternoonSlots.map( (t, index) => {
+		return (
+			<Grid item xs={4} sm={4} md={2} lg={2} >
+				<Box className={gClasses.boxStyle} borderColor="blue" borderRadius={7} border={1} >
+				<Typography>{t.slot}</Typography>
+				</Box>
+			</Grid>
+		)}
+	)}
+	</Grid>	
+	}
+	{/*  Show evening  slots */}
+	{(allTimeSlots[currentIndex].eveningSlots.length > 0) &&
+	<Grid className={gClasses.noPadding} key="EVENING" container alignItems="center" >
+	<Grid item xs={12} sm={12} md={12} lg={12} >
+	<Typography className={classes.slotTitle} >Evening Slots</Typography>
+	</Grid>
+	{allTimeSlots[currentIndex].eveningSlots.map( (t, index) => {
+		return (
+			<Grid item xs={4} sm={4} md={2} lg={2} >
+				<Box className={gClasses.boxStyle} borderColor="blue" borderRadius={7} border={1} >
+				<Typography>{t.slot}</Typography>
+				</Box>
+			</Grid>
+		)}
+	)}
+	</Grid>	
+	}
+	</div>
+	)}
+	
+	function DisplayAllPatients() {
+	return (
+	<Grid className={gClasses.noPadding} key="DATESEL" container alignItems="center" >
+	{patientArray.map( (m, index) => 
+		<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={3} lg={3} >
+		<DisplayPatientDetails 
+			patient={m} 
+			button1={
+				<IconButton color={'primary'} size="small" onClick={() => { handleSelectPatient(m)}}  >
+					<EventNoteIcon />
+				</IconButton>
+			}
+		/>
+		</Grid>
+	)}
+	</Grid>	
+	)}
+	
+	function setFilter(myArray, filterStr) {
+		filterStr = filterStr.trim().toLowerCase();
+		let tmpArray;
+		if (validateInteger(filterStr)) {
+			// it is integer. Thus has to be Id
+			tmpArray = patientMasterArray.filter(x => x.pidStr.includes(filterStr));
+		} else {
+			tmpArray = patientMasterArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+		}
+		setPatientArray(tmpArray);
+	}
+	
+	function filterPatients(filterStr) {
+		setSearchText(filterStr);
+		setFilter(patientMasterArray, filterStr);
+	}
+
+	async function getAppointmentsByPid(myPid) {
+		try {
+			var resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/pendinglist/pid/${userCid}/${myPid}`);
+			setApptArray(resp.data);
+
+		} catch (e) {
+			console.log(e);
+
+			setApptArray([]);
+		}
+	}
+
+	async function handleSelectPatient(rec) {
+		console.log("Select");
+		setCurrentPatient(rec.displayName);
+		setCurrentPatientData(rec);
+		setSelectPatient(false);
+		await getAppointmentsByPid(rec.pid);
+	}
+	
+
+	return (
+		<div className={gClasses.webPage} align="center" key="main">
+		<DisplayPageHeader headerName="Patient Appointment" groupName="" tournament=""/>
 		<Container component="main" maxWidth="lg">
 		<CssBaseline />
-		<DisplaySelectionMode />
-		{(directoryMode) && <DisplayDirectoryMode />}
-		{(!directoryMode) && <DisplayFilterMode />}
-		</Container>
-		<Modal
-			isOpen={modalIsOpen == "NEWPATIENT"}
-			shouldCloseOnOverlayClick={false}
-			onAfterOpen={afterOpenModal}
-			onRequestClose={closeModal}
-			style={modalStyles}
-			contentLabel="Example Modal"
-			aria-labelledby="modalTitle"
-			aria-describedby="modalDescription"
-			ariaHideApp={false}
-		>
-			<DisplayNewPatient />
-		</Modal>
-		<Modal
-			isOpen={modalIsOpen == "TABLECELL"}
-			shouldCloseOnOverlayClick={false}
-			onAfterOpen={afterOpenModal}
-			onRequestClose={closeModal}
-			style={menuModal}
-			contentLabel="Example Modal"
-			aria-labelledby="modalTitle"
-			aria-describedby="modalDescription"
-			ariaHideApp={false}
-		>
-			<DisplayTableCellMenu />
-		</Modal>	
+		{(currentPatient === "") && 
+			<div>
+			<Grid className={gClasses.vgSpacing} key="PatientFilter" container alignItems="center" >
+			<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
+			<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
+				<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
+					defaultValue={searchText}
+					onChange={(event) => filterPatients(event.target.value)}
+					InputProps={{endAdornment: (<InputAdornment position="end"><SearchIcon/></InputAdornment>)}}
+				/>
+			</Grid>
+			<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
+				<Typography>Click button to add new patient</Typography>
+			</Grid>
+			<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
+				<VsButton name="New Patient" /> 
+			</Grid>
+			<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
+			</Grid>
+			<DisplayAllPatients />
+			</div>
+		}
+		{(currentPatient !== "") &&
+			<VsButton align="right" name="Select Patient" onClick={() => { setCurrentPatient("")}} />	
+		}
+		{(currentPatient !== "") &&
+			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+			<Typography align="center" className={classes.modalHeader}>
+			{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
+			</Typography>	
+			<BlankArea />
+			<DisplayAppointments />
+			</Box>
+		}
+		</Container>	
 		<Modal
 			isOpen={modalIsOpen == "YESNO"}
 			shouldCloseOnOverlayClick={false}
