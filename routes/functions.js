@@ -255,6 +255,7 @@ async function setMaster(key, value) {
 }
 
 async function getCustomerNumber(userCid) {
+	console.log(userCid);
 	let customerRec = await M_Customer.findOne({_id: userCid});
 	return ((customerRec) ? customerRec.customerNumber : 0);
 }
@@ -262,17 +263,23 @@ async function getCustomerNumber(userCid) {
 async function getNewPid(userCid) {
 	let newPid = 0;
 	let customerNumber = await getCustomerNumber(userCid);
-
+	//console.log(customerNumber);
+	
 	if (customerNumber > 0) {
 		let d = new Date();
-		let offset = d.getYear() *100 + d.getMonth()+1;
+		//console.log(d.getYear());
+		let offset = (d.getYear()-100) *100 + d.getMonth()+1;
 		offset = (offset*100 + d.getDate())*100;
+		//console.log(customerNumber*CUSTMF, offset);
 		let startnum = customerNumber*CUSTMF + offset;
 		let endnum = (customerNumber+1)*CUSTMF
 		let myFilter = {"$gte": startnum, "$lt": endnum };
 		let rec = await M_Patient.find({ pid: myFilter }).limit(1).sort({ pid: -1 });
-		newPid = (rec.length > 0) ? rec[0].pid + 1 : startnum + 1;
+		//console.log(rec);
+		//console.log(startnum, endnum);
+		newPid = (rec.length > 0) ? rec[0].pid + 1 : (startnum + 1);
 	}
+	//console.log(newPid);
 	return newPid;
 } 
 

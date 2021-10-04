@@ -89,7 +89,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 
 //colours 
 import { 
-red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen, blueGrey, lime,
+red, blue, grey, yellow, orange, pink, green, brown, deepOrange, lightGreen, blueGrey, lime,
 } from '@material-ui/core/colors';
 
 import { 
@@ -137,7 +137,7 @@ const useStyles = makeStyles((theme) => ({
 		padding: "5px 10px", 
 		margin: "4px 2px", 
 		borderColor: 'blue',
-		backgroundColor: 'red',
+		backgroundColor: grey[500],
 	},
 	slotboxStyle: {
 		borderColor: 'blue', 
@@ -569,7 +569,8 @@ export default function Appointment() {
 		let tmp = allAppt.filter( x =>
 			x.year === year && x.month === month && x.date === date &&
 			x.hour === hr && x.minute === min);
-		return (tmp.length > 0);
+		console.log(date, hr, min, tmp);
+		return ((tmp.length > 0) ? tmp[0].displayName : "" );
 	}
 	
 	function prepareData(d, allAppt) {
@@ -600,7 +601,7 @@ export default function Appointment() {
 						dateTime: d, 
 						day: myDay,
 						slot: HOURSTR[hr] + ":" + MINUTESTR[MINUTESLOTS[minIdx]],
-						available: !	checkAppt(myYear, myMonth, myDate, hr, MINUTESLOTS[minIdx], allAppt)
+						available: checkAppt(myYear, myMonth, myDate, hr, MINUTESLOTS[minIdx], allAppt)
 					});
 				}
 			}
@@ -610,11 +611,11 @@ export default function Appointment() {
 			if (workingHours.includes(hr)) {
 				for (let minIdx=0; minIdx < MINUTESLOTS.length; ++minIdx) {
 						afternoonSlots.push({year: myYear, month: myMonth, date: myDate,
-						hour: hr, minute: MINUTESLOTS[minIdx	],
+						hour: hr, minute: MINUTESLOTS[minIdx],
 						dateTime: d, 
 						day: myDay,
 						slot: HOURSTR[hr] + ":" + MINUTESTR[MINUTESLOTS[minIdx]],
-						available: !	checkAppt(myYear, myMonth, myDate, hr, MINUTESLOTS[minIdx], allAppt)
+						available: checkAppt(myYear, myMonth, myDate, hr, MINUTESLOTS[minIdx], allAppt)
 					});
 				}
 			}
@@ -628,7 +629,7 @@ export default function Appointment() {
 						dateTime: d, 
 						day: myDay,
 						slot: HOURSTR[hr] + ":" + MINUTESTR[MINUTESLOTS[minIdx]],
-						available: !	checkAppt(myYear, myMonth, myDate, hr, MINUTESLOTS[minIdx], allAppt)
+						available: checkAppt(myYear, myMonth, myDate, hr, MINUTESLOTS[minIdx], allAppt)
 					});		
 				}
 			}
@@ -906,9 +907,9 @@ async function handleAddAppointment(slot) {
 			let dStr = (compareDate(t.dateTime, new Date()) !== 0) 
 				? t.date + "/" + (t.month + 1) + "/" + t.year
 				: "Today";
-			let freeSlots = t.morningSlots.filter(x => x.available === true).length + 
-				t.afternoonSlots.filter(x => x.available === true).length +
-				t.eveningSlots.filter(x => x.available === true).length;
+			let freeSlots = t.morningSlots.filter(x => x.available === "").length + 
+				t.afternoonSlots.filter(x => x.available === "").length +
+				t.eveningSlots.filter(x => x.available === "").length;
 			let myClass = (index === currentIndex) ? classes.selIndex : classes.unselIndex;
 		return (
 		<Grid key={"TIME"+index} item xs={3} sm={3} md={2} lg={2} >
@@ -938,16 +939,21 @@ async function handleAddAppointment(slot) {
 	{allTimeSlots[currentIndex].morningSlots.map( (t, index) => {
 		return (
 			<Grid key={"MOR"+index} item xs={4} sm={4} md={2} lg={2} >
-					{t.available &&
+				{(t.available !== "") &&
+					<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography>{t.available}</Typography>
+					</Box>
+				}
+				{((t.available == "") && (currentPatient === "INFO")) &&
+						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
+						<Typography>{t.slot}</Typography>
+						</Box>
+				}
+				{((t.available == "") && (currentPatient !== "INFO")) &&
 						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
 						<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
 						</Box>
-					}
-					{!t.available &&
-						<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
-						<Typography className={gClasses.bgRed}>{"Booked"}</Typography>
-						</Box>
-					}
+				}
 			</Grid>
 		)}
 	)}
@@ -964,15 +970,20 @@ async function handleAddAppointment(slot) {
 	{allTimeSlots[currentIndex].afternoonSlots.map( (t, index) => {
 		return (
 			<Grid key={"AFETR"+index} item xs={4} sm={4} md={2} lg={2} >
-				{t.available &&
-					<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
-					<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
+				{(t.available !== "") &&
+					<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography>{t.available}</Typography>
 					</Box>
 				}
-				{!t.available &&
-					<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
-					<Typography className={gClasses.bgRed}>{"Booked"}</Typography>
-					</Box>
+				{((t.available == "") && (currentPatient === "INFO")) &&
+						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
+						<Typography>{t.slot}</Typography>
+						</Box>
+				}
+				{((t.available == "") && (currentPatient !== "INFO")) &&
+						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
+						<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
+						</Box>
 				}
 			</Grid>
 		)}
@@ -990,16 +1001,21 @@ async function handleAddAppointment(slot) {
 	{allTimeSlots[currentIndex].eveningSlots.map( (t, index) => {
 		return (
 			<Grid key={"EVE"+index} item xs={4} sm={4} md={2} lg={2} >
-					{t.available &&
+				{(t.available !== "") &&
+					<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography>{t.available}</Typography>
+					</Box>
+				}
+				{((t.available == "") && (currentPatient === "INFO")) &&
+						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
+						<Typography>{t.slot}</Typography>
+						</Box>
+				}
+				{((t.available == "") && (currentPatient !== "INFO")) &&
 						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
 						<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
 						</Box>
-					}
-					{!t.available &&
-						<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
-						<Typography>{"Booked"}</Typography>
-						</Box>
-					}
+				}
 			</Grid>
 		)}
 	)}
@@ -1111,6 +1127,9 @@ async function handleAddAppointment(slot) {
 		generateSlots(allPendingAppt, holidayArray);
 	}
 	
+	function handleMyAppt() {
+		setCurrentPatient("INFO")
+	}
 
 	return (
 		<div className={gClasses.webPage} align="center" key="main">
@@ -1134,7 +1153,9 @@ async function handleAddAppointment(slot) {
 			<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
 				<VsButton name="New Patient" /> 
 			</Grid>
-			<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
+			<Grid key={"F6"} item xs={4} sm={4} md={2} lg={2} >
+				<VsButton name="My Appointments" onClick={handleMyAppt}/> 
+			</Grid>
 			</Grid>
 			<DisplayAllPatients />
 			</div>
@@ -1145,7 +1166,10 @@ async function handleAddAppointment(slot) {
 		{(currentPatient !== "") &&
 			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 			<Typography align="center" className={classes.modalHeader}>
-			{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
+			{(currentPatient === "INFO") ?
+				"Appointment Information" :
+				currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "
+			}
 			</Typography>	
 			<BlankArea />
 			{(apptArray.length > 0) &&
@@ -1156,20 +1180,7 @@ async function handleAddAppointment(slot) {
 			}
 			</Box>
 		}
-		</Container>	
-		<Modal
-			isOpen={modalIsOpen == "YESNO"}
-			shouldCloseOnOverlayClick={false}
-			onAfterOpen={afterOpenModal}
-			onRequestClose={closeModal}
-			style={yesNoModal}
-			contentLabel="Example Modal"
-			aria-labelledby="modalTitle"
-			aria-describedby="modalDescription"
-			ariaHideApp={false}
-		>
-			<DisplayYesNo close={closeModal} func={yesNoHandler} />
-		</Modal>			
+		</Container>				
   </div>
   );    
 }

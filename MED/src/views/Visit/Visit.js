@@ -41,8 +41,7 @@ import EventNoteIcon from '@material-ui/icons/EventNote';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
 
 import Switch from "@material-ui/core/Switch";
-//import  from '@material-ui/core/Container';
-//import  from '@material-ui/core/CssBaseline';
+
 
 import Link from '@material-ui/core/Link';
 
@@ -61,6 +60,7 @@ DisplayPatientDetails,
 DisplayDocumentList,
 DisplayImage, DisplayPDF,
 LoadingMessage,
+DisplayDocumentDetails,
 } from "CustomComponents/CustomComponents.js"
 
 import {
@@ -75,6 +75,8 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Cancel';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+
 
 //colours 
 import { red, blue 
@@ -1155,7 +1157,22 @@ export default function Visit() {
 			onClick={() =>{setShowDocument(!showDocument); }}
 		/>
 		{(showDocument) && 
-			<DisplayDocumentList documentArray={documentArray} viewHandle={handleFileView} />
+			<div>
+			<Grid className={gClasses.noPadding} key="AllDOCS" container alignItems="center" >
+			{documentArray.map( (d, index) => 
+				<Grid key={"DOC"+index} item xs={12} sm={6} md={3} lg={3} >
+				<DisplayDocumentDetails
+					document={d} 
+					button1={
+						<IconButton color="primary" size="small" onClick={() => {handleFileView(d)}} >
+							<VisibilityIcon	 />
+						</IconButton>	
+					}
+				/>
+				</Grid>
+			)}
+			</Grid>
+			</div>
 		}
 	</Box>
 	)}

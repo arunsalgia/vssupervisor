@@ -48,7 +48,7 @@ router.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(re
 	console.log(pEmail);
   let age = Number(pAge);
 	
-	let newPid = await getNewPid();
+	let newPid = await getNewPid(cid);
 	console.log("New Pid", newPid);
 	
 	mRec = new M_Patient();
@@ -117,7 +117,7 @@ router.get('/new/:cid/:pName', async function(req, res, next) {
   var tmp = await M_Patient.find({cid: cid, name: lname});
   if (tmp.length > 0)  { senderr(res, 601, `Patient ${dname} already in database.`); return; }
 	
-	let newPid = await getNewPid();
+	let newPid = await getNewPid(cid);
 	console.log("New Pid", newPid);
 	
 	mRec = new M_Patient();

@@ -544,7 +544,7 @@ export default function Patient() {
       />
 			<FormControl component="fieldset">
 				<RadioGroup row aria-label="radioselection" name="radioselection" value={radioValue} 
-					onChange={() => {setRadioValue(event.target.value); }}
+					onChange={() => {setRadioValue(event.target.value); setPatientGender(event.target.value); }}
 				>
 				<FormControlLabel className={classes.filterRadio} value="Male" 		control={<Radio color="primary"/>} label="Male" />
 				<FormControlLabel className={classes.filterRadio} value="Female" 	control={<Radio color="primary"/>} label="Female" />
