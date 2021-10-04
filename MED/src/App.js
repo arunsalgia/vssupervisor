@@ -77,8 +77,8 @@ function checkSessionRequest() {
 function checkResetPasswordRequest() {
 	let resetLink = "";
 	let x = location.pathname.split("/");
-  console.log("Path is");
-  console.log(x);
+  //console.log("Path is");
+  //console.log(x);
 	if (x.length >= 4)
 	if (x[1] === "viraagdental")
 	if (x[2] === "resetpassword") {
@@ -118,7 +118,7 @@ function AppRouter() {
 
   function DispayTabs() {
     let isLogged = isUserLogged();
-    console.log("Login status", isLogged)
+    //console.log("Login status", isLogged)
     if (isLogged) {
       // console.log("User is logged");
       return (
@@ -141,7 +141,7 @@ function AppRouter() {
 		} 
 		else  {
 			let myLink = checkResetPasswordRequest();
-			console.log("Link", myLink);
+			//console.log("Link", myLink);
 			if (myLink !== "") {
 				sessionStorage.setItem("currentUserCode", myLink);
 				hist.push("/");

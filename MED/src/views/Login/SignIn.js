@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -23,7 +24,7 @@ import {red, green, blue } from '@material-ui/core/colors';
 import { DesktopWindows } from '@material-ui/icons';
 import { isMobile, cdRefresh, specialSetPos, encrypt, clearBackupData, downloadApk } from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
-import { CricDreamLogo } from 'CustomComponents/CustomComponents.js';
+import { CricDreamLogo, ValidComp } from 'CustomComponents/CustomComponents.js';
 import { BlankArea } from 'CustomComponents/CustomComponents';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
@@ -76,9 +77,7 @@ const useStyles = makeStyles((theme) => ({
 },
 }));
 
-const handleSubmit = e => {
-  e.preventDefault();
-};
+let deviceIsMobile=isMobile();
 
 export default function SignIn() {
   const classes = useStyles();
@@ -108,6 +107,31 @@ export default function SignIn() {
   function setError(msg, isError) {
     setErrorMessage({msg: msg, isError: isError});
   }
+
+
+	async function handleSubmit(e) {
+  e.preventDefault();
+
+	try { 
+		let enPassword = encrypt(password);
+		let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/jaijinendra/${userName}/${enPassword}`); 
+		setError("", false);
+		let userData = response.data.user;
+		window.sessionStorage.setItem("uid", userData.uid)
+		window.sessionStorage.setItem("userName", userData.displayName);
+		window.sessionStorage.setItem("userType", userData.userType);
+		window.sessionStorage.setItem("cid", userData.cid);
+
+		window.sessionStorage.setItem("customerData", JSON.stringify(response.data.customer));
+		
+		window.sessionStorage.setItem("doctorData", JSON.stringify(response.data.doctor));
+		 
+		//window.sessionStorage.setItem("admin", true)
+		setTab(process.env.REACT_APP_HOME);
+	} catch (err) {
+		setError("Invalid User name / Password", true);
+	}
+};
 
   function handleForgot() {
     console.log("Call forgot password here")
@@ -242,110 +266,74 @@ export default function SignIn() {
     )
   }
 
-  
-  function PwdVisible() {
-    console.log("IN visisble");
-    return (
-      <TextField variant="outlined" required fullWidth
-        id="password" label="Password" type="text"
-        defaultValue={password}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <VisibilityOffIcon onClick={() => { handleVisibility(false); }} />
-            </InputAdornment>
-          ),
-        }}
-      />
-    )
-  }
 
-  function PwdNotVisible() {
-    console.log("In non visisble")
-    return (
-      <TextField variant="outlined" required fullWidth
-        id="password" label="Password" type="password"
-        defaultValue={password}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <VisibilityIcon onClick={() => { handleVisibility(true); }} />
-            </InputAdornment>
-          ),
-        }}
-      />
-    )
-
-  }
-
-  function GetPassword() {
-    let itIsMobile = isMobile();
-    console.log("Mobile", itIsMobile)
-    if (itIsMobile) {
-      if (showPassword) 
-        return <PwdVisible />
-      else
-        return <PwdNotVisible />
-    } else {
-      return <NonMobile />
-    }
-  }
-
-	function DisplayWelcome() {
-	return (
-		<div align="center">
-			<BlankArea/>
-			<BlankArea/>
-			<BlankArea/>
-			<BlankArea/>
-			<Typography className={gClasses.signInWelcome} >{welcomeMESSAGE}</Typography>	
-			<BlankArea/>
-			<BlankArea/>
-		</div>
-	)}
 	//console.log("In sign in");
   return (
-		<Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-      <CricDreamLogo />
-        <Typography component="h1" variant="h5" align="center">Sign in</Typography>
-				<BlankArea />
-        <form className={gClasses.form} onSubmit={handleSubmit} noValidate>
-          <TextField
-            // autoComplete="fname"
-            id="userName"
-            label="User Name"
-            // name="userName"
-            variant="outlined"
-            required
-            fullWidth
-            defaultValue={userName}
-            // autoFocus
-            // onChange={(event) => setUserName(event.target.value)}
-          />
-          <h3></h3>
-          <GetPassword />
-          <div>
-            <Typography className={(errorMessage.isError) ? gClasses.error : gClasses.nonerror} align="left">{errorMessage.msg}</Typography>
-            <Typography className={gClasses.link}>
-              <Link href="#" onClick={handleForgot} variant="body2">
-              Forgot password
-              </Link>
-            </Typography>
-          </div>
-          <Button 
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={handleClick}
-          >
-            Sign In
-          </Button>
-        </form>
-      </div>
-		</Container>
+	<Container component="main" maxWidth="xs">
+	<CssBaseline />
+	<div className={classes.paper}>
+	<CricDreamLogo />
+	<ValidatorForm align="center" className={classes.form} onSubmit={handleSubmit}>
+		<Typography component="h1" variant="h5" align="center">Sign in</Typography>
+		<BlankArea />
+		<TextValidator fullWidth  variant="outlined" required className={gClasses.vgSpacing}
+			id="newPatientName" label="Name" type="text"
+			value={userName} 
+			onChange={() => { setUserName(event.target.value) }}
+			validators={['noSpecialCharacters']}
+			errorMessages={['Special characters not permitted']}
+		/>
+		{(deviceIsMobile) &&
+			<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
+				id="password" label="Password" type="password"
+				value={password} 
+				onChange={() => { setPassword(event.target.value) }}
+				validators={['minLength', 'noSpecialCharacters']}
+				errorMessages={['Minimum 6 chars required','Special characters not permitted']}
+			/>
+		}
+		{(!deviceIsMobile && showPassword) &&
+			<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
+				id="password" label="Password" type={"text"}
+				value={password} 
+				InputProps={{
+					endAdornment: (
+						<InputAdornment position="end">
+							<VisibilityOffIcon onClick={() => { setShowPassword(false); }} />
+						</InputAdornment>
+					),
+				}}
+				onChange={() => { setPassword(event.target.value) }}
+				validators={['minLength', 'noSpecialCharacters']}
+				errorMessages={['Minimum 6 chars required','Special characters not permitted']}
+			/>
+		}
+		{(!deviceIsMobile && !showPassword) &&
+			<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
+				id="password" label="Password" type={"password"}
+				value={password} 
+				InputProps={{
+					endAdornment: (
+						<InputAdornment position="end">
+							<VisibilityIcon onClick={() => { setShowPassword(true); }} />
+						</InputAdornment>
+					),
+				}}
+				onChange={() => { setPassword(event.target.value) }}
+				validators={['minLength', 'noSpecialCharacters']}
+				errorMessages={['Minimum 6 chars required','Special characters not permitted']}
+			/>
+		}
+		<Typography className={(errorMessage.isError) ? gClasses.error : gClasses.nonerror} align="left">{errorMessage.msg}</Typography>
+		<ValidComp />
+		<Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+			Sign In
+		</Button>
+		</ValidatorForm>	
+		<div align="left">
+			<Link href="#" onClick={handleForgot} variant="body2">Forgot password</Link>
+		</div>
+	</div>
+	</Container>
   );
 }
