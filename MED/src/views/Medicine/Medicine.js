@@ -290,9 +290,9 @@ export default function Medicine() {
 	
 	function DisplayAllMedicines() {
 	return (
-	<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
+	<Grid className={gClasses.noPadding} key="AllMedicine" container alignItems="center" >
 	{medicineArray.map( (m, index) => 
-		<Grid key={"MED"+m.pid} item xs={12} sm={6} md={3} lg={3} >
+		<Grid key={"MEDITEM"+index} item xs={12} sm={6} md={3} lg={3} >
 		<DisplayMedicineDetails 
 			medicine={m} 
 			button1={
@@ -358,6 +358,7 @@ export default function Medicine() {
 			<TextValidator fullWidth  className={gClasses.vgSpacing}
 				id="newPatientName" label="Name" type="text"
 				value={medicineName} 
+				disabled={!isAdd}
 				onChange={() => { setMedicineName(event.target.value) }}
       />
 			<TextValidator  fullWidth className={gClasses.vgSpacing}

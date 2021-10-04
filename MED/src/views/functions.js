@@ -12,7 +12,7 @@ var ifscsystem = require('ifsc-finder');
 var aadhar = require('aadhaar-validator')
 
 export function isUserLogged() {
-  console.log("User is", sessionStorage.getItem("userName"));
+  //console.log("User is", sessionStorage.getItem("userName"));
   if ((sessionStorage.getItem("userName") === "") || 
       (sessionStorage.getItem("userName") === "0") ||
       (sessionStorage.getItem("userName") === null))
@@ -828,3 +828,16 @@ export function makeTimeString(hr, min) {
 	//console.log(hr, min, tStr);
 	return tStr;
 };
+
+export async function getAllPatients(userCid) {
+	let myData = [];
+	try {
+		let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/list/${userCid}`;
+		let resp = await axios.get(myUrl);
+		return resp.data;
+	}
+	catch(e) {
+		return [];
+	}
+}
+	

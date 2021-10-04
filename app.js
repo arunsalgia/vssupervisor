@@ -333,6 +333,7 @@ if (WEB) {
 // When successfully connected
 mongoose.connection.on('connected', function () {
   //console.log('Mongoose default connection open to ' + process.env.MONGOCONNECTION);
+	console.log('Mongoose connection success');
   db_connection = true;
   connectRequest = true;
 });

@@ -35,6 +35,11 @@ import {
 	dispOnlyAge, dispAge, dispEmail, dispMobile,
 	getOnlyDate,
 } from "views/functions.js";
+
+import {
+HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR,	
+} from "views/globals.js";
+
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import Divider from "@material-ui/core/Divider";
 import globalStyles from "assets/globalStyles";
@@ -677,7 +682,7 @@ export function DisplayMedicineDetails(props) {
 	//console.log(_button1, _button2, _button3, _button4, _button5);
 return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-		<div align="center" >
+		<div key={"MEDDETAILS"+props.medicine.name}align="center" >
 		<Typography>
 		<span className={gClasses.patientName}>{props.medicine.name}</span>
 		</Typography>
@@ -690,6 +695,98 @@ return (
 		<Typography> 
 			<span className={gClasses.patientInfo}>Precaution: </span>
 			<span className={gClasses.patientInfo2}>{props.medicine.precaution}</span>
+		</Typography>
+		<BlankArea />
+		<div align="right">
+		{(!_button1) && props.button1}
+		{(!_button2) && props.button2}
+		{(!_button3) && props.button3}
+		{(!_button4) && props.button4}
+		{(!_button5) && props.button5}
+		</div>
+	</div>
+	</Box>
+)}
+
+
+export function DisplayDocumentDetails(props) {
+	const gClasses = globalStyles();
+	let d = new Date(props.document.date);
+	let myDate = DATESTR[d.getDate()] + "/" + MONTHNUMBERSTR[d.getMonth()] + "/" + d.getFullYear();
+	let myTime = HOURSTR[d.getHours()] + ":" + MINUTESTR[d.getMinutes()];
+	let _button1 = (props.button1 == null);
+	let _button2 = (props.button2 == null);
+	let _button3 = (props.button3 == null);
+	let _button4 = (props.button4 == null);
+	let _button5 = (props.button5 == null);
+	//console.log(_button1, _button2, _button3, _button4, _button5);
+return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<div align="center" >
+		<Typography>
+		<span className={gClasses.patientName}>{props.document.title}</span>
+		</Typography>
+		</div>
+		<div align="left" >
+		<Typography>
+			<span className={gClasses.patientInfo}>Date: </span>
+			<span className={gClasses.patientInfo2}>{myDate+' '+myTime}</span>
+		</Typography>
+		<Typography>
+			<span className={gClasses.patientInfo}>Desc: </span>
+			<span className={gClasses.patientInfo2}>{props.document.desc}</span>
+		</Typography>
+		<Typography> 
+			<span className={gClasses.patientInfo}>Type: </span>
+			<span className={gClasses.patientInfo2}>{props.document.type}</span>
+		</Typography>
+		<BlankArea />
+		<div align="right">
+		{(!_button1) && props.button1}
+		{(!_button2) && props.button2}
+		{(!_button3) && props.button3}
+		{(!_button4) && props.button4}
+		{(!_button5) && props.button5}
+		</div>
+	</div>
+	</Box>
+)}
+
+export function DisplayAppointmentDetails(props) {
+	const gClasses = globalStyles();
+	let d = new Date(props.appointment.apptTime);
+	
+	let myDate = DATESTR[d.getDate()] + "/" +
+		MONTHNUMBERSTR[d.getMonth()] + "/" +
+		d.getFullYear();
+		
+	let myTime = HOURSTR[d.getHours()] + ":" + MINUTESTR[d.getMinutes()];
+		
+	let _button1 = (props.button1 == null);
+	let _button2 = (props.button2 == null);
+	let _button3 = (props.button3 == null);
+	let _button4 = (props.button4 == null);
+	let _button5 = (props.button5 == null);
+	//console.log(_button1, _button2, _button3, _button4, _button5);
+return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<div align="center" >
+		<Typography>
+		<span className={gClasses.patientName}>{props.appointment.displayName}</span>
+		</Typography>
+		</div>
+		<div align="left" >
+		<Typography>
+			<span className={gClasses.patientInfo}>Id: </span>
+			<span className={gClasses.patientInfo2}>{props.appointment.pid}</span>
+		</Typography>
+		<Typography> 
+			<span className={gClasses.patientInfo}>Date: </span>
+			<span className={gClasses.patientInfo2}>{myDate}</span>
+		</Typography>
+		<Typography > 
+			<span className={gClasses.patientInfo}>Time: </span>
+			<span className={gClasses.patientInfo2}>{myTime}</span>
 		</Typography>
 		<BlankArea />
 		<div align="right">

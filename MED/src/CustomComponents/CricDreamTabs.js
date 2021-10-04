@@ -28,7 +28,7 @@ import Appointment from "views/Appointment/Appointment"
 import Medicine from "views/Medicine/Medicine.js" 
 import Patient from "views/Patient/Patient.js" 
 import NextVisit from "views/NextVisit/NextVisit";
-import Document from "views/Document/Document.js" 
+import Report from "views/Report/Report.js" 
 import Wallet from "views/Wallet/Wallet.js"
 
 import Customer from "views/SuperUser/Customer";
@@ -290,7 +290,7 @@ export function CricDreamTabs() {
   const handlePatient = () => { handleClose(); setMenuValue(901);}
 	const handleMedicine = () => { handleClose(); setMenuValue(902);}
 	const handleNextVisit = () => { handleClose(); setMenuValue(904);}
-	const handleDocument = () => { handleClose(); setMenuValue(905);}
+	const handleReport = () => { handleClose(); setMenuValue(905);}
 	
   const handleProfile = () => { handleClose(); setMenuValue(101);}
 	const handleWallet = () => { handleClose(); setMenuValue(102);}
@@ -319,7 +319,7 @@ export function CricDreamTabs() {
       case 902: return <Medicine />;
 			//case 903: return <Sample />
 			case 904: return <NextVisit />
-			case 905: return <Document />
+			case 905: return <Report />
 
 /*
       //case 4: 
@@ -461,7 +461,7 @@ export function CricDreamTabs() {
 								<MenuItem onClick={handlePatient}>Patient</MenuItem>
 								<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
 								<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
-								<MenuItem onClick={handleDocument}>Report</MenuItem>	
+								<MenuItem onClick={handleReport}>Report</MenuItem>	
                 <Divider/>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
 									<div>
@@ -495,7 +495,7 @@ export function CricDreamTabs() {
           <Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
 					<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
 					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>}
-					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleDocument}>Report</Button>}
+					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleReport}>Report</Button>}
 					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>}
           {/* <IconButton
             aria-label="account of current group"

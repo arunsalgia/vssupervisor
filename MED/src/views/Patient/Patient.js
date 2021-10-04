@@ -54,6 +54,7 @@ import EventNoteIcon from '@material-ui/icons/EventNote';
 import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFilter,
 	dispOnlyAge, dispAge, dispEmail, dispMobile,
 	validateInteger,
+	getAllPatients,
  } from "views/functions.js"
 import {DisplayYesNo, DisplayPageHeader, BlankArea,
 DisplayPatientDetails,
@@ -206,7 +207,6 @@ let searchText = "";
 function setSearchText(sss) { searchText = sss;}
 
 var userCid;
-
 export default function Patient() {
 	//const history = useHistory();	
   const classes = useStyles();
@@ -233,26 +233,29 @@ export default function Patient() {
 	
   useEffect(() => {
 		const us = async () => {
-			let ppp = await getAllPatients();
-			setPatientMasterArray(ppp);
-			setPatientArray(ppp);
+			try {
+				//console.log("in try");
+				let ppp = JSON.parse(localStorage.getItem("vdBkpPatients"+userCid));
+				setPatientMasterArray(ppp);
+				setPatientFilter(ppp, searchText);
+			} catch {
+				console.log("in patient catch");
+				// no action required
+			}
+			finally {
+				//console.log("in finally");
+				let ppp = await getAllPatients(userCid);
+				setPatientMasterArray(ppp);
+				setPatientFilter(ppp, searchText);				
+			}
 		}
 		userCid = sessionStorage.getItem("cid");
-		us();
 		sessionStorage.setItem("YESNOMODAL", "");
+		us();
   }, [])
 
 	
-	async  function getAllPatients() {
-		try {
-			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/list/${userCid}`;
-			let resp = await axios.get(myUrl);
-			return resp.data;
-		} catch (e) {
-			return [];
-		}	
-	}
-	
+
 	
 	function ShowResisterStatus() {
     //console.log(`Status is ${registerStatus}`);
@@ -436,9 +439,9 @@ export default function Patient() {
 		}
 		setIsDrawerOpened(false);
 
-		let ppp = await getAllPatients();
+		let ppp = await getAllPatients(userCid);
 		setPatientMasterArray(ppp);
-		setFilter(ppp, searchText);
+		setPatientFilter(ppp, searchText);
 		setIsDrawerOpened(false);
 		return; 
 	}
@@ -476,21 +479,21 @@ export default function Patient() {
 	</Grid>	
 	)}
 	
-	function setFilter(myArray, filterStr) {
+	function setPatientFilter(myArray, filterStr) {
 		filterStr = filterStr.trim().toLowerCase();
 		let tmpArray;
 		if (validateInteger(filterStr)) {
 			// it is integer. Thus has to be Id
-			tmpArray = patientMasterArray.filter(x => x.pidStr.includes(filterStr));
+			tmpArray = myArray.filter(x => x.pidStr.includes(filterStr));
 		} else {
-			tmpArray = patientMasterArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+			tmpArray = myArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
 		}
 		setPatientArray(tmpArray);
 	}
 	
 	function filterPatients(filterStr) {
 		setSearchText(filterStr);
-		setFilter(patientMasterArray, filterStr);
+		setPatientFilter(patientMasterArray, filterStr);
 	}
 	
   return (
@@ -529,6 +532,7 @@ export default function Patient() {
 			<TextValidator fullWidth  className={gClasses.vgSpacing}
 				id="newPatientName" label="Name" type="text"
 				value={patientName} 
+				disabled={!isAdd}
 				onChange={() => { setPatientName(event.target.value) }}
       />
 			<TextValidator  fullWidth className={gClasses.vgSpacing}
