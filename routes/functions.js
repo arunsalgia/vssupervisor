@@ -273,7 +273,7 @@ async function getNewPid(userCid) {
 		let rec = await M_Patient.find({ pid: myFilter }).limit(1).sort({ pid: -1 });
 		newPid = (rec.length > 0) ? rec[0].pid + 1 : startnum + 1;
 	}
-	return myNum;
+	return newPid;
 } 
 
 
