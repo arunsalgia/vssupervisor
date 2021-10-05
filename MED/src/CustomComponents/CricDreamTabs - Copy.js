@@ -27,23 +27,13 @@ import Visit from "views/Visit/Visit"
 import Appointment from "views/Appointment/Appointment"
 import Medicine from "views/Medicine/Medicine.js" 
 import Patient from "views/Patient/Patient.js" 
-import Sample from "views/MED/Sample.js"
+import NextVisit from "views/NextVisit/NextVisit";
+import Report from "views/Report/Report.js" 
+import Wallet from "views/Wallet/Wallet.js"
 
+import Customer from "views/SuperUser/Customer";
+import Sample from "views/SuperUser/Sample.js"
 
-// cd items import
-//import Dash from "views/Dashboard/Dashboard"
-//import Stats from "views/Statistics/Statistics"
-//import MyTeam from "views/MyTeam/MyTeam"
-//import Auction from "views/Auction/Auction"
-//import Captain from "views/Captain/Captain"
-//import Match from "views/UpcomingMatch/UpcomingMatch"
-//import Group from "views/Group/Group"
-
-//import Wallet from "views/Wallet/Wallet.js"
-//import AddWallet from "views/Wallet/AddWallet";
-//import WithdrawWallet from "views/Wallet/WithdrawWallet";
-// import KycBank from "views/Wallet/KycBank";
-// import KycDocs from "views/Wallet/KycDocs";
 
 //import PlayerInfo from "views/MED/PlayerInfo";
 // import Profile from "views/Profile/Profile.js"
@@ -54,10 +44,8 @@ import Home from "views/MED/Home.js";
 import ContactUs from "views/MED/ContactUs.js";
 import PointSystem from "views/MED/PointSystem.js";
 
-
-//import NewGroup from "views/Group/NewGroup.js"
-//import JoinGroup from "views/Group/JoinGroup.js"
-//import GroupDetails from "views/Group/GroupDetails.js"
+import WorkingHours from "views/Settings/WorkingHours";
+import Holiday from "views/Holiday/Holiday";
 
 
 import Modal from 'react-modal';
@@ -67,6 +55,7 @@ import {cdRefresh, specialSetPos, upGradeRequired, isMobile,
   downloadApk, clearBackupData,
   checkIdle, setIdle,
   internalToText, textToInternal,
+	handleLogout,
 } from "views/functions.js"
 import { LocalSee } from '@material-ui/icons';
 
@@ -203,21 +192,7 @@ export function CricDreamTabs() {
       setValue(parseInt(localStorage.getItem("menuValue")));
       setIdle(false);
     }
-		
-		
-    // Version check is now done in Home component
-    // if (value === parseInt(process.env.REACT_APP_HOME))
-    //   checkVersion();  
-    
-		
     setMenuValue();
-
-    // console.log("Params",
-    //   sessionStorage.getItem("param1"),
-    //   sessionStorage.getItem("param2"),
-    //   sessionStorage.getItem("param3")
-    // );
-
 }, []);
 
 
@@ -299,50 +274,19 @@ export function CricDreamTabs() {
 
   const handlePatient = () => { handleClose(); setMenuValue(901);}
 	const handleMedicine = () => { handleClose(); setMenuValue(902);}
-	const handleSample = () => { handleClose(); setMenuValue(903);}
+	const handleNextVisit = () => { handleClose(); setMenuValue(904);}
+	const handleReport = () => { handleClose(); setMenuValue(905);}
 	
   const handleProfile = () => { handleClose(); setMenuValue(101);}
+	const handleWallet = () => { handleClose(); setMenuValue(102);}
 	const handleContactUs = () => { handleClose(); setMenuValue(202);}
 	
+	const handleSample = () => { handleClose(); setMenuValue(801);}
+	const handleCustomer = () => { handleClose(); setMenuValue(802);}
 	
-  //const handlePassword = () => { handleClose(); setMenuValue(102);}
-  //const handleTeam = () => { setMenuValue(3);  }
-  //const handleMatch = () => { handleClose(); setMenuValue(101);}
-  //const handleAuction = () => { handleClose(); setMenuValue(102);}
-  //const handleCaptain = () => { handleClose(); setMenuValue(103);}
-  //const handleGroup = () => { handleGrpClose(); setMenuValue(104);}
-  //const handleWallet = () => { handleClose(); setMenuValue(105);}
-  // 108 for add wallet
-  //const handleHelpDesk = () => { handleClose(); setMenuValue(201);}
+	const handleWorkingHours = () => { handleClose(); setMenuValue(701);}
+	const handleHoliday = () => { handleClose(); setMenuValue(702);}
   
-  //const handleSuImage = () => { handleClose(); setMenuValue(303);}
-
-  //const handleGroupNew = () => { handleGrpClose(); setMenuValue(1001);}
-  //const handleGroupJoin = () => { handleGrpClose(); setMenuValue(1002);}
-  //const handleGroupDetails = () => { handleGrpClose(); setMenuValue(1003);}
-  //const handlePlayerInfo = () => { handleGrpClose(); setMenuValue(1004);}
-
-  const handleLogout = () => {
-    handleClose();
-		window.sessionStorage.setItem("uid", "")
-		window.sessionStorage.setItem("userName", "");
-		window.sessionStorage.setItem("userPlan", "");
-		window.sessionStorage.setItem("admin", false)
-    cdRefresh();  
-  };
-
-  function Show_Supervisor_Options() {
-    //if (localStorage.getItem("userPlan") == process.env.REACT_APP_SUPERUSER) {  
-      return (
-        <div>
-        <MenuItem onClick={handlePatient}>Patient</MenuItem>
-        <MenuItem onClick={handleMedicine}>Medicine</MenuItem>
-        <Divider />
-        </div>)
-    //} else {
-   //   return null;
-   // }
-  }
 
   function DisplayCdItems() {
 		//console.log("CD Value", value);
@@ -352,34 +296,20 @@ export function CricDreamTabs() {
       case 3: return <Visit/>; 
 			
       case 101: return <Profile />;
-      case 102: return <ContactUs />;
+      case 102: return <Wallet />;
+
+			case 801: return <Sample />
+			case 802: return <Customer />
 
       case 901: return <Patient />;
       case 902: return <Medicine />;
-			case 903: return <Sample />
+			//case 903: return <Sample />
+			case 904: return <NextVisit />
+			case 905: return <Report />
 
-/*
-      //case 4: 
-      //case 101: return <Match />;
-      //case 102: return <Auction />;
-      //case 103: return <Captain />;
-      //case 104: return <Group />;
-      //case 105: return <Wallet />;
+			case 701: return <WorkingHours />
+			case 702: return <Holiday />
 
-//      case 107: return <ChangePassword />;
-     // case 108: return <AddWallet />
-      //case 109: return <WithdrawWallet />
-      // case 110: return <KycBank />;
-      // case 111: return <KycDocs />
-  //    case 201: return <About />;
-  //    case 203: return <PointSystem />;
-			
-      //case 303: return <SU_Image />;
-      //case 1001: return <NewGroup />;
-      //case 1002: return <JoinGroup />;
-      //case 1003: return <GroupDetails />;
-     // case 1004: return <PlayerInfo />;
-		*/
       default: return  null;
     }
   }
@@ -413,9 +343,6 @@ export function CricDreamTabs() {
         contentLabel="Example Modal"
         ariaHideApp={false}
       >
-        {/* <Typography className={classes.new} align="center">
-          Current Version {process.env.REACT_APP_VERSION}
-        </Typography> */}
         <Typography className={classes.new} align="center">
           Latest Version {latestApk.version}
         </Typography>
@@ -491,20 +418,46 @@ export function CricDreamTabs() {
                 onClose={handleClose}
               >
                 <MenuItem onClick={handleProfile}>Profile</MenuItem>
+								{(window.sessionStorage.getItem("userType") === "Doctor") &&
+									<MenuItem onClick={handleWallet}>Wallet</MenuItem>
+								}
                 <Divider/>
-								<MenuItem onClick={handlePatient}>Patient</MenuItem>
-								<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
-								<MenuItem onClick={handleSample}>Sample</MenuItem>
+								{(itIsMobile) &&
+									<div>
+									<MenuItem onClick={handleAppointment}>Appointment</MenuItem>
+									<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
+									<MenuItem onClick={handlePatient}>Patient</MenuItem>
+									<MenuItem onClick={handleReport}>Report</MenuItem>	
+									<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
+									<Divider />
+									</div>
+								}
+								<div align="center">
+								<Typography>Settings</Typography>
+								<MenuItem onClick={handleWorkingHours}>WorkingHours</MenuItem>	
+								<MenuItem onClick={handleHoliday}>Set Holidays</MenuItem>
                 <Divider/>
-                <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>       
+								</div>
+								{(window.sessionStorage.getItem("userType") === "Developer") &&
+									<div>
+									<MenuItem onClick={handleSample}>Sample</MenuItem>
+									<MenuItem onClick={handleCustomer}>Customer</MenuItem>
+									<Divider/>
+									</div>
+								}
+                {/*<MenuItem onClick={handleContactUs}>Contact Us</MenuItem>*/}
                 <Divider/>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                <MenuItem onClick={() => {handleClose(); handleLogout(); }}>Logout</MenuItem>
               </Menu>
             </div>
           )}
           {/* <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
             <MenuIcon />
           </IconButton> */}
+					<Typography onClick={handleHome}>
+						<span className={classes.doctor}>+</span>
+						<span className={classes.ankit}> Viraag Dental</span>
+					</Typography>
           {/*<IconButton
             aria-label="account of current user"
             aria-controls="menu-appbar"
@@ -514,19 +467,21 @@ export function CricDreamTabs() {
           >
             <HomeIcon className={classes.icon}/>
           </IconButton>*/}
-					<Typography>
-						<span className={classes.doctor}>+</span>
-						<span className={classes.ankit}> Viraag Dental</span>
-						</Typography>
           <Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
 					<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
 					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>}
+					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleReport}>Report</Button>}
 					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>}
-						{/*<div align="right">
-					<Typography align="right">
-						<span className={classes.ankit}>Arun Salgia</span>
-						</Typography>
-						</div>*/}
+					<div align="right">
+					<Avatar 
+            aria-label="account of current user"
+            aria-controls="user-appbar"
+            aria-haspopup="true"
+            color="inherit"
+            variant="circular" 
+						className={classes.avatar1}>{"A"}
+          </Avatar>
+					</div>
           {/* <IconButton
             aria-label="account of current group"
             aria-controls="group-appbar"

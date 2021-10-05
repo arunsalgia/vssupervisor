@@ -567,7 +567,7 @@ export default function Appointment() {
 		let tmp = allAppt.filter( x =>
 			x.year === year && x.month === month && x.date === date &&
 			x.hour === hr && x.minute === min);
-		console.log(date, hr, min, tmp);
+		//console.log(date, hr, min, tmp);
 		return ((tmp.length > 0) ? tmp[0].displayName : "" );
 	}
 	

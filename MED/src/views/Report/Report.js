@@ -25,6 +25,7 @@ import Radio from '@material-ui/core/Radio';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Modal from 'react-modal'; 
 import Drawer from '@material-ui/core/Drawer';
+import { useAlert } from 'react-alert'
 
 // icons
 import IconButton from '@material-ui/core/IconButton';
@@ -321,6 +322,7 @@ let userCid;
 export default function Document() {
 	const classes = useStyles();
 	const gClasses = globalStyles();
+	const alert = useAlert();
 	
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
 	const [selectPatient, setSelectPatient] = useState(false);
@@ -441,8 +443,10 @@ export default function Document() {
 			let resp = await axios.get(myUrl);
 			let tmpArray = documentArray.filter(x => x.title !== d.title);
 			setDocumentArray(tmpArray);
+			alert.success("Removed document "+d.title);
 		} catch (e) {
 			console.log(e);
+			alert.error("Error removing document "+d.title);
 		}
 	}
 	
@@ -672,14 +676,14 @@ export default function Document() {
 		if (isDrawerOpened === "ADD") {
 			let tmp = documentArray.filter(x => x.title.toLowerCase() === title.toLowerCase())
 			if (tmp.length > 0) {
-				setRegisterStatus(103);
+				alert.error("Report title cannot be blank");
 				return;
 			}
 		}
 		
 		// check for supported file types
 		if (!SupportedMimeTypes.includes(state.selectedFile.type)) {
-			setRegisterStatus(102);
+			alert.error("Report type "+state.selectedFile.type+" not support");
 			return;
 		}
 
@@ -697,9 +701,10 @@ export default function Document() {
 			setIsDrawerOpened("");		// done
 			let ddd = await getPatientDocument(userCid, currentPatientData.pid);
 			setDocumentArray(ddd);
+			alert.success("Report "+title+" successfully added")
 		} catch (e) {
 			console.log(e);
-			setRegisterStatus(104);
+			alert.success("Error adding report "+title);
 		}
 	};
   
@@ -753,12 +758,12 @@ export default function Document() {
 					InputProps={{endAdornment: (<InputAdornment position="end"><SearchIcon/></InputAdornment>)}}
 				/>
 			</Grid>
-			<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
+			{/*<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
 				<Typography>Click button to add new patient</Typography>
 			</Grid>
 			<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
 				<VsButton name="New Patient" /> 
-			</Grid>
+			</Grid>*/}
 			<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
 			</Grid>
 			<DisplayAllPatients />

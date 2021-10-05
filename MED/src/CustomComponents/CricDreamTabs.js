@@ -34,19 +34,6 @@ import Wallet from "views/Wallet/Wallet.js"
 import Customer from "views/SuperUser/Customer";
 import Sample from "views/SuperUser/Sample.js"
 
-// cd items import
-//import Dash from "views/Dashboard/Dashboard"
-//import Stats from "views/Statistics/Statistics"
-//import MyTeam from "views/MyTeam/MyTeam"
-//import Auction from "views/Auction/Auction"
-//import Captain from "views/Captain/Captain"
-//import Match from "views/UpcomingMatch/UpcomingMatch"
-//import Group from "views/Group/Group"
-
-//import AddWallet from "views/Wallet/AddWallet";
-//import WithdrawWallet from "views/Wallet/WithdrawWallet";
-// import KycBank from "views/Wallet/KycBank";
-// import KycDocs from "views/Wallet/KycDocs";
 
 //import PlayerInfo from "views/MED/PlayerInfo";
 // import Profile from "views/Profile/Profile.js"
@@ -140,8 +127,18 @@ const useStyles = makeStyles((theme) => ({
     color: '#000000',
     fontWeight: theme.typography.fontWeightBold,
   },
+	divider: {
+		backgroundColor: 'blue',
+	},
   title: {
     flexGrow: 1,
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(20),
+		fontWeight: theme.typography.fontWeightBold,
+		//paddingTop: theme.spacing(4),
+    //paddingBottom: theme.spacing(4),
+		paddingLeft: theme.spacing(4),
+		paddingRight: theme.spacing(4),
   },
   avatar: {
     margin: theme.spacing(0),
@@ -154,8 +151,10 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(0),
     backgroundColor: deepOrange[500],
     color: theme.palette.getContrastText(deepOrange[500]), 
+		//paddingLeft: theme.spacing(10),
     // width: theme.spacing(10),
-    // height: theme.spacing(10),  
+    // height: theme.spacing(10),
+		marginLeft: theme.spacing(6),
   },
 }));
 
@@ -221,31 +220,8 @@ export function CricDreamTabs() {
 
   function handleGrpMenu(event) {
     setGrpAnchorEl(event.currentTarget);
-    // console.log(event.currentTarget);
-    var myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/group/memberof/${localStorage.getItem("uid")}`;
-    axios.get(myUrl).then((response) => {
-      let allGroups = response.data[0].groups;
-      if (allGroups.length > 0) {
-        let tmp = allGroups.find(x => x.defaultGroup == true);
-        if (!tmp) {
-          tmp = allGroups[0];
-          tmp.defaultGroup = true;
-          localStorage.setItem("gid", tmp.gid.toString());
-          localStorage.setItem("groupName", tmp.groupName);
-          localStorage.setItem("tournament", tmp.tournament);
-          localStorage.setItem("admin", tmp.admin);
-          // clearBackupData();
-        }
-      }
-      setUserGroup(allGroups);
-      // console.log('Everything is awesome.');
-      setArunGroup(true);
-    }).catch((error) => {
-      console.log('Not good man :(');
-      console.log(error);
-      setUserGroup([]);
-      setArunGroup(true);
-    })
+    console.log(event.currentTarget);
+		setArunGroup(true);
   };
 
   async function handleGroupSelect(index) {
@@ -290,7 +266,7 @@ export function CricDreamTabs() {
 	const handleNextVisit = () => { handleClose(); setMenuValue(904);}
 	const handleReport = () => { handleClose(); setMenuValue(905);}
 	
-  const handleProfile = () => { handleClose(); setMenuValue(101);}
+  const handleProfile = () => { handleClose(); handleGrpClose(); setMenuValue(101);}
 	const handleWallet = () => { handleClose(); setMenuValue(102);}
 	const handleContactUs = () => { handleClose(); setMenuValue(202);}
 	
@@ -322,28 +298,7 @@ export function CricDreamTabs() {
 
 			case 701: return <WorkingHours />
 			case 702: return <Holiday />
-/*
-      //case 4: 
-      //case 101: return <Match />;
-      //case 102: return <Auction />;
-      //case 103: return <Captain />;
-      //case 104: return <Group />;
-      //case 105: return <Wallet />;
 
-//      case 107: return <ChangePassword />;
-     // case 108: return <AddWallet />
-      //case 109: return <WithdrawWallet />
-      // case 110: return <KycBank />;
-      // case 111: return <KycDocs />
-  //    case 201: return <About />;
-  //    case 203: return <PointSystem />;
-			
-      //case 303: return <SU_Image />;
-      //case 1001: return <NewGroup />;
-      //case 1002: return <JoinGroup />;
-      //case 1003: return <GroupDetails />;
-     // case 1004: return <PlayerInfo />;
-		*/
       default: return  null;
     }
   }
@@ -377,9 +332,6 @@ export function CricDreamTabs() {
         contentLabel="Example Modal"
         ariaHideApp={false}
       >
-        {/* <Typography className={classes.new} align="center">
-          Current Version {process.env.REACT_APP_VERSION}
-        </Typography> */}
         <Typography className={classes.new} align="center">
           Latest Version {latestApk.version}
         </Typography>
@@ -404,17 +356,13 @@ export function CricDreamTabs() {
   }
 
   function DisplayGroupMenu() {
-    // console.log("Group length", userGroup.length);
-    return (
-      <div key="usergroups">
-      {userGroup.map( (item, index) => {
-        return (
-        <MenuItem key={index} onClick={() => handleGroupSelect(index)}>{item.groupName}</MenuItem>
-        )
-      })}
-      </div>
-    );
-  }
+   console.log("Group length");
+	return (
+	<div align="center" key="usergroups">
+	<Typography className={classes.title}>{sessionStorage.getItem("userName")}</Typography>
+		<MenuItem onClick={handleProfile}>Profile</MenuItem>
+	</div>
+	)}
     
   let mylogo = `${process.env.PUBLIC_URL}/favicon.ico`;
   let groupCharacter="G";
@@ -458,25 +406,32 @@ export function CricDreamTabs() {
 								{(window.sessionStorage.getItem("userType") === "Doctor") &&
 									<MenuItem onClick={handleWallet}>Wallet</MenuItem>
 								}
-                <Divider/>
-								<MenuItem onClick={handlePatient}>Patient</MenuItem>
-								<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
-								<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
-								<MenuItem onClick={handleReport}>Report</MenuItem>	
-								<Divider />
-								<Typography>Settings</Typography>
+                <Divider className={classes.divider}/>
+								{(itIsMobile) &&
+									<div>
+									<MenuItem onClick={handleAppointment}>Appointment</MenuItem>
+									<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
+									<MenuItem onClick={handlePatient}>Patient</MenuItem>
+									<MenuItem onClick={handleReport}>Report</MenuItem>	
+									<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
+									<Divider className={classes.divider} />
+									</div>
+								}
+								<div align="center">
+								<Typography className={classes.title}>Settings</Typography>
 								<MenuItem onClick={handleWorkingHours}>WorkingHours</MenuItem>	
 								<MenuItem onClick={handleHoliday}>Set Holidays</MenuItem>
-                <Divider/>
+                <Divider className={classes.divider}/>
+								</div>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
 									<div>
 									<MenuItem onClick={handleSample}>Sample</MenuItem>
 									<MenuItem onClick={handleCustomer}>Customer</MenuItem>
-									<Divider/>
+									<Divider className={classes.divider}/>
 									</div>
 								}
-                <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>       
-                <Divider/>
+                {/*<MenuItem onClick={handleContactUs}>Contact Us</MenuItem>*/}
+                <Divider className={classes.divider}/>
                 <MenuItem onClick={() => {handleClose(); handleLogout(); }}>Logout</MenuItem>
               </Menu>
             </div>
@@ -484,11 +439,11 @@ export function CricDreamTabs() {
           {/* <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
             <MenuIcon />
           </IconButton> */}
-					<Typography>
+					<Typography onClick={handleHome}>
 						<span className={classes.doctor}>+</span>
 						<span className={classes.ankit}> Viraag Dental</span>
 					</Typography>
-          <IconButton
+          {/*<IconButton
             aria-label="account of current user"
             aria-controls="menu-appbar"
             aria-haspopup="true"
@@ -496,12 +451,44 @@ export function CricDreamTabs() {
             color="inherit"
           >
             <HomeIcon className={classes.icon}/>
-          </IconButton>
-          <Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
-					<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
-					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>}
-					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleReport}>Report</Button>}
-					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>}
+          </IconButton>*/}
+					{(itIsMobile === false) &&
+						<div>
+						<Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handleReport}>Report</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>
+						</div>
+					}
+					<div align="right">
+					<Avatar 
+            aria-label="account of current user"
+            aria-controls="user-appbar"
+            aria-haspopup="true"
+            color="inherit"
+            variant="circular" 
+						onClick={handleGrpMenu}
+						className={classes.avatar1}>{sessionStorage.getItem("userName").substr(0,1)}
+          </Avatar>
+					<Menu
+            id="group-appbar"
+            anchorEl={grpAnchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            // keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={arunGroup}
+            onClose={handleGrpClose}
+          >
+            <DisplayGroupMenu />
+          </Menu>
+					</div>
           {/* <IconButton
             aria-label="account of current group"
             aria-controls="group-appbar"

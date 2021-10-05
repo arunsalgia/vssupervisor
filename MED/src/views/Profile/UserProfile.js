@@ -1,7 +1,14 @@
 import React, { useState ,useContex, useEffect} from 'react';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import VsButton from "CustomComponents/VsButton";
+import VsCancel from "CustomComponents/VsCancel"
+import { useAlert } from 'react-alert'
+import Drawer from '@material-ui/core/Drawer';
+import globalStyles from "assets/globalStyles";
+
 // import TextField from '@material-ui/core/TextField';
 // import Grid from '@material-ui/core/Grid';
 // import Box from '@material-ui/core/Box';
@@ -45,6 +52,20 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(0),
     marginLeft: theme.spacing(0),
   },
+	common: {
+		padding: "10px 10px", 
+		margin: "10px 10px", 
+	},
+	desc: {
+		fontSize: theme.typography.pxToRem(24),
+    fontWeight: theme.typography.fontWeightBold,	
+		
+	},
+	data: {
+		fontSize: theme.typography.pxToRem(24),
+    fontWeight: theme.typography.fontWeightBold,
+		color: 'blue',
+	},
   userMessage: {
     fontSize: theme.typography.pxToRem(10),
     fontWeight: theme.typography.fontWeightBold,
@@ -114,12 +135,18 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Profile() {
   const classes = useStyles();
+	const gClasses = globalStyles();
+	const alert = useAlert();
   const history = useHistory();
 
   const [userCode, setUserCode] = useState("");
   const [userName, setUserName] = useState("");
-  const [groupName, setGroupName] = useState("");
   const [email, setEmail] = useState("");
+	const [editName, setEditName] = useState("");
+	const [editEmail, setEditEmail] = useState("");
+	const [isDrawerOpened, setIsDrawerOpened] = useState("");
+	
+  const [groupName, setGroupName] = useState("");
   const [profile, setProfile] = useState({});
   const [registerStatus, setRegisterStatus] = useState(199);
 
@@ -855,17 +882,98 @@ export default function Profile() {
   )
   }
   
-
+	function editprofile() {
+		setEditName(userName);
+		setEditEmail(email);
+		setIsDrawerOpened("EDIT");
+	}
+	
+	async function addNewSubmit() {
+		try {
+			let tmp1 = encrypt(editEmail)
+			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricupdateprofile/${sessionStorage.getItem("uid")}/${editName}/${tmp1}`);
+      // success
+      localStorage.setItem("userName", editName);
+			setUserName(editName);
+			setEmail(editEmail);
+			alert.success("Profile successfully updated of user "+editName);
+		} catch (e) {
+			console.log(e);
+			alert.error("error updating profile of "+userName);
+		}
+		setIsDrawerOpened("")
+	}
+	
+	
   let headerText = sessionStorage.getItem("userName") + "\`s Profile";
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="sm">
       <CssBaseline />
       <BlankArea />
       <DisplayPageHeader headerName={headerText} groupName="" tournament=""/>
       <BlankArea />
-      <DisplayAccordian />
-      {/* <ShowResisterStatus/> */}
-    </Container>
+			<div align="left">
+      <Typography className={classes.common}>
+				<span className={classes.desc}>User Name: </span>
+				<span className={classes.data}>{userName}</span>
+			</Typography>
+      <Typography className={classes.common}>
+				<span className={classes.desc}>User Email: </span>
+				<span className={classes.data}>{email}</span>
+			</Typography>
+			<VsButton align="center" name="Edit Profile" onClick={editprofile} />
+			<BlankArea />
+			<div >
+				<Typography className={classes.common}>
+				<span className={classes.desc}>User Code: </span>
+				<span className={classes.data}>{userCode}</span>
+			</Typography>
+				<BlankArea/>
+				<Typography><span className={classes.userMessage}>Share Referral code with your friends and earn bonus </span></Typography>
+				<CopyToClipboard text={copyState.value}
+					onCopy={() => setCopyState({copied: true})}>
+				<button>Copy to clipboard</button>
+				</CopyToClipboard>
+          {copyState.copied ? <span style={{color: 'blue'}}>Copied.</span> : null}
+        </div>       
+			</div>
+			<Drawer
+					open={isDrawerOpened !== ""}
+					anchor="right"
+					variant="temporary"
+					classes={{
+						paper: gClasses.drawerPaper,
+					}}
+			>
+			{(isDrawerOpened === "EDIT") &&
+				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+				<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
+				<ValidatorForm align="center" onSubmit={addNewSubmit} className={gClasses.form} >
+				<Typography align="center" className={classes.modalHeader}>
+					{"Edit profile"}
+				</Typography>
+				<BlankArea />
+				<TextValidator required fullWidth color="primary" className={gClasses.vgSpacing} 
+					id="newName" label="User Name" name="newName"
+					value={editName}
+					onChange={(event) => setEditName(event.target.value)}
+					validators={['minLength', 'noSpecialCharacters']}
+					errorMessages={['Minimum 6 characters required','Special characters not required']}
+				/>
+				<TextValidator required fullWidth color="primary" className={gClasses.vgSpacing} 
+					id="newName" label="User Email" type="email"
+					value={editEmail}
+					onChange={(event) => setEditEmail(event.target.value)}
+					validators={['isEmailOK']}
+					errorMessages={['Invalid Email']}
+				/>
+				<VsButton align="center" name= {"Update"} />
+				<ValidComp />
+				</ValidatorForm>
+			</Box>
+			}
+			</Drawer>
+		</Container>
   );
 
 }
