@@ -22,6 +22,15 @@ const globalStyles = makeStyles((theme) => ({
     width: '100%',
     backgroundColor: '#FAF5E9',
   },
+	drawerPaper: {
+    //position: 'relative',
+    whiteSpace: 'nowrap',
+    width: 300,
+    paddingTop: theme.spacing(4),
+    paddingBottom: theme.spacing(4),
+    //background: '#535454',
+    //color: '#fff',
+  },
 	title: {
 		fontSize: theme.typography.pxToRem(18),
 		fontWeight: theme.typography.fontWeightBold,	

@@ -800,6 +800,45 @@ return (
 	</Box>
 )}
 
+export function DisplayHolidayDetails(props) {
+	const gClasses = globalStyles();
+	
+	
+	let myDate = DATESTR[props.holiday.date] + "/" +
+		MONTHNUMBERSTR[props.holiday.month] + "/" +
+		props.holiday.year;
+		
+	let _button1 = (props.button1 == null);
+	let _button2 = (props.button2 == null);
+	let _button3 = (props.button3 == null);
+	let _button4 = (props.button4 == null);
+	let _button5 = (props.button5 == null);
+	//console.log(_button1, _button2, _button3, _button4, _button5);
+return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<div align="center" >
+		<Typography>
+		<span className={gClasses.patientName}>{myDate}</span>
+		</Typography>
+		</div>
+		<div align="left" >
+		<Typography>
+			<span className={gClasses.patientInfo}>Desc: </span>
+			<span className={gClasses.patientInfo2}>{props.holiday.desc}</span>
+		</Typography>
+		<BlankArea />
+		<div align="right">
+		{(!_button1) && props.button1}
+		{(!_button2) && props.button2}
+		{(!_button3) && props.button3}
+		{(!_button4) && props.button4}
+		{(!_button5) && props.button5}
+		</div>
+	</div>
+	</Box>
+)}
+
+
 export function DisplayPatientName(props) {
 	let myText = props.name;
 	if (props.id) myText + " (Id: " + props.id

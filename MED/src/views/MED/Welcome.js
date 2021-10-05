@@ -386,7 +386,7 @@ const Welcome = () => {
 	}
 	
 	function DisplayDoctorCategory() {
-	console.log(categary);
+	//console.log(categary);
 	return (
 	<Box className={gClasses.boxStyle} borderRadius={7} border={1} >
 	<Grid className={gClasses.noPadding} key="DOCTYPE" container alignItems="center" >
@@ -458,7 +458,7 @@ const Welcome = () => {
 	<CssBaseline />
 	<div className={classes.paper}>
 		<div align="center">
-		<Typography className={classes.welcomeMESSAGE} >{"Welcome to Viraag Dental"}</Typography>	
+		<Typography className={classes.welcomeMESSAGE} >{"Welcome to Doctor Viraag"}</Typography>	
 		</div>
 		<VsButton name="Continue to Login" align="right" 
 			onClick={() => {sessionStorage.setItem("currentLogin","SIGNIN"); cdRefresh();}}

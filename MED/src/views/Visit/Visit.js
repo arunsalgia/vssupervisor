@@ -11,6 +11,7 @@ import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
+import { useAlert } from 'react-alert'
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
@@ -222,7 +223,8 @@ export default function Visit() {
   
   const classes = useStyles();
 	const gClasses = globalStyles();
-
+	const alert = useAlert();
+	
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
 	const [selectPatient, setSelectPatient] = useState(false);
   const [patientArray, setPatientArray] = useState([])
@@ -815,19 +817,19 @@ export default function Visit() {
 		});
 		try {
 			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/printdoc/${userCid}/${newVisitInfo}`);
-			setVisitRegister(200);
+			alert.success("Successfully generated visit document");
 		} catch (e) {
 			console.log(e)
-			setVisitRegister(201);
+			alert.error("Error generating visit document");
 		}
 	}
 	
 	async function printVisit() {	
 		try {
 			await downloadVisit();
-			setVisitRegister(300);
+			alert.success("Successfully downloaded visit document");
 		} catch (e) {
-			setVisitRegister(301);
+			alert.error("Error downloading visit document");
 		}
 	}
 	
@@ -1434,7 +1436,7 @@ export default function Visit() {
 	
 	return (
 	<div className={gClasses.webPage} align="center" key="main">
-	<DisplayPageHeader headerName="Doctor Visit" groupName="" tournament=""/>
+	<DisplayPageHeader headerName="Visit Directory" groupName="" tournament=""/>
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
 	{(currentPatient === "") && 
@@ -1449,10 +1451,11 @@ export default function Visit() {
 			/>
 		</Grid>
 		<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
-			<Typography>Click button to add new patient</Typography>
+			<Typography></Typography>
 		</Grid>
 		<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
-			<VsButton name="New Patient" /> 
+			{/*<VsButton name="New Patient" /> */}
+			<Typography></Typography>
 		</Grid>
 		<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
 		</Grid>

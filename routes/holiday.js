@@ -76,8 +76,8 @@ router.get('/monthly/:cid/:year/:month', async function (req, res) {
   setHeader(res);
   var {cid, month, year } = req.params;
 	
-	let hRec = await M_Holiday.find({cid: cid, month: month, year: year})
-	
+	let hRec = await M_Holiday.find({cid: cid, month: month, year: year}).sort({year: 1, month: 1, date: 1});
+	console.log(hRec);
 	sendok(res, hRec);
 });		
 

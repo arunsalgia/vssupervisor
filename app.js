@@ -226,18 +226,12 @@ CustomerSchema = mongoose.Schema({
 	clinicName: String,
 	welcomeMessage: String,
 	plan: String,
+	workingHours: [Number],
 	email: String,
 	mobile: String,
 	fee: Number,
 	expiryDate: Date,
 	enabled:Boolean,
-	day0: [Number],
-	day1: [Number],
-	day2: [Number],
-	day3: [Number],
-	day4: [Number],
-	day5: [Number],
-	day6: [Number]
 });
 
 DoctorSchema = mongoose.Schema({
@@ -251,7 +245,8 @@ DoctorSchema = mongoose.Schema({
 	addr1: String,
 	addr2: String,
 	addr3: String,
-	
+	location: String,
+	pinCode: String,
 	enabled:Boolean
 });
 

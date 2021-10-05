@@ -39,6 +39,8 @@ import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import moment from "moment";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
+import { useAlert } from 'react-alert'
+
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Avatar from "@material-ui/core/Avatar"
@@ -53,12 +55,6 @@ import {dynamicModal } from "assets/dynamicModal";
 import Switch from "@material-ui/core/Switch";
 import Link from '@material-ui/core/Link';
 
-//import Card from "components/Card/Card.js";
-//import CardBody from "components/Card/CardBody.js";
-// import CardAvatar from "components/Card/CardAvatar.js";
-// import { useHistory } from "react-router-dom";
-// import { UserContext } from "../../UserContext";
-
 import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
 DisplayPatientDetails,
 DisplayAppointmentDetails,
@@ -71,6 +67,7 @@ WEEKSTR, MONTHSTR, SHORTMONTHSTR,
 HOURSTR, MINUTESTR,
 VISITTYPE,
 str1by4, str1by2,  str3by4,
+BLOCKNUMBER,
 } from 'views/globals';
 
 // icons
@@ -388,7 +385,7 @@ let medQty=[];
 const timeArray=[1,2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 const unitArray=["Day(s)", "Weeks(s)", "Month(s)"];
 
-const MINUTESLOTS = [0, 15, 30, 45];
+const MINUTEBLOCK = [0, 15, 30, 45];
 
 const menuModal = (isMobile()) ? dynamicModal('50%') : dynamicModal('20%');
 const yesNoModal = dynamicModal('60%');
@@ -410,7 +407,8 @@ var customerData;
 export default function Appointment() {
   const classes = useStyles();
 	const gClasses = globalStyles();
-
+	const alert = useAlert();
+	
   const [patientArray, setPatientArray] = useState([])
 	const [patientMasterArray, setPatientMasterArray] = useState([]);
 	const [currentPatient, setCurrentPatient] = useState("");
@@ -577,61 +575,55 @@ export default function Appointment() {
 		let morningSlots = [];
 		let afternoonSlots = [];
 		let eveningSlots = [];
-		let workingHours;
+		let workingHours = customerData.workingHours;
 		
-		switch (d.getDay()) {
-			case 0: workingHours = customerData.day0; break;
-			case 1: workingHours = customerData.day1; break;
-			case 2: workingHours = customerData.day2; break;
-			case 3: workingHours = customerData.day3; break;
-			case 4: workingHours = customerData.day4; break;
-			case 5: workingHours = customerData.day5; break;
-			case 6: workingHours = customerData.day6; break;			
-		}
 		let myYear = d.getFullYear();
 		let myMonth = d.getMonth();
 		let myDate = d.getDate();
 		let myDay = d.getDay();
 		// for morning slots
-		for(let hr=9; hr<12; ++hr) {
-			if (workingHours.includes(hr)) {
-				for (let minIdx=0; minIdx < MINUTESLOTS.length; ++minIdx) {
-						morningSlots.push({year: myYear, month: myMonth, date: myDate,
-						hour: hr, minute: MINUTESLOTS[minIdx],
-						dateTime: d, 
-						day: myDay,
-						slot: HOURSTR[hr] + ":" + MINUTESTR[MINUTESLOTS[minIdx]],
-						available: checkAppt(myYear, myMonth, myDate, hr, MINUTESLOTS[minIdx], allAppt)
-					});
-				}
+		for(let blk=BLOCKNUMBER.morningBlockStart; blk<=BLOCKNUMBER.morningBlockEnd; ++blk) {
+			if (workingHours.includes(myDay*100+blk)) {
+				let hour = Math.floor(blk / 4);
+				let minute = MINUTEBLOCK[blk % 4];
+				morningSlots.push({year: myYear, month: myMonth, date: myDate,
+					hour: hour,
+					minute: minute,
+					dateTime: d, 
+					day: myDay,
+					slot: HOURSTR[hour] + ":" + MINUTESTR[minute],
+					available: checkAppt(myYear, myMonth, myDate, hour, minute, allAppt)
+				});
 			}
 		}
 		// for afternoon slots
-		for(let hr=12; hr<16; ++hr) {
-			if (workingHours.includes(hr)) {
-				for (let minIdx=0; minIdx < MINUTESLOTS.length; ++minIdx) {
-						afternoonSlots.push({year: myYear, month: myMonth, date: myDate,
-						hour: hr, minute: MINUTESLOTS[minIdx],
-						dateTime: d, 
-						day: myDay,
-						slot: HOURSTR[hr] + ":" + MINUTESTR[MINUTESLOTS[minIdx]],
-						available: checkAppt(myYear, myMonth, myDate, hr, MINUTESLOTS[minIdx], allAppt)
-					});
-				}
+		for(let blk=BLOCKNUMBER.afternoonBlockStart; blk<=BLOCKNUMBER.afternoonBlockEnd; ++blk) {
+			if (workingHours.includes(myDay*100+blk)) {
+				let hour = Math.floor(blk / 4);
+				let minute = MINUTEBLOCK[blk % 4];
+				afternoonSlots.push({year: myYear, month: myMonth, date: myDate,
+					hour: hour,
+					minute: minute,
+					dateTime: d, 
+					day: myDay,
+					slot: HOURSTR[hour] + ":" + MINUTESTR[minute],
+					available: checkAppt(myYear, myMonth, myDate, hour, minute, allAppt)
+				});
 			}
 		}
 		// evening slots
-		for(let hr=16; hr<24; ++hr) {
-			if (workingHours.includes(hr)) {
-				for (let minIdx=0; minIdx < MINUTESLOTS.length; ++minIdx) {
-					eveningSlots.push({year: myYear, month: myMonth, date: myDate,
-						hour: hr, minute: MINUTESLOTS[minIdx	],
-						dateTime: d, 
-						day: myDay,
-						slot: HOURSTR[hr] + ":" + MINUTESTR[MINUTESLOTS[minIdx]],
-						available: checkAppt(myYear, myMonth, myDate, hr, MINUTESLOTS[minIdx], allAppt)
-					});		
-				}
+		for(let blk=BLOCKNUMBER.eveningBlockStart; blk<=BLOCKNUMBER.eveningBlockEnd; ++blk) {
+			if (workingHours.includes(myDay*100+blk)) {
+				let hour = Math.floor(blk / 4);
+				let minute = MINUTEBLOCK[blk % 4];
+				eveningSlots.push({year: myYear, month: myMonth, date: myDate,
+					hour: hour,
+					minute: minute,
+					dateTime: d, 
+					day: myDay,
+					slot: HOURSTR[hour] + ":" + MINUTESTR[minute],
+					available: checkAppt(myYear, myMonth, myDate, hour, minute, allAppt)
+				});
 			}
 		}
 	
@@ -647,16 +639,11 @@ export default function Appointment() {
 		if (tmp.length > 0) return true;
 			
 		// check if doctor's weekend on this date
-		let isClosed = false;
-		switch (d.getDay()) {
-			case 0: isClosed = customerData.day0.length === 0; break;
-			case 1: isClosed = customerData.day1.length === 0; break;
-			case 2: isClosed = customerData.day2.length === 0; break;
-			case 3: isClosed = customerData.day3.length === 0; break;
-			case 4: isClosed = customerData.day4.length === 0; break;
-			case 5: isClosed = customerData.day5.length === 0; break;
-			case 6: isClosed = customerData.day6.length === 0; break;
-		}
+		tmp = customerData.workingHours.filter(x => 
+			x >= (d.getDay()*100 + BLOCKNUMBER.allBlockStart) &&
+			x <= (d.getDay()*100 + BLOCKNUMBER.allBlockEnd)
+		);
+		let isClosed = (tmp.length === 0);
 		return isClosed;
 	}
 	
@@ -843,8 +830,7 @@ export default function Appointment() {
 	}
 	
 
-async function handleAddAppointment(slot) {
-		
+async function handleAddAppointment(slot) {	
 		let myOrder = ((slot.year * 100 + slot.month) * 100  + slot.date)*100;
 		myOrder = (myOrder + slot.hour)*100 + slot.minute;
 		let tmp = {
@@ -868,8 +854,8 @@ async function handleAddAppointment(slot) {
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/add/${userCid}/${jTmp}`;
 			let resp = await axios.get(myUrl);
+			alert.success("Appointment set of "+currentPatientData.displayName);
 			// update patient appointment
-			//console.log(resp.data);
 			let tmpArray=[resp.data].concat(apptArray);
 			//console.log(tmpArray);
 			setApptArray(tmpArray);
@@ -880,6 +866,7 @@ async function handleAddAppointment(slot) {
 			generateSlots(tmpArray, holidayArray);
 		} catch (e) {
 			console.log(e);
+			alert.error("Error setting appointment of "+currentPatientData.displayName);
 			return;
 		}
 	}
@@ -941,7 +928,7 @@ async function handleAddAppointment(slot) {
 			<Grid key={"MOR"+index} item xs={4} sm={4} md={2} lg={2} >
 				{(t.available !== "") &&
 					<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
-					<Typography>{t.available}</Typography>
+					<Typography id={t.slot}>{t.available}</Typography>
 					</Box>
 				}
 				{((t.available == "") && (currentPatient === "INFO")) &&
@@ -1029,7 +1016,7 @@ async function handleAddAppointment(slot) {
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/cancel/${userCid}/${cancelAppt.pid}/${cancelAppt.order}`;
 			let resp = await axios.get(myUrl);
-			//console.log(tmpArray);
+			alert.success("Cancelled appintment of "+cancelAppt.displayName);
 
 			// remove from patient appoint 
 			let tmpAppt = apptArray.filter(x => 
@@ -1047,6 +1034,7 @@ async function handleAddAppointment(slot) {
 			generateSlots(tmpAppt, holidayArray);
 		} catch (e) {
 			console.log(e);
+			alert.error("Error cancellein appointment of "+cancelAppt.displayName);
 		}
 	}
 	
@@ -1129,11 +1117,12 @@ async function handleAddAppointment(slot) {
 	
 	function handleMyAppt() {
 		setCurrentPatient("INFO")
+		setApptArray([]);
 	}
 
 	return (
 		<div className={gClasses.webPage} align="center" key="main">
-		<DisplayPageHeader headerName="Patient Appointment" groupName="" tournament=""/>
+		<DisplayPageHeader headerName="Appointment Directory" groupName="" tournament=""/>
 		<Container component="main" maxWidth="lg">
 		<CssBaseline />
 		{(currentPatient === "") && 

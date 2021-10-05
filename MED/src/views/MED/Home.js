@@ -126,7 +126,12 @@ export default function Home() {
 	<div className={gClasses.webPage} align="center" key="main">
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
-	<Typography className={classes.welcome}>{custInfo.welcomeMessage}</Typography>
+	{(sessionStorage.getItem("userType") === "Developer") &&
+		<Typography className={classes.welcome}>{"Welcome Doctor Viraag"}</Typography>
+	}
+	{(sessionStorage.getItem("userType") !== "Developer") &&
+		<Typography className={classes.welcome}>{custInfo.welcomeMessage}</Typography>
+	}
 	<Grid container key="ALLITEMS" >
 		<Grid item key={"ITEM0"} xs={false} sm={false} md={false} lg={1} />
 		{cardData.map( (item, index) =>

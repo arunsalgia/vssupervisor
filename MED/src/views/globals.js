@@ -30,6 +30,8 @@ export const MINUTESTR = [
 "50", "51", "52", "53", "54", "55", "56", "57", "58", "59"
 ];
 
+export const MINUTEBLOCK=[0, 15, 30, 45];
+
 export const DATESTR = [
 "00",
 "01", "02", "03", "04", "05", "06", "07", "08", "09", "10",
@@ -40,3 +42,14 @@ export const DATESTR = [
 
 //in date function 0 represents JAN I.e. month number 1
 export const MONTHNUMBERSTR = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+
+export const BLOCKNUMBER={
+allBlockStart: 0,
+allBlockEnd: 95,
+morningBlockStart: 0,
+morningBlockEnd: 55,
+afternoonBlockStart: 56,
+afternoonBlockEnd: 63,
+eveningBlockStart: 64,
+eveningBlockEnd: 95,
+}

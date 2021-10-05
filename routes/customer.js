@@ -38,6 +38,16 @@ router.get('/add/:userName', async function(req, res, next) {
 	sendok(res, "done");
 });
 
+router.get('/setworkinghours/:cid/:workingHours', async function(req, res, next) {
+  setHeader(res);
+	var {cid, workingHours} = req.params;
+	
+	let rec = await M_Customer.findOne({_id: cid});
+	rec.workingHours = JSON.parse(workingHours);
+	rec.save();
+	sendok(res, rec);
+})
+
 router.get('/test', async function(req, res, next) {
   setHeader(res);
 	let i, cNum;
@@ -47,16 +57,11 @@ router.get('/test', async function(req, res, next) {
 		//allRecs[i].customerNumber = cNum;
 		//allRecs[i].save();
 		//console.log(allRecs[i]);
-		allRecs[i].day0 = [];
-		allRecs[i].day1 = [9, 10, 11, 12, 13, 16, 17, 18, 19];
-		allRecs[i].day2 = [9, 10, 11, 12, 13, 16, 17, 18, 19];
-		allRecs[i].day3 = [9, 10, 11, 12, 13, 16, 17, 18, 19];
-		allRecs[i].day4 = [9, 10, 11, 12, 13, 16, 17, 18, 19];
-		allRecs[i].day5 = [9, 10, 11, 12, 13];
-		allRecs[i].day6 =  (allRecs[i].customerNumber === 100) ? [] : [9, 10, 11, 12, 13, 16, 17, 18, 19];
+		allRecs[i].workingHours = [148, 149, 150];
+		console.log(allRecs[i]);
 		allRecs[i].save();
 	}
-	sendok(res, "all days done");
+	sendok(res, "working hours days done");
 });
 
 cron.schedule('15,57 0,9,13 * * *', async () => {	

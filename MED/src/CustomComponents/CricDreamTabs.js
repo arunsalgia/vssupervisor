@@ -57,10 +57,8 @@ import Home from "views/MED/Home.js";
 import ContactUs from "views/MED/ContactUs.js";
 import PointSystem from "views/MED/PointSystem.js";
 
-
-//import NewGroup from "views/Group/NewGroup.js"
-//import JoinGroup from "views/Group/JoinGroup.js"
-//import GroupDetails from "views/Group/GroupDetails.js"
+import WorkingHours from "views/Settings/WorkingHours";
+import Holiday from "views/Holiday/Holiday";
 
 
 import Modal from 'react-modal';
@@ -299,7 +297,8 @@ export function CricDreamTabs() {
 	const handleSample = () => { handleClose(); setMenuValue(801);}
 	const handleCustomer = () => { handleClose(); setMenuValue(802);}
 	
-
+	const handleWorkingHours = () => { handleClose(); setMenuValue(701);}
+	const handleHoliday = () => { handleClose(); setMenuValue(702);}
   
 
   function DisplayCdItems() {
@@ -321,6 +320,8 @@ export function CricDreamTabs() {
 			case 904: return <NextVisit />
 			case 905: return <Report />
 
+			case 701: return <WorkingHours />
+			case 702: return <Holiday />
 /*
       //case 4: 
       //case 101: return <Match />;
@@ -462,6 +463,10 @@ export function CricDreamTabs() {
 								<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
 								<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
 								<MenuItem onClick={handleReport}>Report</MenuItem>	
+								<Divider />
+								<Typography>Settings</Typography>
+								<MenuItem onClick={handleWorkingHours}>WorkingHours</MenuItem>	
+								<MenuItem onClick={handleHoliday}>Set Holidays</MenuItem>
                 <Divider/>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
 									<div>
