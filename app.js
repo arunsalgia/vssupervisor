@@ -31,7 +31,7 @@ PASSWORDLINKVALIDTIME=10			// Password link valid time in minutes
 BASELINK='http://localhost:3000';
 if (PRODUCTION) {
 	console.log("Using cloud  base  link");
-  BASELINK='https://viraagdental.herokuapp.com';
+  BASELINK='https://doctorviraag.herokuapp.com';
 } else {
 	console.log("Using local base  link");
   BASELINK='http://localhost:3000';
@@ -87,7 +87,7 @@ app.use((req, res, next) => {
   if (req.url.includes("admin") || 
       req.url.includes("signIn") ||
       req.url.includes("Logout") ||
-      req.url.includes("viraagdental")
+      req.url.includes("doctorviraag")
     ){
     //req.url = "/";
     //res.redirect('/');

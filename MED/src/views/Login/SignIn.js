@@ -283,23 +283,14 @@ export default function SignIn() {
 			validators={['noSpecialCharacters']}
 			errorMessages={['Special characters not permitted']}
 		/>
-		{(deviceIsMobile) &&
-			<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
-				id="password" label="Password" type="password"
-				value={password} 
-				onChange={() => { setPassword(event.target.value) }}
-				validators={['minLength', 'noSpecialCharacters']}
-				errorMessages={['Minimum 6 chars required','Special characters not permitted']}
-			/>
-		}
-		{(!deviceIsMobile && showPassword) &&
+		{(showPassword) &&
 			<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
 				id="password" label="Password" type={"text"}
 				value={password} 
 				InputProps={{
 					endAdornment: (
 						<InputAdornment position="end">
-							<VisibilityOffIcon onClick={() => { setShowPassword(false); }} />
+							<VisibilityIcon onClick={() => { setShowPassword(false); }} />
 						</InputAdornment>
 					),
 				}}
@@ -308,14 +299,14 @@ export default function SignIn() {
 				errorMessages={['Minimum 6 chars required','Special characters not permitted']}
 			/>
 		}
-		{(!deviceIsMobile && !showPassword) &&
+		{(!showPassword) &&
 			<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
 				id="password" label="Password" type={"password"}
 				value={password} 
 				InputProps={{
 					endAdornment: (
 						<InputAdornment position="end">
-							<VisibilityIcon onClick={() => { setShowPassword(true); }} />
+							<VisibilityOffIcon onClick={() => { setShowPassword(true); }} />
 						</InputAdornment>
 					),
 				}}

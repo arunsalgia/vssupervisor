@@ -50,7 +50,7 @@ router.use('/', function(req, res, next) {
 });
 
 
-function decodeVisitInfo(jsonData) {
+async function decodeVisitInfo(jsonData) {
 	let myData = JSON.parse(jsonData);
 
 	// convert base64 to string
@@ -63,6 +63,7 @@ function decodeVisitInfo(jsonData) {
 	for(let i=0; i<myData.visit.remarks.length; ++i) {
 		myData.visit.remarks[i].name = base64ToString(myData.visit.remarks[i].name);
 	}
+	
 	return myData;
 }
 
@@ -70,7 +71,7 @@ router.get('/printdoc/:cid/:jsonData', async function(req, res, next) {
   setHeader(res);
 	var {cid, jsonData } = req.params;
 	
-	let myData = decodeVisitInfo(jsonData);
+	let myData = await decodeVisitInfo(jsonData);
 	console.log(myData);
 
 	let xxx = myData.visit;
@@ -248,7 +249,10 @@ router.get('/updatenewvisit/:cid/:visitNumber/:visitInfo', async function(req, r
 	let updatefirstTime = false;
 	
 	console.log(visitNumber);
-	let tmp = JSON.parse(visitInfo);
+	//let tmp = JSON.parse(visitInfo);
+	let tmp = await decodeVisitInfo(visitInfo);
+	//console.log(tmp);
+
 	let info = tmp.visit;
 	//let apptRec = tmp.appointment;
 	let nextVisitInfo =  tmp.nextVisit;
