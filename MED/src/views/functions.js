@@ -779,11 +779,14 @@ export function stringToBase64(originalString) {
 	// The original utf8 string
 	//let originalString = "GeeksforGeeks";
 	// Create buffer object, specifying utf8 as encoding
-	let bufferObj = Buffer.from(originalString, "utf8");		
+	let bufferObj = Buffer.from(originalString, "utf8");	
+	
 	// Encode the Buffer as a base64 string
 	let base64String = bufferObj.toString("base64");
 	//console.log("The encoded base64 string is:", base64String);
-	return base64String;
+	
+	let b64String = Buffer.from(originalString).toString('base64')
+	return b64String;
 }
 
 export function base64ToString(base64string) {
@@ -795,7 +798,9 @@ export function base64ToString(base64string) {
 	// Encode the Buffer as a utf8 string
 	let decodedString = bufferObj.toString("utf8");
 	//console.log("The decoded string:", decodedString);
-	return decodedString
+	
+	let norString = Buffer.from(base64string, 'base64').toString('ascii')
+	return norString;
 }
 
 export function handleLogout() {

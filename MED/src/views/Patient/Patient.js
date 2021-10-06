@@ -563,7 +563,7 @@ export default function Patient() {
 				value={patientEmail} 
 				onChange={() => { setPatientEmail(event.target.value) }}
       />
-			<TextValidator    fullWidth  className={gClasses.vgSpacing} 
+			<TextValidator fullWidth required className={gClasses.vgSpacing} 
 				id="newPatientMobile" label="Mobile" type="number"
 				value={patientMobile} 
 				onChange={() => { setPatientMobile(event.target.value) }}

@@ -40,7 +40,7 @@ import "react-datetime/css/react-datetime.css";
 import moment from "moment";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { useAlert } from 'react-alert'
-
+import Drawer from '@material-ui/core/Drawer';
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Avatar from "@material-ui/core/Avatar"
@@ -416,7 +416,14 @@ export default function Appointment() {
 	const [allPendingAppt, setAllPendingAppt] = useState([])
 	const [emurName, setEmurName] = useState("");
 	const [modalRegister, setModalRegister] = useState(0)
-	const [radioValue, setRadioValue] = useState("all");
+	const [radioValue, setRadioValue] = useState("Male");
+	const [isDrawerOpened, setIsDrawerOpened] = useState(false);
+	
+	const	[patientName, setPatientName] = useState("");
+	const	[patientAge, setPatientAge] = useState(0);
+	const	[patientGender, setPatientGender] = useState("Male");
+	const	[patientEmail, setPatientEmail] = useState("");
+	const	[patientMobile, setPatientMobile] = useState(0);
 	
 	const [directoryMode, setDirectoryMode] = useState(defaultDirectoryMode);
 	const [monthYearDate, setMonthYearDate] = useState(new Date());
@@ -1115,6 +1122,51 @@ async function handleAddAppointment(slot) {
 		generateSlots(allPendingAppt, holidayArray);
 	}
 	
+	function handleAdd() {
+		//console.log("handleAdd");
+		setPatientName("");
+		setPatientAge("");
+		setPatientGender("Male")
+		setRadioValue("Male");
+		setPatientEmail("");
+		setPatientMobile("");
+		
+		//setIsAdd(true);
+		setIsDrawerOpened(true);
+	}
+	
+	async function handleAddEditSubmit() {
+		let myAge = (patientAge !== "") ? patientAge : 0;
+		let myMobile = (patientMobile !== "") ? patientMobile : 0;
+		let myEmail = (patientEmail !== "") ? patientEmail : "-";
+		myEmail = encrypt(myEmail);
+		console.log(myEmail);
+		console.log("Addedit", patientName, myAge, patientGender, myEmail, myMobile);
+		
+		let resp;
+		let myUrl;
+	
+		try {
+			myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/add/${userCid}/${patientName}/${myAge}/${patientGender}/${myEmail}/${myMobile}`;
+			resp = await axios.get(myUrl);
+			alert.success("Successfully added new patient "+patientName);
+		} catch (error)  {
+			console.log(error.response.status);
+			alert.error("Error adding new patient "+patientName);
+			return
+		}
+
+		setIsDrawerOpened(false);
+
+		let ppp = await getAllPatients(userCid);
+		setPatientMasterArray(ppp);
+		setPatientFilter(ppp, searchText);
+		setIsDrawerOpened(false);
+		return; 
+	}
+	
+
+
 	function handleMyAppt() {
 		setCurrentPatient("INFO")
 		setApptArray([]);
@@ -1140,7 +1192,8 @@ async function handleAddAppointment(slot) {
 				<Typography>Click button to add new patient</Typography>
 			</Grid>
 			<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
-				<VsButton name="New Patient" /> 
+				<VsButton name="New Patient" onClick={handleAdd} />
+				
 			</Grid>
 			<Grid key={"F6"} item xs={4} sm={4} md={2} lg={2} >
 				<VsButton name="My Appointments" onClick={handleMyAppt}/> 
@@ -1169,6 +1222,55 @@ async function handleAddAppointment(slot) {
 			}
 			</Box>
 		}
+		<Drawer className={classes.drawer}
+			anchor="right"
+			variant="temporary"
+			open={isDrawerOpened}
+		>
+		{(true) &&
+		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<VsCancel align="right" onClick={() => { setIsDrawerOpened(false)}} />
+		<ValidatorForm align="center" className={classes.form} onSubmit={handleAddEditSubmit}>
+			<Typography className={gClasses.title}>{"Add Patient"}</Typography>
+			<TextValidator fullWidth  className={gClasses.vgSpacing}
+				id="newPatientName" label="Name" type="text"
+				value={patientName} 
+				onChange={() => { setPatientName(event.target.value) }}
+      />
+			<TextValidator  fullWidth className={gClasses.vgSpacing}
+				id="newPatientAge" label="Age" type="number"
+				value={patientAge}
+				onChange={() => { setPatientAge(event.target.value) }}
+				validators={['minNumber:1', 'maxNumber:99']}
+        errorMessages={['Age to be above 1', 'Age to be less than 100']}				
+      />
+			<FormControl component="fieldset">
+				<RadioGroup row aria-label="radioselection" name="radioselection" value={radioValue} 
+					onChange={() => {setRadioValue(event.target.value); setPatientGender(event.target.value); }}
+				>
+				<FormControlLabel className={classes.filterRadio} value="Male" 		control={<Radio color="primary"/>} label="Male" />
+				<FormControlLabel className={classes.filterRadio} value="Female" 	control={<Radio color="primary"/>} label="Female" />
+				<FormControlLabel className={classes.filterRadio} value="Other"   control={<Radio color="primary"/>} label="Other" />
+			</RadioGroup>
+			</FormControl>
+			<TextValidator   fullWidth   className={gClasses.vgSpacing} 
+				id="newPatientEmail" label="Email" type="email"
+				value={patientEmail} 
+				onChange={() => { setPatientEmail(event.target.value) }}
+      />
+			<TextValidator fullWidth required className={gClasses.vgSpacing} 
+				id="newPatientMobile" label="Mobile" type="number"
+				value={patientMobile} 
+				onChange={() => { setPatientMobile(event.target.value) }}
+				validators={['minNumber:1000000000', 'maxNumber:9999999999']}
+        errorMessages={['Invalid Mobile number','Invalid Mobile number']}
+      />	
+			<BlankArea />
+			<VsButton name={"Add"} />
+			</ValidatorForm>    		
+			</Box>
+		}
+		</Drawer>		
 		</Container>				
   </div>
   );    

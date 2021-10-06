@@ -228,6 +228,10 @@ export default function WorkingHours() {
   const classes = useStyles();
 	const gClasses = globalStyles();
 
+	const [defaultMorningSlots, setDefaultMorningSlots] = useState([]);
+	const [defaultAfternoonSlots, setDefaultAfternoonSlots] = useState([]);
+	const [defaultEveningSlots, setDefaultEveningSlots] = useState([]);
+	
 	const [workingArray, setWorkingArray] = useState([])
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [morningCB, setMorningCB] = useState(false);
@@ -245,18 +249,43 @@ export default function WorkingHours() {
 	
   useEffect(() => {	
 		userCid = sessionStorage.getItem("cid");
-
 		let w=[];
 		for(let i=0; i<700; ++i) {
 			w.push(false);
 		}
-
 		customerData = JSON.parse(sessionStorage.getItem("customerData"));
+		//console.log(customerData.workingHours);
 		for(let i=0; i<customerData.workingHours.length; ++i) {
 			w[customerData.workingHours[i]] = true;
 		}
-		
 		setWorkingArray(w);
+		
+		let allSlotStr = process.env.REACT_APP_DEFAULTMORNINGSLOTS;
+		let allSlotSplit = allSlotStr.split(",");
+		//console.log(allSlotSplit);
+		let allSlotArray = [];
+		for(let i=0; i<allSlotSplit.length; ++i) {
+			allSlotArray.push(Number(allSlotSplit[i]));
+		}
+		//console.log(allSlotArray);
+		setDefaultMorningSlots(allSlotArray);
+			
+		allSlotStr = process.env.REACT_APP_DEFAULTAFTERNOONSLOTS;
+		allSlotSplit = allSlotStr.split(",");
+		allSlotArray = [];
+		for(let i=0; i<allSlotSplit.length; ++i) {
+			allSlotArray.push(Number(allSlotSplit[i]));
+		}
+		setDefaultAfternoonSlots(allSlotArray);
+			
+		allSlotStr = process.env.REACT_APP_DEFAULTEVENINGSLOTS;
+		allSlotSplit = allSlotStr.split(",");
+		allSlotArray = [];
+		for(let i=0; i<allSlotSplit.length; ++i) {
+			allSlotArray.push(Number(allSlotSplit[i]));
+		}
+		setDefaultEveningSlots(allSlotArray);
+
   }, []);
 
 
@@ -350,6 +379,32 @@ export default function WorkingHours() {
 	</div>
 	)}
 	
+	function setDefaultSlots(slotType, startNum, endNum) {
+		let i, blockNumber;
+		//console.log(defaultMorningSlots);
+		//console.log(defaultAfternoonSlots);
+		//console.log(defaultEveningSlots);
+		//console.log(slotType);
+		let tmpArray = [].concat(workingArray);
+		for(i=startNum; i<=endNum; ++i) {
+			blockNumber = i % 100;
+			switch (slotType) {
+				case "MORNING":
+					tmpArray[i] = defaultMorningSlots.includes(blockNumber);
+					//console.log(i,  tmpArray[i]);
+					break;
+				case "AFTERNOON":
+					tmpArray[i] = defaultAfternoonSlots.includes(blockNumber); 
+					break;
+				case "EVENING":
+					tmpArray[i] = defaultEveningSlots.includes(blockNumber); 
+					break;
+			}
+		}
+		//console.log(i,  tmpArray[i]);
+		setWorkingArray(tmpArray);
+	}
+	
 	function DisplayMorningSlots() {
 	let startNum = currentIndex*100 + BLOCKNUMBER.morningBlockStart;
 	let endNum = currentIndex*100 + BLOCKNUMBER.morningBlockEnd + 1;
@@ -357,12 +412,15 @@ export default function WorkingHours() {
 	return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={classes.noPadding} key={"MED"+currentIndex} container alignItems="center"  >
-	<Grid item xs={12} sm={8} md={8} lg={8} >
+	<Grid item xs={12} sm={6} md={6} lg={6} >
 		<div align="center">
 		<Typography className={classes.slotTitle}>{WEEKSTR[currentIndex]+" Morning slots"}</Typography>
 		</div>
 	</Grid>
-	<Grid item xs={12} sm={4} md={4} lg={4} >
+	<Grid item xs={6} sm={3} md={3} lg={3} >
+		<VsButton name="Set default Morning Slots" onClick={() => {setDefaultSlots("MORNING", startNum, endNum)}} />
+	</Grid>
+	<Grid item xs={6} sm={3} md={3} lg={3} >
 	 <FormControlLabel 
 		control={
 		 <Checkbox 
@@ -415,12 +473,15 @@ export default function WorkingHours() {
 	return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={classes.noPadding} key={"MED"+currentIndex} container alignItems="center"  >
-	<Grid item xs={12} sm={8} md={8} lg={8} >
+	<Grid item xs={12} sm={6} md={6} lg={6} >
 		<div align="center">
 		<Typography className={classes.slotTitle}>{WEEKSTR[currentIndex]+" afternoon slots"}</Typography>
 		</div>
 	</Grid>
-	<Grid item xs={12} sm={4} md={4} lg={4} >
+	<Grid item xs={6} sm={3} md={3} lg={3} >
+		<VsButton name="Set default Afternoon Slots" onClick={() => {setDefaultSlots("AFTERNOON", startNum, endNum)}} />
+	</Grid>
+	<Grid item xs={6} sm={3} md={3} lg={3} >
 	 <FormControlLabel 
 		control={
 		 <Checkbox 
@@ -474,12 +535,15 @@ export default function WorkingHours() {
 	return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={classes.noPadding} key={"MED"+currentIndex} container alignItems="center"  >
-	<Grid item xs={12} sm={8} md={8} lg={8} >
+	<Grid item xs={12} sm={6} md={6} lg={6} >
 		<div align="center">
 		<Typography className={classes.slotTitle}>{WEEKSTR[currentIndex]+" evening slots"}</Typography>
 		</div>
 	</Grid>
-	<Grid item xs={12} sm={4} md={4} lg={4} >
+	<Grid item xs={6} sm={3} md={3} lg={3} >
+		<VsButton name="Set default Evening Slots" onClick={() => {setDefaultSlots("EVENING", startNum, endNum)}} />
+	</Grid>
+	<Grid item xs={6} sm={3} md={3} lg={3} >
 	 <FormControlLabel 
 		control={
 		 <Checkbox 

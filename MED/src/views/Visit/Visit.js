@@ -782,19 +782,14 @@ export default function Visit() {
 		return (errcode);
 	}
 	
-	async function generateVisit() {
+	async function generateVisitDocument() {
 		let errcode = validateNewVisit();
 
 		if (errcode !== 0) { setVisitError(errcode); return; }
 		
 		//let newVisitNumber = visitArray.length;
-		let newVisit = getenrateVisitInfo();	
-		let newVisitInfo = JSON.stringify(
-		{
-			appointment: currentAppt,
-			visit:       newVisit,
-			nextVisit:   {after: nextVisitTime, unit: nextVisitUnit},
-		});
+		let newVisit = prepareVisitData();	
+		let newVisitInfo = JSON.stringify(newVisit);
 		try {
 			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/printdoc/${userCid}/${newVisitInfo}`);
 			alert.success("Successfully generated visit document");
@@ -813,14 +808,24 @@ export default function Visit() {
 		}
 	}
 	
-	function getenrateVisitInfo() {
+	function prepareVisitData() {
 		let newVisit = cloneDeep(visitArray[0]);
-
 		// remove blank lines
 		newVisit.remarks = newVisit.remarks.filter(x => x.name.trim() !== "");
 		newVisit.userNotes = newVisit.userNotes.filter(x => x.name.trim() !== "");
 
-		return newVisit;
+		for(let i=0; i<newVisit.medicines.length; ++i) {
+			newVisit.medicines[i].name = stringToBase64(newVisit.medicines[i].name);
+		}
+		for(let i=0; i<newVisit.userNotes.length; ++i) {
+			newVisit.userNotes[i].name = stringToBase64(newVisit.userNotes[i].name);
+		}
+		for(let i=0; i<newVisit.remarks.length; ++i) {
+			newVisit.remarks[i].name = stringToBase64(newVisit.remarks[i].name);
+		}
+		
+		let result = {visit: newVisit, nextVisit: {after: nextVisitTime, unit: nextVisitUnit} }
+		return result;
 	}
 	
 	async function updateVisit() {
@@ -828,22 +833,19 @@ export default function Visit() {
 
 		if (errcode == 0) {	
 			let newVisitNumber = visitArray.length;
-			let newVisit = getenrateVisitInfo();
+			let newVisit = prepareVisitData();
 			// encodeURI			
-			let newVisitInfo = encodeURI(JSON.stringify(
-			{
-				visit:       newVisit,
-				nextVisit:   {after: nextVisitTime, unit: nextVisitUnit},
-			}));
+			let newVisitInfo = JSON.stringify(newVisit);
+			//console.log(newVisitInfo);
 			try {
 				await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/updatenewvisit/${userCid}/${newVisitNumber}/${newVisitInfo}`)
-				setVisitRegister(100);
+				alert.success("Successfully update new visit");
 			} catch (e) {
 				console.log(e)
-				setVisitRegister(101);
+				alert.success("Error updating new visit");
 			}
 		} else {
-			setVisitError(errcode);
+			//setVisitError(errcode);
 		}
 	}
 	
@@ -1315,7 +1317,7 @@ export default function Visit() {
 	return (
 		<div align="right">
 		<VsButton name="Update New Visit"  onClick={updateVisit} />
-		<VsButton name="Generate Visit Document"  onClick={generateVisit} />
+		<VsButton name="Generate Visit Document"  onClick={generateVisitDocument} />
 		<VsButton name="Download Visit Document"  onClick={printVisit} />
 		<VisitRegisterStatus />
 		</div>
@@ -1362,8 +1364,8 @@ export default function Visit() {
 		<DisplayPatientDetails 
 			patient={m} 
 			button1={
-				<IconButton color={'primary'} size="small" onClick={() => { handleSelectPatient(m)}}  >
-					<EventNoteIcon />
+				<IconButton className={gClasses.green} size="small" onClick={() => { handleSelectPatient(m)}}  >
+					<LocalHospitalIcon />
 				</IconButton>
 			}
 		/>
