@@ -609,11 +609,15 @@ export default function Document() {
 	function setFilter(myArray, filterStr) {
 		filterStr = filterStr.trim().toLowerCase();
 		let tmpArray;
+		if (filterStr !== "") {
 		if (validateInteger(filterStr)) {
 			// it is integer. Thus has to be Id
-			tmpArray = patientMasterArray.filter(x => x.pidStr.includes(filterStr));
+			tmpArray = myArray.filter(x => x.pidStr.includes(filterStr));
 		} else {
-			tmpArray = patientMasterArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+			tmpArray = myArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+		}
+		} else {
+			tmpArray = myArray;
 		}
 		setPatientArray(tmpArray);
 	}

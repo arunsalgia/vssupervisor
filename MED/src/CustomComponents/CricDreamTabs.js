@@ -140,6 +140,11 @@ const useStyles = makeStyles((theme) => ({
 		paddingLeft: theme.spacing(4),
 		paddingRight: theme.spacing(4),
   },
+	menuStyle: {
+		paddingLeft: theme.spacing(2),
+		fontSize: theme.typography.pxToRem(16),
+		fontWeight: theme.typography.fontWeightBold,	
+	},
   avatar: {
     margin: theme.spacing(0),
     // backgroundColor: theme.palette.secondary.main,
@@ -220,7 +225,7 @@ export function CricDreamTabs() {
 
   function handleGrpMenu(event) {
     setGrpAnchorEl(event.currentTarget);
-    console.log(event.currentTarget);
+    //console.log(event.currentTarget);
 		setArunGroup(true);
   };
 
@@ -267,7 +272,8 @@ export function CricDreamTabs() {
 	const handleReport = () => { handleClose(); setMenuValue(905);}
 	
   const handleProfile = () => { handleClose(); handleGrpClose(); setMenuValue(101);}
-	const handleWallet = () => { handleClose(); setMenuValue(102);}
+	const handleWallet = () => { handleClose(); handleGrpClose(); setMenuValue(102);}
+	const handleChangePassword = () => { handleClose(); handleGrpClose(); setMenuValue(103);}
 	const handleContactUs = () => { handleClose(); setMenuValue(202);}
 	
 	const handleSample = () => { handleClose(); setMenuValue(801);}
@@ -286,7 +292,8 @@ export function CricDreamTabs() {
 			
       case 101: return <Profile />;
       case 102: return <Wallet />;
-
+			case 103: return <ChangePassword />;
+			
 			case 801: return <Sample />
 			case 802: return <Customer />
 
@@ -356,11 +363,26 @@ export function CricDreamTabs() {
   }
 
   function DisplayGroupMenu() {
-   console.log("Group length");
+   //console.log("Group length");
 	return (
 	<div align="center" key="usergroups">
-	<Typography className={classes.title}>{sessionStorage.getItem("userName")}</Typography>
-		<MenuItem onClick={handleProfile}>Profile</MenuItem>
+		<Typography className={classes.title}>{sessionStorage.getItem("userName")}</Typography>
+		<Divider className={classes.divider} />
+		<MenuItem onClick={handleProfile}>
+		<Typography className={classes.menuStyle}>Profile</Typography>
+		</MenuItem>
+		<MenuItem onClick={handleChangePassword}>
+		<Typography className={classes.menuStyle}>Change Password</Typography>
+		</MenuItem>
+		{(window.sessionStorage.getItem("userType") === "Doctor") &&
+			<MenuItem onClick={handleWallet}>
+			<Typography className={classes.menuStyle}>Wallet</Typography>
+			</MenuItem>
+		}
+		<Divider className={classes.divider} />
+		<MenuItem onClick={() => {handleClose(); handleLogout(); }}>
+		<Typography className={classes.menuStyle}>Logout</Typography>
+		</MenuItem>
 	</div>
 	)}
     
@@ -402,37 +424,63 @@ export function CricDreamTabs() {
                 open={open}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleProfile}>Profile</MenuItem>
+								<Typography className={classes.title}>{sessionStorage.getItem("userName")}</Typography>
+								<Divider className={classes.divider} />
+                <MenuItem onClick={handleProfile}>
+								<Typography className={classes.menuStyle}>Profile</Typography>
+								</MenuItem>
 								{(window.sessionStorage.getItem("userType") === "Doctor") &&
-									<MenuItem onClick={handleWallet}>Wallet</MenuItem>
+									<MenuItem onClick={handleWallet}>
+									<Typography className={classes.menuStyle}>Wallet</Typography>
+									</MenuItem>
 								}
                 <Divider className={classes.divider}/>
 								{(itIsMobile) &&
 									<div>
-									<MenuItem onClick={handleAppointment}>Appointment</MenuItem>
-									<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
-									<MenuItem onClick={handlePatient}>Patient</MenuItem>
-									<MenuItem onClick={handleReport}>Report</MenuItem>	
-									<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
-									<Divider className={classes.divider} />
+									<MenuItem onClick={handleAppointment}>
+									<Typography className={classes.menuStyle}>Appointment</Typography>
+									</MenuItem>
+									<MenuItem onClick={handleVisit}>
+									<Typography className={classes.menuStyle}>Visit</Typography>
+									</MenuItem>	
+									<MenuItem onClick={handlePatient}>
+									<Typography className={classes.menuStyle}>Patient</Typography>
+									</MenuItem>
+									<MenuItem onClick={handleReport}>
+									<Typography className={classes.menuStyle}>Report</Typography>
+									</MenuItem>	
+									<MenuItem onClick={handleMedicine}>
+									<Typography className={classes.menuStyle}>Medicine</Typography>
+									</MenuItem>
 									</div>
 								}
+								<MenuItem onClick={handleNextVisit}>
+								<Typography className={classes.menuStyle}>Next Visit</Typography>
+								</MenuItem>
+								<Divider className={classes.divider} />
 								<div align="center">
 								<Typography className={classes.title}>Settings</Typography>
-								<MenuItem onClick={handleWorkingHours}>WorkingHours</MenuItem>	
-								<MenuItem onClick={handleHoliday}>Set Holidays</MenuItem>
-                <Divider className={classes.divider}/>
+								<MenuItem onClick={handleWorkingHours}>
+								<Typography className={classes.menuStyle}>Working Hours</Typography>
+								</MenuItem>	
+								<MenuItem onClick={handleHoliday}>
+								<Typography className={classes.menuStyle}>Holidays</Typography>
+								</MenuItem>
 								</div>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
 									<div>
-									<MenuItem onClick={handleSample}>Sample</MenuItem>
-									<MenuItem onClick={handleCustomer}>Customer</MenuItem>
 									<Divider className={classes.divider}/>
+									<MenuItem onClick={handleSample}>
+									<Typography className={classes.menuStyle}>Sample</Typography>
+									</MenuItem>
+									<MenuItem onClick={handleCustomer}>
+									<Typography className={classes.menuStyle}>Customer</Typography>
+									</MenuItem>
 									</div>
 								}
                 {/*<MenuItem onClick={handleContactUs}>Contact Us</MenuItem>*/}
-                <Divider className={classes.divider}/>
-                <MenuItem onClick={() => {handleClose(); handleLogout(); }}>Logout</MenuItem>
+									{/*<Divider className={classes.divider}/>
+									<MenuItem onClick={() => {handleClose(); handleLogout(); }}>Logout</MenuItem>*/}
               </Menu>
             </div>
           )}

@@ -358,7 +358,6 @@ export default function Medicine() {
 			<TextValidator fullWidth  className={gClasses.vgSpacing}
 				id="newPatientName" label="Name" type="text"
 				value={medicineName} 
-				disabled={!isAdd}
 				onChange={() => { setMedicineName(event.target.value) }}
       />
 			<TextValidator  fullWidth className={gClasses.vgSpacing}

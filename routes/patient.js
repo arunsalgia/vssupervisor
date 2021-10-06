@@ -62,6 +62,7 @@ router.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(re
 	mRec.gender = pGender;
 	mRec.enabled = true;
 	mRec.pid = newPid;
+	mRec.pidStr = newPid.toString();
 	mRec.save();
 	sendok(res, mRec);
 });
@@ -311,6 +312,18 @@ router.get('/test', async function(req, res, next) {
 		console.log(customerNumber, allRecs[i].pid, tmp, sss, pid2);
 		allRecs[i].pid = pid2;
 		//allRecs[i].save();
+	}
+	sendok(res, "Done");
+});
+
+router.get('/pidtest', async function(req, res, next) { 
+  setHeader(res);
+  
+	let allRecs = await M_Patient.find({});
+	for(let i=0; i<allRecs.length; ++i) {
+		console.log(allRecs[i].pid, allRecs[i].pidStr);
+		allRecs[i].pidStr =  allRecs[i].pid.toString();
+		allRecs[i].save();
 	}
 	sendok(res, "Done");
 });

@@ -8,8 +8,9 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 // import Grid from '@material-ui/core/Grid';
 // import Box from '@material-ui/core/Box';
 //import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
+import {Typography, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
 //import { UserContext } from "../../UserContext";
 //import axios from "axios";
@@ -19,7 +20,9 @@ import { useHistory } from "react-router-dom";
 import { cdRefresh, encrypt} from "views/functions.js";
 import { BlankArea, ValidComp } from 'CustomComponents/CustomComponents.js';
 import { setTab } from "CustomComponents/CricDreamTabs.js"
-
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import { useAlert } from 'react-alert'
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -49,48 +52,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-/***
-class ChildComp extends React.Component {
-
-  componentDidMount()  {
-    // custom rule will have name 'isPasswordMatch'
-    ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
-      return (value === this.props.p1)
-    });
-
-    ValidatorForm.addValidationRule('minLength', (value) => {
-      return (value.length >= 6)
-    });
-
-    ValidatorForm.addValidationRule('noSpecialCharacters', (value) => {
-      return validateSpecialCharacters(value);
-    });
-
-    ValidatorForm.addValidationRule('isEmailOK', (value) => {
-      return validateEmail(value);
-    });
-  }
-
-  
-  componentWillUnmount() {
-    // remove rule when it is not needed
-    ValidatorForm.removeValidationRule('isPasswordMatch');
-    ValidatorForm.removeValidationRule('isEmailOK');
-    ValidatorForm.removeValidationRule('minLength');
-    ValidatorForm.removeValidationRule('noSpecialCharacters');   
-  }
-
-  render() {
-    return <br/>;
-  }
-
-}
-***/
-
-
-
 export default function ChangePassword() {
   const classes = useStyles();
+	const gClasses = globalStyles();
+	const alert = useAlert();
 //  const history = useHistory();
   // const [userName, setUserName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -98,30 +63,29 @@ export default function ChangePassword() {
   const [repeatPassword, setRepeatPassword] = useState("");
   const [registerStatus, setRegisterStatus] = useState(199);
 
-  // const { setUser } = useContext(UserContext);
-
-  // const handleChange = (event) => {
-  //   const { user } = this.state;
-  //   user[event.target.name] = event.target.value;
-  //   this.setState({ user });
-  // }
-
+	const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+	const [showNewPassword, setShowNewPassword] = useState(false);
+	const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+	
   const handleSubmit = async() => {
     console.log("Submit command provided");
-    if (currentPassword !== newPassword) {
-      let tmp1 = encrypt(currentPassword);
-      let tmp2 = encrypt(newPassword);
-      let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricchangepassword/${localStorage.getItem("uid")}/${tmp1}/${tmp2}`);
-      if (response.status === 200) {
-        setTab(0);
-      } else {
-        // error
-        setRegisterStatus(response.status);
-        console.log(`Status is ${response.status}`);
-      }
-    } else {
-      setRegisterStatus(611);
-    }
+		if (currentPassword === newPassword) { 
+			alert.show("Current and New password are identical.");
+			return;
+		}
+		
+		let tmp1 = encrypt(currentPassword);
+		let tmp2 = encrypt(newPassword);
+		let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/cricchangepassword/${sessionStorage.getItem("uid")}/${tmp1}/${tmp2}`);
+		if (response.status === 200) {
+			setTab(process.env.REACT_APP_HOME);
+		} else {
+			// error
+			alert.error("Error updating new password");
+			setRegisterStatus(response.status);
+			console.log(`Status is ${response.status}`);
+		}
+    
   }
 
 
@@ -152,65 +116,113 @@ export default function ChangePassword() {
 
   
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-      <Typography component="h1" variant="h5">
-        Change Password
-      </Typography>
-      <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
-      <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="Current Password"
-          onChange={(event) => setCurrentPassword(event.target.value)}
-          name="currentpassword"
-          type="password"
-          validators={['required', 'noSpecialCharacters']}
-          errorMessages={['Current Password to be provided', 'Special characters not permitted']}
-          value={currentPassword}
-      />
-      <BlankArea/>
-      <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="Password"
-          onChange={(event) => setNewPassword(event.target.value)}
-          name="password"
-          type="password"
-          validators={['required', 'minLength', 'noSpecialCharacters']}
-          errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
-          value={newPassword}
-      />
-      <BlankArea/>
-      <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="Repeat password"
-          onChange={(event) => setRepeatPassword(event.target.value)}
-          name="repeatPassword"
-          type="password"
-          validators={['isPasswordMatch', 'required']}
-          errorMessages={['password mismatch', 'this field is required']}
-          value={repeatPassword}
-      />
-      <ShowResisterStatus/>
-      <BlankArea/>
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        className={classes.submit}
-      >
-        Update
-    </Button>
-    </ValidatorForm>
-    </div>
-    <ValidComp p1={newPassword}/>    
-    </Container>
-  );
+	<Container component="main" maxWidth="xs">
+	<CssBaseline />
+	<div className={classes.paper}>
+	<Typography component="h1" variant="h5">
+		Change Password
+	</Typography>
+	<ValidatorForm className={classes.form} onSubmit={handleSubmit}>
+	{(!showCurrentPassword) &&
+		<TextValidator variant="outlined" required fullWidth type="password" className={gClasses.vgSpacing}      
+			label="Current Password"
+			value={currentPassword}
+			onChange={(event) => setCurrentPassword(event.target.value)}
+			validators={['noSpecialCharacters']}
+			errorMessages={['Special characters not permitted']}
+			InputProps={{
+				endAdornment: (
+					<InputAdornment position="end">
+						<VisibilityOffIcon onClick={() => { setShowCurrentPassword(true); }} />
+					</InputAdornment>
+				),
+			}}
+		/>
+	}
+	{(showCurrentPassword) &&
+		<TextValidator variant="outlined" required fullWidth type="text" className={gClasses.vgSpacing}      
+			label="Current Password"
+			value={currentPassword}
+			onChange={(event) => setCurrentPassword(event.target.value)}
+			validators={['noSpecialCharacters']}
+			errorMessages={['Special characters not permitted']}
+			InputProps={{
+				endAdornment: (
+					<InputAdornment position="end">
+						<VisibilityIcon onClick={() => { setShowCurrentPassword(false); }} />
+					</InputAdornment>
+				),
+			}}
+		/>
+	}
+	{(!showNewPassword) &&
+		<TextValidator variant="outlined" required fullWidth type="password" className={gClasses.vgSpacing}           
+			label="Password"
+			value={newPassword}
+			onChange={(event) => setNewPassword(event.target.value)}
+			validators={['minLength', 'noSpecialCharacters']}
+			errorMessages={['Minimum 6 characters required', 'Special characters not permitted']}
+			InputProps={{
+				endAdornment: (
+					<InputAdornment position="end">
+						<VisibilityOffIcon onClick={() => { setShowNewPassword(true); }} />
+					</InputAdornment>
+				),
+			}}
+		/>
+	}
+	{(showNewPassword) &&
+		<TextValidator variant="outlined" required fullWidth type="text" className={gClasses.vgSpacing}           
+			label="Password"
+			value={newPassword}
+			onChange={(event) => setNewPassword(event.target.value)}
+			validators={['minLength', 'noSpecialCharacters']}
+			errorMessages={['Minimum 6 characters required', 'Special characters not permitted']}
+			InputProps={{
+				endAdornment: (
+					<InputAdornment position="end">
+						<VisibilityIcon onClick={() => { setShowNewPassword(false); }} />
+					</InputAdornment>
+				),
+			}}
+		/>
+	}
+	{(!showRepeatPassword) &&
+		<TextValidator variant="outlined" required fullWidth type="password" className={gClasses.vgSpacing}                
+			label="Repeat password"
+			value={repeatPassword}
+			onChange={(event) => setRepeatPassword(event.target.value)}
+			validators={['isPasswordMatch', 'required']}
+			errorMessages={['password mismatch', 'this field is required']}
+			InputProps={{
+				endAdornment: (
+					<InputAdornment position="end">
+						<VisibilityOffIcon onClick={() => { setShowRepeatPassword(true); }} />
+					</InputAdornment>
+				),
+			}}		/>
+	}
+	{(showRepeatPassword) &&
+		<TextValidator variant="outlined" required fullWidth type="text" className={gClasses.vgSpacing}                
+			label="Repeat password"
+			value={repeatPassword}
+			onChange={(event) => setRepeatPassword(event.target.value)}
+			validators={['isPasswordMatch', 'required']}
+			errorMessages={['password mismatch', 'this field is required']}
+			InputProps={{
+				endAdornment: (
+					<InputAdornment position="end">
+						<VisibilityIcon onClick={() => { setShowRepeatPassword(false); }} />
+					</InputAdornment>
+				),
+			}}		/>
+	}
+	<Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+		Update
+	</Button>
+	</ValidatorForm>
+	</div>
+	<ValidComp p1={newPassword}/>    
+	</Container>
+	);
 }

@@ -215,8 +215,7 @@ function dose(dose1, dose2, dose3) {
 
 let searchText = "";
 function setSearchText(sss) { searchText = sss;}
-//let info="";
-//function setInfo(i) { info = i; }
+
 
 var userCid;
 export default function Visit() {
@@ -361,14 +360,6 @@ export default function Visit() {
 		}	
 	}
 	
-	//progress
-	const LoadingIndicator = props => {
-		const { promiseInProgress } = usePromiseTracker();
-		return (
-			promiseInProgress && 
-			<h1>Hey some async call in progress ! </h1>
-			);  
-	}
 
 	async function getPatientVisit(rec) {
 		try {
@@ -401,16 +392,12 @@ export default function Visit() {
 	return ( <VsCancel align="right" onClick={closeModal} /> )}
 	
 	
-	//======old funcs
 	
 	
 	function DisplayVisitError() {
-	return(
-		<Container component="DisplayVisitError" maxWidth="s">
-		<DisplayCloseModal />
-		<Typography align="center" className={classes.modalHeader}>{registerError}</Typography>
-		</Container>
-	)}
+		alert.error(registerError);
+		return null;
+	}
 	
 	function setVisitError(errcode) {
     console.log(errcode);
@@ -648,8 +635,6 @@ export default function Visit() {
 	}
 	
 	function handleCreateNewVisit() {
-		//console.log("In new visit");
-		//console.log(expandedPanel);
 		let x = new Date();
 		
 		let tmpArray = [{
@@ -713,9 +698,6 @@ export default function Visit() {
     )
   }
 	
-	
-	
-	
 	function handleCopyNew(num) {
 		let today = new Date();
 		
@@ -772,7 +754,8 @@ export default function Visit() {
 		// confirm of atleast 1 medicine given
 		if (errcode == 0)
 		if (visitArray[0].medicines.length == 0) {
-			errcode = 1001;
+			alert.error("No Medicine prescribed.");
+			return;
 		} 
 		
 		// confirm medicine name given and atleast 1 dose is non-zero
@@ -782,21 +765,18 @@ export default function Visit() {
 			let m = visitArray[0].medicines[i];
 			console.log("X"+m.name+"X");
 			if (m.name == "") {
-				errcode = 1011;
-				break;
+				return alert.error("Medicine Name cannot be blank");
 			}
 			
 			// confirm duplicate medicine not given
 			let tmp = visitArray[0].medicines.filter(x => x.name == m.name);
 			if (tmp.length > 1) {
-				errcode = 1012;
-				break;
+				return alert.error("Medicine "+m.name+" prescribed more than once");
 			}
 			
 			// confirm atleast 1 dose is non-zero
 			if ((m.dose1 + m.dose2 + m.dose3) == 0) {
-				errcode = 1013;
-				break;
+				return alert.error("No dose specified");
 			}	
 		};
 		return (errcode);
@@ -840,17 +820,6 @@ export default function Visit() {
 		newVisit.remarks = newVisit.remarks.filter(x => x.name.trim() !== "");
 		newVisit.userNotes = newVisit.userNotes.filter(x => x.name.trim() !== "");
 
-		// convert string to base64
-		for(let i=0; i<newVisit.medicines.length; ++i) {
-			newVisit.medicines[i].name = stringToBase64(newVisit.medicines[i].name);
-		}
-		for(let i=0; i<newVisit.userNotes.length; ++i) {
-			newVisit.userNotes[i].name = stringToBase64(newVisit.userNotes[i].name);
-		}
-		for(let i=0; i<newVisit.remarks.length; ++i) {
-			newVisit.remarks[i].name = stringToBase64(newVisit.remarks[i].name);
-		}
-		
 		return newVisit;
 	}
 	
@@ -859,13 +828,13 @@ export default function Visit() {
 
 		if (errcode == 0) {	
 			let newVisitNumber = visitArray.length;
-			let newVisit = getenrateVisitInfo();	
-			let newVisitInfo = JSON.stringify(
+			let newVisit = getenrateVisitInfo();
+			// encodeURI			
+			let newVisitInfo = encodeURI(JSON.stringify(
 			{
-				appointment: currentAppt,
 				visit:       newVisit,
 				nextVisit:   {after: nextVisitTime, unit: nextVisitUnit},
-			});
+			}));
 			try {
 				await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/updatenewvisit/${userCid}/${newVisitNumber}/${newVisitInfo}`)
 				setVisitRegister(100);
@@ -1406,11 +1375,15 @@ export default function Visit() {
 	function setFilter(myArray, filterStr) {
 		filterStr = filterStr.trim().toLowerCase();
 		let tmpArray;
-		if (validateInteger(filterStr)) {
-			// it is integer. Thus has to be Id
-			tmpArray = patientMasterArray.filter(x => x.pidStr.includes(filterStr));
+		if (filterStr !== "") {
+			if (validateInteger(filterStr)) {
+				// it is integer. Thus has to be Id
+				tmpArray = myArray.filter(x => x.pidStr.includes(filterStr));
+			} else {
+				tmpArray = myArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+			}
 		} else {
-			tmpArray = patientMasterArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+			tmpArray = myArray;
 		}
 		setPatientArray(tmpArray);
 	}

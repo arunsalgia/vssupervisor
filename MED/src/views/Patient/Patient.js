@@ -480,13 +480,21 @@ export default function Patient() {
 	)}
 	
 	function setPatientFilter(myArray, filterStr) {
+		//console.log(myArray);
+		//console.log(filterStr);
 		filterStr = filterStr.trim().toLowerCase();
+		//console.log(filterStr);
 		let tmpArray;
-		if (validateInteger(filterStr)) {
-			// it is integer. Thus has to be Id
-			tmpArray = myArray.filter(x => x.pidStr.includes(filterStr));
+		if (myArray !== "") {
+			if (validateInteger(filterStr)) {
+				// it is integer. Thus has to be Id
+				//console.log("Num check",filterStr);
+				tmpArray = myArray.filter(x => x.pidStr.includes(filterStr));
+			} else {
+				tmpArray = myArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+			}
 		} else {
-			tmpArray = myArray.filter(x => x.displayName.toLowerCase().includes(filterStr));
+			tmpArray = myArray;
 		}
 		setPatientArray(tmpArray);
 	}
@@ -532,7 +540,6 @@ export default function Patient() {
 			<TextValidator fullWidth  className={gClasses.vgSpacing}
 				id="newPatientName" label="Name" type="text"
 				value={patientName} 
-				disabled={!isAdd}
 				onChange={() => { setPatientName(event.target.value) }}
       />
 			<TextValidator  fullWidth className={gClasses.vgSpacing}

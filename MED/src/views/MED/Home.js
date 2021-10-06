@@ -111,12 +111,12 @@ export default function Home() {
 			try {
 				let tmp = JSON.parse(sessionStorage.getItem("customerData"));
 				setCustInfo(tmp);
-				console.log(tmp)
+				//console.log(tmp)
 			} catch (e) {
 				console.log(e);
 			}
 		}
-		console.log(sessionStorage.getItem("cid"));
+		//console.log(sessionStorage.getItem("cid"));
 		getCustomerInfo();
     }, [])
 
