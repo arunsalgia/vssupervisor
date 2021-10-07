@@ -12,6 +12,9 @@ const globalStyles = makeStyles((theme) => ({
 	green: {
 		color: green[900],
 	},
+	deepOrange: {
+		color: deepOrange[900],
+	},
 	blue: {
 		color: 'blue',
 	},
@@ -57,11 +60,17 @@ const globalStyles = makeStyles((theme) => ({
 		color: 'blue',
 	},
 	patientInfo: {
+		marginLeft: theme.spacing(3),
 		fontSize: theme.typography.pxToRem(14),
 	},
 	patientInfo2: {
 		fontSize: theme.typography.pxToRem(14),
 		fontWeight: theme.typography.fontWeightBold,
+	},
+		patientInfo999: {
+		fontSize: theme.typography.pxToRem(14),
+		fontWeight: theme.typography.fontWeightBold,
+		marginRight: theme.spacing(5),
 	},
 	selectForm: {
     margin: theme.spacing(1),

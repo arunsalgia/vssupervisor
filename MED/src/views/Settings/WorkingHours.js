@@ -12,6 +12,7 @@ import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
+import { useAlert } from 'react-alert';
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
@@ -227,7 +228,8 @@ export default function WorkingHours() {
   
   const classes = useStyles();
 	const gClasses = globalStyles();
-
+	const alert = useAlert();
+	
 	const [defaultMorningSlots, setDefaultMorningSlots] = useState([]);
 	const [defaultAfternoonSlots, setDefaultAfternoonSlots] = useState([]);
 	const [defaultEveningSlots, setDefaultEveningSlots] = useState([]);
@@ -418,9 +420,12 @@ export default function WorkingHours() {
 		</div>
 	</Grid>
 	<Grid item xs={6} sm={3} md={3} lg={3} >
-		<VsButton name="Set default Morning Slots" onClick={() => {setDefaultSlots("MORNING", startNum, endNum)}} />
+		{(sessionStorage.getItem("userType") === "Doctor") &&
+			<VsButton name="Set default Morning Slots" onClick={() => {setDefaultSlots("MORNING", startNum, endNum)}} />
+		}
 	</Grid>
 	<Grid item xs={6} sm={3} md={3} lg={3} >
+	{(sessionStorage.getItem("userType") === "Doctor") &&
 	 <FormControlLabel 
 		control={
 		 <Checkbox 
@@ -435,7 +440,8 @@ export default function WorkingHours() {
 			 {"Select all morning slots"} 
 			 </Typography>
 		 }
-	/>
+		/>
+	}
 	</Grid>
 	{workingArray.slice(startNum, endNum).map( (m, index) =>	{
 		let tmp = BLOCKNUMBER.morningBlockStart + index;
@@ -444,7 +450,8 @@ export default function WorkingHours() {
 		return (
 			<Grid item xs={3} sm={2} md={1} lg={1} >	
 			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-				 <FormControlLabel 
+				{(sessionStorage.getItem("userType") === "Doctor") &&
+					<FormControlLabel 
 					control={
 					 <Checkbox 
 						key={HOURSTR[hour]+":"+MINUTESTR[minute]} 
@@ -453,12 +460,29 @@ export default function WorkingHours() {
 						className={classes.blueCheckBox}
 						/>
 					} 
-				 label={
+					label={
 					 <Typography className={classes.blueCheckBoxLabel}>
 					 {HOURSTR[hour]+":"+MINUTESTR[minute]} 
 					 </Typography>
-				 }
-				/>	 
+					}
+					/>
+				}
+				{(sessionStorage.getItem("userType") !== "Doctor") &&
+					<FormControlLabel 
+					control={
+					 <Checkbox 
+						key={HOURSTR[hour]+":"+MINUTESTR[minute]} 
+						checked={workingArray[startNum+index]} 
+						className={classes.blueCheckBox}
+						/>
+					} 
+					label={
+					 <Typography className={classes.blueCheckBoxLabel}>
+					 {HOURSTR[hour]+":"+MINUTESTR[minute]} 
+					 </Typography>
+					}
+					/>
+				}
 			</Box>
 			</Grid>
 		)}
@@ -479,24 +503,28 @@ export default function WorkingHours() {
 		</div>
 	</Grid>
 	<Grid item xs={6} sm={3} md={3} lg={3} >
-		<VsButton name="Set default Afternoon Slots" onClick={() => {setDefaultSlots("AFTERNOON", startNum, endNum)}} />
+		{(sessionStorage.getItem("userType") === "Doctor") &&
+			<VsButton name="Set default Afternoon Slots" onClick={() => {setDefaultSlots("AFTERNOON", startNum, endNum)}} />
+		}
 	</Grid>
 	<Grid item xs={6} sm={3} md={3} lg={3} >
-	 <FormControlLabel 
-		control={
-		 <Checkbox 
-			key={"AfternoonCB"} 
-			checked={afternoonCB} 
-			onClick={() => {toggleAllCheckbox("AFTERNOON", startNum, endNum)}}
-			className={classes.blueCheckBox}
-			/>
-		} 
-		 label={
-			 <Typography className={classes.blueCheckBoxLabel}>
-			 {"Select all afternoon slots"} 
-			 </Typography>
-		 }
-	/>
+	{(sessionStorage.getItem("userType") === "Doctor") &&
+		 <FormControlLabel 
+			control={
+			 <Checkbox 
+				key={"AfternoonCB"} 
+				checked={afternoonCB} 
+				onClick={() => {toggleAllCheckbox("AFTERNOON", startNum, endNum)}}
+				className={classes.blueCheckBox}
+				/>
+			} 
+			 label={
+				 <Typography className={classes.blueCheckBoxLabel}>
+				 {"Select all afternoon slots"} 
+				 </Typography>
+			 }
+		/>
+	}
 	</Grid>
 	{workingArray.slice(startNum, endNum).map( (m, index) =>	{
 		let tmp = BLOCKNUMBER.afternoonBlockStart + index;
@@ -505,21 +533,39 @@ export default function WorkingHours() {
 		return (
 			<Grid item xs={3} sm={2} md={1} lg={1} >	
 			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-				 <FormControlLabel 
-					control={
-					 <Checkbox 
-						key={HOURSTR[hour]+":"+MINUTESTR[minute]} 
-						checked={workingArray[startNum+index]} 
-						onClick={() => {toggleCheckbox(startNum+index)}}
-						className={classes.blueCheckBox}
-						/>
-					} 
-				 label={
-					 <Typography className={classes.blueCheckBoxLabel}>
-					 {HOURSTR[hour]+":"+MINUTESTR[minute]} 
-					 </Typography>
-				 }
-				/>	 
+				{(sessionStorage.getItem("userType") === "Doctor") &&
+					<FormControlLabel 
+						control={
+						 <Checkbox 
+							key={HOURSTR[hour]+":"+MINUTESTR[minute]} 
+							checked={workingArray[startNum+index]} 
+							onClick={() => {toggleCheckbox(startNum+index)}}
+							className={classes.blueCheckBox}
+							/>
+							} 
+						 label={
+							 <Typography className={classes.blueCheckBoxLabel}>
+							 {HOURSTR[hour]+":"+MINUTESTR[minute]} 
+							 </Typography>
+						 }
+					/>
+				}
+				{(sessionStorage.getItem("userType") !== "Doctor") &&
+					<FormControlLabel 
+						control={
+						 <Checkbox 
+							key={HOURSTR[hour]+":"+MINUTESTR[minute]} 
+							checked={workingArray[startNum+index]} 
+							className={classes.blueCheckBox}
+							/>
+							} 
+						 label={
+							 <Typography className={classes.blueCheckBoxLabel}>
+							 {HOURSTR[hour]+":"+MINUTESTR[minute]} 
+							 </Typography>
+						 }
+					/>
+				}
 			</Box>
 			</Grid>
 		)}
@@ -541,9 +587,12 @@ export default function WorkingHours() {
 		</div>
 	</Grid>
 	<Grid item xs={6} sm={3} md={3} lg={3} >
-		<VsButton name="Set default Evening Slots" onClick={() => {setDefaultSlots("EVENING", startNum, endNum)}} />
+		{(sessionStorage.getItem("userType") === "Doctor") &&
+			<VsButton name="Set default Evening Slots" onClick={() => {setDefaultSlots("EVENING", startNum, endNum)}} />
+		}
 	</Grid>
 	<Grid item xs={6} sm={3} md={3} lg={3} >
+	{(sessionStorage.getItem("userType") === "Doctor") &&
 	 <FormControlLabel 
 		control={
 		 <Checkbox 
@@ -559,6 +608,7 @@ export default function WorkingHours() {
 			 </Typography>
 		 }
 	/>
+	}
 	</Grid>
 	{workingArray.slice(startNum, endNum).map( (m, index) =>	{
 		let tmp = BLOCKNUMBER.eveningBlockStart + index;
@@ -567,21 +617,39 @@ export default function WorkingHours() {
 		return (
 			<Grid item xs={3} sm={2} md={1} lg={1} >	
 			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-				 <FormControlLabel 
-					control={
-					 <Checkbox 
-						key={HOURSTR[hour]+":"+MINUTESTR[minute]} 
-						checked={workingArray[startNum+index]} 
-						onClick={() => {toggleCheckbox(startNum+index)}}
-						className={classes.blueCheckBox}
-						/>
-					} 
-				 label={
-					 <Typography className={classes.blueCheckBoxLabel}>
-					 {HOURSTR[hour]+":"+MINUTESTR[minute]} 
-					 </Typography>
-				 }
-				/>	 
+				{(sessionStorage.getItem("userType") === "Doctor") &&
+					<FormControlLabel 
+						control={
+						 <Checkbox 
+							key={HOURSTR[hour]+":"+MINUTESTR[minute]} 
+							checked={workingArray[startNum+index]} 
+							onClick={() => {toggleCheckbox(startNum+index)}}
+							className={classes.blueCheckBox}
+							/>
+						} 
+						label={
+						 <Typography className={classes.blueCheckBoxLabel}>
+						 {HOURSTR[hour]+":"+MINUTESTR[minute]} 
+						 </Typography>
+						}
+					/>
+				}
+				{(sessionStorage.getItem("userType") !== "Doctor") &&
+					<FormControlLabel 
+						control={
+						 <Checkbox 
+							key={HOURSTR[hour]+":"+MINUTESTR[minute]} 
+							checked={workingArray[startNum+index]} 
+							className={classes.blueCheckBox}
+							/>
+						} 
+						label={
+						 <Typography className={classes.blueCheckBoxLabel}>
+						 {HOURSTR[hour]+":"+MINUTESTR[minute]} 
+						 </Typography>
+						}
+					/>
+				}
 			</Box>
 			</Grid>
 		)}
@@ -648,10 +716,12 @@ export default function WorkingHours() {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/customer/setworkinghours/${userCid}/${tmp}`;
 			let resp = await axios.get(myUrl);
 			// success
+			alert.success("Successfully updated weekly working hours");
 			customerData = resp.data;
-		sessionStorage.setItem("customerData", JSON.stringify(customerData));
+			sessionStorage.setItem("customerData", JSON.stringify(customerData));
 		} catch (e) {
 			console.log(e);
+			alert.error("Error update weekly working hours");
 		}
 	}
 	
@@ -661,7 +731,9 @@ export default function WorkingHours() {
 	<DisplayPageHeader headerName="Configure weekly working slots" groupName="" tournament=""/>
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
-	<VsButton name="Update working hours" align="right" onClick={updateWorkingHours} />
+	{(sessionStorage.getItem("userType") === "Doctor") &&
+		<VsButton name="Update working hours" align="right" onClick={updateWorkingHours} />
+	}
 	<DisplayDaySelection />
 	<DisplayMorningSlots />
 	<DisplayAfterNoonSlots />

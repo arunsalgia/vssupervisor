@@ -127,9 +127,24 @@ const useStyles = makeStyles((theme) => ({
     color: '#000000',
     fontWeight: theme.typography.fontWeightBold,
   },
+	divider: {
+		backgroundColor: 'blue',
+	},
   title: {
     flexGrow: 1,
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(20),
+		fontWeight: theme.typography.fontWeightBold,
+		//paddingTop: theme.spacing(4),
+    //paddingBottom: theme.spacing(4),
+		paddingLeft: theme.spacing(4),
+		paddingRight: theme.spacing(4),
   },
+	menuStyle: {
+		paddingLeft: theme.spacing(2),
+		fontSize: theme.typography.pxToRem(16),
+		fontWeight: theme.typography.fontWeightBold,	
+	},
   avatar: {
     margin: theme.spacing(0),
     // backgroundColor: theme.palette.secondary.main,
@@ -141,8 +156,10 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(0),
     backgroundColor: deepOrange[500],
     color: theme.palette.getContrastText(deepOrange[500]), 
+		//paddingLeft: theme.spacing(10),
     // width: theme.spacing(10),
-    // height: theme.spacing(10),  
+    // height: theme.spacing(10),
+		marginLeft: theme.spacing(6),
   },
 }));
 
@@ -208,31 +225,8 @@ export function CricDreamTabs() {
 
   function handleGrpMenu(event) {
     setGrpAnchorEl(event.currentTarget);
-    // console.log(event.currentTarget);
-    var myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/group/memberof/${localStorage.getItem("uid")}`;
-    axios.get(myUrl).then((response) => {
-      let allGroups = response.data[0].groups;
-      if (allGroups.length > 0) {
-        let tmp = allGroups.find(x => x.defaultGroup == true);
-        if (!tmp) {
-          tmp = allGroups[0];
-          tmp.defaultGroup = true;
-          localStorage.setItem("gid", tmp.gid.toString());
-          localStorage.setItem("groupName", tmp.groupName);
-          localStorage.setItem("tournament", tmp.tournament);
-          localStorage.setItem("admin", tmp.admin);
-          // clearBackupData();
-        }
-      }
-      setUserGroup(allGroups);
-      // console.log('Everything is awesome.');
-      setArunGroup(true);
-    }).catch((error) => {
-      console.log('Not good man :(');
-      console.log(error);
-      setUserGroup([]);
-      setArunGroup(true);
-    })
+    //console.log(event.currentTarget);
+		setArunGroup(true);
   };
 
   async function handleGroupSelect(index) {
@@ -277,8 +271,9 @@ export function CricDreamTabs() {
 	const handleNextVisit = () => { handleClose(); setMenuValue(904);}
 	const handleReport = () => { handleClose(); setMenuValue(905);}
 	
-  const handleProfile = () => { handleClose(); setMenuValue(101);}
-	const handleWallet = () => { handleClose(); setMenuValue(102);}
+  const handleProfile = () => { handleClose(); handleGrpClose(); setMenuValue(101);}
+	const handleWallet = () => { handleClose(); handleGrpClose(); setMenuValue(102);}
+	const handleChangePassword = () => { handleClose(); handleGrpClose(); setMenuValue(103);}
 	const handleContactUs = () => { handleClose(); setMenuValue(202);}
 	
 	const handleSample = () => { handleClose(); setMenuValue(801);}
@@ -297,7 +292,8 @@ export function CricDreamTabs() {
 			
       case 101: return <Profile />;
       case 102: return <Wallet />;
-
+			case 103: return <ChangePassword />;
+			
 			case 801: return <Sample />
 			case 802: return <Customer />
 
@@ -367,17 +363,28 @@ export function CricDreamTabs() {
   }
 
   function DisplayGroupMenu() {
-    // console.log("Group length", userGroup.length);
-    return (
-      <div key="usergroups">
-      {userGroup.map( (item, index) => {
-        return (
-        <MenuItem key={index} onClick={() => handleGroupSelect(index)}>{item.groupName}</MenuItem>
-        )
-      })}
-      </div>
-    );
-  }
+   //console.log("Group length");
+	return (
+	<div align="center" key="usergroups">
+		<Typography className={classes.title}>{sessionStorage.getItem("userName")}</Typography>
+		<Divider className={classes.divider} />
+		<MenuItem onClick={handleProfile}>
+		<Typography className={classes.menuStyle}>Profile</Typography>
+		</MenuItem>
+		<MenuItem onClick={handleChangePassword}>
+		<Typography className={classes.menuStyle}>Change Password</Typography>
+		</MenuItem>
+		{(window.sessionStorage.getItem("userType") === "Doctor") &&
+			<MenuItem onClick={handleWallet}>
+			<Typography className={classes.menuStyle}>Wallet</Typography>
+			</MenuItem>
+		}
+		<Divider className={classes.divider} />
+		<MenuItem onClick={() => {handleClose(); handleLogout(); }}>
+		<Typography className={classes.menuStyle}>Logout</Typography>
+		</MenuItem>
+	</div>
+	)}
     
   let mylogo = `${process.env.PUBLIC_URL}/favicon.ico`;
   let groupCharacter="G";
@@ -417,37 +424,63 @@ export function CricDreamTabs() {
                 open={open}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleProfile}>Profile</MenuItem>
+								<Typography className={classes.title}>{sessionStorage.getItem("userName")}</Typography>
+								<Divider className={classes.divider} />
+                <MenuItem onClick={handleProfile}>
+								<Typography className={classes.menuStyle}>Profile</Typography>
+								</MenuItem>
 								{(window.sessionStorage.getItem("userType") === "Doctor") &&
-									<MenuItem onClick={handleWallet}>Wallet</MenuItem>
+									<MenuItem onClick={handleWallet}>
+									<Typography className={classes.menuStyle}>Wallet</Typography>
+									</MenuItem>
 								}
-                <Divider/>
+                <Divider className={classes.divider}/>
 								{(itIsMobile) &&
 									<div>
-									<MenuItem onClick={handleAppointment}>Appointment</MenuItem>
-									<MenuItem onClick={handleNextVisit}>Next Visit</MenuItem>	
-									<MenuItem onClick={handlePatient}>Patient</MenuItem>
-									<MenuItem onClick={handleReport}>Report</MenuItem>	
-									<MenuItem onClick={handleMedicine}>Medicine</MenuItem>
-									<Divider />
+									<MenuItem onClick={handleAppointment}>
+									<Typography className={classes.menuStyle}>Appointment</Typography>
+									</MenuItem>
+									<MenuItem onClick={handleVisit}>
+									<Typography className={classes.menuStyle}>Visit</Typography>
+									</MenuItem>	
+									<MenuItem onClick={handlePatient}>
+									<Typography className={classes.menuStyle}>Patient</Typography>
+									</MenuItem>
+									<MenuItem onClick={handleReport}>
+									<Typography className={classes.menuStyle}>Report</Typography>
+									</MenuItem>	
+									<MenuItem onClick={handleMedicine}>
+									<Typography className={classes.menuStyle}>Medicine</Typography>
+									</MenuItem>
 									</div>
 								}
+								<MenuItem onClick={handleNextVisit}>
+								<Typography className={classes.menuStyle}>Next Visit</Typography>
+								</MenuItem>
+								<Divider className={classes.divider} />
 								<div align="center">
-								<Typography>Settings</Typography>
-								<MenuItem onClick={handleWorkingHours}>WorkingHours</MenuItem>	
-								<MenuItem onClick={handleHoliday}>Set Holidays</MenuItem>
-                <Divider/>
+								<Typography className={classes.title}>Settings</Typography>
+								<MenuItem onClick={handleWorkingHours}>
+								<Typography className={classes.menuStyle}>Working Hours</Typography>
+								</MenuItem>	
+								<MenuItem onClick={handleHoliday}>
+								<Typography className={classes.menuStyle}>Holidays</Typography>
+								</MenuItem>
 								</div>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
 									<div>
-									<MenuItem onClick={handleSample}>Sample</MenuItem>
-									<MenuItem onClick={handleCustomer}>Customer</MenuItem>
-									<Divider/>
+									<Divider className={classes.divider}/>
+									<MenuItem onClick={handleSample}>
+									<Typography className={classes.menuStyle}>Sample</Typography>
+									</MenuItem>
+									<MenuItem onClick={handleCustomer}>
+									<Typography className={classes.menuStyle}>Customer</Typography>
+									</MenuItem>
 									</div>
 								}
                 {/*<MenuItem onClick={handleContactUs}>Contact Us</MenuItem>*/}
-                <Divider/>
-                <MenuItem onClick={() => {handleClose(); handleLogout(); }}>Logout</MenuItem>
+									{/*<Divider className={classes.divider}/>
+									<MenuItem onClick={() => {handleClose(); handleLogout(); }}>Logout</MenuItem>*/}
               </Menu>
             </div>
           )}
@@ -467,11 +500,15 @@ export function CricDreamTabs() {
           >
             <HomeIcon className={classes.icon}/>
           </IconButton>*/}
-          <Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
-					<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
-					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>}
-					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleReport}>Report</Button>}
-					{(itIsMobile === false) && <Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>}
+					{(itIsMobile === false) &&
+						<div>
+						<Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handleReport}>Report</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>
+						</div>
+					}
 					<div align="right">
 					<Avatar 
             aria-label="account of current user"
@@ -479,8 +516,26 @@ export function CricDreamTabs() {
             aria-haspopup="true"
             color="inherit"
             variant="circular" 
-						className={classes.avatar1}>{"A"}
+						onClick={handleGrpMenu}
+						className={classes.avatar1}>{sessionStorage.getItem("userName").substr(0,1)}
           </Avatar>
+					<Menu
+            id="group-appbar"
+            anchorEl={grpAnchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            // keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={arunGroup}
+            onClose={handleGrpClose}
+          >
+            <DisplayGroupMenu />
+          </Menu>
 					</div>
           {/* <IconButton
             aria-label="account of current group"

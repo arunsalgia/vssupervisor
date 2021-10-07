@@ -211,6 +211,7 @@ router.get('/jaijinendra/:uName/:uPassword', async function (req, res, next) {
   let uRec = await User.findOne({ userName:  getLoginName(uName)});
   //console.log(uRec)
 	if (uRec) {
+		//console.log(dbdecrypt(uRec.password));
 		uPassword = decrypt(uPassword);
 		//console.log(uPassword);
 		uPassword = dbencrypt(uPassword);
@@ -535,7 +536,7 @@ router.get('/bhoolgaya/:mailid', async function (req, res, next) {
 	let myCode = encrypt( uRec._id + "/" + T1.getTime() );
 	//console.log(myCode);
 	
-  myLink = `${BASELINK}/viraagdental/resetpassword/${myCode}`;
+  myLink = `${BASELINK}/doctorviraag/resetpassword/${myCode}`;
   
   let text = `Dear User,
   

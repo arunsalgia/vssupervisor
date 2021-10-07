@@ -816,25 +816,19 @@ export function DisplayHolidayDetails(props) {
 	//console.log(_button1, _button2, _button3, _button4, _button5);
 return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-		<div align="center" >
-		<Typography>
-		<span className={gClasses.patientName}>{myDate}</span>
-		</Typography>
+		<div align="left">
+			<Typography>
+				<span className={gClasses.patientInfo}>Date: </span>
+				<span className={gClasses.patientName}>{myDate}</span>
+				<span className={gClasses.patientInfo}> Desc: </span>
+				<span className={gClasses.patientInfo999}>{props.holiday.desc}</span>
+				{(!_button1) && props.button1}
+				{(!_button2) && props.button2}
+				{(!_button3) && props.button3}
+				{(!_button4) && props.button4}
+				{(!_button5) && props.button5}
+			</Typography>
 		</div>
-		<div align="left" >
-		<Typography>
-			<span className={gClasses.patientInfo}>Desc: </span>
-			<span className={gClasses.patientInfo2}>{props.holiday.desc}</span>
-		</Typography>
-		<BlankArea />
-		<div align="right">
-		{(!_button1) && props.button1}
-		{(!_button2) && props.button2}
-		{(!_button3) && props.button3}
-		{(!_button4) && props.button4}
-		{(!_button5) && props.button5}
-		</div>
-	</div>
 	</Box>
 )}
 

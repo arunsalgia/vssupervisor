@@ -8,8 +8,6 @@ import { TextField, InputAdornment } from "@material-ui/core";
 import Grid from '@material-ui/core/Grid';
 import Link from '@material-ui/core/Link';
 import { Switch, Route } from 'react-router-dom';
-// import Dialog from '@material-ui/core/Dialog';
-// import DialogTitle from '@material-ui/core/DialogTitle';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';

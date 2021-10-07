@@ -386,6 +386,10 @@ export default function Customer() {
 		getAllCustomers();
   }, []);
 
+	function handleSelectCustomer(rec) {
+		sessionStorage.setItem("cid", rec._id);
+		sessionStorage.setItem("customerData", JSON.stringify(rec));
+	}
 	
 	function DisplayCustomerList() {
 	return (	
@@ -445,7 +449,7 @@ export default function Customer() {
 					<TableCell key={"TD11"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 						<Typography className={classes.link}>
-							<Link href="#" variant="body2" disabled={a.enabled === false} onClick={() => {sessionStorage.setItem("cid", a._id) }}>Select</Link>
+							<Link href="#" variant="body2" disabled={a.enabled === false} onClick={() => {handleSelectCustomer(a) }}>Select</Link>
 						</Typography>
 					</TableCell>
 					<TableCell key={"TD12"+index} align="center" component="td" scope="row" align="center" padding="none"

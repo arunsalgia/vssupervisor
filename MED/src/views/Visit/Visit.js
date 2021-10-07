@@ -247,7 +247,7 @@ export default function Visit() {
 	const [notesArray, setNotesArry] = useState([]);
 	const [remarkArray, setRemarkArray] = useState([{name: "Rem1"}, {name: "Rem2"}]);
 	
-	const [currentAppt, setCurrentAppt] = useState(null);
+	//const [currentAppt, setCurrentAppt] = useState(null);
 	const [visitArray, setVisitArray] = useState([])
 
 	const [nextVisitTime, setNextVisitTime] = useState(2);
@@ -289,51 +289,28 @@ export default function Visit() {
 	
 	
   useEffect(() => {	
-		const checkPatient = async () => {		
-			// check if appointment has been called from Patient view
-			let myPatient;
+		const checkPatient = async () => {	
+			let ppp = await getAllPatients();
+			setPatientMasterArray(ppp);		
+			// check if visit has called from some other view
 			try {
-				let shareData = JSON.parse(sessionStorage.getItem("shareData"));
-				sessionStorage.setItem("shareData", "");		// clean up
-				console.log(shareData);
-				switch (shareData.caller) {
-					case "PATIENT":
-						//let allPat = [];
-						//allPat.push(shareData.patient);
-						
-						setCurrentPatient(shareData.patient.displayName);
-						setCurrentPatientData(shareData.patient);
-						setPatientArray([shareData.patient]);
-						setCurrentAppt(null);		// directly from patient. This no info about appt
-						myPatient = shareData.patient;
-						break;
-						
-					case "APPOINTMENT":	
-						console.log(shareData.appointment);
-						let myData = await updatePatientByFilter(shareData.appointment.pid.toString(), userCid);
-						console.log(myData);
-						if (myData.length == 0) {
-							//error. SHould not have come here.
-							return;
-						}
-						console.log(myData[0]);
-						setCurrentPatient(myData[0].displayName);
-						setCurrentPatientData(myData[0]);
-						setPatientArray([myData[0]]);
-						setCurrentAppt(shareData.appointment);	
-						myPatient = myData[0];								// directly f
-						break;
-				}
-				// now get all visits of patient
-				getPatientVisit(myPatient);
-				let ddd = await getPatientDocument(userCid, myPatient.pid);
+				let patRec = JSON.parse(sessionStorage.getItem("shareData"));
+				console.log(patRec);
+				setSearchText(patRec.displayName);
+				setPatientArray([patRec]);
+				setCurrentPatientData(patRec);
+				setCurrentPatient(patRec.displayName);
+				getPatientVisit(patRec);
+				let ddd = await getPatientDocument(userCid, patRec.pid);
 				console.log("Docs", ddd);
 				setDocumentArray(ddd);
 			} catch {
+				// have come directly
 				let ppp = await getAllPatients();
 				setPatientArray(ppp);
 				setPatientMasterArray(ppp);
 			}
+			sessionStorage.setItem("shareData", "");		// clean up
 			
 		}
 		userCid = sessionStorage.getItem("cid");
@@ -1350,7 +1327,7 @@ export default function Visit() {
 		setShowDocument(false); 
 		setViewImage(false); 
 		setDocumentArray([]); 
-		setCurrentAppt(null); 
+		//setCurrentAppt(null); 
 		setCurrentPatient(""); 
 		setVisitArray([]); 
 		setSelectPatient(true);

@@ -41,6 +41,7 @@ import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Typography from '@material-ui/core/Typography';
 import Avatar from "@material-ui/core/Avatar"
 import { useHistory } from "react-router-dom";
+import { useAlert } from 'react-alert';
 
 // icons
 import IconButton from '@material-ui/core/IconButton';
@@ -48,7 +49,9 @@ import SearchIcon from '@material-ui/icons/Search';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EventNoteIcon from '@material-ui/icons/EventNote';
-						
+import NoteAddIcon from '@material-ui/icons/NoteAdd';
+
+
 // import CardAvatar from "components/Card/CardAvatar.js";
 // import { UserContext } from "../../UserContext";
 import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFilter,
@@ -211,6 +214,7 @@ export default function Patient() {
 	//const history = useHistory();	
   const classes = useStyles();
 	const gClasses = globalStyles();
+	const alert = useAlert();
 
 	const [patientMasterArray, setPatientMasterArray] = useState([]);
 	const [patientArray, setPatientArray] = useState([]);
@@ -397,16 +401,15 @@ export default function Patient() {
 	}
 	
 	function handleVisit(rec) {
-		let myData = {
-			caller: "PATIENT",
-			patient: rec,
-			appointment: null,
-		}
-		sessionStorage.setItem("shareData", JSON.stringify(myData));
+		sessionStorage.setItem("shareData", JSON.stringify(rec));
 		setTab(process.env.REACT_APP_VISIT);
 	}
 	
-
+	function handleReport(rec) {
+		sessionStorage.setItem("shareData", JSON.stringify(rec));
+		setTab(process.env.REACT_APP_REPORT);
+	}
+	
 	async function handleAddEditSubmit() {
 		console.log("Addedit", patientName, patientAge, patientGender, patientEmail, patientMobile);
 		let myAge = (patientAge !== "") ? patientAge : 0;
@@ -446,6 +449,8 @@ export default function Patient() {
 		return; 
 	}
 	
+
+	
 	function DisplayAllPatients() {
 	return (
 	<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
@@ -454,21 +459,26 @@ export default function Patient() {
 		<DisplayPatientDetails 
 			patient={m} 
 			button1={
+				<IconButton className={gClasses.deepOrange} size="small" onClick={() => { handleReport(m)}}  >
+					<NoteAddIcon />
+				</IconButton>
+			}
+			button2={
 				<IconButton color={'primary'} size="small" onClick={() => { handleAppointmentConfirm(m)}}  >
 					<EventNoteIcon />
 				</IconButton>
 			}
-			button2={
+			button3={
 				<IconButton className={gClasses.green} size="small" onClick={() => {handleVisit(m)}}  >
 					<LocalHospitalIcon />
 				</IconButton>
 			}
-			button3={
+			button4={
 				<IconButton className={gClasses.blue} size="small" onClick={() => {handleEdit(m)}}  >
 					<EditIcon  />
 				</IconButton>
 			}
-			button4={
+			button5={
 				<IconButton color="secondary" size="small" onClick={() => {handleCancel(m)}}  >
 					<CancelIcon />
 				</IconButton>

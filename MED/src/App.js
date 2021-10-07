@@ -37,6 +37,7 @@ clearBackupData, downloadApk
 const hist = createBrowserHistory();
 
 
+/***
 function checkJoinGroup(pathArray) {
   let sts = false;
   if ((pathArray[1].toLowerCase() === "joingroup") && (pathArray.length === 3) && (pathArray[2].length > 0)) {
@@ -45,9 +46,9 @@ function checkJoinGroup(pathArray) {
   }
   return sts;
 }
+***/
 
 function initCdParams() {
-  localStorage.setItem("joinGroupCode", "");
   let ipos = 0;
   if ((localStorage.getItem("tabpos") !== null) &&
   (localStorage.getItem("tabpos") !== "") ) {
@@ -80,7 +81,7 @@ function checkResetPasswordRequest() {
   //console.log("Path is");
   //console.log(x);
 	if (x.length >= 4)
-	if (x[1] === "viraagdental")
+	if (x[1] === "doctorviraag")
 	if (x[2] === "resetpassword") {
 		resetLink = x[3];
 	}
@@ -90,14 +91,13 @@ function checkResetPasswordRequest() {
 
 function AppRouter() {
   //let history={hist}
-	
+
   const [user, setUser] = useState(null);
 	const [fireToken, setFireToken] = useState("");
 	
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
   var idleTimer = null;
   
-  // console.log(`000. User is ${localStorage.getItem("uid")}`)
   
   async function handleOnActive (event) {
     // console.log('user is active', event);
@@ -118,9 +118,7 @@ function AppRouter() {
 
   function DispayTabs() {
     let isLogged = isUserLogged();
-    //console.log("Login status", isLogged)
     if (isLogged) {
-      // console.log("User is logged");
       return (
         <div>
           <CricDreamTabs/>
@@ -159,26 +157,6 @@ function AppRouter() {
   //console.log("in before unload");
 
   initCdParams();
-
-  let mypath = window.location.pathname.split("/");
-  if (checkJoinGroup(mypath)) {
-    //console.log("join group found");
-    localStorage.setItem("tabpos", 105);
-    //history.push("/")
-  } 
-
-  // return (
-  // <Router history={hist}> 
-  //     <UserContext.Provider value={value}>
-  //       {!user && <Redirect from="/" to="/signIn" />}
-  //       <Route path="/joingroup" component={JoinGroup} />
-  //       <Route path="/admin" component={value ? Admin : SignIn} />
-  //       <Redirect from="/" to="/signIn" />
-  //     </UserContext.Provider>
-  //   </Router>
-  // );
-
-
   return (
     <Router history={hist}> 
     <UserContext.Provider value={value}>

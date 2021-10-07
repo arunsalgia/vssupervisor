@@ -35,6 +35,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import EventNoteIcon from '@material-ui/icons/EventNote';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
+import NoteAddIcon from '@material-ui/icons/NoteAdd';
 
 // styles
 import globalStyles from "assets/globalStyles";
@@ -368,8 +369,22 @@ export default function Document() {
   useEffect(() => {		
 		const checkPatient = async () => {		
 			let ppp = await getAllPatients();
-			setPatientArray(ppp);
 			setPatientMasterArray(ppp);
+			try {
+				let patRec = JSON.parse(sessionStorage.getItem("shareData"));
+				// has come from patient page
+				console.log(patRec);
+				setSearchText(patRec.displayName);
+				setPatientArray([patRec]);
+				let ddd = await getPatientDocument(userCid, patRec.pid);
+				setDocumentArray(ddd);
+				setCurrentPatientData(patRec);
+				setCurrentPatient(patRec.displayName);
+			} catch {
+				setPatientArray(ppp);
+			}
+			sessionStorage.setItem("shareData", "");
+			
 		}
 		userCid = sessionStorage.getItem("cid");
 		checkPatient();
@@ -644,8 +659,8 @@ export default function Document() {
 		<DisplayPatientDetails 
 			patient={m} 
 			button1={
-				<IconButton color={'primary'} size="small" onClick={() => { handleSelectPatient(m)}}  >
-					<EventNoteIcon />
+				<IconButton className={gClasses.deepOrange} size="small" onClick={() => { handleSelectPatient(m)}}  >
+					<NoteAddIcon />
 				</IconButton>
 			}
 		/>

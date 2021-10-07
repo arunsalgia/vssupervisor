@@ -12,6 +12,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import globalStyles from "assets/globalStyles";
 import Container from '@material-ui/core/Container';
+import { TextField, InputAdornment } from "@material-ui/core";
 //import { UserContext } from "../../UserContext";
 import axios from "axios";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
@@ -20,6 +21,9 @@ import { useHistory } from "react-router-dom";
 import { cdRefresh, encrypt} from "views/functions.js";
 import { CricDreamLogo, BlankArea, ValidComp } from 'CustomComponents/CustomComponents.js';
 import { setTab } from "CustomComponents/CricDreamTabs.js"
+import { useAlert } from 'react-alert';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -50,64 +54,23 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-/***
-class ChildComp extends React.Component {
-
-  componentDidMount()  {
-    // custom rule will have name 'isPasswordMatch'
-    ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
-      return (value === this.props.p1)
-    });
-
-    ValidatorForm.addValidationRule('minLength', (value) => {
-      return (value.length >= 6)
-    });
-
-    ValidatorForm.addValidationRule('noSpecialCharacters', (value) => {
-      return validateSpecialCharacters(value);
-    });
-
-    ValidatorForm.addValidationRule('isEmailOK', (value) => {
-      return validateEmail(value);
-    });
-  }
-
-  
-  componentWillUnmount() {
-    // remove rule when it is not needed
-    ValidatorForm.removeValidationRule('isPasswordMatch');
-    ValidatorForm.removeValidationRule('isEmailOK');
-    ValidatorForm.removeValidationRule('minLength');
-    ValidatorForm.removeValidationRule('noSpecialCharacters');   
-  }
-
-  render() {
-    return <br/>;
-  }
-
-}
-***/
 
 
 
 export default function ResetPassword() {
   const classes = useStyles();
 	const gClasses = globalStyles();
+	const alert = useAlert();
 //  const history = useHistory();
   // const [userName, setUserName] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
+
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [registerStatus, setRegisterStatus] = useState(0);
+	const [showNewPassword, setShowNewPassword] = useState(false);
+	const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+	
 	const [disableButton, setDisableButton] = useState(true);
-
-  // const { setUser } = useContext(UserContext);
-
-  // const handleChange = (event) => {
-  //   const { user } = this.state;
-  //   user[event.target.name] = event.target.value;
-  //   this.setState({ user });
-  // }
+	
 	
 	useEffect(() => {
 
@@ -118,12 +81,23 @@ export default function ResetPassword() {
 				let  response = await axios.get(myUrl);
 				// console.log(response.data);
 				let sts = response.data.status;
-				// console.log("Status:", sts);
-				setRegisterStatus(sts);
-				setDisableButton(false);
+				switch (sts) {
+					case 1001:
+						alert.error("Invalid Link");
+						break;
+					case 1002:
+						alert.error("Link expired. Regenerate link");
+						break;
+					case 0:
+						setDisableButton(false);
+						break;
+					default:
+						alert.error("Invalid code "+sts.toString()+" received from server");
+						break;
+				}
 			} catch (e) {
 				console.log("Failed");
-				setRegisterStatus(1001);
+				alert.error("Error in response from server");
 			}
     }
     verifyCode();
@@ -203,57 +177,76 @@ export default function ResetPassword() {
         Reset Password
       </Typography>
       <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
-      <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="New Password"
-          onChange={(event) => setNewPassword(event.target.value)}
-          name="password"
-          type="password"
-          validators={['required', 'minLength', 'noSpecialCharacters']}
-          errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
-          value={newPassword}
-      />
-      <BlankArea/>
-      <TextValidator
-          variant="outlined"
-          required
-          fullWidth      
-          label="Repeat password"
-          onChange={(event) => setRepeatPassword(event.target.value)}
-          name="repeatPassword"
-          type="password"
-          validators={['isPasswordMatch', 'required']}
-          errorMessages={['password mismatch', 'this field is required']}
-          value={repeatPassword}
-      />
-      <ShowResisterStatus/>
-      <BlankArea/>
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        className={(registerStatus === 0) ? gClasses.show : gClasses.hide}
-				//disabled={disableButton}
-      >
+			{(showNewPassword) &&
+				<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
+					label="New Password" type={"text"}
+					value={newPassword} 
+					InputProps={{
+						endAdornment: (
+							<InputAdornment position="end">
+								<VisibilityIcon onClick={() => { setShowNewPassword(false); }} />
+							</InputAdornment>
+						),
+					}}
+					onChange={() => { setNewPassword(event.target.value) }}
+					validators={['minLength', 'noSpecialCharacters']}
+					errorMessages={['Minimum 6 chars required','Special characters not permitted']}
+				/>
+			}
+			{(!showNewPassword) &&
+				<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
+					label="New Password" type={"password"}
+					value={newPassword} 
+					InputProps={{
+						endAdornment: (
+							<InputAdornment position="end">
+								<VisibilityOffIcon onClick={() => { setShowNewPassword(true); }} />
+							</InputAdornment>
+						),
+					}}
+					onChange={() => { setNewPassword(event.target.value) }}
+					validators={['minLength', 'noSpecialCharacters']}
+					errorMessages={['Minimum 6 chars required','Special characters not permitted']}
+				/>
+			}
+			{(showRepeatPassword) &&
+				<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
+					label="Repeat Password" type={"text"}
+					value={repeatPassword} 
+					onChange={() => { setRepeatPassword(event.target.value) }}
+					InputProps={{
+						endAdornment: (
+							<InputAdornment position="end">
+								<VisibilityIcon onClick={() => { setShowRepeatPassword(false); }} />
+							</InputAdornment>
+						),
+					}}
+          validators={['isPasswordMatch']}
+          errorMessages={['password mismatch']}
+				/>
+			}
+			{(!showRepeatPassword) &&
+				<TextValidator fullWidth variant="outlined"  required className={gClasses.vgSpacing}
+					label="Repeat Password" type={"password"}
+					value={repeatPassword} 
+					onChange={() => { setRepeatPassword(event.target.value) }}
+					InputProps={{
+						endAdornment: (
+							<InputAdornment position="end">
+								<VisibilityOffIcon onClick={() => { setShowRepeatPassword(true); }} />
+							</InputAdornment>
+						),
+					}}
+          validators={['isPasswordMatch']}
+          errorMessages={['password mismatch']}
+				/>
+			}
+      <Button type="submit" fullWidth variant="contained" color="primary" disabled={disableButton} >
         Update
 			</Button>
-			<Button
-        //type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        className={(registerStatus !== 0) ? gClasses.show : gClasses.hide}
-				onClick={handleForgot}
-				//disabled={disableButton}
-      >
-        Regenrate Link
-			</Button>
+			<ValidComp p1={newPassword}/> 
     </ValidatorForm>
     </div>
-    <ValidComp p1={newPassword}/>  
 		<Typography className={classes.root}>
       <Link href="#" onClick={handleLogin} variant="body2">
         Already have an account? Sign in 

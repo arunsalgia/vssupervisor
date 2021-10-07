@@ -45,7 +45,7 @@ import ContactUs from "views/MED/ContactUs.js";
 import PointSystem from "views/MED/PointSystem.js";
 
 import WorkingHours from "views/Settings/WorkingHours";
-import Holiday from "views/Holiday/Holiday";
+import Holiday from "views/Settings/Holiday";
 
 
 import Modal from 'react-modal';
@@ -82,6 +82,12 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: theme.typography.fontWeightBold,
     color: 'white',
 		backgroundColor: green[800],
+	},
+	userName: {
+		fontSize: theme.typography.pxToRem(24),
+    fontWeight: theme.typography.fontWeightBold,
+    color: 'white',
+		marginLeft: theme.spacing(50),
 	},
 	ankit: {
 		fontSize: theme.typography.pxToRem(22),
@@ -427,7 +433,10 @@ export function CricDreamTabs() {
 								<Typography className={classes.title}>{sessionStorage.getItem("userName")}</Typography>
 								<Divider className={classes.divider} />
                 <MenuItem onClick={handleProfile}>
-								<Typography className={classes.menuStyle}>Profile</Typography>
+									<Typography className={classes.menuStyle}>Profile</Typography>
+								</MenuItem>
+								<MenuItem onClick={handleChangePassword}>
+									<Typography className={classes.menuStyle}>Change Password</Typography>
 								</MenuItem>
 								{(window.sessionStorage.getItem("userType") === "Doctor") &&
 									<MenuItem onClick={handleWallet}>
@@ -479,8 +488,10 @@ export function CricDreamTabs() {
 									</div>
 								}
                 {/*<MenuItem onClick={handleContactUs}>Contact Us</MenuItem>*/}
-									{/*<Divider className={classes.divider}/>
-									<MenuItem onClick={() => {handleClose(); handleLogout(); }}>Logout</MenuItem>*/}
+								<Divider className={classes.divider}/>
+								<MenuItem onClick={() => {handleClose(); handleLogout(); }}>
+									<Typography className={classes.menuStyle}>Logout</Typography>
+								</MenuItem>
               </Menu>
             </div>
           )}
@@ -509,6 +520,7 @@ export function CricDreamTabs() {
 						<Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>
 						</div>
 					}
+					{(false) &&
 					<div align="right">
 					<Avatar 
             aria-label="account of current user"
@@ -537,42 +549,11 @@ export function CricDreamTabs() {
             <DisplayGroupMenu />
           </Menu>
 					</div>
-          {/* <IconButton
-            aria-label="account of current group"
-            aria-controls="group-appbar"
-            aria-haspopup="true"
-            onClick={handleGrpMenu}
-            color="inherit"
-          >
-            <GroupIcon className={classes.icon}/>
-          </IconButton> */}
-          {/* <Avatar 
-            aria-label="account of current user"
-            aria-controls="user-appbar"
-            aria-haspopup="true"
-            onClick={handleGrpMenu}
-            color="inherit"
-            variant="circular" className={classes.avatar1}>{groupCharacter}
-          </Avatar> */}
-          {/* <Menu
-            id="group-appbar"
-            anchorEl={grpAnchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            // keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={arunGroup}
-            onClose={handleGrpClose}
-          >
-            <DisplayGroupMenu />
-          </Menu> */}
-        {/* </div> */}
-       </Toolbar>
+					}
+					<Typography onClick={handleHome}>
+						<span className={classes.userName}>{sessionStorage.getItem("userName")}</span>
+					</Typography>
+			 </Toolbar>
       </AppBar>
       <DisplayCdItems/>
       {/* <DisplayUpgrade/> */}
