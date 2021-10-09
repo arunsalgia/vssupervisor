@@ -91,6 +91,7 @@ import { callYesNo,
 	dispAge, dispEmail, dispMobile,
 	getPatientDocument,
 	stringToBase64,
+	vsDialog,
 } from "views/functions.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -225,6 +226,7 @@ export default function Visit() {
 	const alert = useAlert();
 	
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
+	const [isListDrawer, setIsListDrawer] = useState("");
 	const [selectPatient, setSelectPatient] = useState(false);
   const [patientArray, setPatientArray] = useState([])
 	const [patientMasterArray, setPatientMasterArray] = useState([])
@@ -919,6 +921,7 @@ export default function Visit() {
 		setIsDrawerOpened("");
 	}
 	
+	
 	function handleDeleteRemark(vNumber, mNumber) {
 		console.log("handleDeleteMedicine "+vNumber+" Remark "+mNumber);
 		if (vNumber == 0) {
@@ -944,6 +947,8 @@ export default function Visit() {
 		setModalRegister(0);
 		setIsDrawerOpened("ADDMED");
 	}
+	
+
 	
 	function handleEditMedicine(vNumber, mNumber) {
 		//await getAllMedicines();
@@ -995,6 +1000,14 @@ export default function Visit() {
 	}
 	
 	function handleDeleteMedicine(vNumber, mNumber) {
+		if (vNumber !== 0) return;
+		vsDialog("Delete Medicine", `Are you sure you want to delete medicine ${visitArray[0].medicines[mNumber].name}?`,
+		{label: "Yes", onClick: () => handleDeleteMedicineConfirm(vNumber, mNumber) },
+		{label: "No" }
+		);
+	}
+	
+	function handleDeleteMedicineConfirm(vNumber, mNumber) {
 		console.log("handleDeleteMedicine "+vNumber+" Medicine "+mNumber);
 		if (vNumber == 0) {
 			var tmp = [].concat(visitArray);
@@ -1385,6 +1398,19 @@ export default function Visit() {
 	}
 	
 
+	function DisplayMedicineMenu() {
+	return (	
+		<div>
+		<VsCancel align="right" onClick={() => setIsListDrawer("")} />
+		{medicineArray.map( (p) =>
+			<MenuItem key={p.name} value={p.name}>
+			<Typography onClick={() => { setEmurName(p.name); setIsListDrawer(""); } }>
+				{p.name}
+			</Typography>
+			</MenuItem>
+		)}
+		</div>
+	)}
 	
 	return (
 	<div className={gClasses.webPage} align="center" key="main">
@@ -1475,35 +1501,13 @@ export default function Visit() {
 			<Typography align="center" className={classes.modalHeader}>
 				{(isDrawerOpened === "ADDMED") ? "New Medicine" : "Edit Medicine"}
 			</Typography>
+			<VsButton name="Select Medicine" align="right" onClick={() => setIsListDrawer("LIST")} />
 			<BlankArea />
-			<div key="StdInp" align="left" >
-			<FormControlLabel align="right" className={classes.radio} label="Standard"
-        control={
-          <SwitchBtn className={classes.radio} checked={standard} onChange={() => {setStandard(!standard) }} color="primary" />
-        } 
-      />
-			{standard &&
-				<Select labelId='team' id='team' name="team" padding={10}
-					required fullWidth label="Medicine"
-					value={emurName}
-					className={gClasses.vgSpacing}
-					inputProps={{
-						name: 'Group',
-						id: 'filled-age-native-simple',
-					}}
-					onChange={(event) => setEmurName(event.target.value)}
-					>
-					{medicineArray.map(x =>	<MenuItem key={x.name} value={x.name}>{x.name}</MenuItem>)}
-				</Select>
-			}
-			{!standard &&
 			<TextValidator required fullWidth color="primary"
 				id="newName" label="Medicine" name="newName"
 				onChange={(event) => setEmurName(event.target.value)}
 				value={emurName}
 			/>
-			}
-			</div>
 			<BlankArea />
 			<Grid key="editmed" container justify="center" alignItems="left" >
 			<Grid className={gClasses.vgSpacing} item xs={1} sm={1} md={1} lg={1} >
@@ -1631,6 +1635,13 @@ export default function Visit() {
 	}
 	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
 	</Box>
+	</Drawer>
+	<Drawer className={classes.drawer}
+		anchor="left"
+		variant="temporary"
+		open={isListDrawer !== ""}
+	>
+	<DisplayMedicineMenu />
 	</Drawer>
 	</Container>			
   </div>

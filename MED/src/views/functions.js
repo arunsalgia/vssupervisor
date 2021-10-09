@@ -4,8 +4,12 @@ import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import CircularProgressWithLabel from '@material-ui/core/LinearProgress';
 import moment from "moment";
-
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import {cloneDeep} from "lodash";
 import { func } from "prop-types";
+import {dialogOptions } from "views/globals";
+
 
 var crypto = require("crypto");
 var ifscsystem = require('ifsc-finder');
@@ -846,3 +850,12 @@ export async function getAllPatients(userCid) {
 	}
 }
 	
+export function vsDialog(title, msg, yesB, noB) {
+	let option = cloneDeep(dialogOptions);
+	console.log(option); 
+	option.title = title;
+	option.message = msg;
+	option.buttons[0] = yesB;
+	option.buttons[1] = noB;
+	confirmAlert(option);
+}
