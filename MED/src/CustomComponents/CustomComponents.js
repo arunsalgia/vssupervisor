@@ -803,7 +803,6 @@ return (
 export function DisplayHolidayDetails(props) {
 	const gClasses = globalStyles();
 	
-	
 	let myDate = DATESTR[props.holiday.date] + "/" +
 		MONTHNUMBERSTR[props.holiday.month] + "/" +
 		props.holiday.year;
@@ -818,7 +817,7 @@ return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 		<div align="center">
 			<Typography>
-			<span className={gClasses.patientName}>{props.appointment.displayName}</span>
+			<span className={gClasses.patientName}>{myDate}</span>
 			</Typography>
 		</div>
 		<div align="left">
