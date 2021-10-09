@@ -60,7 +60,7 @@ const globalStyles = makeStyles((theme) => ({
 		color: 'blue',
 	},
 	patientInfo: {
-		marginLeft: theme.spacing(3),
+		//marginLeft: theme.spacing(3),
 		fontSize: theme.typography.pxToRem(14),
 	},
 	patientInfo2: {

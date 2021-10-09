@@ -53,6 +53,142 @@ router.get('/suencrypt/:text', async function (req, res, next) {
 });
 
 
+router.get('/svrtoclient/:text', async function (req, res, next) {
+  // CricRes = res;
+  setHeader(res);
+  var { text } = req.params;
+	let x = dbdecrypt(text);
+	console.log()
+  sendok(res, svrToDbText(text));
+});
+
+// get users belonging to customer
+router.get('/getassistant/:userCid', async function (req, res, next) {
+  // CricRes = res;
+  setHeader(res);
+
+  var { userCid } = req.params;
+  let allUsers = await User.find({cid: userCid, userType: "Assistant"}).sort({displayName: 1});
+	for(let i=0; i<allUsers.length; ++i) {
+		allUsers[i].email = dbToSvrText(allUsers[i].email);
+	}
+	sendok(res, allUsers)
+	
+});
+
+router.get('/addassistant/:userCid/:userName/:userEmail/:userMobile', async function (req, res, next) {
+  // CricRes = res;
+  setHeader(res);
+
+  var { userCid, userName, userEmail, userMobile } = req.params;
+	
+	var isValid = false;
+  // if user name already used up by this customer
+  var lname = getLoginName(userName);
+  var dname = getDisplayName(userName);
+  let userEmail1 = decrypt(userEmail);
+	console.log(userEmail1);
+	userEmail1 = dbencrypt(userEmail1);
+	console.log(userEmail1);
+
+  let uuu = await User.find({userName: lname, cid: userCid });
+  if (uuu.length > 0) return senderr(res, 601, "User name already used.");
+  //uuu = await User.find({ email: userEmail1, cid: userCid });
+  //if (uuu.length > 0) senderr(res, 603, "Email already used.");
+   
+  uRec = await User.find({}).limit(1).sort({ "uid": -1 });
+	/*
+	uid: Number,
+  userName: String,
+  displayName: String,
+  password: String,
+  status: Boolean,
+  email: String,
+  userType: String,
+  mobile: String,
+	cid: String,
+	*/
+  var user1 = new User({
+		uid: uRec[0].uid + 1,
+		userName: lname,
+		displayName: dname,
+		password: dbencrypt("cd"),
+		status: true,
+		email: userEmail1,
+		userType: 'Assistant',
+		mobile: userMobile,
+		cid: userCid
+	});
+	console.log(user1);
+  await user1.save();
+  console.log(user1);
+	user1.email = dbToSvrText(user1.email);
+  sendok(res, user1); 
+	
+});
+
+router.get('/updateassistant/:userCid/:uid/:userName/:userEmail/:userMobile', async function (req, res, next) {
+  // CricRes = res;
+  setHeader(res);
+
+  var { userCid, uid, userName, userEmail, userMobile } = req.params;
+	
+	var isValid = false;
+  // if user name already used up by this customer
+  var lname = getLoginName(userName);
+  var dname = getDisplayName(userName);
+  let userEmail1 = decrypt(userEmail);
+	console.log(userEmail1);
+	userEmail1 = dbencrypt(userEmail1);
+	console.log(userEmail1);
+
+  let user1 = await User.findOne({uid: Number(uid), cid: userCid });
+  if (!user1) return senderr(res, 601, "Invalid user id.");
+  
+   
+	/*
+	uid: Number,
+  userName: String,
+  displayName: String,
+  password: String,
+  status: Boolean,
+  email: String,
+  userType: String,
+  mobile: String,
+	cid: String,
+	*/
+  
+	user1.userName = lname;
+	user1.displayName = dname;
+	user1.email = userEmail1;
+	user1.mobile = userMobile;
+
+	console.log(user1);
+  await user1.save();
+  console.log(user1);
+	user1.email = dbToSvrText(user1.email);
+  sendok(res, user1); 
+	
+});
+
+router.get('/deleteassistant/:userCid/:uid', async function (req, res, next) {
+  // CricRes = res;
+  setHeader(res);
+
+  var { userCid, uid} = req.params;
+	
+	var isValid = false;
+  // if user name already used up by this customer
+
+  let uuu = await User.find({uid: Number(uid), cid: userCid });
+  if (uuu.length !== 1) return senderr(res, 601, "Invalid user");
+
+   
+  uRec = await User.deleteOne({uid: Number(uid), cid: userCid });
+	
+  sendok(res, "deleted user"); 
+	
+});
 
 // get users belonging to group "mygroup"
 router.get('/group/:mygroup', async function (req, res, next) {

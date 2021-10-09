@@ -46,7 +46,7 @@ import PointSystem from "views/MED/PointSystem.js";
 
 import WorkingHours from "views/Settings/WorkingHours";
 import Holiday from "views/Settings/Holiday";
-
+import Assistant from "views/Settings/Assistant";
 
 import Modal from 'react-modal';
 // import download from 'js-file-downloader';
@@ -287,6 +287,7 @@ export function CricDreamTabs() {
 	
 	const handleWorkingHours = () => { handleClose(); setMenuValue(701);}
 	const handleHoliday = () => { handleClose(); setMenuValue(702);}
+	const handleAssistant = () => { handleClose(); setMenuValue(703);}
   
 
   function DisplayCdItems() {
@@ -311,6 +312,7 @@ export function CricDreamTabs() {
 
 			case 701: return <WorkingHours />
 			case 702: return <Holiday />
+			case 703: return <Assistant />
 
       default: return  null;
     }
@@ -475,6 +477,9 @@ export function CricDreamTabs() {
 								<MenuItem onClick={handleHoliday}>
 								<Typography className={classes.menuStyle}>Holidays</Typography>
 								</MenuItem>
+								<MenuItem onClick={handleAssistant}>
+								<Typography className={classes.menuStyle}>User</Typography>
+								</MenuItem>
 								</div>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
 									<div>
@@ -550,9 +555,9 @@ export function CricDreamTabs() {
           </Menu>
 					</div>
 					}
-					<Typography onClick={handleHome}>
+					{/*<Typography onClick={handleHome}>
 						<span className={classes.userName}>{sessionStorage.getItem("userName")}</span>
-					</Typography>
+					</Typography>*/}
 			 </Toolbar>
       </AppBar>
       <DisplayCdItems/>

@@ -967,6 +967,42 @@ return (
 	</Box>	
 )}
 	
+export function DisplayUserDetails(props) {
+	const gClasses = globalStyles();
+	let _button1 = (props.button1 == null);
+	let _button2 = (props.button2 == null);
+	let _button3 = (props.button3 == null);
+	let _button4 = (props.button4 == null);
+	let _button5 = (props.button5 == null);
+	//console.log(_button1, _button2, _button3, _button4, _button5);
+return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<div align="center" >
+		<Typography>
+		<span className={gClasses.patientName}>{props.user.displayName}</span>
+		</Typography>
+		</div>
+		<div align="left" >
+		<Typography > 
+			<span className={gClasses.patientInfo}>Email: </span>
+			<span className={gClasses.patientInfo2}>{dispEmail(props.user.email)}</span>
+		</Typography>
+		<Typography > 
+			<span className={gClasses.patientInfo}>Mob.: </span>
+			<span className={gClasses.patientInfo2}>{dispMobile(props.user.mobile)}</span>
+		</Typography>
+		<BlankArea />
+		<div align="right">
+		{(!_button1) && props.button1}
+		{(!_button2) && props.button2}
+		{(!_button3) && props.button3}
+		{(!_button4) && props.button4}
+		{(!_button5) && props.button5}
+		</div>
+	</div>
+	</Box>
+)}
+
 export function DisplayImage(props) {
 const classes = useStyles();
 //console.log(props);
