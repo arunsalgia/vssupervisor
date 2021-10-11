@@ -794,9 +794,10 @@ export default function Visit() {
 			});
 			let myFile = "patientVisit.docx";
 			console.log(myFile);
+			console.log(response.data);
 			await download(response.data, myFile);
 			setStepNo(3);
-			//console.log("download over");
+			console.log("download over");
 			alert.success("Successfully downloaded visit document");
 		} catch (e) {
 			console.log(e)
