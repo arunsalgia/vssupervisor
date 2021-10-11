@@ -422,11 +422,9 @@ export function DisplayPageHeader (props) {
 
 export function DisplayBalance (props) {
   const classes = useStyles();
-  // let msg =  ;
   return (
   <div>
     <Typography align="right" className={classes.balance} >{`Wallet balance: ${props.wallet}`}</Typography>
-    <Typography align="right" className={classes.balance} >{`Bonus  balance: ${props.bonus}`}</Typography>
   </div>
   );
 }

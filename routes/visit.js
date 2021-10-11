@@ -234,8 +234,8 @@ router.get('/printdoc/:cid/:jsonData', async function(req, res, next) {
 	});
 	
 	// Used to export the file into a .docx file
-	Packer.toBuffer(visitDoc).then((buffer) => {
-			fs.writeFileSync("./temp/patientVisit.docx", buffer);
+	await Packer.toBuffer(visitDoc).then((buffer) => {
+			fs.writeFileSync(`./temp/${pRec.cid}_${pRec.pid}_patientVisit.docx`, buffer);
 	});
 		
 	sendok(res, xxx);
@@ -408,11 +408,12 @@ router.get('/nextVisit/list/:cid', async function(req, res, next) {
 
 });
 
-router.get('/downloadvisit', async function (req, res) {
+router.get('/downloadvisit/:cid/:pid', async function (req, res) {
   setHeader(res);
-  console.log("in downloaf");
+	var {cid, pid} = req.params;
+  console.log("in download");
   
-  let myFile = process.cwd() + "/temp/patientVisit.docx";		// getFileName(pname, myProduct[0].versionNumber, ptype);
+  let myFile = process.cwd() + `/temp/${cid}_${pid}_patientVisit.docx`;		// getFileName(pname, myProduct[0].versionNumber, ptype);
   console.log(myFile);
 
   if (fs.existsSync(myFile)) {

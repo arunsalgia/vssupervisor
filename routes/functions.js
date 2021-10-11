@@ -291,17 +291,11 @@ async function getUserBalance(userid) {
   let tmp = {wallet: 0, bonus: 0};
 
   let xxx = await M_Wallet.aggregate([
-    {$match: {cid: userid, isWallet: true}},
+    {$match: {cid: userid}},
     {$group : {_id : "$cid", balance : {$sum : "$amount"}}}
   ]);
   if (xxx.length === 1) tmp.wallet = xxx[0].balance;
-
-  xxx = await M_Wallet.aggregate([
-    {$match: {cid: userid, isWallet: false}},
-    {$group : {_id : "$cid", balance : {$sum : "$amount"}}}
-  ]);
-  if (xxx.length === 1) tmp.bonus = xxx[0].balance;
-
+	
   return tmp;
 }
 

@@ -34,8 +34,8 @@ var instaOptions = {
 var razorOptions = {
 	"key": RAZOR_API_KEY,
 	"amount": 0, 		// Example: 2000 paise = INR 20
-	"name": "APL",
-	"description": "APL Wallet",
+	"name": "VRG",
+	"description": "Dr. Viraag Wallet",
 	//"image": "VS.JPG",    // COMPANY LOGO
 	//"handler": handleRazor,
 	"prefill": {
@@ -47,7 +47,7 @@ var razorOptions = {
 		"address": "address" //customer address 
 	},
 	"theme": {
-		"color": "#15b8f3" // screen color
+		"color": "#15b8f3" // screen colour
 	}
 };
 
@@ -119,16 +119,16 @@ mac: 'ec891618e4e2b2a23377647065168e5458ca39b4'
   return sendok(res, "done");
 });	
 	
-// create intamojo payment request when add waller selected by user with amount
-router.get('/instageneratepaymentrequest/:userid/:amount', async function (req, res, next) {
+// create intamojo payment request when add wallet selected by user with amount
+router.get('/instageneratepaymentrequest/:userCid/:amount', async function (req, res, next) {
   setHeader(res);
-    let { userid, amount } = req.params;
-    let PAYMENT_REQUEST_URL = '';
+	let { userCid, amount } = req.params;
+	let PAYMENT_REQUEST_URL = '';
 	
-	let userRec = await akshuGetUser(userid);
+	let customerRec = await Customer.findOne({_id:userCid });
 	instaOptions.amount = amount;
-	instaOptions.buyer_name = userRec.displayName;
-	instaOptions.email = dbdecrypt(userRec.email);
+	instaOptions.buyer_name = customerRec.name;
+	instaOptions.email = dbdecrypt(customerRec.email);
 
 	Instamojo.setKeys(INSTA_API_KEY, INSTA_AUTH_KEY);	
 	Instamojo.isSandboxMode(true); // For testing
@@ -233,57 +233,57 @@ router.get('/instapaymentfail/:paymentRequest', async function (req, res) {
 });	
 	
 	
-router.get('/razorgeneratepaymentrequest/:userid/:amount', async function (req, res, next) {
+router.get('/razorgeneratepaymentrequest/:userCid/:amount', async function (req, res, next) {
   setHeader(res);
-	let { userid, amount } = req.params;
+	let { userCid, amount } = req.params;
 	let PAYMENT_REQUEST_URL = '';
 	
-	let userRec = await akshuGetUser(userid);
-
+	let customerRec = await M_Customer.findOne({_id: userCid});
+	//console.log(customerRec);
 	razorOptions.amount = Number(amount) * 100;			// convert to paise
-	razorOptions.prefill.name = userRec.displayName;
-	razorOptions.prefill.email = dbdecrypt(userRec.email);
-	razorOptions.prefill.contact = '+91' + userRec.mobile;
+	razorOptions.prefill.name = customerRec.name;
+	razorOptions.prefill.email = dbdecrypt(customerRec.email);
+	razorOptions.prefill.contact = '+91' + customerRec.mobile;
 	
 	sendok(res, razorOptions);
 }); 
 
-// given by razorpay on successfull payment
-router.get('/razorpaymentok/:userId/:amount/:paymentId', async function (req, res) {
+// given by razor pay on successful payment
+router.get('/razorpaymentok/:userCid/:amount/:paymentId', async function (req, res) {
   setHeader(res);
   console.log("In success payment");
-  var {userId, amount, paymentId } = req.params;
+  var {userCid, amount, paymentId } = req.params;
 	
-	let userRec = await akshuGetUser(userId);
+	let customerRec = await M_Customer.findOne({_id: userCid});
 	
-	let myPayment = new Payment();
-	myPayment.uid = userRec.uid;
-	myPayment.email = userRec.email;
+	/*
+	cid: Number,
+  email: String,
+  amount: Number,
+  status: String,
+  requestId: String,
+  requestTime: Date,
+  paymentId: String,
+  paymentTime: Date,
+  fee: Number,
+	*/
+	
+	let myPayment = new M_Payment();
+	myPayment.cid = customerRec.cid;
+	myPayment.email = customerRec.email;
 	myPayment.amount = parseFloat(amount);
-	myPayment.paymentId = paymentId;
-  myPayment.paymentTime = new Date();
   myPayment.status = "CREDIT";			//req.body.status.toUpperCase();
-  myPayment.fee = 0;   							//parseFloat(req.body.fees);
 	myPayment.requestId = 'NA';   		//response.payment_request.id;
 	myPayment.requestTime = new Date();
+	myPayment.paymentId = paymentId;
+  myPayment.paymentTime = new Date();
+  myPayment.fee = 0; 
 	await myPayment.save();
   
-  let myTrans = createWalletTransaction();
-  myTrans.isWallet = true;
-  myTrans.uid = myPayment.uid;
-  myTrans.transType = WalletTransType.refill;
+  let myTrans = createWalletTransaction(userCid);
+  myTrans.transType = 'Recharge';
   myTrans.transSubType = myPayment.paymentId;
   myTrans.amount = myPayment.amount;
-  await myTrans.save();
-  
-  let bonusAmount = calculateBonus(myPayment.amount);
-  
-  myTrans = createWalletTransaction();
-  myTrans.isWallet = false;
-  myTrans.uid = myPayment.uid;
-  myTrans.transType = BonusTransType.refill;
-  myTrans.transSubType = myPayment.paymentId;
-  myTrans.amount = bonusAmount;
   await myTrans.save();
   
   return sendok(res, "done");
@@ -313,7 +313,8 @@ router.get('/details/:userid', async function (req, res, next) {
     
     let userTrans=[];
     let myTrans = await M_Wallet.find({cid: userid}).sort({ "transNumber": -1 });
-    myTrans.forEach(tRec => {
+		/*
+			myTrans.forEach(tRec => {
       if (tRec.amount != 0) {
         let tDate = new Date(tRec.transNumber);
         userTrans.push({
@@ -324,9 +325,10 @@ router.get('/details/:userid', async function (req, res, next) {
         });
       }
     });
-  
-  // console.log(tmp);  
-  sendok(res, userTrans);
+		*/
+		
+  console.log(myTrans);
+  sendok(res, myTrans);
 }); 
 
 
@@ -380,12 +382,12 @@ router.get('/groupfeebreakup/:groupId', async function (req, res, next) {
 });
 
 
-router.get('/balance/:userid', async function (req, res, next) {
+router.get('/balance/:userCid', async function (req, res, next) {
   // WalletRes = res;
   setHeader(res);
 
-  var { userid } = req.params;
-  var tmp = await getUserBalance(userid);
+  var { userCid } = req.params;
+  var tmp = await getUserBalance(userCid);
   // console.log(tmp);  
   sendok(res, tmp);
 }); 

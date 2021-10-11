@@ -741,9 +741,9 @@ export function getDateTime(t) {
 	return outStr;
 }
 
-export async function downloadVisit() { 
+export async function downloadVisit(cid, pid) { 
   try {
-		let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/visit/downloadvisit`;
+		let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/visit/downloadvisit/${cid}/${pid}`;
     let response = await axios({ method: 'get', url: myURL, responseType: 'arraybuffer',
       // onDownloadProgress: (progressEvent) => {
       //   // let newPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);

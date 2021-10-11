@@ -12,6 +12,7 @@ import VsCancel from "CustomComponents/VsCancel";
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
+import download from 'js-file-download';
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
@@ -28,6 +29,9 @@ import Modal from 'react-modal';
 import { borders } from '@material-ui/system';
 import {dynamicModal } from "assets/dynamicModal";
 import cloneDeep from 'lodash/cloneDeep';
+import StepProgressBar from 'react-step-progress';
+// import the stylesheet
+import 'react-step-progress/dist/index.css';
 
 // styles
 import globalStyles from "assets/globalStyles";
@@ -184,7 +188,10 @@ const addEditModal = dynamicModal('60%');
 const yesNoModal = dynamicModal('60%');
 
 const COUNTPERPAGE=10;
-
+// setup the step content
+const step1Content = <h1>Request to server</h1>;
+const step2Content = <h1>Geneate visit document</h1>;
+const step3Content = <h1>Download visit document</h1>;
 
 let test=[];
 let medQty=[];
@@ -238,6 +245,8 @@ export default function Visit() {
 	const [showDocument, setShowDocument] = useState(false);
 	const [documentArray, setDocumentArray] = useState([]);
 	
+	const [stepNo, setStepNo] = useState(0);
+	const [showProgress, setShowProgress] = useState(false);
 	const [dlMime, setDlMime] = useState("");
 	const [dlFile, setDlFile] = useState("");
 	const [isPdf, setIsPdf] = useState(false);
@@ -763,24 +772,42 @@ export default function Visit() {
 	
 	async function generateVisitDocument() {
 		let errcode = validateNewVisit();
-
-		if (errcode !== 0) { setVisitError(errcode); return; }
+		setShowProgress(true);
+		setStepNo(0);
+		if (errcode !== 0) { setVisitError(errcode); setShowProgress(false); return; }
+		setStepNo(1);
 		
 		//let newVisitNumber = visitArray.length;
 		let newVisit = prepareVisitData();	
 		let newVisitInfo = JSON.stringify(newVisit);
 		try {
 			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/printdoc/${userCid}/${newVisitInfo}`);
-			alert.success("Successfully generated visit document");
+			setStepNo(2);
+			//alert.success("Successfully generated visit document");
+			//await downloadVisit(userCid, currentPatientData.pid);
+			let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/visit/downloadvisit/${userCid}/${currentPatientData.pid}`;
+			let response = await axios({ method: 'get', url: myURL, responseType: 'arraybuffer',
+      // onDownloadProgress: (progressEvent) => {
+      //   // let newPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      //   // console.log("File download in progress ", newPercent);
+      // },
+			});
+			let myFile = "patientVisit.docx";
+			console.log(myFile);
+			await download(response.data, myFile);
+			setStepNo(3);
+			//console.log("download over");
+			alert.success("Successfully downloaded visit document");
 		} catch (e) {
 			console.log(e)
-			alert.error("Error generating visit document");
+			alert.error("Error generating / downloading visit document");
 		}
+		setShowProgress(false);
 	}
 	
 	async function printVisit() {	
 		try {
-			await downloadVisit();
+			await downloadVisit(userCid, currentPatientData.pid);
 			alert.success("Successfully downloaded visit document");
 		} catch (e) {
 			alert.error("Error downloading visit document");
@@ -1304,11 +1331,37 @@ export default function Visit() {
 	let x = props.visitRec;
 	if  (x.visitNumber !== 0) return null;
 	
+	function step1Validator() { return stepNo >= 1};
+	function step2Validator() { return stepNo >= 2};
+	function step3Validator() { return stepNo >= 3};
+	
 	return (
+		<div>
 		<div align="right">
-		<VsButton name="Update New Visit"  onClick={updateVisit} />
-		<VsButton name="Generate Visit Document"  onClick={generateVisitDocument} />
-		<VsButton name="Download Visit Document"  onClick={printVisit} />
+			<VsButton name="Update Visit"  onClick={updateVisit} />
+			<VsButton name="Generate Visit Document"  onClick={generateVisitDocument} />
+				{/*<VsButton name="Download Visit Document"  onClick={printVisit} />*/}
+		</div>
+		{(showProgress) &&
+		<StepProgressBar startingStep={0}
+		steps={[{label: 'Validate visit info', name: 'step 1', content: step1Content,
+		validator: step1Validator 
+		},
+    {
+      label: 'Generate visit document',
+      name: 'step 2',
+      content: step2Content,
+      validator: step2Validator
+    },
+    {
+      label: 'Download visit document',
+      name: 'step 3',
+      content: step3Content,
+      validator: step3Validator
+    }
+		]}
+		/>
+		}
 		<VisitRegisterStatus />
 		</div>
 	);

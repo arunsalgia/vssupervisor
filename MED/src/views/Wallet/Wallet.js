@@ -30,7 +30,10 @@ import axios from "axios";
 import { setTab }from "CustomComponents/CricDreamTabs";
 import { BlankArea, DisplayBalance } from 'CustomComponents/CustomComponents';
 import { getMinimumBalance, isMobile, getDateTime } from 'views/functions';
-import { WALLETTYPE } from 'views/globals';
+import { WALLETTYPE,
+DATESTR, MONTHNUMBERSTR, HOURSTR, MINUTESTR, 
+ } from 'views/globals';
+import useScript from './useScript';
 
 // import classes from '*.module.css';
 var request= require('request');
@@ -39,12 +42,12 @@ var request= require('request');
 // import { useHistory } from "react-router-dom";
 // import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
 import { blue, red, deepOrange, pink } from '@material-ui/core/colors';
-// var Insta = require('instamojo-nodejs');
 
 
-//const INSTAMOJOSCRIPT="https://js.instamojo.com/v1/checkout.js";
 const COUNTPERPAGE=5;
 
+const DVLOGO = `${process.env.PUBLIC_URL}/DV.JPG`;
+const RAZORSCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
 
 const useStyles = makeStyles((theme) => ({
 	filterRadio: {
@@ -108,7 +111,7 @@ const useStyles = makeStyles((theme) => ({
 let userCid;
 
 export default function Wallet(props) {
-  //useScript(INSTAMOJOSCRIPT);
+  useScript(RAZORSCRIPT);
 
   //const history = useHistory();
   const classes = useStyles();
@@ -145,30 +148,18 @@ export default function Wallet(props) {
       setBalance(JSON.parse(localStorage.getItem("saveBalance")));
 
 	if (localStorage.getItem("saveTransactions")) {
-      setTransactions(JSON.parse(localStorage.getItem("saveTransactions")));
-	  setMasterTransactions(JSON.parse(localStorage.getItem("saveTransactions")));
+		setTransactions(JSON.parse(localStorage.getItem("saveTransactions")));
 	}
 	
-    const minimumAmount = async () => {
-      let amt = await getMinimumBalance();
-      setMinBalance(amt); 
-      console.log("Min Balance ", amt);
-      setMinMessage(`Minimum balance of  ${amt} is required for withdrawal.`);
-    }
-    
 	const WalletInfo = async () => {
       try {
-        // get user details
         // get wallet transaction and also calculate balance
-        var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${sessionStorage.getItem("cid")}`);
+        var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${userCid}`);
         setTransactions(response.data);
         setMasterTransactions(response.data);
 				sessionStorage.setItem("saveTransactions", JSON.stringify(response.data));
-		
-        // let myempty = rowsPerPage - Math.min(rowsPerPage, response.data.length - page * rowsPerPage);
-        // setEmptyRows(myempty);
 
-        response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${sessionStorage.getItem("cid")}`);
+        response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${userCid}`);
         setBalance(response.data);
 				sessionStorage.setItem("saveBalance", JSON.stringify(response.data));
       } catch (e) {
@@ -178,7 +169,6 @@ export default function Wallet(props) {
     
 		userCid = sessionStorage.getItem("cid");
 		WalletInfo();
-    //minimumAmount()
   }, []);
 
   function ShowResisterStatus() {
@@ -253,14 +243,8 @@ export default function Wallet(props) {
 			<TableHead>
 				<TableRow align="center">
 					<TableCell key={"TH1"} component="th" scope="row" align="center" padding="none"
-					className={classes.th} colSpan={colCount}>
-					{"Wallet details"}
-					</TableCell>
-				</TableRow>
-				<TableRow align="center">
-					<TableCell key={"TH3"} component="th" scope="row" align="center" padding="none"
-						className={classes.th} colSpan={colCount}>
-						<DisplayFilterRadios />
+					className={classes.th} colSpan={6}>
+					{`Transaction details (Balance ${balance.wallet})`}
 					</TableCell>
 				</TableRow>
 				<TableRow align="center">
@@ -270,24 +254,34 @@ export default function Wallet(props) {
 					</TableCell>
 					<TableCell key={"TH22"} component="th" scope="row" align="center" padding="none"
 					className={classes.th} >
-					Type
+					Time
 					</TableCell>
 					<TableCell key={"TH23"} component="th" scope="row" align="center" padding="none"
 					className={classes.th} >
-					Amount
+					Type
+					</TableCell>
+					<TableCell key={"TH24"} component="th" scope="row" align="center" padding="none"
+					className={classes.th} >
+					Trans. Id
+					</TableCell>
+					<TableCell key={"TH25"} component="th" scope="row" align="center" padding="none"
+					className={classes.th} >
+					Credit
+					</TableCell>
+					<TableCell key={"TH26"} component="th" scope="row" align="center" padding="none"
+					className={classes.th} >
+					Debit
 					</TableCell>
 				</TableRow>
 			</TableHead>
 			<TableBody>  
 			{props.myArray.map( (a, index) => {
-				let myDate = getDateTime(a.date);
-				let myType;
-				let myClass; 
-				switch (a.type) {
-					case WALLETTYPE.bonus: myType = "Bonus"; myClass = classes.tdWallet; break;
-					case WALLETTYPE.wallet: myType = "Wallet"; myClass = classes.tdBonus; break;
-				}
-				//console.log(a);
+				console.log(a);
+				let t = new Date(a.transDate);
+				let myDate = DATESTR[t.getDate()] + "/" + MONTHNUMBERSTR[t.getMonth()] + "/" + t.getFullYear();
+				let myTime = HOURSTR[t.getHours()] + ":" + MINUTESTR[t.getMinutes()];
+				let myClass = classes.tdWallet;
+				console.log(a);
 				//console.log(a.type, myType, WALLETTYPE  )
 				return(
 					<TableRow align="center" key={"TROW"+index}>
@@ -300,13 +294,31 @@ export default function Wallet(props) {
 					<TableCell key={"TD2"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 						<Typography>
-							{myType}
+							{myTime}
 						</Typography>
 					</TableCell>
 					<TableCell key={"TD3"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
 						<Typography>
-							{a.amount}
+							{a.transType}
+						</Typography>
+					</TableCell>
+					<TableCell key={"TD4"+index} align="center" component="td" scope="row" align="center" padding="none"
+						className={myClass}>
+						<Typography>
+							{a.transSubType}
+						</Typography>
+					</TableCell>
+					<TableCell key={"TD5"+index} align="center" component="td" scope="row" align="center" padding="none"
+						className={myClass}>
+						<Typography>
+							{(a.amount >= 0) ? parseFloat(a.amount).toFixed(2) : ""}
+						</Typography>
+					</TableCell>
+					<TableCell key={"TD6"+index} align="center" component="td" scope="row" align="center" padding="none"
+						className={myClass}>
+						<Typography>
+							{(a.amount < 0) ? abs(a.amount) : ""}
 						</Typography>
 					</TableCell>
 					</TableRow>
@@ -318,23 +330,52 @@ export default function Wallet(props) {
 		</Box>		
 	)}
 	
-	function handleAddWallet() {
-		alert("Amount to add is "+amount);
+	async function handleRazor(response) {
+		// AFTER RAZOR TRANSACTION IS COMPLETE and SUCCESSFULL YOU WILL GET THE RESPONSE HERE.
+		console.log(response);
+		let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/razorpaymentok/${userCid}/${amount}/${response.razorpay_payment_id}`;
+    
+    try {
+			console.log(myURL);
+      await axios.get(myURL);
+			setTab('102');
+    } catch (e) {
+      console.log(e);
+      setRegisterStatus(1002);
+    }
+	}
+  
+
+	 async function handleAddWallet() {
+		let sts;
+
+		//paymentRequest = "";
+		//paymentId = "";
+
+		try {
+			var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/razorgeneratepaymentrequest/${userCid}/${amount}`);
+			let myOptions = response.data;
+			myOptions.handler = handleRazor;
+			myOptions.image = DVLOGO;					    // COMPANY LOGO
+			var rzp1 = new window.Razorpay(myOptions, '_parent');
+			rzp1.open();
+		} catch (e) {
+			setRegisterStatus(1001);
+			console.log(e);
+			console.log("Error calling wallet");
+		}
 	}
 
+
   return (
-    <Container component="main" maxWidth="md">
+    <Container component="main" maxWidth="lg">
       <DisplayBalance wallet={balance.wallet} bonus={balance.bonus}/>
       <CssBaseline />
       <div className={gClasses.paper}>
         <ShowResisterStatus />
         <BlankArea />
 				{(!addNewWallet) &&
-					<div align="right">
-					<Typography align="right" className={classes.link}>
-						<Link align="right" href="#" variant="body2" onClick={() => { setAmount(0); setAddNewWallet(true);  }}>Add to wallet</Link>
-					</Typography>
-					</div>
+					<VsButton name="Add to wallet" align="right" onClick={() => { setAmount(0); setAddNewWallet(true);  }} />
 				}
 				{(addNewWallet) &&
 					<Box align="center" className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} width="100%" >
@@ -351,9 +392,8 @@ export default function Wallet(props) {
 									<TextValidator variant="outlined" required fullWidth color="primary" type="number"
 										id="amount" label="Add amount" name="amount"
 										onChange={(event) => setAmount(event.target.value)}
-										autoFocus
 										value={amount}
-										validators={['minNumber:100']}
+										validators={['minNumber:50']}
 										errorMessages={['Minimum is 100']}
 									/>
 								</Grid>
