@@ -419,6 +419,7 @@ router.get('/downloadvisit/:cid/:pid', async function (req, res) {
 
   if (fs.existsSync(myFile)) {
     res.contentType("application/docx");
+		console.log("..............file found", myfile);
     await res.status(200).sendFile(myFile);
   } else
     senderr(res, 601, "Doc not found");  
