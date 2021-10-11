@@ -233,9 +233,10 @@ router.get('/printdoc/:cid/:jsonData', async function(req, res, next) {
 		}]
 	});
 	
+	console.log("PWD is ",process.cwd())
 	// Used to export the file into a .docx file
 	await Packer.toBuffer(visitDoc).then((buffer) => {
-			fs.writeFileSync(`./temp/${pRec.cid}_${pRec.pid}_patientVisit.docx`, buffer);
+			fs.writeFileSync(process.cwd() + `/temp/${pRec.cid}_${pRec.pid}_patientVisit.docx`, buffer);
 	});
 		
 	sendok(res, xxx);
