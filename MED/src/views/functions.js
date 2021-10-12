@@ -752,6 +752,7 @@ export async function downloadVisit(cid, pid) {
 		});
     let myFile = "patientVisit.docx";
     console.log(myFile);
+		console.log(response.data);
     await download(response.data, myFile);
     console.log("download over");
   } catch (e) {

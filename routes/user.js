@@ -357,9 +357,9 @@ router.get('/jaijinendra/:uName/:uPassword', async function (req, res, next) {
   }
 	
   if (isValid) {
-		let myDoctor = await M_Doctor.findOne({cid: uRec.cid});
+		//let myDoctor = await M_Doctor.findOne({cid: uRec.cid});
 		let myCustomer = await M_Customer.findOne({_id: uRec.cid});
-		sendok(res, {user: uRec, doctor: myDoctor, customer: myCustomer});
+		sendok(res, {user: uRec, customer: myCustomer});
 		//sendok(res, "OK");
 		console.log("Done");
 	}

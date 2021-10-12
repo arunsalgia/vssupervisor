@@ -15,7 +15,7 @@ import globalStyles from "assets/globalStyles";
 import useScript from './useScript';
 import VsButton from "CustomComponents/VsButton";
 
-import { downloadApk } from "views/functions";
+import { downloadApk, decrypt } from "views/functions";
 import { BlankArea, CricDreamLogo } from 'CustomComponents/CustomComponents';
 import { isMobile, cdRefresh } from "views/functions.js"
 import { red, blue, deepOrange, yellow } from '@material-ui/core/colors';
@@ -274,7 +274,7 @@ const Welcome = () => {
 			let done=false;
 			while (!done) {
 				try {
-					var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/doctor/list`);
+					var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/customer/list`);
 					setMasterDoctorArray(response.data);
 					setDoctorArray(response.data);
 					let allCat = [...new Set(response.data.map(item => item.type))]; // [ 'A', 'B']
@@ -419,9 +419,9 @@ const Welcome = () => {
 	return (
 	<div>
 	{doctorArray.map( (d, index) => {
-		let myDoc = d.name.substr(3);
+		//let myDoc = d.name.substr(3);
 		return (
-			<Box className={gClasses.boxStyle} borderRadius={7} border={1} >
+			<Box key={"BOX"+index} className={gClasses.boxStyle} borderRadius={7} border={1} >
 			<Grid key={"DOCCONT"+index} container alignItems="center" >
 			<Grid key={"DOC11"+index} item xs={2} sm={2} md={2} lg={2} >
 				<div align="center">
@@ -435,7 +435,7 @@ const Welcome = () => {
 				<Typography className={classes.docName}>{d.name}</Typography>
 				<Typography className={classes.docType}>{d.type}</Typography>
 				<Typography className={classes.docMobile}>{"Mobile : "+d.mobile}</Typography>
-				<Typography className={classes.docMobile}>{"Email  : "+d.email}</Typography>
+				<Typography className={classes.docMobile}>{"Email  : "+decrypt(d.email)}</Typography>
 				<Typography className={classes.docMobile}>{"Addr  : "}</Typography>
 				<Typography className={classes.docAddr}>{d.addr1}</Typography>
 				<Typography className={classes.docAddr}>{d.addr2}</Typography>

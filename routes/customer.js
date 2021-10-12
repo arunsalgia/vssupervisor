@@ -1,6 +1,7 @@
 var router = express.Router();
 const { 
 	checkDate,
+	dbToSvrText,
 } = require('./functions');
 
 router.use('/', function(req, res, next) {
@@ -13,6 +14,9 @@ router.use('/', function(req, res, next) {
 router.get('/list', async function(req, res, next) {
   setHeader(res);
 	let rec = await M_Customer.find({});
+	for(let i=0; i<rec.length; ++i) {
+		rec[i].email = dbToSvrText(rec[i].email);
+	}
 	sendok(res, rec);
 });
 

@@ -107,9 +107,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
   
+var orderId=""; 
+function setOrderId(sss) { orderId = sss; }
 
-let userCid;
-
+let userCid; 
 export default function Wallet(props) {
   useScript(RAZORSCRIPT);
 
@@ -117,7 +118,11 @@ export default function Wallet(props) {
   const classes = useStyles();
   const gClasses = globalStyles();
 
-	const [radioValue, setRadioValue] = useState("all");
+	const [razOpt, setRazOpt] = useState({});
+	//const [orderId, setOrderId] = useState("");
+	const [payId, setPayId] = useState("");
+	const [signId, setSignId] = useState("");
+	
 	const [masterTransactions, setMasterTransactions] = useState([]);
 	const [transactions, setTransactions] = useState([]);
 	const [addNewWallet, setAddNewWallet] = useState(false);
@@ -128,12 +133,12 @@ export default function Wallet(props) {
   const [balance, setBalance] = useState({wallet: 0, bonus: 0});
   
   
-  const [registerStatus, setRegisterStatus] = useState(0);
   const [message, setMessage] = useState("");
-  const [rowsPerPage, setRowsPerPage] = useState(COUNTPERPAGE);
-  // const [emptyRows, setEmptyRows] = useState(0);
   const [page, setPage] = useState(0);
-  const [minMessage, setMinMessage] = useState(`Minimum balance of  ${process.env.REACT_APP_MINBALANCE} is required for withdrawal.`)
+  const [rowsPerPage, setRowsPerPage] = useState(COUNTPERPAGE);
+
+  // const [emptyRows, setEmptyRows] = useState(0);
+  //const [minMessage, setMinMessage] = useState(`Minimum balance of  ${process.env.REACT_APP_MINBALANCE} is required for withdrawal.`)
   
   // have we come via route
   //console.log("Wallet", localStorage.getItem("menuValue"));
@@ -144,14 +149,14 @@ export default function Wallet(props) {
   // );
   useEffect(() => {
 	  
-	if (localStorage.getItem("saveBalance"))
-      setBalance(JSON.parse(localStorage.getItem("saveBalance")));
+		if (localStorage.getItem("saveBalance"))
+				setBalance(JSON.parse(localStorage.getItem("saveBalance")));
 
-	if (localStorage.getItem("saveTransactions")) {
-		setTransactions(JSON.parse(localStorage.getItem("saveTransactions")));
-	}
+		if (localStorage.getItem("saveTransactions")) {
+			setTransactions(JSON.parse(localStorage.getItem("saveTransactions")));
+		}
 	
-	const WalletInfo = async () => {
+		const WalletInfo = async () => {
       try {
         // get wallet transaction and also calculate balance
         var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/details/${userCid}`);
@@ -171,34 +176,6 @@ export default function Wallet(props) {
 		WalletInfo();
   }, []);
 
-  function ShowResisterStatus() {
-    let myMsg;
-    let errmsg = true;
-    switch (registerStatus) {
-      case 1001:
-        myMsg = message;
-        errmsg = false;
-      break;
-      case 1002:
-        myMsg = message;
-      break;
-      case 0:
-        myMsg = ``;
-        errmsg = false;
-      break;      
-      default:
-        myMsg = `Unknown error code ${registerStatus}`;
-        break;
-    }
-    let myClass = (errmsg) ? gClasses.error : gClasses.nonerror;
-    return(
-      <div>
-        <Typography className={myClass}>{myMsg}</Typography>
-      </div>
-    );
-  }
-
-
   const handleChangePage = (event, newPage) => {
     event.preventDefault();
     setPage(newPage);
@@ -208,31 +185,6 @@ export default function Wallet(props) {
   };
 
 
-
-	function handleRadioChange(v) {
-		//console.log(v);
-		setRadioValue(v);
-		let myArray;
-		switch (v) {
-			case WALLETTYPE.bonus: myArray = masterTransactions.filter(x => x.type === WALLETTYPE.bonus); break;
-			case WALLETTYPE.wallet: myArray = masterTransactions.filter(x => x.type === WALLETTYPE.wallet); break;
-			default:  	myArray = [].concat(masterTransactions); break;
-		}
-		setTransactions(myArray);
-	}
-	
-	function DisplayFilterRadios() {
-	return (	
-		<FormControl component="fieldset">
-		<RadioGroup row aria-label="radioselection" name="radioselection" value={radioValue} 
-			onChange={() => {handleRadioChange(event.target.value); }}
-		>
-			<FormControlLabel className={classes.filterRadio} value="all" 			control={<Radio color="primary"/>} label="All Transactions" />
-			<FormControlLabel className={classes.filterRadio} value="wallet" 	control={<Radio color="primary"/>} label="Wallet Transactions" />
-			<FormControlLabel className={classes.filterRadio} value="bonus"  		control={<Radio color="primary"/>} label="Bonus Transactions" />
-		</RadioGroup>
-	</FormControl>
-	)}
 	
 	function DisplayWalletTable(props) {
 	let colCount = isMobile() ? 3 : 3;
@@ -276,12 +228,12 @@ export default function Wallet(props) {
 			</TableHead>
 			<TableBody>  
 			{props.myArray.map( (a, index) => {
-				console.log(a);
+				//console.log(a);
 				let t = new Date(a.transDate);
 				let myDate = DATESTR[t.getDate()] + "/" + MONTHNUMBERSTR[t.getMonth()] + "/" + t.getFullYear();
 				let myTime = HOURSTR[t.getHours()] + ":" + MINUTESTR[t.getMinutes()];
 				let myClass = classes.tdWallet;
-				console.log(a);
+				//console.log(a);
 				//console.log(a.type, myType, WALLETTYPE  )
 				return(
 					<TableRow align="center" key={"TROW"+index}>
@@ -330,7 +282,7 @@ export default function Wallet(props) {
 		</Box>		
 	)}
 	
-	async function handleRazor(response) {
+	async function orghandleRazor(response) {
 		// AFTER RAZOR TRANSACTION IS COMPLETE and SUCCESSFULL YOU WILL GET THE RESPONSE HERE.
 		console.log(response);
 		let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/razorpaymentok/${userCid}/${amount}/${response.razorpay_payment_id}`;
@@ -338,13 +290,32 @@ export default function Wallet(props) {
     try {
 			console.log(myURL);
       await axios.get(myURL);
-			setTab('102');
+			setTab(process.env.REACT_APP_WALLET);
     } catch (e) {
       console.log(e);
-      setRegisterStatus(1002);
+      //setRegisterStatus(1002);
     }
 	}
   
+	async function handleRazor (response)  {
+		//console.log("in razor response");
+		//console.log(response);
+		//console.log(orderId);
+		//console.log(razOpt);
+		if (orderId == response.razorpay_order_id) {
+			try {
+				let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/razorpaymentok/${userCid}/${amount}/${response.razorpay_payment_id}`;
+				//console.log(myURL);
+				await axios.get(myURL);
+				setTab(process.env.REACT_APP_WALLET);
+			} catch (e) {
+				console.log(e);
+				//setRegisterStatus(1002);
+			}
+		} else {
+			alert("Order Id mismatch");
+		}
+	}
 
 	 async function handleAddWallet() {
 		let sts;
@@ -353,16 +324,26 @@ export default function Wallet(props) {
 		//paymentId = "";
 
 		try {
-			var response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/razorgeneratepaymentrequest/${userCid}/${amount}`);
-			let myOptions = response.data;
-			myOptions.handler = handleRazor;
-			myOptions.image = DVLOGO;					    // COMPANY LOGO
-			var rzp1 = new window.Razorpay(myOptions, '_parent');
+			// generate order
+			let  response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/razor/order/${userCid}/${amount}`);	
+			//console.log(response.data);
+			let myOpt = response.data
+			setRazOpt(myOpt);
+			setOrderId(myOpt.order_id);
+			//setPayId("");
+			//setSignId("");
+			
+			// now check out
+			
+			myOpt["handler"] = handleRazor;
+			//console.log(myOpt);
+			
+			var rzp1 = new Razorpay(myOpt);
 			rzp1.open();
 		} catch (e) {
-			setRegisterStatus(1001);
+			//setRegisterStatus(1001);
 			console.log(e);
-			console.log("Error calling wallet");
+			console.log("Error Razor error");
 		}
 	}
 
@@ -372,8 +353,6 @@ export default function Wallet(props) {
       <DisplayBalance wallet={balance.wallet} bonus={balance.bonus}/>
       <CssBaseline />
       <div className={gClasses.paper}>
-        <ShowResisterStatus />
-        <BlankArea />
 				{(!addNewWallet) &&
 					<VsButton name="Add to wallet" align="right" onClick={() => { setAmount(0); setAddNewWallet(true);  }} />
 				}

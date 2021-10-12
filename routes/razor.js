@@ -4,6 +4,9 @@ const Razorpay = require("razorpay");
 
 var router = express.Router();
 
+const {
+	encrypt, decrypt, dbencrypt, dbdecrypt, dbToSvrText, 
+} = require('./functions'); 
 
 
 
@@ -25,13 +28,13 @@ var razorOptions = {
 	//"currency": "INR",
 	"order_id": "",
 	"name": "Dr. Viraag",
-	"description": "Doctor Viraag",
+	"description": "for Doctor Viraag",
 	"image": "DV.JPG", 
 	//"handler": handleRazor,
 	"prefill": {
-		"name": "", 		// pass customer name
-		"email": '',		// customer email
-		"contact": '' 	//customer phone no.
+		"name": "Arun", 		// pass customer name
+		"email": 'xxx',		// customer email
+		"contact": '0' 	//customer phone no.
 	},
 	"notes": { 
 		"address": "address" //customer address 
@@ -48,25 +51,28 @@ router.get('/order/:userCid/:amount', async function( req, res) {
 	
 	let customerRec = await M_Customer.findOne({_id: userCid});
 	if (!customerRec) return senderr(res, 601, "Invalid Customer Id");
-	
+	//console.log(customerRec);
 	
 	params.amount = Number(amount)*100;
-	console.log(`Amount ${params.amount}`);
+	//console.log(`Amount ${params.amount}`);
 	
 	let instance = new Razorpay({
 		key_id: process.env.RazorKey,
 		key_secret: process.env.RazorSecret,
 	});
-
+	//console.log(process.env.RazorKey, process.env.RazorSecret);
+	//console.log(instance);
+	
   instance.orders
     .create(params)
     .then((data) => {
-			console.log(data);
+			//console.log(data);
+			//console.log(razorOptions);
 			// update order id and user details
 			razorOptions.order_id = data.id;
 			razorOptions.name = customerRec.name;
-			razorOptions.email = decrypt(customerRec.email);
-			razorOptions.mobile = customerRec.mobile;
+			razorOptions.prefill.email = dbdecrypt(customerRec.email);
+			razorOptions.prefill.contact = customerRec.mobile;
       sendok(res, razorOptions);
     })
     .catch((error) => {

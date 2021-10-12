@@ -225,18 +225,28 @@ QuoteSchema = mongoose.Schema({
 
 CustomerSchema = mongoose.Schema({
 	customerNumber: Number,
+	// Doctors details
 	name: String,
-	clinicName: String,
-	welcomeMessage: String,
-	plan: String,
-	workingHours: [Number],
+	type: String,
 	email: String,
 	mobile: String,
+	// Clinic details
+	clinicName: String,
+	addr1: String,
+	addr2: String,
+	addr3: String,
+	location: String,
+	pinCode: String,
+	workingHours: [Number], // clinic weekly working slots (15 minute slots
+	
+	welcomeMessage: String,
+	plan: String,
 	fee: Number,
 	expiryDate: Date,
 	enabled:Boolean,
 });
 
+/*
 DoctorSchema = mongoose.Schema({
 	cid: String,
 	name: String,
@@ -245,14 +255,10 @@ DoctorSchema = mongoose.Schema({
 	email: String,
 	mobile: String,
 	
-	addr1: String,
-	addr2: String,
-	addr3: String,
-	location: String,
-	pinCode: String,
+	
 	enabled:Boolean
 });
-
+*/
 ImageSchema = mongoose.Schema({
 	cid: 		String,
 	pid:		Number,
@@ -303,7 +309,7 @@ M_Customer = mongoose.model('Customer', CustomerSchema);
 M_NextVisit = mongoose.model('NextVisit', NextVisitSchema);
 M_Image = mongoose.model('image', ImageSchema);
 M_Wallet = mongoose.model('wallet', WalletSchema);
-M_Doctor = mongoose.model('doctor', DoctorSchema);
+//M_Doctor = mongoose.model('doctor', DoctorSchema);
 M_Payment = mongoose.model('payment', PaymentSchema);
 router = express.Router();
 

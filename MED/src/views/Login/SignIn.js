@@ -122,7 +122,7 @@ export default function SignIn() {
 
 		window.sessionStorage.setItem("customerData", JSON.stringify(response.data.customer));
 		
-		window.sessionStorage.setItem("doctorData", JSON.stringify(response.data.doctor));
+		//window.sessionStorage.setItem("doctorData", JSON.stringify(response.data.doctor));
 		 
 		//window.sessionStorage.setItem("admin", true)
 		setTab(process.env.REACT_APP_HOME);
@@ -293,8 +293,8 @@ export default function SignIn() {
 					),
 				}}
 				onChange={() => { setPassword(event.target.value) }}
-				validators={['minLength', 'noSpecialCharacters']}
-				errorMessages={['Minimum 6 chars required','Special characters not permitted']}
+				validators={['noSpecialCharacters']}
+				errorMessages={['Special characters not permitted']}
 			/>
 		}
 		{(!showPassword) &&
@@ -309,8 +309,8 @@ export default function SignIn() {
 					),
 				}}
 				onChange={() => { setPassword(event.target.value) }}
-				validators={['minLength', 'noSpecialCharacters']}
-				errorMessages={['Minimum 6 chars required','Special characters not permitted']}
+				validators={['noSpecialCharacters']}
+				errorMessages={['Special characters not permitted']}
 			/>
 		}
 		<Typography className={(errorMessage.isError) ? gClasses.error : gClasses.nonerror} align="left">{errorMessage.msg}</Typography>
