@@ -26,6 +26,7 @@ import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Modal from 'react-modal'; 
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
+import StepProgressBar from 'react-step-progress';
 
 // icons
 import IconButton from '@material-ui/core/IconButton';
@@ -325,6 +326,9 @@ export default function Document() {
 	const gClasses = globalStyles();
 	const alert = useAlert();
 	
+	const [stepNo, setStepNo] = useState(0);
+	const [showProgress, setShowProgress] = useState(false);
+	
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
 	const [selectPatient, setSelectPatient] = useState(false);
   const [patientArray, setPatientArray] = useState([])
@@ -423,10 +427,10 @@ export default function Document() {
 	
 	async function handleFileView(d) {
 		let pdfReport;
+		setStartLoading(true);
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/downloadimage/${userCid}/${d.pid}/${d.title}`
 			let resp = await axios.get(myUrl);
-			setStartLoading(true);
 			setIsDrawerOpened((d.type === "PDF") ? "PDF" : "IMG");
 			if (d.type === "PDF") {
 				// pdf file
@@ -446,10 +450,10 @@ export default function Document() {
 			let idx = SupportedExtensions.indexOf(d.type);
 			setDlMime(SupportedMimeTypes[idx]);
 			setViewImage(true);
-			setStartLoading(false);			
 		} catch (e) {
 			console.log(e);
 		}
+		setStartLoading(false);			
 	}
 	
 	async function deleteDoc(d) {
@@ -734,6 +738,9 @@ export default function Document() {
 		{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
 	</Typography>
 	<VsButton align="right" name="Add new Medical Report" onClick={addDoc} />
+	{(startLoading) &&
+				<Typography className={gClasses.title}>Loading report...</Typography>
+	}
 	<Grid className={gClasses.noPadding} key="AllDOCS" container alignItems="center" >
 	{documentArray.map( (d, index) => 
 		<Grid key={"DOC"+index} item xs={12} sm={6} md={3} lg={3} >
@@ -760,6 +767,14 @@ export default function Document() {
 	</Grid>
 	</div>
 	)}
+	
+	function step1Validator() { return stepNo >= 1};
+	function step2Validator() { return stepNo >= 2};
+	function step3Validator() { return stepNo >= 3};
+	function step4Validator() { return stepNo >= 4};
+	const step1Content = <h1>Request to server</h1>;
+	const step2Content = <h1>Geneate visit document</h1>;
+	const step3Content = <h1>Download visit document</h1>;
 	
 	return (
 	<div className={gClasses.webPage} align="center" key="main">
@@ -792,7 +807,9 @@ export default function Document() {
 			<VsButton align="right" name="Select Patient" onClick={() => { setCurrentPatient("")}} />	
 		}
 		{(currentPatient !== "") &&
+			<div>
 			<DisplayAllReports />
+			</div>
 		}
 		<Drawer className={classes.drawer}
 			anchor="right"

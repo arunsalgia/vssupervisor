@@ -34,10 +34,11 @@ import {
 	getImageName,
 	dispOnlyAge, dispAge, dispEmail, dispMobile,
 	getOnlyDate,
+	ordinalSuffix,
 } from "views/functions.js";
 
 import {
-HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR,	
+HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR,
 } from "views/globals.js";
 
 import {setTab} from "CustomComponents/CricDreamTabs.js"
@@ -691,7 +692,7 @@ return (
 			<span className={gClasses.patientInfo2}>{props.medicine.description}</span>
 		</Typography>
 		<Typography> 
-			<span className={gClasses.patientInfo}>Precaution: </span>
+			<span className={gClasses.patientInfo}>Precaution : </span>
 			<span className={gClasses.patientInfo2}>{props.medicine.precaution}</span>
 		</Typography>
 		<BlankArea />
@@ -801,9 +802,7 @@ return (
 export function DisplayHolidayDetails(props) {
 	const gClasses = globalStyles();
 	
-	let myDate = DATESTR[props.holiday.date] + "/" +
-		MONTHNUMBERSTR[props.holiday.month] + "/" +
-		props.holiday.year;
+	let myDate = ordinalSuffix(props.holiday.date) + " " + MONTHSTR[props.holiday.month] + " " + props.holiday.year;
 		
 	let _button1 = (props.button1 == null);
 	let _button2 = (props.button2 == null);

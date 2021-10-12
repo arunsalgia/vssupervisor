@@ -12,7 +12,8 @@ import VsCancel from "CustomComponents/VsCancel";
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
-import download from 'js-file-download';
+import fileDownload  from 'js-file-download';
+import fs from 'fs';
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
@@ -245,8 +246,7 @@ export default function Visit() {
 	const [showDocument, setShowDocument] = useState(false);
 	const [documentArray, setDocumentArray] = useState([]);
 	
-	const [stepNo, setStepNo] = useState(0);
-	const [showProgress, setShowProgress] = useState(false);
+
 	const [dlMime, setDlMime] = useState("");
 	const [dlFile, setDlFile] = useState("");
 	const [isPdf, setIsPdf] = useState(false);
@@ -772,17 +772,18 @@ export default function Visit() {
 	
 	async function generateVisitDocument() {
 		let errcode = validateNewVisit();
-		setShowProgress(true);
-		setStepNo(0);
+		//setShowProgress(true);
+		//setStepNo(0);
 		if (errcode !== 0) { setVisitError(errcode); setShowProgress(false); return; }
-		setStepNo(1);
+		//setStepNo(1);
 		
 		//let newVisitNumber = visitArray.length;
 		let newVisit = prepareVisitData();	
 		let newVisitInfo = JSON.stringify(newVisit);
 		try {
 			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/printdoc/${userCid}/${newVisitInfo}`);
-			setStepNo(2);
+			/*
+			//setStepNo(2);
 			//alert.success("Successfully generated visit document");
 			//await downloadVisit(userCid, currentPatientData.pid);
 			let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/visit/downloadvisit/${userCid}/${currentPatientData.pid}`;
@@ -795,15 +796,16 @@ export default function Visit() {
 			let myFile = "patientVisit.docx";
 			console.log(myFile);
 			console.log(response.data);
-			await download(response.data, myFile);
-			setStepNo(3);
+			await fileDownload (response.data, myFile);
+			//setStepNo(3);
 			console.log("download over");
-			alert.success("Successfully downloaded visit document");
+			*/
+			alert.success("Successfully generated visit document");
 		} catch (e) {
 			console.log(e)
-			alert.error("Error generating / downloading visit document");
+			alert.error("Error generating visit document");
 		}
-		setShowProgress(false);
+		//setShowProgress(false);
 	}
 	
 	async function printVisit() {	
@@ -1111,10 +1113,10 @@ export default function Visit() {
 	
 	async function handleFileView(d) {
 		let pdfReport;
+		setStartLoading(true);
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/downloadimage/${userCid}/${d.pid}/${d.title}`
 			let resp = await axios.get(myUrl);
-			setStartLoading(true);
 			setIsDrawerOpened((d.type === "PDF") ? "PDF" : "IMG");
 			if (d.type === "PDF") {
 				// pdf file
@@ -1134,10 +1136,10 @@ export default function Visit() {
 			let idx = SupportedExtensions.indexOf(d.type);
 			setDlMime(SupportedMimeTypes[idx]);
 			setViewImage(true);
-			setStartLoading(false);			
 		} catch (e) {
 			console.log(e);
 		}
+		setStartLoading(false);			
 	}
 	
 	function DisplayMedicalReports() {
@@ -1149,6 +1151,9 @@ export default function Visit() {
 		/>
 		{(showDocument) && 
 			<div>
+			{(startLoading) &&
+				<Typography className={gClasses.title}>{"Loading report..."}</Typography>
+			}
 			<Grid className={gClasses.noPadding} key="AllDOCS" container alignItems="center" >
 			{documentArray.map( (d, index) => 
 				<Grid key={"DOC"+index} item xs={12} sm={6} md={3} lg={3} >
@@ -1341,9 +1346,9 @@ export default function Visit() {
 		<div align="right">
 			<VsButton name="Update Visit"  onClick={updateVisit} />
 			<VsButton name="Generate Visit Document"  onClick={generateVisitDocument} />
-				{/*<VsButton name="Download Visit Document"  onClick={printVisit} />*/}
+			<VsButton name="Download Visit Document"  onClick={printVisit} />
 		</div>
-		{(showProgress) &&
+		{(false) &&
 		<StepProgressBar startingStep={0}
 		steps={[{label: 'Validate visit info', name: 'step 1', content: step1Content,
 		validator: step1Validator 

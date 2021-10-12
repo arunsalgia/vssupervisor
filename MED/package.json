@@ -22,6 +22,7 @@
     "crypto": "^1.0.1",
     "env-cmd": "^10.1.0",
     "firebase": "^8.7.0",
+    "fs": "0.0.1-security",
     "history": "4.10.1",
     "ifsc-finder": "^1.1.4",
     "instamojo-nodejs": "0.0.5",

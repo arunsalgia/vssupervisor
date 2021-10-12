@@ -25,7 +25,6 @@ import Divider from '@material-ui/core/Divider';
 
 import Visit from "views/Visit/Visit"
 import Appointment from "views/Appointment/Appointment"
-import Medicine from "views/Medicine/Medicine.js" 
 import Patient from "views/Patient/Patient.js" 
 import NextVisit from "views/NextVisit/NextVisit";
 import Report from "views/Report/Report.js" 
@@ -47,6 +46,8 @@ import PointSystem from "views/MED/PointSystem.js";
 import WorkingHours from "views/Settings/WorkingHours";
 import Holiday from "views/Settings/Holiday";
 import Assistant from "views/Settings/Assistant";
+import Medicine from "views/Settings/Medicine.js" 
+
 
 import Modal from 'react-modal';
 // import download from 'js-file-downloader';
@@ -273,7 +274,6 @@ export function CricDreamTabs() {
   const handleVisit = () => { setMenuValue(3);  }
 
   const handlePatient = () => { handleClose(); setMenuValue(901);}
-	const handleMedicine = () => { handleClose(); setMenuValue(902);}
 	const handleNextVisit = () => { handleClose(); setMenuValue(904);}
 	const handleReport = () => { handleClose(); setMenuValue(905);}
 	
@@ -288,6 +288,7 @@ export function CricDreamTabs() {
 	const handleWorkingHours = () => { handleClose(); setMenuValue(701);}
 	const handleHoliday = () => { handleClose(); setMenuValue(702);}
 	const handleAssistant = () => { handleClose(); setMenuValue(703);}
+	const handleMedicine = () => { handleClose(); setMenuValue(704);}
   
 
   function DisplayCdItems() {
@@ -305,7 +306,6 @@ export function CricDreamTabs() {
 			case 802: return <Customer />
 
       case 901: return <Patient />;
-      case 902: return <Medicine />;
 			//case 903: return <Sample />
 			case 904: return <NextVisit />
 			case 905: return <Report />
@@ -313,6 +313,7 @@ export function CricDreamTabs() {
 			case 701: return <WorkingHours />
 			case 702: return <Holiday />
 			case 703: return <Assistant />
+      case 704: return <Medicine />;
 
       default: return  null;
     }
@@ -460,9 +461,6 @@ export function CricDreamTabs() {
 									<MenuItem onClick={handleReport}>
 									<Typography className={classes.menuStyle}>Report</Typography>
 									</MenuItem>	
-									<MenuItem onClick={handleMedicine}>
-									<Typography className={classes.menuStyle}>Medicine</Typography>
-									</MenuItem>
 									</div>
 								}
 								<MenuItem onClick={handleNextVisit}>
@@ -479,6 +477,9 @@ export function CricDreamTabs() {
 								</MenuItem>
 								<MenuItem onClick={handleAssistant}>
 								<Typography className={classes.menuStyle}>User</Typography>
+								</MenuItem>
+								<MenuItem onClick={handleMedicine}>
+									<Typography className={classes.menuStyle}>Medicine</Typography>
 								</MenuItem>
 								</div>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
@@ -522,7 +523,6 @@ export function CricDreamTabs() {
 						<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
 						<Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>
 						<Button color="inherit" className={classes.visitButton} onClick={handleReport}>Report</Button>
-						<Button color="inherit" className={classes.visitButton} onClick={handleMedicine}>Medicine</Button>
 						</div>
 					}
 					{(false) &&
