@@ -41,6 +41,7 @@ import moment from "moment";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { useAlert } from 'react-alert'
 import Drawer from '@material-ui/core/Drawer';
+import _ from 'lodash'
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Avatar from "@material-ui/core/Avatar"
@@ -101,6 +102,7 @@ import {
 	ordinalSuffix,
 	compareDate, makeTimeString,
 	getAllPatients,
+	vsDialog,
 } from "views/functions.js";
 
 
@@ -1020,10 +1022,17 @@ async function handleAddAppointment(slot) {
 	)}
 	
 	async function handleCancelAppt(cancelAppt) {
+		vsDialog("Cancel Appointment", `Are you sure you want to cancel appointment of ${cancelAppt.displayName}?`,
+			{label: "Yes", onClick: () => handleCancelApptConfirm(cancelAppt) },
+			{label: "No" }
+		);
+	}
+	
+	async function handleCancelApptConfirm(cancelAppt) {
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/cancel/${userCid}/${cancelAppt.pid}/${cancelAppt.order}`;
 			let resp = await axios.get(myUrl);
-			alert.success("Cancelled appintment of "+cancelAppt.displayName);
+			//alert.success("Cancelled appointment of "+cancelAppt.displayName);
 
 			// remove from patient appoint 
 			let tmpAppt = apptArray.filter(x => 
@@ -1041,7 +1050,7 @@ async function handleAddAppointment(slot) {
 			generateSlots(tmpAppt, holidayArray);
 		} catch (e) {
 			console.log(e);
-			alert.error("Error cancellein appointment of "+cancelAppt.displayName);
+			alert.error("Error cancelling appointment of "+cancelAppt.displayName);
 		}
 	}
 	

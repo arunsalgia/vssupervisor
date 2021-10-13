@@ -1362,10 +1362,13 @@ export default function Visit() {
 	<Box borderColor="primary.main" border={1}>
 		<Typography className={classes.murItem}>
 		{x.medicines.map( (m, index) =>
-			<span key={"MEDSPAN"+index} className={classes.murItem}>{m.name}
-				<IconButton color="secondary" size="small" onClick={() => { handleDeleteMedicine(x.visitNumber, index)}} >
-					<DeleteIcon />
-				</IconButton>
+			<span key={"MEDSPAN"+index} className={classes.murItem}>
+				{m.name}
+				{(x.visitNumber === 0) &&
+					<IconButton color="secondary" size="small" onClick={() => { handleDeleteMedicine(x.visitNumber, index)}} >
+						<DeleteIcon />
+					</IconButton>
+				}
 			</span>
 		)}
 		</Typography>

@@ -68,6 +68,7 @@ import {
 	ordinalSuffix,
 	getOnlyDate, getDateTime,
 	getPatientDocument,
+	vsDialog,
 } from "views/functions.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -460,6 +461,13 @@ export default function Document() {
 	}
 	
 	async function deleteDoc(d) {
+		vsDialog("Delete Report", `Are you sure you want to delete report ${d.title}?`,
+			{label: "Yes", onClick: () => deleteDocConfirm(d) },
+			{label: "No" }
+		);
+	}
+	
+		async function deleteDocConfirm(d) {
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/delete/${userCid}/${currentPatientData.pid}/${d.title}`
 			let resp = await axios.get(myUrl);

@@ -58,6 +58,7 @@ import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFil
 	dispOnlyAge, dispAge, dispEmail, dispMobile,
 	validateInteger,
 	getAllPatients,
+	vsDialog,
  } from "views/functions.js"
 import {DisplayYesNo, DisplayPageHeader, BlankArea,
 DisplayPatientDetails,
@@ -389,9 +390,32 @@ export default function Patient() {
 		setIsDrawerOpened(true);
 	}
 
-	function handleCancel(rec) {
-		alert("Cancel"+rec.displayName);
-		console.log(rec);
+	async function handleCancel(rec) {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/visitcount/${userCid}/${rec.pid}`;
+		try {
+			let resp = await axios.get(myUrl);
+			let msg = "";
+			if ((resp.data.pending > 0) && (resp.data.visit > 0)) {
+				msg = `${rec.displayName} has appointment and ${resp.data.visit} visit(s).`;
+			} else if (resp.data.pending > 0) {
+				msg = `${rec.displayName} has appointment.`;
+			} else if (resp.data.visit > 0) {
+				msg = `${rec.displayName} has ${resp.data.visit} visit(s).`;
+			}
+			msg += " Are you sure you want to delete?";
+			vsDialog("Delete patient", msg,
+				{label: "Yes", onClick: () => handleCancelConfirm(rec) },
+				{label: "No" }
+			);		
+		} catch (e) {
+			console.log(e);
+			alert.error("Error deleting patient record");
+		}		
+	}
+	
+	function handleCancelConfirm(rec) {
+		alert.error("Delete all info of "+rec.displayName);
+		//console.log(rec);
 	}
 	
 	function handleAppt(rec) {
