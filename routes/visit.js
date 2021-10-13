@@ -71,6 +71,7 @@ router.get('/printdoc/:cid/:jsonData', async function(req, res, next) {
   setHeader(res);
 	var {cid, jsonData } = req.params;
 	
+	let pCustomerRec = M_Customer.findOne({_id: cid});
 	let myData = await decodeVisitInfo(jsonData);
 	console.log(myData);
 
@@ -214,8 +215,10 @@ router.get('/printdoc/:cid/:jsonData', async function(req, res, next) {
 	allPara.push(blankLine());
 	allPara.push(blankLine());
 	
+	let customerRec = await pCustomerRec;
+	console.log(customerRec);
 	text = [];
-	text.push(boldText("Dr. Arun Salgia"+"   "));
+	text.push(boldText(customerRec.name+"   "));
 	allPara.push(rightAlignedPara(text));
 	
 	

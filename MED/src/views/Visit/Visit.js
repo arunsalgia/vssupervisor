@@ -325,7 +325,7 @@ export default function Visit() {
 				setCurrentPatient(patRec.displayName);
 				await getPatientVisit(patRec);
 				let ddd = await getPatientDocument(userCid, patRec.pid);
-				console.log("Docs", ddd);
+				//console.log("Docs", ddd);
 				setDocumentArray(ddd);
 			} catch {
 				// have come directly
@@ -818,7 +818,6 @@ export default function Visit() {
 		let newVisitInfo = JSON.stringify(newVisit);
 		try {
 			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/printdoc/${userCid}/${newVisitInfo}`);
-			/*
 			//setStepNo(2);
 			//alert.success("Successfully generated visit document");
 			//await downloadVisit(userCid, currentPatientData.pid);
@@ -835,7 +834,7 @@ export default function Visit() {
 			await fileDownload (response.data, myFile);
 			//setStepNo(3);
 			console.log("download over");
-			*/
+
 			alert.success("Successfully generated visit document");
 		} catch (e) {
 			console.log(e)
@@ -1274,17 +1273,22 @@ export default function Visit() {
 	function DisplayMedicalReports() {
 	return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-		<VsButton align="right" 
-			name={(showDocument) ? "Hide Document" : "Show Document"} 
-			onClick={() =>{setShowDocument(!showDocument); }}
-		/>
-		{(showDocument) && 
+		{(documentArray.length === 0) &&
+			<Typography className={gClasses.title}>{"No Reports"}</Typography>
+		}
+		{(documentArray.length > 0) &&
 			<div>
-			{(startLoading) &&
+			<VsButton align="right" 
+				name={(showDocument) ? "Hide Document" : "Show Document"} 
+				onClick={() =>{setShowDocument(!showDocument); }}
+			/>
+			{(showDocument) && 
+				<div>
+				{(startLoading) &&
 				<Typography className={gClasses.title}>{"Loading report..."}</Typography>
 			}
-			<Grid className={gClasses.noPadding} key="AllDOCS" container alignItems="center" >
-			{documentArray.map( (d, index) => 
+				<Grid className={gClasses.noPadding} key="AllDOCS" container alignItems="center" >
+				{documentArray.map( (d, index) => 
 				<Grid key={"DOC"+index} item xs={6} sm={4} md={2} lg={2} >
 				<DisplayDocumentDetails brief
 					document={d} 
@@ -1297,6 +1301,8 @@ export default function Visit() {
 				</Grid>
 			)}
 			</Grid>
+			</div>
+			}
 			</div>
 		}
 	</Box>
@@ -1545,7 +1551,7 @@ export default function Visit() {
 		<div align="right">
 			<VsButton name="Update Visit"  onClick={updateVisit} />
 			<VsButton name="Generate Visit Document"  onClick={generateVisitDocument} />
-			<VsButton name="Download Visit Document"  onClick={printVisit} />
+			{/*<VsButton name="Download Visit Document"  onClick={printVisit} />*/}
 		</div>
 		{(false) &&
 		<StepProgressBar startingStep={0}

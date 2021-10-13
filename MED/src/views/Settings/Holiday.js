@@ -100,6 +100,7 @@ import {
 	ordinalSuffix,
 	compareDate, makeTimeString,
 	getAllPatients,
+	vsDialog,
 } from "views/functions.js";
 
 
@@ -465,7 +466,14 @@ export default function Holiday() {
 	</Box>
 	)}
 
-	async function handleCancelHoliday(hol) {
+	function handleCancelHoliday(hol) {
+		vsDialog("Delete Holiday", `Are you sure you want to delete holiday ${hol.date}/${hol.month}/${hol.year}?`,	
+			{label: "Yes", onClick: () => handleCancelHolidayConfirm(hol) },
+			{label: "No" }
+		);	
+	}
+	
+	async function handleCancelHolidayConfirm(hol) {
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/holiday/delete/${userCid}/${hol.year}/${hol.month}/${hol.date}`;
 			var resp = await axios.get(myUrl);

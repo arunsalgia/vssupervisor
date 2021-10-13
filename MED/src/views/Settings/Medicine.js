@@ -20,7 +20,7 @@ import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
 import Typography from '@material-ui/core/Typography';
 
-import { getImageName } from "views/functions.js"
+import { getImageName, vsDialog } from "views/functions.js"
 import {DisplayPageHeader, ValidComp, BlankArea, DisplayMedicineDetails} from "CustomComponents/CustomComponents.js"
 
 // styles
@@ -273,6 +273,14 @@ export default function Medicine() {
 	}
 
 	async function handleCancel(rec) {
+		vsDialog('Delete Medicine',`Are you sure you want to delete medicine ${rec.name}?`,
+			{label: "Yes", onClick: () => handleCancelConfirm(rec) },
+			{label: "NO" }
+		);
+	}
+	
+
+	async function handleCancelConfirm(rec) {
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/delete/${userCid}/${rec.name}`;
 			await axios.get(myUrl);
@@ -287,7 +295,7 @@ export default function Medicine() {
 		}
 	}
 	
-	
+		
 	function DisplayAllMedicines() {
 	return (
 	<Grid className={gClasses.noPadding} key="AllMedicine" container alignItems="center" >
