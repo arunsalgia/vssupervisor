@@ -719,35 +719,45 @@ export function DisplayDocumentDetails(props) {
 	let _button4 = (props.button4 == null);
 	let _button5 = (props.button5 == null);
 	//console.log(_button1, _button2, _button3, _button4, _button5);
+	let _notbrief = (props.brief == null)
 return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-		<div align="center" >
-		<Typography>
-		<span className={gClasses.patientName}>{props.document.title}</span>
-		</Typography>
-		</div>
-		<div align="left" >
-		<Typography>
-			<span className={gClasses.patientInfo}>Date: </span>
-			<span className={gClasses.patientInfo2}>{myDate+' '+myTime}</span>
-		</Typography>
-		<Typography>
-			<span className={gClasses.patientInfo}>Desc: </span>
-			<span className={gClasses.patientInfo2}>{props.document.desc}</span>
-		</Typography>
-		<Typography> 
-			<span className={gClasses.patientInfo}>Type: </span>
-			<span className={gClasses.patientInfo2}>{props.document.type}</span>
-		</Typography>
-		<BlankArea />
-		<div align="right">
-		{(!_button1) && props.button1}
-		{(!_button2) && props.button2}
-		{(!_button3) && props.button3}
-		{(!_button4) && props.button4}
-		{(!_button5) && props.button5}
-		</div>
-	</div>
+		{(_notbrief) &&
+			<div>
+			<div align="center" >
+			<Typography>
+			<span className={gClasses.patientName}>{props.document.title}</span>
+			</Typography>
+			</div>
+			<div align="left" >
+			<Typography>
+				<span className={gClasses.patientInfo}>Date: </span>
+				<span className={gClasses.patientInfo2}>{myDate+' '+myTime}</span>
+			</Typography>
+			<Typography>
+				<span className={gClasses.patientInfo}>Desc: </span>
+				<span className={gClasses.patientInfo2}>{props.document.desc}</span>
+			</Typography>
+			<Typography> 
+				<span className={gClasses.patientInfo}>Type: </span>
+				<span className={gClasses.patientInfo2}>{props.document.type}</span>
+			</Typography>
+			<BlankArea />
+			</div>
+			<div align="right">
+				{(!_button1) && props.button1}
+				{(!_button2) && props.button2}
+				{(!_button3) && props.button3}
+				{(!_button4) && props.button4}
+				{(!_button5) && props.button5}
+			</div>
+			</div>
+		}
+		{(!_notbrief) &&
+			<Typography>
+			<span className={gClasses.patientName}>{props.document.title} {props.button1}</span>
+			</Typography>
+		}
 	</Box>
 )}
 

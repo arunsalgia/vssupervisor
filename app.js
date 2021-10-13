@@ -74,6 +74,8 @@ imageRouter = require('./routes/image');
 walletRouter = require('./routes/wallet');
 doctorRouter = require('./routes/doctor');
 razorRouter = require('./routes/razor');
+noteRouter = require('./routes/note');
+remarkRouter = require('./routes/remark');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -114,7 +116,8 @@ app.use('/image', imageRouter);
 app.use('/wallet', walletRouter);
 app.use('/doctor', doctorRouter); 
 app.use('/razor', razorRouter); 
-
+app.use('/note', noteRouter);
+app.use('/remark', remarkRouter);
 //Schema
 
 UserSchema = mongoose.Schema({
@@ -143,6 +146,20 @@ MedicineSchema = mongoose.Schema({
 	name: String,
 	description: String,
 	precaution: String,
+	enabled: Boolean,
+	cid: String,
+});
+
+NoteSchema = mongoose.Schema({
+	id: String,
+	name: String,
+	enabled: Boolean,
+	cid: String,
+});
+
+RemarkSchema = mongoose.Schema({
+	id: String,
+	name: String,
 	enabled: Boolean,
 	cid: String,
 });
@@ -246,8 +263,7 @@ CustomerSchema = mongoose.Schema({
 	enabled:Boolean,
 });
 
-/*
-DoctorSchema = mongoose.Schema({
+/* DoctorSchema = mongoose.Schema({
 	cid: String,
 	name: String,
 	type: String,		// dentist, physician, orthopaedic
@@ -259,6 +275,8 @@ DoctorSchema = mongoose.Schema({
 	enabled:Boolean
 });
 */
+
+
 ImageSchema = mongoose.Schema({
 	cid: 		String,
 	pid:		Number,
@@ -298,6 +316,8 @@ PaymentSchema = mongoose.Schema({
 // models
 User = mongoose.model("user", UserSchema);
 M_Medicine = mongoose.model('Medicine', MedicineSchema);
+M_Note = mongoose.model('Note', NoteSchema);
+M_Remark = mongoose.model('Remark', RemarkSchema);
 M_MasterSetting = mongoose.model("MasterSetting", MasterSettingsSchema)
 M_Patient = mongoose.model('Patient', PatientSchema);
 M_Visit = mongoose.model('Visit', VisitSchema);

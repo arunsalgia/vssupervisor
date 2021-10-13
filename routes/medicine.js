@@ -26,9 +26,31 @@ router.get('/add/:cid/:newMedicine/:desc/:precaution', async function(req, res, 
 		mRec = new M_Medicine();
 		mRec.cid = cid;
 		mRec.id = id;
-		mRec.name = getDisplayName(newMedicine);
+		mRec.name = newMedicine;
 		mRec.description= desc;
 		mRec.precaution = precaution;
+		mRec.enabled = true;
+		mRec.save();
+    sendok(res, mRec);
+  }
+	else
+    senderr(res, 601, 'Medicine already in database.');
+});
+
+router.get('/add/:cid/:newMedicine', async function(req, res, next) {
+  setHeader(res);
+  
+  var {cid, newMedicine } = req.params;
+	
+	let id = getLoginName(newMedicine);
+  var tmp = await M_Medicine.findOne({cid: cid, id: id});
+  if (!tmp) {
+		mRec = new M_Medicine();
+		mRec.cid = cid;
+		mRec.id = id;
+		mRec.name = newMedicine;
+		mRec.description= "";
+		mRec.precaution = "";
 		mRec.enabled = true;
 		mRec.save();
     sendok(res, mRec);
@@ -65,7 +87,7 @@ router.get('/edit/:cid/:oldMedicineName/:newMedicineName/:desc/:precaution', asy
 
 	// good. now update the details
 	mRec.id = new_lname;
-	mRec.name = getDisplayName(newMedicineName);
+	mRec.name = newMedicineName;
 	mRec.description= desc;
 	mRec.precaution = precaution;
 	mRec.enabled = true;

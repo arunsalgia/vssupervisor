@@ -14,6 +14,7 @@ import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
 import fileDownload  from 'js-file-download';
 import fs from 'fs';
+import _ from 'lodash';
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
@@ -108,6 +109,11 @@ const useStyles = makeStyles((theme) => ({
 	patientInfo: {
 		fontSize: theme.typography.pxToRem(14),
 	},
+	murItem: {
+		fontSize: theme.typography.pxToRem(15),
+		fontWeight: theme.typography.fontWeightBold,
+		paddingRight: '10px',
+	},
     root: {
       width: '100%',
     }, 
@@ -170,10 +176,10 @@ const useStyles = makeStyles((theme) => ({
 			fontSize: theme.typography.pxToRem(15),
 			fontWeight: theme.typography.fontWeightBold,
 		},
-		normalAccordian: {
-			backgroundColor: '#B2EBF2',
-		},
 		selectedAccordian: {
+			//backgroundColor: '#B2EBF2',
+		},
+		normalAccordian: {
 			backgroundColor: '#FFE0B2',
 		},
     secondaryHeading: {
@@ -233,6 +239,10 @@ export default function Visit() {
 	const gClasses = globalStyles();
 	const alert = useAlert();
 	
+	const [filterItem, setFilterItem] = useState("");
+	const [filterItemText, setFilterItemText] = useState("");
+	const [filterItemArray, setFilterItemArray] = useState([]);
+	
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
 	const [isListDrawer, setIsListDrawer] = useState("");
 	const [selectPatient, setSelectPatient] = useState(false);
@@ -255,7 +265,7 @@ export default function Visit() {
 	const [viewImage, setViewImage] = useState(false);
 	
 	const [medicineArray, setMedicineArray] = useState([])
-	const [notesArray, setNotesArry] = useState([]);
+	const [noteArray, setNoteArray] = useState([]);
 	const [remarkArray, setRemarkArray] = useState([{name: "Rem1"}, {name: "Rem2"}]);
 	
 	//const [currentAppt, setCurrentAppt] = useState(null);
@@ -313,7 +323,7 @@ export default function Visit() {
 				setCurrentPatient(patRec.displayName);
 				getPatientVisit(patRec);
 				let ddd = await getPatientDocument(userCid, patRec.pid);
-				console.log("Docs", ddd);
+				//console.log("Docs", ddd);
 				setDocumentArray(ddd);
 			} catch {
 				// have come directly
@@ -326,8 +336,10 @@ export default function Visit() {
 		}
 		userCid = sessionStorage.getItem("cid");
 		setMedQty();
-		getAllMedicines();
 		checkPatient();
+		getAllMedicines();
+		getAllNotes();
+		getAllRemarks();
   }, []);
 
 
@@ -339,6 +351,9 @@ export default function Visit() {
   
 	
 	async  function getAllPatients() {
+		if (process.env.REACT_APP_DIRECTVISIT !== 'true')
+			return [];
+			
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/list/${userCid}`;
 			let resp = await axios.get(myUrl);
@@ -374,6 +389,26 @@ export default function Visit() {
 			}
 		}	
 	}	
+	
+	async function getAllNotes() {
+		try {
+			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/note/list/${userCid}`)
+			setNoteArray(resp.data);
+			//console.log(resp.data);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+		
+	async function getAllRemarks() {
+		try {
+			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/remark/list/${userCid}`)
+			setRemarkArray(resp.data);
+			//console.log(resp.data);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 		
 		
 	function DisplayCloseModal() {
@@ -496,7 +531,7 @@ export default function Visit() {
 		return (
 		<Container component="main" maxWidth="lg">
 		<Typography className={classes.title}>Prescription</Typography>
-		<Box borderColor="primary.main" borderRadius={7} border={2}>
+		<Box borderColor="primary.main" borderRadius={7} border={1}>
 		{myMed.map( (m, index) =>
 			<Grid className={classes.noPadding} key={"MED"+props.visitNumber+"-"+index} container justify="center" alignItems="center" >
 			<Grid item xs={6} sm={6} md={6} lg={6} >
@@ -522,7 +557,7 @@ export default function Visit() {
 		</Typography>}
 		{/* user notes start from here */}
 		<Typography className={classes.title}>User Notes</Typography>
-		<Box borderColor="primary.main" borderRadius={7} border={2}>
+		<Box borderColor="primary.main" borderRadius={7} border={1}>
 		{myNotes.map( (un, index) =>
 			<Grid className={classes.noPadding} key={"NOTES"+props.visitNumber+"med"+index} container justify="center" alignItems="center" >
 			<Grid item xs={10} sm={10} md={10} lg={10} >
@@ -542,7 +577,7 @@ export default function Visit() {
 		</Typography>}
 		{/* remarks start from here */}
 		<Typography className={classes.title}>Examination Advised</Typography>
-		<Box borderColor="primary.main" borderRadius={7} border={2}>
+		<Box borderColor="primary.main" borderRadius={7} border={1}>
 		{myRem.map( (r, index) =>
 			<Grid className={classes.noPadding} key={"REM"+props.visitNumber+"-"+index} container justify="center" alignItems="center" >
 			<Grid item xs={10} sm={10} md={10} lg={10} >
@@ -572,7 +607,7 @@ export default function Visit() {
 	function DisplayPatientInfo() {
 	setInfo("High BP. Blood loss. Cavity in upper left. Needs root canal required.");
 	return (
-		<Box borderColor="primary.main" borderRadius={7} border={2}>
+		<Box borderColor="primary.main" borderRadius={7} border={1}>
 		<Typography align="right" className={classes.link}>
 			<Link variant="body2" onClick={() => { setHideInfo(!hideInfo); }}>
 				{(hideInfo) ? "Show Diagnosis"  : "Hide Diagnosis"}
@@ -885,6 +920,10 @@ export default function Visit() {
 	function handleAddUserNotes() {
 		setEmurName("");
 		setIsDrawerOpened("ADDNOTE");
+		// set filter
+		setFilterItem("NOT");
+		setFilterItemText("");
+		setFilterItemArray([]);
 	}
 	
 	function handleEditUserNotes(vNumber, notesNumber) {
@@ -894,9 +933,16 @@ export default function Visit() {
 		setEmurName(tmp.userNotes[notesNumber].name);
 		setModalRegister(0);
 		setIsDrawerOpened("EDITNOTE");
+		
+		setFilterItem("NOT");
+		setFilterItemText("");
+		setFilterItemArray([]);
+
 	}
 	
 	function updateUserNotes() {
+		updateNoteToDatabase(emurName);
+		
 		let tmp = [].concat(visitArray);
 		let index = emurNumber;
 		if (isDrawerOpened === "ADDNOTE") {
@@ -910,7 +956,17 @@ export default function Visit() {
 	}
 	
 	function handleDeleteNotes(vNumber, mNumber) {
-		console.log("handleDeleteMedicine "+vNumber+" Notes "+mNumber);
+		//console.log("handleDeleteMedicine "+vNumber+" Notes "+mNumber);
+		if (vNumber === 0) {
+			vsDialog("Delete User Note", `Are you sure you want to delete note ${visitArray[0].userNotes[mNumber].name}?`,
+				{label: "Yes", onClick: () => handleDeleteNotesConfirm(vNumber, mNumber) },
+				{label: "No" }
+			);
+		}
+	}
+	
+	function handleDeleteNotesConfirm(vNumber, mNumber) {
+		//console.log("handleDeleteMedicine "+vNumber+" Notes "+mNumber);
 		if (vNumber == 0) {
 			var tmp = [].concat(visitArray);
 			tmp[0].userNotes = tmp[0].userNotes.filter(function(value, index, arr){ 
@@ -920,13 +976,16 @@ export default function Visit() {
 		}
 	}
 	
-
 	//Arun Salgia new add / edit / delete Remarks
 	
 	function handleAddNewRemark() {
 		setEmurName("");
 		setModalRegister(0);
 		setIsDrawerOpened("ADDREM");
+		
+		setFilterItem("REM");
+		setFilterItemText("");
+		setFilterItemArray([]);
 	}
 	
 	function handleEditRemark(vNumber, remarkNumber) {
@@ -937,9 +996,15 @@ export default function Visit() {
 		setEmurName(tmp.remarks[remarkNumber].name)
 		setModalRegister(0);
 		setIsDrawerOpened("EDITREM");
+		
+		setFilterItem("REM");
+		setFilterItemText("");
+		setFilterItemArray([]);
 	}
 	
 	function updateRemark() {
+		updateRemarkToDatabase(emurName);
+		
 		let tmp = [].concat(visitArray);
 		let index = emurNumber;
 		if (isDrawerOpened === "ADDREM") {
@@ -951,8 +1016,16 @@ export default function Visit() {
 		setIsDrawerOpened("");
 	}
 	
-	
 	function handleDeleteRemark(vNumber, mNumber) {
+		if (vNumber !== 0) return;
+		let item = visitArray[0].remarks[mNumber].name;
+		vsDialog("Delete Examination Advice", `Are you sure you want to delete Examination advice of ${item}?`,
+		{label: "Yes", onClick: () => handleDeleteRemarkConfirm(vNumber, mNumber) },
+		{label: "No" }
+		);
+	}
+	
+	function handleDeleteRemarkConfirm(vNumber, mNumber) {
 		console.log("handleDeleteMedicine "+vNumber+" Remark "+mNumber);
 		if (vNumber == 0) {
 			var tmp = [].concat(visitArray);
@@ -960,11 +1033,12 @@ export default function Visit() {
         return index !== mNumber;
 			});
 			setVisitArray(tmp);
-			console.log(tmp[0].remarks);
+			//console.log(tmp[0].remarks);
 		}
 	}
 	
 
+	
 	//Arun Salgia new add / edit / delete medicine
 	
 	function handleAddNewMedicine() {
@@ -975,6 +1049,11 @@ export default function Visit() {
 		setEmedTime(2);
 		setEmedUnit(unitArray[1]);
 		setModalRegister(0);
+		// for filter
+		setFilterItem("MED");
+		setFilterItemText("");
+		setFilterItemArray([]);
+		
 		setIsDrawerOpened("ADDMED");
 	}
 	
@@ -997,10 +1076,58 @@ export default function Visit() {
 		setEmedUnit (tmp.medicines[mNumber].unit);
 		let ttt = medicineArray.find(x => x.name == tmp.medicines[mNumber].name);
 		setStandard(ttt != null);
+		
+				// for filter
+		setFilterItem("MED");
+		setFilterItemText("");
+		setFilterItemArray([]);
+		
 		setModalRegister(0);
 		setIsDrawerOpened("EDITMED");
 	}
 
+	async function updateMedicineToDatabase(medName) {
+		let tmp = medicineArray.find(x => x.name === medName)
+		if (!tmp) {
+			try {
+				let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/add/${userCid}/${medName}`;
+				axios.get(myUrl);
+				let tmpArray = [{name: medName}].concat(medicineArray);
+				setMedicineArray(_.sortBy(tmpArray, 'name'));
+			} catch (e) {
+				console.log(e);
+			}
+		}
+	}
+	
+	async function updateNoteToDatabase(noteName) {
+		let tmp = noteArray.find(x => x.name === noteName)
+		if (!tmp) {
+			try {
+				let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/note/add/${userCid}/${noteName}`;
+				axios.get(myUrl);
+				let tmpArray = [{name: noteName}].concat(noteArray);
+				setNoteArray(_.sortBy(tmpArray, 'name'));
+			} catch (e) {
+				console.log(e);
+			}
+		}
+	}
+	
+	async function updateRemarkToDatabase(remarkName) {
+		let tmp = remarkArray.find(x => x.name === remarkName)
+		if (!tmp) {
+			try {
+				let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/remark/add/${userCid}/${remarkName}`;
+				axios.get(myUrl);
+				let tmpArray = [{name: remarkName}].concat(remarkArray);
+				setRemarkArray(_.sortBy(tmpArray, 'name'));
+			} catch (e) {
+				console.log(e);
+			}
+		}
+	}
+	
 	function handleMedicineUpdate() {
 		if ((emedDose1+emedDose2+emedDose3) == 0) {
 				setModalRegister(101);
@@ -1011,6 +1138,7 @@ export default function Visit() {
 				return;
 		}
 		
+		updateMedicineToDatabase(emurName);
 		let tmp = [].concat(visitArray);
 		let index = emurNumber;
 		if (isDrawerOpened === "ADDMED") {
@@ -1156,8 +1284,8 @@ export default function Visit() {
 			}
 			<Grid className={gClasses.noPadding} key="AllDOCS" container alignItems="center" >
 			{documentArray.map( (d, index) => 
-				<Grid key={"DOC"+index} item xs={12} sm={6} md={3} lg={3} >
-				<DisplayDocumentDetails
+				<Grid key={"DOC"+index} item xs={6} sm={4} md={2} lg={2} >
+				<DisplayDocumentDetails brief
 					document={d} 
 					button1={
 						<IconButton color="primary" size="small" onClick={() => {handleFileView(d)}} >
@@ -1173,12 +1301,12 @@ export default function Visit() {
 	</Box>
 	)}
 	
-	function ArunMedicines(props) {
+	function org_ArunMedicines(props) {
 	let x = props.visitRec;
 	return (
 	<div>
 	<Typography className={classes.title}>Prescription</Typography>
-	<Box borderColor="primary.main" borderRadius={7} border={2}>
+	<Box borderColor="primary.main" borderRadius={7} border={1}>
 	{x.medicines.map( (m, index) =>
 		<Grid className={classes.noPadding} key={"MED"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
 		<Grid item xs={4} sm={4} md={6} lg={6} >
@@ -1217,12 +1345,49 @@ export default function Visit() {
 	</div>
 	)}
 	
+	function ArunMedicines(props) {
+	let x = props.visitRec;
+	return (
+	<div>	
+	<Typography>
+	<span className={classes.title}>Prescription</span>
+	{(x.visitNumber === 0) && 
+		<span>
+		<IconButton  color="primary" size="small" onClick={handleAddNewMedicine} >
+			<AddIcon />
+		</IconButton>
+		</span>
+	}
+	</Typography>
+	<Box borderColor="primary.main" border={1}>
+		<Typography className={classes.murItem}>
+		{x.medicines.map( (m, index) =>
+			<span key={"MEDSPAN"+index} className={classes.murItem}>{m.name}
+				<IconButton color="secondary" size="small" onClick={() => { handleDeleteMedicine(x.visitNumber, index)}} >
+					<DeleteIcon />
+				</IconButton>
+			</span>
+		)}
+		</Typography>
+	</Box>
+	</div>
+	)}
+	
 	function ArunNotes(props) {
 	let x = props.visitRec;
 	return (
 	<div>
-	<Typography className={classes.title}>User Notes</Typography>
-	<Box borderColor="primary.main" borderRadius={7} border={2}>
+	<Typography>
+	<span className={classes.title}>User Notes</span>
+		{(x.visitNumber === 0) && 
+			<span>
+			<IconButton  color="primary" size="small" onClick={handleAddUserNotes} >
+				<AddIcon />
+			</IconButton>
+			</span>
+		}
+	</Typography>
+	<Box borderColor="primary.main" border={1}>
 	{x.userNotes.map( (un, index) =>
 		<Grid className={classes.noPadding} key={"NOTES"+x.visitNumber+"notes"+index} container justify="center" alignItems="center" >
 		<Grid item xs={10} sm={10} md={10} lg={10} >
@@ -1245,13 +1410,41 @@ export default function Visit() {
 		</Grid>
 	)}
 	</Box>
-	{(x.visitNumber === 0) &&
-		<div align="right">
-		<IconButton  color="primary" size="small" onClick={handleAddUserNotes} >
-			<AddIcon />
-		</IconButton>
-		</div>
-	}
+	</div>
+	)}
+	
+	function newArunNotes_issues(props) {
+	let x = props.visitRec;
+	return (
+	<div>
+	<Typography>
+	<span className={classes.title}>User Notes</span>
+		{(x.visitNumber === 0) && 
+			<span>
+			<IconButton  color="primary" size="small" onClick={handleAddUserNotes} >
+				<AddIcon />
+			</IconButton>
+			</span>
+		}
+	</Typography>
+	<Box borderColor="primary.main" border={1}>
+	<Grid className={classes.noPadding} maxWidth="100%" key={"NOTES"+x.visitNumber} container justify="center" alignItems="center" >
+	<Typography border={1} className={classes.murItem}>
+		{x.userNotes.map( (un, index) =>
+			<Grid item xs={4} sm={4} md={2} lg={2} >
+				<Typography border={1} className={classes.murItem}>
+				<span key={"NOTESPAN"+index} className={classes.murItem}>
+				{un.name}
+				<IconButton color="secondary" size="small" onClick={() => { handleDeleteNotes(x.visitNumber, index)}} >
+					<DeleteIcon />
+				</IconButton>
+				</span>
+				</Typography>
+			</Grid>
+		)}
+	</Typography>
+	</Grid>
+	</Box>
 	</div>
 	)}
 	
@@ -1259,8 +1452,17 @@ export default function Visit() {
 	let x = props.visitRec;
 	return (
 	<div>
-	<Typography className={classes.title}>Examination Advised</Typography>
-	<Box borderColor="primary.main" borderRadius={7} border={2}>
+	<Typography>
+		<span className={classes.title}>Examination Advised</span>
+		{(x.visitNumber === 0) && 
+			<span>
+			<IconButton  color="primary" size="small" onClick={handleAddNewRemark} >
+				<AddIcon />
+			</IconButton>
+			</span>
+		}
+	</Typography>
+	<Box borderColor="primary.main" border={1}>
 	{x.remarks.map( (r, index) =>
 		<Grid className={classes.noPadding} key={"REM"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
 		<Grid item xs={10} sm={10} md={10} lg={10} >
@@ -1283,13 +1485,6 @@ export default function Visit() {
 	</Grid>
 	)}
 	</Box>
-	{(x.visitNumber === 0) && 
-		<div align="right">
-		<IconButton  color="primary" size="small" onClick={handleAddNewRemark} >
-			<AddIcon />
-		</IconButton>
-		</div>
-	}	
 	</div>
 	)}
 	
@@ -1471,12 +1666,48 @@ export default function Visit() {
 		</div>
 	)}
 	
+	function setEmurNameWithFilter(itemName) {
+		//console.log("Iin filter");
+		let txt = itemName;
+		setEmurName(txt);
+		setFilterItemText(txt);
+		let tmpArray = [];
+		if (itemName !== "") {
+			if (filterItem.substr(0,3) === "MED")
+				tmpArray = medicineArray.filter( x => x.name.startsWith(txt) );
+			else if (filterItem.substr(0,3) === "NOT")
+				tmpArray = noteArray.filter( x => x.name.startsWith(txt) );
+			else if (filterItem.substr(0,3) === "REM")
+				tmpArray = remarkArray.filter( x => x.name.startsWith(txt) );
+		} 
+		setFilterItemArray(tmpArray);
+	}
+	
+	function DisplayFilterArray() {
+	return (
+		<div align="center" >
+			{filterItemArray.map( (item, index) =>
+				<Typography key={"ITEM"+index} className={gClasses.blue} type="button" onClick={() => { setFilterItemArray([]); setEmurName(item.name); }} >
+				{item.name}
+				</Typography>
+			)}
+		</div>	
+	)}
+	
+	function getCurrntPatientInfo() {
+		let xxx = currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) ";
+		if (currentPatientData.age > 0) {
+			xxx += " " + currentPatientData.age + "/" + currentPatientData.gender;
+		}
+		return xxx;
+	}
+	
 	return (
 	<div className={gClasses.webPage} align="center" key="main">
 	<DisplayPageHeader headerName="Visit Directory" groupName="" tournament=""/>
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
-	{(currentPatient === "") && 
+	{((currentPatient === "") && (process.env.REACT_APP_DIRECTVISIT === 'true')) && 
 		<div>
 		<Grid className={gClasses.vgSpacing} key="PatientFilter" container alignItems="center" >
 		<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
@@ -1499,20 +1730,20 @@ export default function Visit() {
 		<DisplayAllPatients />
 		</div>
 	}
-	{(currentPatient !== "") &&
+	{((currentPatient !== "") && (process.env.REACT_APP_DIRECTVISIT === 'true')) && 
 		<VsButton align="right" name="Select Patient" onClick={() => { setCurrentPatient("")}} />	
 	}
 	{(currentPatient !== "") &&
 		<Box align="left" >
 			<Typography align="center" className={classes.modalHeader}>
-			{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
+			{getCurrntPatientInfo()}
 			</Typography>	
 			<DisplayMedicalReports />
 			{/*<DisplayPatientInfo />*/}
 			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 			<DisplayNewVisitBtn />
 			{visitArray.map(x =>	
-				<Accordion className={(expandedPanel === "V"+x.visitNumber)? classes.normalAccordian : classes.selectedAccordian} 
+				<Accordion className={(expandedPanel !== "V"+x.visitNumber)? classes.normalAccordian : classes.selectedAccordian} 
 					key={"AM"+x.visitNumber} expanded={expandedPanel === "V"+x.visitNumber} 
 					onChange={handleAccordionChange("V"+x.visitNumber)}>
 				<AccordionSummary key={"AS"+x.visitNumber} expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
@@ -1556,17 +1787,18 @@ export default function Visit() {
 		/> 
 	}
 	{((isDrawerOpened === "ADDMED") || (isDrawerOpened === "EDITMED")) &&
-		<ValidatorForm align="center" className={gClasses.form} >
+		<ValidatorForm align="center" className={gClasses.form} onSubmit={handleMedicineUpdate}>
 			<Typography align="center" className={classes.modalHeader}>
-				{(isDrawerOpened === "ADDMED") ? "New Medicine" : "Edit Medicine"}
+				{((isDrawerOpened === "ADDMED") ? "New Medicine" : "Edit Medicine")+` for ${currentPatient}`}
 			</Typography>
-			<VsButton name="Select Medicine" align="right" onClick={() => setIsListDrawer("LIST")} />
+			{(false) && <VsButton name="Select Medicine" align="right" onClick={() => setIsListDrawer("LIST")} />}
 			<BlankArea />
 			<TextValidator required fullWidth color="primary"
 				id="newName" label="Medicine" name="newName"
-				onChange={(event) => setEmurName(event.target.value)}
+				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>
+			<DisplayFilterArray />
 			<BlankArea />
 			<Grid key="editmed" container justify="center" alignItems="left" >
 			<Grid className={gClasses.vgSpacing} item xs={1} sm={1} md={1} lg={1} >
@@ -1651,48 +1883,47 @@ export default function Visit() {
 			</Grid>
 			<ModalResisterStatus />
 			<BlankArea />
-			<VsButton onClick={handleMedicineUpdate} 
+			<VsButton type="submit" 
 			name= {(isDrawerOpened === "ADDMED") ? "Add" : "Update"}
 			/>
 		</ValidatorForm>
 	}
 	{((isDrawerOpened === "ADDNOTE") || (isDrawerOpened === "EDITNOTE")) &&
-		<ValidatorForm align="center" className={gClasses.form} >
+		<ValidatorForm align="center" className={gClasses.form} onSubmit={updateUserNotes}>
 			<Typography align="center" className={classes.modalHeader}>
-				{(isDrawerOpened === "ADDNOTE") ? "New Note" : "Edit Note"}
+				{((isDrawerOpened === "ADDNOTE") ? "New Note" : "Edit Note")+`for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
 			<TextValidator required fullWidth color="primary"
 				id="newName" label="Note" name="newName"
-				onChange={(event) => setEmurName(event.target.value)}
+				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>
+			<DisplayFilterArray />
 			<ModalResisterStatus />
 			<BlankArea />
-			<VsButton onClick={updateUserNotes} 
-			name= {(isDrawerOpened === "ADDNOTE") ? "Add" : "Update"}
-			/>
+			<VsButton type ="submit" name= {(isDrawerOpened === "ADDNOTE") ? "Add" : "Update"} />
 		</ValidatorForm>
 	}
 	{((isDrawerOpened === "ADDREM") || (isDrawerOpened === "EDITREM")) &&
-		<ValidatorForm align="center" className={gClasses.form} >
+		<ValidatorForm align="center" className={gClasses.form} onSubmit={updateRemark} >
 			<Typography align="center" className={classes.modalHeader}>
-				{(isDrawerOpened === "ADDREM") ? "New Remark" : "Edit Remark"}
+				{((isDrawerOpened === "ADDREM") ? "New Remark" : "Edit Remark")+` for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
 			<TextValidator required fullWidth color="primary"
 				id="newName" label="Remark" name="newName"
-				onChange={(event) => setEmurName(event.target.value)}
+				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>
+			<DisplayFilterArray />
 			<ModalResisterStatus />
 			<BlankArea />
-			<VsButton onClick={updateRemark} 
-			name= {(isDrawerOpened === "ADDNOTE") ? "Add" : "Update"}
+			<VsButton type="submit" name= {(isDrawerOpened === "ADDREM") ? "Add" : "Update"}
 			/>
 		</ValidatorForm>
 	}
-	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
+	{(false) && <VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />}
 	</Box>
 	</Drawer>
 	<Drawer className={classes.drawer}

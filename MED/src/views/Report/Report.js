@@ -396,6 +396,9 @@ export default function Document() {
   }, []);
 
 	async  function getAllPatients() {
+		if (process.env.REACT_APP_DIRECTREPORT !== 'true')
+				return [];
+			
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/list/${userCid}`;
 			let resp = await axios.get(myUrl);
@@ -781,7 +784,7 @@ export default function Document() {
 	<DisplayPageHeader headerName="Medical Reports Directory" groupName="" tournament=""/>
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
-		{(currentPatient === "") && 
+		{((currentPatient === "") && (process.env.REACT_APP_DIRECTREPORT === 'true')) &&
 			<div>
 			<Grid className={gClasses.vgSpacing} key="PatientFilter" container alignItems="center" >
 			<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
@@ -803,7 +806,7 @@ export default function Document() {
 			<DisplayAllPatients />
 			</div>
 		}
-		{(currentPatient !== "") &&
+		{((currentPatient !== "") && (process.env.REACT_APP_DIRECTREPORT === 'true')) &&
 			<VsButton align="right" name="Select Patient" onClick={() => { setCurrentPatient("")}} />	
 		}
 		{(currentPatient !== "") &&

@@ -590,7 +590,8 @@ export async function getIdleTimeout() {
   return parseInt(value);
 }
 
-const ALL0 = "0000000000000000000000000000000000000000000000000000000000000000000000"
+const ALL0 = "0000000000000000000000000000000000000000000000000000000000000000000000";
+const allSpace = "                                                                   ";
 export function left (sss, sLen=1) {
 	let tmp = sss;
 	if (tmp.length > sLen)
@@ -606,9 +607,12 @@ export function right (sss, sLen=1) {
 	return tmp;
 }
   
-//export function fixedString (sss, sLen=1) {
-//	return right(sss, sLen);
-//}
+export function fixedString (sss, sLen=1) {
+	let xxx = sss.substr(0, sLen);
+	//if (xxx.length < sLen)
+		//xxx = 
+	return right(sss, sLen);
+}
 
 export function intString (num, sLen=2) {
 	let tmp = num.toString();
@@ -853,7 +857,7 @@ export async function getAllPatients(userCid) {
 	
 export function vsDialog(title, msg, yesB, noB) {
 	let option = cloneDeep(dialogOptions);
-	console.log(option); 
+	//console.log(option); 
 	option.title = title;
 	option.message = msg;
 	option.buttons[0] = yesB;

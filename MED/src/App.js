@@ -147,7 +147,10 @@ function AppRouter() {
 				return (<ResetPassword />);
 			} else {
 				//console.log("About to call Welcome");
-				return (<Welcome/>)
+				if (process.env.REACT_APP_SHOWWELCOMEPAGE === 'true')
+					return (<Welcome/>)
+				else
+					return <SignIn />
 			}
 		} 
   }
