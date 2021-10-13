@@ -310,6 +310,8 @@ export default function Visit() {
 	
 	
   useEffect(() => {	
+		userCid = sessionStorage.getItem("cid");
+
 		const checkPatient = async () => {	
 			let ppp = await getAllPatients();
 			setPatientMasterArray(ppp);		
@@ -321,9 +323,9 @@ export default function Visit() {
 				setPatientArray([patRec]);
 				setCurrentPatientData(patRec);
 				setCurrentPatient(patRec.displayName);
-				getPatientVisit(patRec);
+				await getPatientVisit(patRec);
 				let ddd = await getPatientDocument(userCid, patRec.pid);
-				//console.log("Docs", ddd);
+				console.log("Docs", ddd);
 				setDocumentArray(ddd);
 			} catch {
 				// have come directly
@@ -334,7 +336,6 @@ export default function Visit() {
 			sessionStorage.setItem("shareData", "");		// clean up
 			
 		}
-		userCid = sessionStorage.getItem("cid");
 		setMedQty();
 		checkPatient();
 		getAllMedicines();

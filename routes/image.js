@@ -34,11 +34,12 @@ router.get('/list/:cid', async function(req, res, next) {
 router.get('/list/:cid/:pid', async function(req, res, next) {
   setHeader(res);
 	var {cid, pid} = req.params;
-	
+	console.log(cid, pid);
 	let rec = await M_Image.find({cid: cid, pid: pid}, 
 		{title: 1, name: 1, desc: 1, type: 1, date: 1, pid: 1, displayName: 1})
 		.sort({date: -1});
 
+	//console.log(rec);
 	sendok(res, rec);
 });
 
