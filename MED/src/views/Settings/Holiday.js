@@ -537,8 +537,9 @@ export default function Holiday() {
 			// success
 			setIsDrawerOpened("");
 
-			if ((holidayDate.getFullYear() === year) && (holidayDate.getMonth() === month)) {
-				let tmpArray = [resp.data].concat(holidayArray);
+			if ((myYear === year) && (myMonth === month)) {
+				let tmpArray = holidayArray.filter(x => x.date !== myDate || x.month !== myMonth || x.year !== myYear);
+				tmpArray = [resp.data].concat(tmpArray);
 				tmpArray.sort((a, b) => { 
 					return (((a.year*100+a.month)*100 + a.date)) - ((b.year*100 + b.month)*100+b.date)
 				});

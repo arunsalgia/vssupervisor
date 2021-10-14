@@ -73,6 +73,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 //import CancelIcon from '@material-ui/icons/Cancel';
+import ClearSharpIcon from '@material-ui/icons/ClearSharp';
 
 import {red, blue, yellow, orange, green } from '@material-ui/core/colors';
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
@@ -548,9 +549,17 @@ export default function Patient() {
 			<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
 			<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
 			<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
-				defaultValue={searchText}
+				value={searchText}
 				onChange={(event) => filterPatients(event.target.value)}
-				InputProps={{endAdornment: (<InputAdornment position="end"><SearchIcon/></InputAdornment>)}}
+				InputProps={
+					{
+						endAdornment: (
+							<div>
+							<InputAdornment position="end"><SearchIcon /></InputAdornment>
+							</div>
+							)
+					}
+				}
 			/>
 			</Grid>
 			<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
