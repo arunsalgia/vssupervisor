@@ -514,7 +514,7 @@ export function CricDreamTabs() {
           </IconButton> */}
 					<Typography onClick={handleHome}>
 						<span className={classes.doctor}>+</span>
-						<span className={classes.ankit}> Viraag Dental</span>
+						<span className={classes.ankit}> Doctor Viraag</span>
 					</Typography>
           {/*<IconButton
             aria-label="account of current user"

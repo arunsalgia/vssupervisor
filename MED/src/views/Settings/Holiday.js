@@ -482,9 +482,10 @@ export default function Holiday() {
 				x.month !== hol.month || x.date !== hol.date);
 			//console.log(tmp);
 			setHolidayArray(tmp);
-			alert.success("Successfully deleted holiday "+hol.date+"/"+(hol.month+1)+"/"+hol.year);
+			//alert.success("Successfully deleted holiday "+hol.date+"/"+(hol.month+1)+"/"+hol.year);
 		} catch (e) {
 			console.log(e);
+			alert.success("	Error deleting holiday "+hol.date+"/"+(hol.month+1)+"/"+hol.year);
 		}
 			
 	}
@@ -521,6 +522,7 @@ export default function Holiday() {
 	}
 
 	function handleDate(d) {
+		//console.log(d);
 		setHolidayDate(d.toDate());
 	}
 	
@@ -533,17 +535,19 @@ export default function Holiday() {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/holiday/set/${userCid}/${myYear}/${myMonth}/${myDate}/${holidayDesc}`;
 			var resp = await axios.get(myUrl);
 			// success
+			setIsDrawerOpened("");
+
 			if ((holidayDate.getFullYear() === year) && (holidayDate.getMonth() === month)) {
 				let tmpArray = [resp.data].concat(holidayArray);
 				tmpArray.sort((a, b) => { 
 					return (((a.year*100+a.month)*100 + a.date)) - ((b.year*100 + b.month)*100+b.date)
 				});
 				setHolidayArray(tmpArray);
-				setIsDrawerOpened("");
-				alert.success("Successfully added holiday "+myDate+"/"+(myMonth+1)+"/"+myYear);
 			}
+			alert.success("Successfully added holiday "+myDate+"/"+(myMonth+1)+"/"+myYear);
 		} catch (e) {
 			console.log(e);
+			aler.error("Selected date is already set as holiday");
 		}
 	}
 	
@@ -568,7 +572,7 @@ export default function Holiday() {
 	>
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
-	<ValidatorForm align="center" className={gClasses.form} >
+	<ValidatorForm align="center" className={gClasses.form} onSubmit={addNewSubmit} >
 	<Typography align="center" className={classes.modalHeader}>
 		{"New Holiday"}
 	</Typography>
@@ -581,6 +585,7 @@ export default function Holiday() {
 		dateFormat="DD/MM/yyyy"
 		isValidDate={disablePastDt}
 		onClose={handleDate}
+		closeOnSelect={true}
 	/>
 	<BlankArea />
 	<TextValidator required fullWidth color="primary"
@@ -589,7 +594,7 @@ export default function Holiday() {
 		onChange={(event) => setHolidayDesc(event.target.value)}
 	/>
 	<BlankArea />
-	<VsButton onClick={addNewSubmit} name= {"Add"} />
+	<VsButton type="submit" name= {"Add"} />
 	</ValidatorForm>
 	</Box>
 	</Drawer>
