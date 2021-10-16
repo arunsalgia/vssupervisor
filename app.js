@@ -40,7 +40,7 @@ console.log(BASELINK);
 ARCHIVEDIR= (PRODUCTION) ? "public/" : "public/" ;       // binary will be stored here
 
 PORT = process.env.PORT || 4000;
-VISITTYPE = {pending: 'pending', cancelled: 'cancelled', over: 'over'};
+VISITTYPE = {pending: 'pending', cancelled: 'cancelled', over: 'over', expired: 'expired'};
 
 
 http = require('http');
@@ -76,6 +76,9 @@ doctorRouter = require('./routes/doctor');
 razorRouter = require('./routes/razor');
 noteRouter = require('./routes/note');
 remarkRouter = require('./routes/remark');
+diagnosisRouter = require('./routes/diagnosis');
+symptomRouter = require('./routes/symptom');
+investigationRouter = require('./routes/investigation');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -118,6 +121,10 @@ app.use('/doctor', doctorRouter);
 app.use('/razor', razorRouter); 
 app.use('/note', noteRouter);
 app.use('/remark', remarkRouter);
+app.use('/diagnosis', diagnosisRouter);
+app.use('/symptom', symptomRouter);
+app.use('/investigation', investigationRouter);
+
 //Schema
 
 UserSchema = mongoose.Schema({
@@ -164,6 +171,20 @@ RemarkSchema = mongoose.Schema({
 	cid: String,
 });
 
+DiagnosisSchema = mongoose.Schema({
+	id: String,
+	name: String,
+	enabled: Boolean,
+	cid: String,
+});
+
+SymptomSchema = mongoose.Schema({
+	id: String,
+	name: String,
+	enabled: Boolean,
+	cid: String,
+});
+
 PatientSchema = mongoose.Schema({
   pid: Number,
 	pidStr: String,
@@ -182,12 +203,26 @@ VisitSchema = mongoose.Schema({
   pid: Number,
 	displayName: String,
 	visitNumber: Number,
-	visitDate: String,
+	visitDate: Date,
 	medicines: [{name: String, dose1: Number, dose2: Number, dose3: Number, time: Number, unit: String}],
 	userNotes: [{name: String}],
 	remarks: [{name: String}],
+	//info: [{name: String}],
 	enabled: Boolean,
-	appointment: String,	// store appointment _id. If unscheduled visit then it is blank
+	//appointment: String,	// store appointment _id. If unscheduled visit then it is blank
+	nextVisitTime: Number,
+	nextVisitUnit: String,
+	cid: String,
+});
+
+
+InvestigationSchema = mongoose.Schema({
+  pid: Number,
+	investigationNumber: Number,
+	investigationDate: Date,
+	symptom: [{name: String}],
+	diagnosis: [{name: String}],
+	enabled: Boolean,
 	cid: String,
 });
 
@@ -226,9 +261,19 @@ AppointmentSchema = mongoose.Schema({
 });
 
 // 1 info record per person
+// info field will have multiple entry.
+// will take entry from InfoDb schema
 InfoSchema = mongoose.Schema({
 	pid: Number,
-	info: String,	// Patient info. Will have to preserve blanks, tabs, CR, LF etc.
+	info: [{name: String}],
+	enabled: Boolean,
+	cid: String,
+});
+
+InfoDbSchema = mongoose.Schema({
+	id: String,
+	name: String,
+	enabled: Boolean,
 	cid: String,
 });
 
@@ -329,7 +374,9 @@ M_Customer = mongoose.model('Customer', CustomerSchema);
 M_NextVisit = mongoose.model('NextVisit', NextVisitSchema);
 M_Image = mongoose.model('image', ImageSchema);
 M_Wallet = mongoose.model('wallet', WalletSchema);
-//M_Doctor = mongoose.model('doctor', DoctorSchema);
+M_Diagnosis = mongoose.model('diagnosis', DiagnosisSchema);
+M_Symptom = mongoose.model('symptoms', SymptomSchema);
+M_Investigation = mongoose.model('investigations', InvestigationSchema);
 M_Payment = mongoose.model('payment', PaymentSchema);
 router = express.Router();
 
@@ -369,14 +416,14 @@ if (WEB) {
 // When successfully connected
 mongoose.connection.on('connected', function () {
   //console.log('Mongoose default connection open to ' + process.env.MONGOCONNECTION);
-	console.log('Mongoose connection success');
+	console.log('Database connection success');
   db_connection = true;
   connectRequest = true;
 });
 
 // If the connection throws an error
 mongoose.connection.on('error', function (err) {
-  console.log('Mongoose default connection error');
+  console.log('Database default connection error');
   console.log(err);
   db_connection = false;
   connectRequest = false;   // connect request refused
@@ -392,7 +439,7 @@ mongoose.connection.on('disconnected', function () {
 process.on('SIGINT', function () {
   // close mongoose connection
   mongoose.connection.close(function () {
-    console.log('Mongoose default connection disconnected through app termination');
+    console.log('Database default connection disconnected through app termination');
   });
   process.exit(0);
 });

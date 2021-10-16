@@ -27,7 +27,7 @@ router.get('/list/:cid', async function(req, res, next) {
   setHeader(res);
 	var {cid} = req.params;
 	
-	let rec = await M_Image.find({cid: cid}, {title: 1, name: 1, desc: 1, type: 1, date: 1, pid: 1, displayName: 1}).sort({date: -1});
+	let rec = await M_Image.find({cid: cid}, {_id: 0, title: 1, name: 1, desc: 1, type: 1, date: 1, pid: 1, displayName: 1}).sort({date: -1});
 	sendok(res, rec);
 });
 

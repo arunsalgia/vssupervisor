@@ -43,6 +43,7 @@
     "react-alert-template-basic": "^1.0.2",
     "react-animated-slider": "^2.0.0",
     "react-beforeunload": "^2.3.0",
+    "react-border-wrapper": "^1.0.3",
     "react-chartist": "0.14.3",
     "react-confirm-alert": "^2.7.0",
     "react-copy-to-clipboard": "^5.0.2",

@@ -12,7 +12,7 @@ router.get('/list/:cid', async function(req, res, next) {
   setHeader(res);
 	var {cid} = req.params;
 	
-	let rec = await M_Info.find({cid: cid});
+	let rec = await M_Info.find({cid: cid}, {_id: 0});
 	console.log(rec);
 	sendok(res, rec);
 });

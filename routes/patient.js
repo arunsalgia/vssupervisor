@@ -328,26 +328,6 @@ router.get('/pidtest', async function(req, res, next) {
 	sendok(res, "Done");
 });
 
-cron.schedule('10,50 0,9,13 1,7,14,21,28 * *', async () => {	
-  if (!db_connection) {
-    return;
-  }
-	// update age based on date of birth
-	let today = new Date();
-	let todayTime = today.getTime();
-	let allPatients = await M_Patient.find({});
-	for(let i=0; i<allPatients.length; ++i) {
-		if (allPatients[i].dob.getFullYear() !== 1900) {
-			let timeDifference = Math.abs(todayTime - allPatients[i].dob.getTime())
-			let differentYears = Math.round(timeDifference / (1000 * 3600 * 24 * 365));
-			console.log(allPatients[i].dob, differentYears);
-			allPatients[i].age = differentYears;
-		} else
-			allPatients[i].age = 0;
-		allPatients[i].save();
-	}
-});
-
 async function getPatient(filter) {
 	//console.log(filter);
 	var allPatient =  await M_Patient.find(filter).sort({displayName: 1});

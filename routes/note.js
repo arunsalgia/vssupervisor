@@ -91,7 +91,7 @@ router.get('/list/:cid', async function(req, res, next) {
   
   var { cid } = req.params;
 	
-	M_Note.find({cid: cid}, "name", function(err, objs) {
+	M_Note.find({cid: cid}, {_id: 0, name: 1}, function(err, objs) {
 		objs = _.sortBy(objs, 'name');
 		sendok(res, objs);
   });

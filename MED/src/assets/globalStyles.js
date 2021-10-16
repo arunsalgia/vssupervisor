@@ -9,6 +9,15 @@ import { makeStyles } from '@material-ui/core/styles';
 
 
 const globalStyles = makeStyles((theme) => ({
+	functionSelected: {
+		fontSize: theme.typography.pxToRem(20),
+		fontWeight: theme.typography.fontWeightBold,
+		color: "blue",
+	},
+	functionUnselected: {
+		fontSize: theme.typography.pxToRem(16),
+		fontWeight: theme.typography.fontWeightBold,
+	},
 	green: {
 		color: green[900],
 	},
@@ -20,6 +29,14 @@ const globalStyles = makeStyles((theme) => ({
 	},
 	bgRed: {
 		backgroundColor: 'red',
+	},
+	bgBlue: {
+		backgroundColor: 'blue',
+	},
+	divider: {
+		backgroundColor: 'blue',
+		paddingTop: '5px',
+		paddingLeft: '5px',
 	},
   root: {
     width: '100%',

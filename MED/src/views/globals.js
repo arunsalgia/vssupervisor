@@ -74,3 +74,15 @@ export const dialogOptions={
   onKeypressEscape: () => {},
   overlayClassName: "overlay-custom-class-name"
 }
+
+// for dental
+
+export const ToothLeft =		[8,7,6,5,4,3,2,1];
+export const ToothRight =		[1,2,3,4,5,6,7,8];
+
+export const ToothNumber = {
+	upperLeft:  [18, 17, 16, 15, 14, 13, 12, 11],
+	upperRight: [28, 27, 26, 25, 24, 23, 22, 21],
+	lowerRight: [38, 37, 36, 35, 34, 33, 32, 31],
+	lowerLeft:  [48, 47, 46, 45, 44, 43, 42, 41],
+}

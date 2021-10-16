@@ -19,7 +19,7 @@ bSTyle.backgroundColor = (props.color) ? props.color: 'blue';
 let handler=disabled;
 if (props.disabled) {
 	// job done
-	bSTyle.backgroundColor = yellow[100];
+	bSTyle.backgroundColor = '#424242';
 	bSTyle.color = 'black';
 } else {
 	if (props.onClick)

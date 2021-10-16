@@ -58,7 +58,8 @@ import Link from '@material-ui/core/Link';
 
 import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
 DisplayPatientDetails,
-DisplayAppointmentDetails,
+DisplayPatientBox,
+DisplayAppointmentDetails, DisplayAppointmentBox,
 } from "CustomComponents/CustomComponents.js"
 
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
@@ -548,7 +549,7 @@ export default function Appointment() {
 				setPatientFilter(ppp, "");
 				//setCurrentPatientData({});
 				//setCurrentPatient("");
-			}
+			} 
 		}	
 		
 		// fetch data 1 by 1 
@@ -557,6 +558,7 @@ export default function Appointment() {
 		PgetAllPendingAppointment = getAllPendingAppointment();
 		makeSlots();
 		PcheckFromPatient = checkFromPatient();
+		handleMyAppt();
   }, []);
 
 	function generateSlots(allPendingAppt, allHolidays) {
@@ -881,6 +883,8 @@ async function handleAddAppointment(slot) {
 	}
   
 	function DisplayAvailableAppointments() {
+	if (allTimeSlots.length === 0) return null;
+	
 	let tStr = ((allTimeSlots[currentIndex].date < 10) ? "0" : "") + allTimeSlots[currentIndex].date;
 	tStr += "/";
 	tStr += (((allTimeSlots[currentIndex].month + 1) < 10) ? "0" : "") + (allTimeSlots[currentIndex].month+1);
@@ -1059,7 +1063,7 @@ async function handleAddAppointment(slot) {
 	<Grid className={gClasses.noPadding} key="Appt" container alignItems="center" >
 	{apptArray.map( (a, index) => 
 		<Grid key={"Apt"+a.pid} item xs={12} sm={6} md={3} lg={3} >
-		<DisplayAppointmentDetails 
+		<DisplayAppointmentBox 
 			appointment={a} 
 			button1={
 				<IconButton color={'secondary'} size="small" onClick={() => { handleCancelAppt(a)}}  >
@@ -1077,13 +1081,8 @@ async function handleAddAppointment(slot) {
 	<Grid className={gClasses.noPadding} key="DATESEL" container alignItems="center" >
 	{patientArray.map( (m, index) => 
 		<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={3} lg={3} >
-		<DisplayPatientDetails 
-			patient={m} 
-			button1={
-				<IconButton color={'primary'} size="small" onClick={() => { handleSelectPatient(m)}}  >
-					<EventNoteIcon />
-				</IconButton>
-			}
+		<DisplayPatientBox 
+			patient={m} onClick={() => { handleSelectPatient(m)}} 
 		/>
 		</Grid>
 	)}

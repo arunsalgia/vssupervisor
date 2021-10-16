@@ -328,12 +328,7 @@ async function cancelOldAppt() {
 	}
 }
 
-cron.schedule('5,45 0,9,13 * * *', async () => {	
-  if (!db_connection) {
-    return;
-  }
-	await cancelOldAppt();
-});
+
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
 function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }

@@ -21,18 +21,17 @@ router.get('/add/:cid/:newNote', async function(req, res, next) {
   var {cid, newNote } = req.params;
 	
 	let id = getLoginName(newNote);
-  var tmp = await M_Remark.findOne({cid: cid, id: id});
-  if (!tmp) {
-		mRec = new M_Note();
-		mRec.cid = cid;
-		mRec.id = id;
-		mRec.name = newNote;
-		mRec.enabled = true;
-		mRec.save();
-    sendok(res, mRec);
-  }
-	else
-    senderr(res, 601, 'Note already in database.');
+  var mRec = await M_Remark.findOne({cid: cid, id: id});
+	if (mRec) return senderr(res, 601, 'Note already in database.');
+	
+	mRec = new M_Remark();
+	mRec.cid = cid;
+	mRec.id = id;
+	mRec.name = newNote;
+	mRec.enabled = true;
+	mRec.save();
+	sendok(res, mRec);
+    
 });
 
 router.get('/edit/:cid/:oldNote/:newNote', async function(req, res, next) {
@@ -91,7 +90,7 @@ router.get('/list/:cid', async function(req, res, next) {
   
   var { cid } = req.params;
 	
-	M_Remark.find({cid: cid}, "name", function(err, objs) {
+	M_Remark.find({cid: cid}, {_id: 0, name: 1}, function(err, objs) {
 		objs = _.sortBy(objs, 'name');
 		sendok(res, objs);
   });

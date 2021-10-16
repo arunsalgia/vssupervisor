@@ -42,6 +42,7 @@ import Typography from '@material-ui/core/Typography';
 import Avatar from "@material-ui/core/Avatar"
 import { useHistory } from "react-router-dom";
 import { useAlert } from 'react-alert';
+import Divider from '@material-ui/core/Divider';
 
 // icons
 import IconButton from '@material-ui/core/IconButton';
@@ -50,18 +51,24 @@ import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EventNoteIcon from '@material-ui/icons/EventNote';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+
+import Report from 'views/Report/Report';
+import Visit  from 'views/Visit/Visit';
+import Investigation from 'views/Investigation/Investigation';
+import DentalTreatment from  'views/Treatment/DentalTreatment';
 
 
-// import CardAvatar from "components/Card/CardAvatar.js";
 // import { UserContext } from "../../UserContext";
 import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFilter,
 	dispOnlyAge, dispAge, dispEmail, dispMobile,
 	validateInteger,
 	getAllPatients,
 	vsDialog,
+	getPatientDocument,
  } from "views/functions.js"
 import {DisplayYesNo, DisplayPageHeader, BlankArea,
-DisplayPatientDetails,
+DisplayPatientBox, DisplayDocumentDetails,
 } from "CustomComponents/CustomComponents.js"
 
 // styles
@@ -212,12 +219,22 @@ let searchText = "";
 function setSearchText(sss) { searchText = sss;}
 
 var userCid;
+var customerData = JSON.parse(sessionStorage.getItem("customerData"));
+
 export default function Patient() {
 	//const history = useHistory();	
   const classes = useStyles();
 	const gClasses = globalStyles();
 	const alert = useAlert();
+	//customerData = sessionStorage.getItem("customerData");
 
+	const [currentPatient, setCurrentPatient] = useState("");
+	const [currentPatientData, setCurrentPatientData] = useState({});
+
+	const [currentSelection, setCurrentSelection] = useState("");
+	
+
+	// 
 	const [patientMasterArray, setPatientMasterArray] = useState([]);
 	const [patientArray, setPatientArray] = useState([]);
 	const [isDrawerOpened, setIsDrawerOpened] = useState(false);
@@ -260,9 +277,7 @@ export default function Patient() {
 		us();
   }, [])
 
-	
 
-	
 	function ShowResisterStatus() {
     //console.log(`Status is ${registerStatus}`);
     let myMsg;
@@ -344,24 +359,6 @@ export default function Patient() {
 		sessionStorage.setItem("shareData", JSON.stringify(rec));
 		setTab(process.env.REACT_APP_APPT);
 	}
-	
-	function yesNoHandler(id, action) {
-		//console.log("Id is " + id + "  Action is " + action);
-		if ((id === "delete") && (action === "YES"))	{
-			handleDeleteConfirm(patientRec);
-			return;
-		}
-		if ((id === "visit") && (action === "YES"))	{
-			handleVisitConfirm(patientRec);
-			return;
-		}
-		
-		if ((id === "appointment") && (action === "YES"))	{
-			handleAppointmentConfirm(patientRec);
-			return;
-		}
-	}
-	//==========================
 	
 	function handleAdd() {
 		//console.log("handleAdd");
@@ -474,40 +471,102 @@ export default function Patient() {
 		return; 
 	}
 	
+	function handleSelectPatient(pat) {
+		setCurrentPatientData(pat);
+		setCurrentPatient(pat.displayName);
+		setCurrentSelection("Investigation");
+	}
+
+
+	function DisplayPatientHeader() {
+	return (
+	<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+	<Grid className={gClasses.noPadding} key="AllPatients" container align="left">
+			<Grid key={"PAT"} item xs={12} sm={6} md={4} lg={4} >
+				<Typography>
+					<span className={gClasses.patientInfo}>Patient: </span>
+					<span className={gClasses.patientInfo2}>{currentPatient+"( Id: "+currentPatientData.pid+" )"}</span>
+				</Typography>
+			</Grid>
+			<Grid key={"PAT1"} item xs={12} sm={6} md={2} lg={2} >
+				<Typography>
+					<span className={gClasses.patientInfo}>Age: </span>
+					<span className={gClasses.patientInfo2}>{dispAge(currentPatientData.age, currentPatientData.gender)}</span>
+				</Typography>
+			</Grid>
+			<Grid key={"PAT2"} item xs={12} sm={6} md={3} lg={3} >
+				<Typography>
+					<span className={gClasses.patientInfo}>Email: </span>
+					<span className={gClasses.patientInfo2}>{dispEmail(currentPatientData.email)}</span>
+				</Typography>
+			</Grid>		
+			<Grid key={"PAT3"} item xs={12} sm={6} md={3} lg={3} >
+				<Typography>
+					<span className={gClasses.patientInfo}>Contact: </span>
+					<span className={gClasses.patientInfo2}>{dispMobile(currentPatientData.mobile)}</span>
+				</Typography>
+			</Grid>	
+	</Grid>	
+	</Box>
+	)}
+
+	function DisplayFunctionItem(props) {
+	let itemName = props.item;
+	return (
+	<Grid key={"BUT"+itemName} item xs={4} sm={4} md={2} lg={2} >
+	<Typography onClick={() => setSelection(itemName)}>
+		<span 
+			className={(itemName === currentSelection) ? gClasses.functionSelected : gClasses.functionUnselected}>
+		{itemName}
+		</span>
+	</Typography>
+	</Grid>
+	)}
+	
+	async function setSelection(item) {
+		sessionStorage.setItem("shareData",JSON.stringify(currentPatientData));
+		setCurrentSelection(item);
+	}
+	
+	
+	function DisplayFunctionHeader() {
+	return (
+	<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
+		<DisplayFunctionItem item="Investigation" />
+		<DisplayFunctionItem item="Report" />
+		<DisplayFunctionItem item="Visit" />
+		<DisplayFunctionItem item="Treatment" />
+		<DisplayFunctionItem item="Payment" />
+	</Grid>	
+	</Box>
+	)}
+
 
 	
 	function DisplayAllPatients() {
+	//console.log(patientArray);
+	//console.log(patientMasterArray);
 	return (
 	<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
 	{patientArray.map( (m, index) => 
 		<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={3} lg={3} >
-		<DisplayPatientDetails 
-			patient={m} 
-			button1={
-				<IconButton className={gClasses.deepOrange} size="small" onClick={() => { handleReport(m)}}  >
-					<NoteAddIcon />
-				</IconButton>
-			}
-			button2={
-				<IconButton color={'primary'} size="small" onClick={() => { handleAppointmentConfirm(m)}}  >
-					<EventNoteIcon />
-				</IconButton>
-			}
-			button3={
-				<IconButton className={gClasses.green} size="small" onClick={() => {handleVisit(m)}}  >
-					<LocalHospitalIcon />
-				</IconButton>
-			}
-			button4={
-				<IconButton className={gClasses.blue} size="small" onClick={() => {handleEdit(m)}}  >
-					<EditIcon  />
-				</IconButton>
-			}
-			button5={
-				<IconButton color="secondary" size="small" onClick={() => {handleCancel(m)}}  >
-					<CancelIcon />
-				</IconButton>
-			}
+		<DisplayPatientBox patient={m}
+		button1={
+			<IconButton className={gClasses.blue} size="small" onClick={() => handleSelectPatient(m) }  >
+				<VisibilityIcon  />
+			</IconButton>
+		}
+		button2={
+			<IconButton className={gClasses.blue} size="small" onClick={() => {handleEdit(m)}}  >
+				<EditIcon  />
+			</IconButton>
+		}
+		button3={
+			<IconButton color="secondary" size="small" onClick={() => {handleCancel(m)}}  >
+				<CancelIcon />
+			</IconButton>
+		}
 		/>
 		</Grid>
 	)}
@@ -539,38 +598,74 @@ export default function Patient() {
 		setPatientFilter(patientMasterArray, filterStr);
 	}
 	
+	function handleBack() {
+		setSearchText("");
+		setPatientArray(patientMasterArray);
+		setCurrentPatientData({});
+		setCurrentPatient("");
+	}
+	
   return (
   <div className={gClasses.webPage} align="center" key="main">
 		<Container component="main" maxWidth="lg">
 		<CssBaseline />
-		<DisplayPageHeader headerName="Patient Directory" groupName="" tournament=""/>
-		<BlankArea />
-		<Grid className={gClasses.vgSpacing} key="PatientFilter" container alignItems="center" >
-			<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
-			<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
-			<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
-				value={searchText}
-				onChange={(event) => filterPatients(event.target.value)}
-				InputProps={
-					{
-						endAdornment: (
-							<div>
-							<InputAdornment position="end"><SearchIcon /></InputAdornment>
-							</div>
-							)
+		{(currentPatient === "") &&
+			<div>
+			<DisplayPageHeader headerName="Patient Directory" groupName="" tournament=""/>
+			<BlankArea />
+			<Grid className={gClasses.vgSpacing} key="PatientFilter" container alignItems="center" >
+				<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
+				<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
+				<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
+					value={searchText}
+					onChange={(event) => filterPatients(event.target.value)}
+					InputProps={
+						{
+							endAdornment: (
+								<div>
+								<InputAdornment position="end"><SearchIcon /></InputAdornment>
+								</div>
+								)
+						}
 					}
-				}
-			/>
+				/>
+				</Grid>
+				<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
+				</Grid>
+				<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
+					<VsButton name="New Patient" onClick={handleAdd} />
+				</Grid>
+				<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
 			</Grid>
-			<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
-				<Typography>Click button to add new patient</Typography>
-			</Grid>
-			<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
-				<VsButton name="New Patient" onClick={handleAdd} />
-			</Grid>
-			<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
-		</Grid>
-		<DisplayAllPatients />
+			<DisplayAllPatients />
+			</div>
+		}
+		{(currentPatient !== "") &&
+			<div>
+			<VsButton align="right" name="Back to Patient Directory" onClick={handleBack} />
+			<DisplayPatientHeader />
+			<DisplayFunctionHeader />
+			<Divider className={gClasses.divider} /> 
+			{((currentSelection === "Treatment") && (true)) &&
+				<DentalTreatment patient={currentPatientData} />
+			}
+			{((currentSelection === "Treatment") && (customerData.type !== "Dentist")) &&
+				<Typography>Aiyoo gochi</Typography>
+			}
+			{(currentSelection === "Payment") &&
+				<Typography>Payment feature to be provided</Typography>
+			}
+			{(currentSelection === "Investigation") &&
+				<Investigation patient={currentPatientData} />
+			}
+			{(currentSelection === "Report") &&
+				<Report patient={currentPatientData} />
+			}
+			{(currentSelection === "Visit") &&
+				<Visit patient={currentPatientData} />
+			}
+			</div>
+		}
 		<Drawer className={classes.drawer}
 			anchor="right"
 			variant="temporary"

@@ -671,6 +671,49 @@ return (
 	</Box>
 )}
 
+export function DisplayPatientBox(props) {
+	const gClasses = globalStyles();
+	let _button1 = (props.button1 == null);
+	let _button2 = (props.button2 == null);
+	let _button3 = (props.button3 == null);
+	let _button4 = (props.button4 == null);
+	let _button5 = (props.button5 == null);
+	return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<div align="center" >
+		<Typography onClick={props.onClick} >
+		<span className={gClasses.patientName} >{props.patient.displayName}</span>
+		</Typography>
+		</div>
+		<div align="left" >
+		<Typography onClick={props.onClick} >
+			<span className={gClasses.patientInfo}>Id: </span>
+			<span className={gClasses.patientInfo2}>{props.patient.pid}</span>
+		</Typography>
+		<Typography onClick={props.onClick} > 
+			<span className={gClasses.patientInfo}>Age: </span>
+			<span className={gClasses.patientInfo2}>{dispAge(props.patient.age, props.patient.gender)}</span>
+		</Typography>
+		<Typography onClick={props.onClick} > 
+			<span className={gClasses.patientInfo}>Email: </span>
+			<span className={gClasses.patientInfo2}>{dispEmail(props.patient.email)}</span>
+		</Typography>
+		<Typography onClick={props.onClick} > 
+			<span className={gClasses.patientInfo}>Mob.: </span>
+			<span className={gClasses.patientInfo2}>{dispMobile(props.patient.mobile)}</span>
+		</Typography>
+		<BlankArea />
+		</div>
+		<div align="right">
+		{(!_button1) && props.button1}
+		{(!_button2) && props.button2}
+		{(!_button3) && props.button3}
+		{(!_button4) && props.button4}
+		{(!_button5) && props.button5}
+		</div>
+	</Box>
+	)}
+
 export function DisplayMedicineDetails(props) {
 	const gClasses = globalStyles();
 	let _button1 = (props.button1 == null);
@@ -761,6 +804,7 @@ return (
 	</Box>
 )}
 
+
 export function DisplayAppointmentDetails(props) {
 	const gClasses = globalStyles();
 	let d = new Date(props.appointment.apptTime);
@@ -806,6 +850,39 @@ return (
 		{(!_button5) && props.button5}
 		</div>
 	</div>
+	</Box>
+)}
+
+
+export function DisplayAppointmentBox(props) {
+	const gClasses = globalStyles();
+	let d = new Date(props.appointment.apptTime);
+	
+	let myDate = DATESTR[d.getDate()] + "/" +
+		MONTHNUMBERSTR[d.getMonth()] + "/" +
+		d.getFullYear();
+		
+	let myTime = HOURSTR[d.getHours()] + ":" + MINUTESTR[d.getMinutes()];
+		
+	let _button1 = (props.button1 == null);
+	let _button2 = (props.button2 == null);
+	let _button3 = (props.button3 == null);
+	let _button4 = (props.button4 == null);
+	let _button5 = (props.button5 == null);
+	//console.log(_button1, _button2, _button3, _button4, _button5);
+return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<Typography> 
+		<span className={gClasses.patientName}>{"Appointment: "}</span>
+		<span className={gClasses.patientInfo2}>{myDate+" "+myTime}</span>
+		<span className={gClasses.patientInfo2}>
+				{(!_button1) && props.button1}
+				{(!_button2) && props.button2}
+				{(!_button3) && props.button3}
+				{(!_button4) && props.button4}
+				{(!_button5) && props.button5}
+		</span>
+		</Typography>
 	</Box>
 )}
 

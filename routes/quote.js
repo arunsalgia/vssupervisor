@@ -100,11 +100,13 @@ async function addNewQuote() {
 }
 
 
+/*
 cron.schedule('10 9 * * *', async () => {	
   if (db_connection) {
     await addNewQuote();
   }
 });
+*/
 
 
 function sendok(res, usrmsg) { res.send(usrmsg); }

@@ -322,7 +322,7 @@ function setSearchText(sss) { searchText = sss;}
 
 let userCid;
  
-export default function Document() {
+export default function Document(props) {
 	const classes = useStyles();
 	const gClasses = globalStyles();
 	const alert = useAlert();
@@ -376,7 +376,8 @@ export default function Document() {
 			let ppp = await getAllPatients();
 			setPatientMasterArray(ppp);
 			try {
-				let patRec = JSON.parse(sessionStorage.getItem("shareData"));
+				console.log("About to parse share data");
+				let patRec = props.patient;		//JSON.parse(sessionStorage.getItem("shareData"));
 				// has come from patient page
 				console.log(patRec);
 				setSearchText(patRec.displayName);
@@ -744,11 +745,11 @@ export default function Document() {
   
 	function DisplayAllReports() {
 	return (
-	<div>
-	<Typography align="center" className={classes.modalHeader}>
-		{currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "}
-	</Typography>
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<VsButton align="right" name="Add new Medical Report" onClick={addDoc} />
+	{/*<Typography align="left" className={classes.modalHeader}>
+		{"Medical Reports"}
+		</Typography>*/}
 	{(startLoading) &&
 				<Typography className={gClasses.title}>Loading report...</Typography>
 	}
@@ -776,7 +777,7 @@ export default function Document() {
 		</Grid>
 	)}
 	</Grid>
-	</div>
+	</Box>
 	)}
 	
 	function step1Validator() { return stepNo >= 1};
@@ -789,8 +790,7 @@ export default function Document() {
 	
 	return (
 	<div className={gClasses.webPage} align="center" key="main">
-	<DisplayPageHeader headerName="Medical Reports Directory" groupName="" tournament=""/>
-	<Container component="main" maxWidth="lg">
+		{/* <DisplayPageHeader headerName="Medical Reports Directory" groupName="" tournament=""/> */}
 	<CssBaseline />
 		{((currentPatient === "") && (process.env.REACT_APP_DIRECTREPORT === 'true')) &&
 			<div>
@@ -873,7 +873,6 @@ export default function Document() {
 			}
 		</Box>
 		</Drawer>
-		</Container>
   </div>
   );    
 }

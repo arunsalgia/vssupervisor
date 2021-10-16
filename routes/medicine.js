@@ -117,12 +117,33 @@ router.get('/list/:cid', async function(req, res, next) {
   
   var { cid } = req.params;
 	
-	M_Medicine.find({cid: cid}, "name description precaution", function(err, objs) {
+	M_Medicine.find({cid: cid},  {name: 1, _id: 0, description: 1, precaution: 1}, function(err, objs) {
 		objs = _.sortBy(objs, 'name');
 		sendok(res, objs);
   });
 });
 
+router.get('/list/:cid', async function(req, res, next) {
+  setHeader(res);
+  
+  var { cid } = req.params;
+	
+	M_Medicine.find({cid: cid},  {name: 1, _id: 0, description: 1, precaution: 1}, function(err, objs) {
+		objs = _.sortBy(objs, 'name');
+		sendok(res, objs);
+  });
+});
+
+router.get('/listonlyname/:cid', async function(req, res, next) {
+  setHeader(res);
+  
+  var { cid } = req.params;
+	
+	M_Medicine.find({cid: cid},  {name: 1, _id: 0}, function(err, objs) {
+		objs = _.sortBy(objs, 'name');
+		sendok(res, objs);
+  });
+});
 router.get('/alphabetlist/:cid/:myChar', async function(req, res, next) {
   setHeader(res);
   
