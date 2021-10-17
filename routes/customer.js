@@ -68,7 +68,7 @@ router.get('/test', async function(req, res, next) {
 	sendok(res, "working hours days done");
 });
 
-cron.schedule('5,59 0,9 * * *', async () => {	
+cron.schedule('5 0 * * *', async () => {	
 	let retry = 30;
 	while (retry > 0) {
 		if (db_connection) break;

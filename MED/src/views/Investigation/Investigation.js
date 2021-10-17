@@ -9,11 +9,13 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
+import VsList from "CustomComponents/VsList";
+import VsCheckBox from "CustomComponents/VsCheckBox";
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
-import fileDownload  from 'js-file-download';
-import fs from 'fs';
+//import fileDownload  from 'js-file-download';
+//import fs from 'fs';
 import _ from 'lodash';
 
 import Grid from "@material-ui/core/Grid";
@@ -27,11 +29,11 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Box from '@material-ui/core/Box';
-import Modal from 'react-modal';
+//import Modal from 'react-modal';
 import { borders } from '@material-ui/system';
 import {dynamicModal } from "assets/dynamicModal";
 import cloneDeep from 'lodash/cloneDeep';
-import StepProgressBar from 'react-step-progress';
+//import StepProgressBar from 'react-step-progress';
 // import the stylesheet
 import 'react-step-progress/dist/index.css';
 
@@ -202,8 +204,8 @@ const useStyles = makeStyles((theme) => ({
 		}
   }));
 
-const addEditModal = dynamicModal('60%');
-const yesNoModal = dynamicModal('60%');
+//const addEditModal = dynamicModal('60%');
+//const yesNoModal = dynamicModal('60%');
 
 const COUNTPERPAGE=10;
 // set-up the step content
@@ -222,7 +224,8 @@ export default function Visit(props) {
 	const alert = useAlert();
 	
 	const [currentSelection, setCurrentSelection] = useState("Symptom");
-
+	const [remember, setRemember] = useState(false);
+	
 	const [investigationIndex, setInvestigationIndex] = useState(0);
 	const [investigationArray, setInvestigationArray] = useState([])
 	
@@ -473,38 +476,11 @@ export default function Visit(props) {
         myMsg = "";
 				regerr = false;
         break;
-      case 100:
-        myMsg = "Medicine successfully updated";
-				regerr = false;
+      case 1001:
+        myMsg = "Duplicate Symptom";
         break;
-      case 101:
-        myMsg = `All the doses cannot be 0`;
-        break;
-      case 102:
-        myMsg = `No Medicine selected`;
-        break;
-      case 200:
-        myMsg = "Note successfully updated";
-				regerr = false;
-        break;
-      case 201:
-        myMsg = `All notes cannot be 0`;
-        break;
-      case 202:
-        myMsg = `Notes cannot be blank`;
-        break;
-      case 300:
-        myMsg = "Remark successfully updated";
-				regerr = false;
-        break;
-      case 301:
-        myMsg = `All notes cannot be 0`;
-        break;
-      case 302:
-        myMsg = `Remark cannot be blank`;
-        break;
-			case 401:
-        myMsg = `Patient name already in database`;
+      case 2001:
+        myMsg = `Duplicate diagnosis`;
         break;
       default:
           myMsg = "Unknown Error";
@@ -524,6 +500,7 @@ export default function Visit(props) {
 		setFilterItem("DIA");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
 	}
 	
 	function handleEditDiagnosis(mNumber) {
@@ -535,6 +512,7 @@ export default function Visit(props) {
 		setFilterItem("DIA");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
 
 	}
 	
@@ -550,10 +528,13 @@ export default function Visit(props) {
 				let tmpArray = myInvestitgation[0].diagnosis.concat([{name: emurName}]);
 				myInvestitgation[0].diagnosis = tmpArray;
 				setInvestigationArray(myInvestitgation);
-				updateInvestigation(investigationArray[0].symptom, tmpArray)
+				updateInvestigation(investigationArray[0].symptom, tmpArray);
+				setIsDrawerOpened("");
+			} else {
+				setModalRegister(2001);
 			}
 		}
-		setIsDrawerOpened("");
+		
 	}
 	
 	function handleDeleteDiagnosis(itemName) {
@@ -579,6 +560,7 @@ export default function Visit(props) {
 		setFilterItem("SYM");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
 		
 		setIsDrawerOpened("ADDSYM");
 	}
@@ -591,30 +573,59 @@ export default function Visit(props) {
 		setFilterItem("SYM");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
 		
 		setModalRegister(0);
 		setIsDrawerOpened("EDITSYM");
 	}
 
 	async function updateSymptomToDatabase(myName) {
-		let myEncodedName = encodeURIComponent(myName);
-		try {
-			axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/symptom/update/${userCid}/${myEncodedName}`)
-			let tmpArray = [{name: myName}].concat(symptomDbArray);
-			setSymptomDbArray(_.sortBy(tmpArray, 'name'));
-		} catch (e) {
-			console.log(e);
-		}	
+		if (!remember) return;
+		let tmp = symptomDbArray.find(x => x.name.toLowerCase() === myName.toLowerCase())
+		if (!tmp) {
+			let myEncodedName = encodeURIComponent(myName);
+			try {
+				axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/symptom/update/${userCid}/${myEncodedName}`)
+				let tmpArray = [{name: myName}].concat(symptomDbArray);
+				setSymptomDbArray(_.sortBy(tmpArray, 'name'));
+			} catch (e) {
+				console.log(e);
+			}	
+		}
 	}
 	
-	async function updateDiagnosisToDatabase(myName) {
-		//console.log("in diag upd db", myName);
+	function handleVsSymptomDelete(sym) {
+		let myName = sym.name;
 		let myEncodedName = encodeURIComponent(myName);
-		//console.log("in diag url encoded", myName);
+		try {
+			axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/symptom/delete/${userCid}/${myEncodedName}`)
+			setSymptomDbArray(symptomDbArray.filter(x => x.name !== myName));
+			setFilterItemArray(filterItemArray.filter(x => x.name !== myName));
+		} catch (e) {
+			console.log(e);
+		}		
+	}
+	
+	function updateDiagnosisToDatabase(myName) {
+		if (!remember) return;	
+		let tmp = diagnosisDbArray.find(x => x.name.toLowerCase() === myName.toLowerCase())
+		let myEncodedName = encodeURIComponent(myName);
 		try {
 			axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/diagnosis/update/${userCid}/${myEncodedName}`)
 			let tmpArray = [{name: myName}].concat(diagnosisDbArray);
 			setDiagnosisDbArray(_.sortBy(tmpArray, 'name'));
+		} catch (e) {
+			console.log(e);
+		}		
+	}
+
+	function handleVsDiagnosisDelete(dia) {
+		let myName = dia.name;
+		let myEncodedName = encodeURIComponent(myName);
+		try {
+			axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/diagnosis/delete/${userCid}/${myEncodedName}`)
+			setDiagnosisDbArray(diagnosisDbArray.filter(x => x.name !== myName));
+			setFilterItemArray(filterItemArray.filter(x => x.name !== myName));
 		} catch (e) {
 			console.log(e);
 		}		
@@ -632,9 +643,11 @@ export default function Visit(props) {
 				myInvestitgation[0].symptom = tmpArray;
 				setInvestigationArray(myInvestitgation);
 				updateInvestigation(tmpArray, investigationArray[0].diagnosis)
+				setIsDrawerOpened("");
+			} else {
+				setModalRegister(1001);
 			}
 		}
-		setIsDrawerOpened("");
 	}
 	
 	function handleDeleteSymptom(itemName) {
@@ -716,10 +729,12 @@ export default function Visit(props) {
 		let tmpArray = [];
 		if (txt !== "") {
 			if (filterItem.substr(0,3) === "SYM")
-				tmpArray = symptomDbArray.filter(x => x.name.startsWith(txt));
+				tmpArray = symptomDbArray.filter(x => x.name.toLowerCase().includes(txt.toLowerCase()));
 			else if (filterItem.substr(0,3) === "DIA")
-				tmpArray = diagnosisDbArray.filter(x => x.name.startsWith(txt));
+				tmpArray = diagnosisDbArray.filter(x => x.name.toLowerCase().includes(txt.toLowerCase()));
 		} 
+		console.log(symptomDbArray);
+		console.log(diagnosisDbArray);
 		console.log(tmpArray);
 		setFilterItemArray(tmpArray);
 	}
@@ -736,8 +751,9 @@ export default function Visit(props) {
 		</div>	
 	)}
 	
-	function saveInvestigation() {
-		
+	function handleVsSelect(item) {
+		setFilterItemArray([]); 
+		setEmurName(item.name);
 	}
 
 
@@ -786,10 +802,11 @@ export default function Visit(props) {
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>
-			<DisplayFilterArray />
+			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsSymptomDelete} />
+			<ModalResisterStatus />
 			<BlankArea />
-			<VsButton type="submit" 
-			name= {(isDrawerOpened === "ADDSYM") ? "Add" : "Update"}
+			<VsButton type="submit" name= {(isDrawerOpened === "ADDSYM") ? "Add" : "Update"}
 			/>
 		</ValidatorForm>
 	}
@@ -804,7 +821,8 @@ export default function Visit(props) {
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>
-			<DisplayFilterArray />
+			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsDiagnosisDelete} />
 			<ModalResisterStatus />
 			<BlankArea />
 			<VsButton type ="submit" name= {(isDrawerOpened === "ADDDIAG") ? "Add" : "Update"} />

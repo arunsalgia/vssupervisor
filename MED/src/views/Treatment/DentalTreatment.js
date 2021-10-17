@@ -7,8 +7,12 @@ import SwitchBtn from '@material-ui/core/Switch';
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
+
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
+import VsList from "CustomComponents/VsList";
+import VsCheckBox from "CustomComponents/VsCheckBox";
+
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
@@ -132,6 +136,7 @@ const useStyles = makeStyles((theme) => ({
 		color: 'blue',
 		fontSize: theme.typography.pxToRem(18),
 		fontWeight: theme.typography.fontWeightBold,
+		margin: "5px",
 	},
 	slotTitle: {
 		color: 'green',
@@ -243,6 +248,7 @@ export default function DentalTreatment(props) {
 	const alert = useAlert();
 	
 	const [currentSelection, setCurrentSelection] = useState("Treatment");
+	const [remember, setRemember] = useState(false);
 	
 	const [currentPatient, setCurrentPatient] = useState("");
 	const [currentPatientData, setCurrentPatientData] = useState({});
@@ -515,7 +521,9 @@ export default function DentalTreatment(props) {
 		setTreatmentIndex(0);
 	}
 
-	
+	function handleVsTreatmentDelete(treat) {
+		
+	}
 	function handleAddDiagnosis() {
 		setEmurName("");
 		setEmurToothArray([]);
@@ -619,17 +627,12 @@ export default function DentalTreatment(props) {
 		setTreatmentArray(tmp);
 	}
 	
-	function DisplayFilterArray() {
-		return (
-			<div align="center" >
-				{filterItemArray.map( (item, index) =>
-					<Typography key={"ITEM"+index} className={gClasses.blue} type="button" onClick={() => { setFilterItemArray([]); setEmurName(item.name); }} >
-					{item.name}
-					</Typography>
-				)}
-			</div>	
-		)
+
+	function handleVsSelect(item) {
+		setFilterItemArray([]); 
+		setEmurName(item.name);
 	}
+	
 	
 	function setEmurNameWithFilter(txt) {
 		//console.log("Iin filter", txt);
@@ -682,16 +685,17 @@ export default function DentalTreatment(props) {
 				{((isDrawerOpened === "ADDTREAT") ? "New Treatment" : "Edit Treatment")+` for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
-			<TextValidator required fullWidth color="primary" className={gClasses.vgSpacing} 
+			<TextValidator required fullWidth color="primary"
 				id="newName" label="Treatment type" name="newName"
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>
-			<DisplayFilterArray />
+			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsTreatmentDelete} />
 			<BlankArea />
 			<DisplayTeeth toothArray={emurToothArray} onClick={handleToothUpdate} />
 			<TextValidator required fullWidth color="primary" type="number" className={gClasses.vgSpacing} 
-				id="newName" label="Treatment type" name="newName"
+				id="newName" label="Professional Charge" name="newName"
 				onChange={(event) => setEmurAmount(event.target.value)}
 				value={emurAmount}
 				validators={['minNumber:100']}

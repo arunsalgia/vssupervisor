@@ -44,7 +44,7 @@ router.post('/update/:cid/:infoMsg', async function(req, res, next) {
 	sendok(res, myRec);
 });
 
-router.get('/delete/:cid/:infoMsg', async function(req, res, next) {
+router.post('/delete/:cid/:infoMsg', async function(req, res, next) {
   setHeader(res);
 	var {cid, infoMsg} = req.params;
 	let lInfo = getLoginName(infoMsg);

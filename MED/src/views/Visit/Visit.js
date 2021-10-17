@@ -11,6 +11,9 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
+import VsList from "CustomComponents/VsList";
+import VsCheckBox from "CustomComponents/VsCheckBox";
+
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
@@ -257,6 +260,7 @@ export default function Visit(props) {
 	
 	const [currentSelection, setCurrentSelection] = useState("Medicine");
 	const [visitIndex, setVisitIndex] = useState(0);
+	const [remember, setRemember] = useState(false);
 	
 	const [filterItem, setFilterItem] = useState("");
 	const [filterItemText, setFilterItemText] = useState("");
@@ -705,6 +709,7 @@ export default function Visit(props) {
 		setFilterItem("NOT");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
 	}
 	
 	function handleEditUserNotes(vNumber, notesNumber) {
@@ -718,7 +723,7 @@ export default function Visit(props) {
 		setFilterItem("NOT");
 		setFilterItemText("");
 		setFilterItemArray([]);
-
+		setRemember(false);
 	}
 	
 	function updateUserNotes() {
@@ -780,6 +785,8 @@ export default function Visit(props) {
 		setFilterItem("REM");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
+
 	}
 	
 	function handleEditRemark(vNumber, remarkNumber) {
@@ -794,6 +801,8 @@ export default function Visit(props) {
 		setFilterItem("REM");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
+
 	}
 	
 	function updateRemark() {
@@ -859,6 +868,7 @@ export default function Visit(props) {
 		setFilterItem("MED");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
 		
 		setIsDrawerOpened("ADDMED");
 	}
@@ -886,13 +896,15 @@ export default function Visit(props) {
 		setFilterItem("MED");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
 		
 		setModalRegister(0);
 		setIsDrawerOpened("EDITMED");
 	}
 
 	function updateMedicineToDatabase(medName) {
-		let tmp = medicineArray.find(x => x.name === medName)
+		if (!remember) return;
+		let tmp = medicineArray.find(x => x.name.toLowerCase() === medName.toLowerCase());
 		if (!tmp) {
 			try {
 				let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/add/${userCid}/${medName}`;
@@ -904,9 +916,24 @@ export default function Visit(props) {
 			}
 		}
 	}
+
+	function handleVsMedicineDelete(med) {
+		let medName = med.name;
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/delete/${userCid}/${medName}`;
+			axios.get(myUrl);
+			setMedicineArray(medicineArray.filter(x => x.name !== medName))
+			setFilterItemArray(filterItemArray.filter(x => x.name !== medName));
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
 	
 	function updateNoteToDatabase(noteName) {
-		let tmp = noteArray.find(x => x.name === noteName)
+		if (!remember) return;
+		
+		let tmp = noteArray.find(x => x.name.toLowerCase() === noteName.toLowerCase())
 		if (!tmp) {
 			try {
 				let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/note/add/${userCid}/${noteName}`;
@@ -919,8 +946,23 @@ export default function Visit(props) {
 		}
 	}
 	
+		
+	function handleVsNoteDelete(note) {
+		let noteName = note.name;
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/note/delete/${userCid}/${noteName}`;
+			axios.get(myUrl);
+			setNoteArray(noteArray.filter(x => x.name !== noteName));
+			setFilterItemArray(filterItemArray.filter(x => x.name !== noteName));
+		} catch (e) {
+			console.log(e);
+		}
+	}
+	
+	
 	function updateRemarkToDatabase(remarkName) {
-		let tmp = remarkArray.find(x => x.name === remarkName)
+		if (!remember) return;
+		let tmp = remarkArray.find(x => x.name.toLowerCase() === remarkName.toLowerCase());
 		if (!tmp) {
 			try {
 				let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/remark/add/${userCid}/${remarkName}`;
@@ -930,6 +972,18 @@ export default function Visit(props) {
 			} catch (e) {
 				console.log(e);
 			}
+		}
+	}
+	
+	function handleVsRemarkDelete(remark) {
+		let remarkName = remark.name;
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/remark/delete/${userCid}/${remarkName}`;
+			axios.get(myUrl);
+			setRemarkArray(remarkArray.filter(x => x.name !== remarkName));
+			setFilterItemArray(filterItemArray.filter(x => x.name !== remarkName))
+		} catch (e) {
+			console.log(e);
 		}
 	}
 	
@@ -1280,19 +1334,19 @@ export default function Visit(props) {
 	}
 
 	function setEmurNameWithFilter(itemName) {
-		//console.log("Iin filter");
 		let txt = itemName;
 		setEmurName(txt);
 		setFilterItemText(txt);
 		let tmpArray = [];
 		if (itemName !== "") {
 			if (filterItem.substr(0,3) === "MED")
-				tmpArray = medicineArray.filter( x => x.name.startsWith(txt) );
+				tmpArray = medicineArray.filter( x => x.name.toLowerCase().includes(txt.toLowerCase()) );
 			else if (filterItem.substr(0,3) === "NOT")
-				tmpArray = noteArray.filter( x => x.name.startsWith(txt) );
+				tmpArray = noteArray.filter( x => x.name.toLowerCase().includes(txt.toLowerCase()) );
 			else if (filterItem.substr(0,3) === "REM")
-				tmpArray = remarkArray.filter( x => x.name.startsWith(txt) );
+				tmpArray = remarkArray.filter( x => x.name.toLowerCase().includes(txt.toLowerCase()) );
 		} 
+		console.log(tmpArray);
 		setFilterItemArray(tmpArray);
 	}
 	
@@ -1307,8 +1361,14 @@ export default function Visit(props) {
 		</div>	
 	)}
 	
-
+	function handleVsSelect(item) {
+		//console.log(item);
+		//alert.info(`To select item ${item.name}`)
+		setFilterItemArray([]); 
+		setEmurName(item.name);
+	}
 	
+
 	return (
 	<div align="center" key="main">
 	<CssBaseline />
@@ -1353,7 +1413,8 @@ export default function Visit(props) {
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>
-			<DisplayFilterArray />
+			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsMedicineDelete} />
 			<BlankArea />
 			<Grid key="editmed" container justify="center" alignItems="left" >
 			<Grid className={gClasses.vgSpacing} item xs={1} sm={1} md={1} lg={1} >
@@ -1446,7 +1507,7 @@ export default function Visit(props) {
 	{((isDrawerOpened === "ADDNOTE") || (isDrawerOpened === "EDITNOTE")) &&
 		<ValidatorForm align="center" className={gClasses.form} onSubmit={updateUserNotes}>
 			<Typography align="center" className={classes.modalHeader}>
-				{((isDrawerOpened === "ADDNOTE") ? "New Note" : "Edit Note")+`for ${currentPatient}`}
+				{((isDrawerOpened === "ADDNOTE") ? "New Note" : "Edit Note")+` for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
 			<TextValidator required fullWidth color="primary"
@@ -1454,7 +1515,8 @@ export default function Visit(props) {
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>
-			<DisplayFilterArray />
+			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsNoteDelete} />
 			<ModalResisterStatus />
 			<BlankArea />
 			<VsButton type ="submit" name= {(isDrawerOpened === "ADDNOTE") ? "Add" : "Update"} />
@@ -1471,7 +1533,8 @@ export default function Visit(props) {
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>
-			<DisplayFilterArray />
+			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsRemarkDelete} />
 			<ModalResisterStatus />
 			<BlankArea />
 			<VsButton type="submit" name= {(isDrawerOpened === "ADDREM") ? "Add" : "Update"}

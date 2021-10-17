@@ -43,6 +43,7 @@ import { useAlert } from 'react-alert'
 import Drawer from '@material-ui/core/Drawer';
 import _ from 'lodash'
 
+
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Avatar from "@material-ui/core/Avatar"
 //import validator from 'validator'
@@ -65,8 +66,9 @@ DisplayAppointmentDetails, DisplayAppointmentBox,
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 
 import {
-WEEKSTR, MONTHSTR, SHORTMONTHSTR, 
+WEEKSTR, SHORTMONTHSTR, 
 HOURSTR, MINUTESTR,
+MONTHSTR, DATESTR, MONTHNUMBERSTR,
 VISITTYPE,
 str1by4, str1by2,  str3by4,
 BLOCKNUMBER,
@@ -412,6 +414,8 @@ export default function Appointment() {
 	const gClasses = globalStyles();
 	const alert = useAlert();
 	
+	const [registerStatus, setRegisterStatus] = useState(0);
+	
   const [patientArray, setPatientArray] = useState([])
 	const [patientMasterArray, setPatientMasterArray] = useState([]);
 	const [currentPatient, setCurrentPatient] = useState("");
@@ -427,6 +431,7 @@ export default function Appointment() {
 	const	[patientGender, setPatientGender] = useState("Male");
 	const	[patientEmail, setPatientEmail] = useState("");
 	const	[patientMobile, setPatientMobile] = useState(0);
+	const [patientDob, setPatientDob] = useState(new Date(2000, 1, 1));
 	
 	const [directoryMode, setDirectoryMode] = useState(defaultDirectoryMode);
 	const [monthYearDate, setMonthYearDate] = useState(new Date());
@@ -669,6 +674,32 @@ export default function Appointment() {
 		//console.log("O",d)
 		return d;
 	}
+
+
+	function ShowResisterStatus() {
+    //console.log(`Status is ${registerStatus}`);
+    let myMsg;
+    switch (registerStatus) {
+      case 621:
+        myMsg = "Invalid patient age";
+        break;
+			case 1001:
+        myMsg = "Invalid date of birth";
+        break;
+      case 601:
+        myMsg = "Patient name already in database";
+        break;
+      case 611:
+        myMsg = "Patient name not found in database";
+        break;
+    }
+    return(
+      <div>
+        <Typography className={gClasses.error}>{myMsg}</Typography>
+      </div>
+    )
+  }
+
 
 	function getPrevDate(d, myHoildays) {
 		let today = new Date();
@@ -1138,32 +1169,38 @@ async function handleAddAppointment(slot) {
 		setRadioValue("Male");
 		setPatientEmail("");
 		setPatientMobile("");
+		setPatientDob(moment(new Date(2000, 1, 1)));
 		
 		//setIsAdd(true);
 		setIsDrawerOpened(true);
 	}
 	
 	async function handleAddEditSubmit() {
-		let myAge = (patientAge !== "") ? patientAge : 0;
+		let myDate = patientDob.toDate();
+		let testAge = new Date().getFullYear() - myDate.getFullYear();
+		console.log(testAge, myDate);
+		if ((testAge >= 100) || (testAge <= 1)) return setRegisterStatus(1001);
+		
 		let myMobile = (patientMobile !== "") ? patientMobile : 0;
 		let myEmail = (patientEmail !== "") ? patientEmail : "-";
 		myEmail = encrypt(myEmail);
+		let dobStr = myDate.getFullYear() + MONTHNUMBERSTR[myDate.getMonth()] + DATESTR[myDate.getDate()];
+		
 		console.log(myEmail);
-		console.log("Addedit", patientName, myAge, patientGender, myEmail, myMobile);
+		console.log("Addedit", patientName, dobStr, patientGender, myEmail, myMobile);
 		
 		let resp;
 		let myUrl;
 	
 		try {
-			myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/add/${userCid}/${patientName}/${myAge}/${patientGender}/${myEmail}/${myMobile}`;
+			myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/addwithdob/${userCid}/${patientName}/${dobStr}/${patientGender}/${myEmail}/${myMobile}`;
 			resp = await axios.get(myUrl);
 			alert.success("Successfully added new patient "+patientName);
 		} catch (error)  {
 			console.log(error.response.status);
-			alert.error("Error adding new patient "+patientName);
-			return
+			setRegisterStatus(error.response.status);
+			return;
 		}
-
 		setIsDrawerOpened(false);
 
 		let ppp = await getAllPatients(userCid);
@@ -1180,6 +1217,11 @@ async function handleAddAppointment(slot) {
 		setApptArray([]);
 	}
 
+	function handleDate(d) {
+		//console.log(d);
+		setPatientDob(d);
+	}
+	
 	return (
 		<div className={gClasses.webPage} align="center" key="main">
 		<DisplayPageHeader headerName="Appointment Directory" groupName="" tournament=""/>
@@ -1245,13 +1287,27 @@ async function handleAddAppointment(slot) {
 				value={patientName} 
 				onChange={() => { setPatientName(event.target.value) }}
       />
-			<TextValidator  fullWidth className={gClasses.vgSpacing}
+			{/*<TextValidator  fullWidth className={gClasses.vgSpacing}
 				id="newPatientAge" label="Age" type="number"
 				value={patientAge}
 				onChange={() => { setPatientAge(event.target.value) }}
 				validators={['minNumber:1', 'maxNumber:99']}
         errorMessages={['Age to be above 1', 'Age to be less than 100']}				
-      />
+      />*/}
+			<div align="left">
+			<Typography className={gClasses.vgSpacing}>Date of Birth</Typography>
+			</div>
+			<Datetime 
+				className={classes.dateTimeBlock}
+				inputProps={{className: classes.dateTimeNormal}}
+				timeFormat={false} 
+				initialValue={patientDob}
+				dateFormat="DD/MM/yyyy"
+				isValidDate={disableFutureDt}
+				onClose={handleDate}
+				closeOnSelect={true}
+			/>
+			<BlankArea />
 			<FormControl component="fieldset">
 				<RadioGroup row aria-label="radioselection" name="radioselection" value={radioValue} 
 					onChange={() => {setRadioValue(event.target.value); setPatientGender(event.target.value); }}
@@ -1273,6 +1329,7 @@ async function handleAddAppointment(slot) {
 				validators={['minNumber:1000000000', 'maxNumber:9999999999']}
         errorMessages={['Invalid Mobile number','Invalid Mobile number']}
       />	
+			<ShowResisterStatus />
 			<BlankArea />
 			<VsButton name={"Add"} />
 			</ValidatorForm>    		

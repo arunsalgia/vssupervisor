@@ -79,6 +79,7 @@ remarkRouter = require('./routes/remark');
 diagnosisRouter = require('./routes/diagnosis');
 symptomRouter = require('./routes/symptom');
 investigationRouter = require('./routes/investigation');
+treatmentRouter = require('./routes/treatment');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -124,6 +125,7 @@ app.use('/remark', remarkRouter);
 app.use('/diagnosis', diagnosisRouter);
 app.use('/symptom', symptomRouter);
 app.use('/investigation', investigationRouter);
+app.use('/treatment', treatmentRouter);
 
 //Schema
 
@@ -179,6 +181,13 @@ DiagnosisSchema = mongoose.Schema({
 });
 
 SymptomSchema = mongoose.Schema({
+	id: String,
+	name: String,
+	enabled: Boolean,
+	cid: String,
+});
+
+TreatmentSchema = mongoose.Schema({
 	id: String,
 	name: String,
 	enabled: Boolean,
@@ -376,6 +385,7 @@ M_Image = mongoose.model('image', ImageSchema);
 M_Wallet = mongoose.model('wallet', WalletSchema);
 M_Diagnosis = mongoose.model('diagnosis', DiagnosisSchema);
 M_Symptom = mongoose.model('symptoms', SymptomSchema);
+M_Treatment = mongoose.model('treatment', TreatmentSchema);
 M_Investigation = mongoose.model('investigations', InvestigationSchema);
 M_Payment = mongoose.model('payment', PaymentSchema);
 router = express.Router();

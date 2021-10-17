@@ -28,7 +28,18 @@ function getDob(age) {
 	return myBirthYear;
 }
 
-
+function getAge(birthDate) 
+{
+    var today = new Date();
+    //var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) 
+    {
+        age--;
+    }
+    return age;
+}
 
 router.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {
   setHeader(res);
@@ -59,6 +70,45 @@ router.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(re
 	mRec.mobile = pMobile;
 	mRec.age = age;
 	mRec.dob = getDob(age);
+	mRec.gender = pGender;
+	mRec.enabled = true;
+	mRec.pid = newPid;
+	mRec.pidStr = newPid.toString();
+	mRec.save();
+	sendok(res, mRec);
+});
+
+
+router.get('/addwithdob/:cid/:pName/:pDob/:pGender/:pEmail/:pMobile', async function(req, res, next) {
+  setHeader(res);
+  
+  var {cid, pName, pGender, pDob, pEmail, pMobile} = req.params;
+	let mRec;
+	let lname = getLoginName(pName);
+	
+	// verify if name already exists
+	mRec = await M_Patient.findOne({cid: cid, name: lname});
+  if (mRec) { senderr(res, 601, 'Patient name already in database.'); return; }
+	
+	let dname = getDisplayName(pName);
+	console.log(lname, dname);
+	console.log(pEmail);
+  pEmail = svrToDbText(pEmail);
+	console.log(pEmail);
+  let myDob = new Date(Number(pDob.substr(0, 4)), Number(pDob.substr(4, 2))-1, Number(pDob.substr(6, 2)))
+	let myAge = getAge(myDob);
+	
+	let newPid = await getNewPid(cid);
+	console.log("New Pid", newPid);
+	
+	mRec = new M_Patient();
+	mRec.cid = cid;
+	mRec.name = lname;
+	mRec.displayName = dname;
+	mRec.email= pEmail;
+	mRec.mobile = pMobile;
+	mRec.age = myAge;
+	mRec.dob = myDob
 	mRec.gender = pGender;
 	mRec.enabled = true;
 	mRec.pid = newPid;
@@ -98,6 +148,47 @@ router.get('/edit/:cid/:oldName/:pName/:pAge/:pGender/:pEmail/:pMobile', async f
 	mRec.mobile = pMobile;
 	mRec.age = Number(pAge);
 	mRec.dob = getDob(Number(pAge));
+	mRec.gender = pGender;
+	mRec.enabled = true;
+	console.log(mRec);
+	mRec.save();
+	sendok(res, mRec);
+});
+
+router.get('/editwithdob/:cid/:oldName/:pName/:pDob/:pGender/:pEmail/:pMobile', async function(req, res, next) {
+  setHeader(res);
+  
+  var {cid, oldName, pName, pGender, pDob, pEmail, pMobile} = req.params;
+	var mRec;
+
+	let old_lname = getLoginName(oldName);
+	let new_lname = getLoginName(pName);
+	
+	if (old_lname != new_lname) {
+		// just check that of new patient already in database
+		mRec = await M_Patient.findOne({cid: cid, name: new_lname});
+		if (mRec) {
+			senderr(res, 601, "New Medicine name already in database");
+			return;
+		}
+	} 
+	
+	// check if old name really exists!!!! Only then we can modify it
+	mRec = await M_Patient.findOne({cid: cid, name: old_lname});
+	if (!mRec) {
+		senderr(res, 611, "Old Patient name not found in database");
+		return;
+	}
+	
+	let myDob = new Date(Number(pDob.substr(0, 4)), Number(pDob.substr(4, 2))-1, Number(pDob.substr(6, 2)))
+	let myAge = getAge(myDob);
+	
+	mRec.name = getLoginName(pName);
+	mRec.displayName = getDisplayName(pName);
+	mRec.email= svrToDbText(pEmail);
+	mRec.mobile = pMobile;
+	mRec.age = myAge;
+	mRec.dob = myDob;
 	mRec.gender = pGender;
 	mRec.enabled = true;
 	console.log(mRec);

@@ -68,7 +68,7 @@ DisplayDocumentDetails,
 import {
 SupportedMimeTypes, SupportedExtensions,
 str1by4, str1by2, str3by4,
-WEEKSTR, BLOCKNUMBER, MINUTEBLOCK,
+WEEKSTR, SHORTWEEKSTR, BLOCKNUMBER, MINUTEBLOCK,
 HOURSTR, MINUTESTR
 } from "views/globals.js";
 
@@ -697,7 +697,7 @@ export default function WorkingHours() {
 					<Typography className={myClass} 
 						onClick={() => {handleCategoryClick(index)}}
 					>
-					{WEEKSTR[index]}
+					{SHORTWEEKSTR[index]}
 					</Typography>
 				</Grid>
 			)}

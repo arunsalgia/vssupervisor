@@ -9,6 +9,14 @@ import { makeStyles } from '@material-ui/core/styles';
 
 
 const globalStyles = makeStyles((theme) => ({
+	blueCheckBox: {
+		color: 'blue',
+	},
+	blueCheckBoxLabel: {
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(14),
+		fontWeight: theme.typography.fontWeightBold,
+	},
 	functionSelected: {
 		fontSize: theme.typography.pxToRem(20),
 		fontWeight: theme.typography.fontWeightBold,

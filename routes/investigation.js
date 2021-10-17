@@ -36,7 +36,7 @@ router.post('/update/:cid/:pid/:newInfo', async function(req, res, next) {
 	iRec.symptom = newInfo.symptom;
 	iRec.diagnosis = newInfo.diagnosis;
 	console.log(iRec);
-	iRec.save();
+	await iRec.save();
 	sendok(res, 'Done');
 });
 

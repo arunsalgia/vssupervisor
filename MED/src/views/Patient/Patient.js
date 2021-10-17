@@ -43,7 +43,9 @@ import Avatar from "@material-ui/core/Avatar"
 import { useHistory } from "react-router-dom";
 import { useAlert } from 'react-alert';
 import Divider from '@material-ui/core/Divider';
-
+import Datetime from "react-datetime";
+import "react-datetime/css/react-datetime.css";
+import moment from "moment";
 // icons
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
@@ -58,6 +60,9 @@ import Visit  from 'views/Visit/Visit';
 import Investigation from 'views/Investigation/Investigation';
 import DentalTreatment from  'views/Treatment/DentalTreatment';
 
+import {
+WEEKSTR, MONTHSTR, SHORTMONTHSTR, DATESTR, MONTHNUMBERSTR,
+} from 'views/globals';
 
 // import { UserContext } from "../../UserContext";
 import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFilter,
@@ -66,6 +71,7 @@ import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFil
 	getAllPatients,
 	vsDialog,
 	getPatientDocument,
+	disableFutureDt,
  } from "views/functions.js"
 import {DisplayYesNo, DisplayPageHeader, BlankArea,
 DisplayPatientBox, DisplayDocumentDetails,
@@ -82,13 +88,36 @@ import CloseIcon from '@material-ui/icons/Close';
 //import CancelIcon from '@material-ui/icons/Cancel';
 import ClearSharpIcon from '@material-ui/icons/ClearSharp';
 
-import {red, blue, yellow, orange, green } from '@material-ui/core/colors';
+import {red, blue, yellow, orange, green, pink } from '@material-ui/core/colors';
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 
 const drawerWidth=800;
 const AVATARHEIGHT=4;
 const useStyles = makeStyles((theme) => ({
+	dateTime: {
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		backgroundColor: pink[100],
+		align: 'center',
+		width: (isMobile()) ? '60%' : '20%',
+	}, 
+	dateTimeNormal: {
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(14),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: pink[100],
+		align: 'center',
+		//width: (isMobile()) ? '60%' : '20%',
+	}, 
+	dateTimeBlock: {
+		color: 'blue',
+		//fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: pink[100],
+		width: '40%'
+	},
 	drawer: {
 		width: '40%',
 		flexShrink: 0
@@ -250,7 +279,7 @@ export default function Patient() {
 	const	[patientGender, setPatientGender] = useState("Male");
 	const	[patientEmail, setPatientEmail] = useState("");
 	const	[patientMobile, setPatientMobile] = useState(0);
-	
+	const [patientDob, setPatientDob] = useState(new Date(2000, 1, 1));
   const [page, setPage] = useState(0);
 	
 	
@@ -284,6 +313,9 @@ export default function Patient() {
     switch (registerStatus) {
       case 621:
         myMsg = "Invalid patient age";
+        break;
+			case 1001:
+        myMsg = "Invalid date of birth";
         break;
       case 601:
         myMsg = "Patient name already in database";
@@ -368,13 +400,14 @@ export default function Patient() {
 		setRadioValue("Male");
 		setPatientEmail("");
 		setPatientMobile("");
-		
+		setPatientDob(moment(new Date(2000, 1, 1)));
 		setRegisterStatus(0);
 		setIsAdd(true);
 		setIsDrawerOpened(true);
 	}
 	
 	function handleEdit(rec) {
+		console.log(rec);
 		setOldPatientName(rec.displayName);
 		setPatientName(rec.displayName);		
 		setPatientAge(dispOnlyAge(rec.age));
@@ -382,7 +415,7 @@ export default function Patient() {
 		setRadioValue(rec.gender);
 		setPatientEmail(dispEmail(rec.email));
 		setPatientMobile(dispMobile(rec.mobile));
-		
+		setPatientDob(moment(rec.dob));
 		setRegisterStatus(0);
 		setIsAdd(false);
 		setIsDrawerOpened(true);
@@ -433,19 +466,21 @@ export default function Patient() {
 	}
 	
 	async function handleAddEditSubmit() {
-		console.log("Addedit", patientName, patientAge, patientGender, patientEmail, patientMobile);
-		let myAge = (patientAge !== "") ? patientAge : 0;
+		let myDate = patientDob.toDate();
+		let testAge = new Date().getFullYear() - myDate.getFullYear();
+		console.log(testAge, myDate);
+		if ((testAge >= 100) || (testAge <= 1)) return setRegisterStatus(1001);
 		let myMobile = (patientMobile !== "") ? patientMobile : 0;
 		let myEmail = (patientEmail !== "") ? patientEmail : "-";
 		myEmail = encrypt(myEmail);
+		let dobStr = myDate.getFullYear() + MONTHNUMBERSTR[myDate.getMonth()] + DATESTR[myDate.getDate()];
 		console.log(myEmail);
-		console.log("Addedit", patientName, myAge, patientGender, myEmail, myMobile);
-		
+		console.log("Addedit", patientName, dobStr, patientGender, myEmail, myMobile);
 		let resp;
 		let myUrl;
 		if (isAdd) {
 			try {
-				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/add/${userCid}/${patientName}/${myAge}/${patientGender}/${myEmail}/${myMobile}`;
+				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/addwithdob/${userCid}/${patientName}/${dobStr}/${patientGender}/${myEmail}/${myMobile}`;
 				resp = await axios.get(myUrl);
 			} catch (error)  {
 				console.log(error.response.status);
@@ -454,7 +489,7 @@ export default function Patient() {
 			}
 		} else {
 			try {
-				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/edit/${userCid}/${oldPatientName}/${patientName}/${myAge}/${patientGender}/${myEmail}/${myMobile}`;
+				myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/patient/editwithdob/${userCid}/${oldPatientName}/${patientName}/${dobStr}/${patientGender}/${myEmail}/${myMobile}`;
 				resp = await axios.get(myUrl);
 			} catch (error)  {
 				console.log(error.response.status);
@@ -605,6 +640,11 @@ export default function Patient() {
 		setCurrentPatient("");
 	}
 	
+	function handleDate(d) {
+		//console.log(d);
+		setPatientDob(d);
+	}
+	
   return (
   <div className={gClasses.webPage} align="center" key="main">
 		<Container component="main" maxWidth="lg">
@@ -680,13 +720,27 @@ export default function Patient() {
 				value={patientName} 
 				onChange={() => { setPatientName(event.target.value) }}
       />
-			<TextValidator  fullWidth className={gClasses.vgSpacing}
+			{/*<TextValidator  fullWidth className={gClasses.vgSpacing}
 				id="newPatientAge" label="Age" type="number"
 				value={patientAge}
 				onChange={() => { setPatientAge(event.target.value) }}
 				validators={['minNumber:1', 'maxNumber:99']}
         errorMessages={['Age to be above 1', 'Age to be less than 100']}				
-      />
+			/>*/}
+			<div align="left">
+			<Typography className={gClasses.vgSpacing}>Date of Birth</Typography>
+			</div>
+			<Datetime 
+				className={classes.dateTimeBlock}
+				inputProps={{className: classes.dateTimeNormal}}
+				timeFormat={false} 
+				initialValue={patientDob}
+				dateFormat="DD/MM/yyyy"
+				isValidDate={disableFutureDt}
+				onClose={handleDate}
+				closeOnSelect={true}
+			/>
+			<BlankArea />
 			<FormControl component="fieldset">
 				<RadioGroup row aria-label="radioselection" name="radioselection" value={radioValue} 
 					onChange={() => {setRadioValue(event.target.value); setPatientGender(event.target.value); }}
