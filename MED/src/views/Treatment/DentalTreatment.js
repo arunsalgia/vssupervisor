@@ -11,6 +11,8 @@ import FormControl from '@material-ui/core/FormControl';
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import VsList from "CustomComponents/VsList";
+import VsTeeth from "CustomComponents/VsTeeth";
+
 import VsCheckBox from "CustomComponents/VsCheckBox";
 
 import { useLoading, Audio } from '@agney/react-loading';
@@ -79,7 +81,7 @@ DisplayDocumentDetails,
 
 import {
 SupportedMimeTypes, SupportedExtensions,
-str1by4, str1by2, str3by4,
+str1by4, str1by2, str3by4, INR,
 HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR,
 ToothLeft, ToothRight,
 ToothNumber,
@@ -157,6 +159,11 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: theme.typography.pxToRem(15),
 		fontWeight: theme.typography.fontWeightBold,
 		paddingRight: '10px',
+	},
+	total: {
+		fontSize: theme.typography.pxToRem(15),
+		fontWeight: theme.typography.fontWeightBold,
+		paddingRight: '30px',
 	},
     root: {
       width: '100%',
@@ -254,6 +261,9 @@ export default function DentalTreatment(props) {
 	const [currentPatientData, setCurrentPatientData] = useState({});
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
 	
+	const [treatTypeArray, setTreatTypeArray] = useState([]);
+	
+	
 	const [treatmentIndex, setTreatmentIndex] = useState(0);
 	const [treatmentArray, setTreatmentArray] = useState([]);
 	
@@ -283,7 +293,8 @@ export default function DentalTreatment(props) {
 			setCurrentPatient(patRec.displayName);
 			await getPatientTreatment(patRec);
 		}
-		checkPatient()
+		checkPatient();
+		getAllTreatType();
   }, []);
 
 	function ModalResisterStatus() {
@@ -295,38 +306,8 @@ export default function DentalTreatment(props) {
         myMsg = "";
 				regerr = false;
         break;
-      case 100:
-        myMsg = "Medicine successfully updated";
-				regerr = false;
-        break;
-      case 101:
-        myMsg = `All the doses cannot be 0`;
-        break;
-      case 102:
-        myMsg = `No Medicine selected`;
-        break;
-      case 200:
-        myMsg = "Note successfully updated";
-				regerr = false;
-        break;
-      case 201:
-        myMsg = `All notes cannot be 0`;
-        break;
-      case 202:
-        myMsg = `Notes cannot be blank`;
-        break;
-      case 300:
-        myMsg = "Remark successfully updated";
-				regerr = false;
-        break;
-      case 301:
-        myMsg = `All notes cannot be 0`;
-        break;
-      case 302:
-        myMsg = `Remark cannot be blank`;
-        break;
-			case 401:
-        myMsg = `Patient name already in database`;
+      case 2001:
+        myMsg = 'Duplicate Treatment type';
         break;
       default:
           myMsg = "Unknown Error";
@@ -340,7 +321,25 @@ export default function DentalTreatment(props) {
   }
 	
 	async function getPatientTreatment(patRec) {
-		
+		let myArray = [];
+		try {
+			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/treatment/list/${userCid}/${patRec.pid}`)
+			myArray = resp.data;
+		} catch (e) {
+			console.log(e)
+		}
+		setTreatmentArray(myArray);
+		setTreatmentIndex(0);
+		setCurrentSelection("Treatment");	
+	}
+	
+	async function getAllTreatType() {
+		try {
+			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/treattype/list/${userCid}`)
+			setTreatTypeArray(resp.data);
+		} catch (e) {
+			console.log(e);
+		}
 	}
 	
 	function DisplayFunctionItem(props) {
@@ -432,6 +431,7 @@ export default function DentalTreatment(props) {
 	function handleUpdate(num) {
 		//console.log(emurToothArray);
 		//console.log(num);
+		//console.log(num);
 		let newTootlArray;
 		if (emurToothArray.includes(num)) {
 			newTootlArray = emurToothArray.filter(x => x !== num);
@@ -449,7 +449,7 @@ export default function DentalTreatment(props) {
 	let _Click = (props.onClick == null) ? dummy : props.onClick;
 	return (
 		<div>
-			<Typography align="center" className={classes.tooth}>
+			<div align="center" className={classes.tooth}>
 				<span className={classes.toothType}>UL: </span>
 				{ToothNumber.upperLeft.map( (t) => {
 					let myClass = (props.toothArray.includes(t)) ? classes.selectedTooth : classes.normalTooth;
@@ -470,8 +470,8 @@ export default function DentalTreatment(props) {
 						</BorderWrapper>								
 					)}
 				)}
-			</Typography>
-			<Typography align="center" className={classes.tooth}>
+			</div>
+			<div align="center" className={classes.tooth}>
 				<span className={classes.toothType}>LL: </span>
 				{ToothNumber.lowerLeft.map( (t) => {
 					let myClass = (props.toothArray.includes(t)) ? classes.selectedTooth : classes.normalTooth;
@@ -492,7 +492,7 @@ export default function DentalTreatment(props) {
 						</BorderWrapper>								
 					)}
 				)}
-			</Typography>
+			</div>
 		</div>
 	)}
 	
@@ -521,9 +521,10 @@ export default function DentalTreatment(props) {
 		setTreatmentIndex(0);
 	}
 
-	function handleVsTreatmentDelete(treat) {
-		
+	function handleVsTreatTypeDelete(treat) {
+		console.log(treat);
 	}
+	
 	function handleAddDiagnosis() {
 		setEmurName("");
 		setEmurToothArray([]);
@@ -534,11 +535,13 @@ export default function DentalTreatment(props) {
 		setFilterItem("TRE");
 		setFilterItemText("");
 		setFilterItemArray([]);
+		setRemember(false);
 	}
 	
 		
 	function handleDeleteTreatment(itemName) {
-		//console.log("handleDeleteSymptom "+vNumber+" Notes "+mNumber);
+		//console.log(itemName);
+		//console.log(treatmentArray);
 		vsDialog("Delete Treatment", `Are you sure you want to delete treatment ${itemName}?`,
 			{label: "Yes", onClick: () => handleDeleteTreatmentConfirm(itemName) },
 			{label: "No" }
@@ -546,10 +549,13 @@ export default function DentalTreatment(props) {
 	}
 	
 	function handleDeleteTreatmentConfirm(itemName) {
+
 		let tmpArray = [].concat(treatmentArray);
+		//console.log(tmpArray);
 		tmpArray[0].treatment = tmpArray[0].treatment.filter(x => x.name !== itemName);
+		//console.log(tmpArray);
 		setTreatmentArray(tmpArray);
-		updateTreatment(tmpArray[0].treatment);
+		updateNewTreatment(tmpArray[0].treatment);
 	}
 	
 
@@ -575,7 +581,7 @@ export default function DentalTreatment(props) {
 						<Typography className={classes.heading}>{"Tooth: "+ttt}</Typography>
 					</Grid>
 					<Grid item xs={10} sm={2} md={2} lg={2} >
-						<Typography className={classes.heading}>{"Amount: "+un.amount}</Typography>
+						<Typography className={classes.heading}>{INR+un.amount}</Typography>
 					</Grid>
 					<Grid item xs={1} sm={1} md={1} lg={1} >
 						{(x.treatmentNumber === 0) &&
@@ -588,19 +594,42 @@ export default function DentalTreatment(props) {
 				)}
 			)}
 			</Box>
+			<Box borderColor="primary.main" border={1}>
+				<div align="right">
+					<Typography className={classes.total}>{"Total Professional Charges: "+INR+" "+_.sumBy(x.treatment, 'amount')}</Typography>
+				</div>
+			</Box>
 			</div>
 		)}
 		
-	function updateTreatmentToDatabase(treatment) {
+
+	async function updateTreatTypeToDatabase(myName) {
+		if (!remember) return;	
+		//console.log(myName);
+		//console.log(treatTypeArray);
 		
+		let tmp = treatTypeArray.find(x => x.name.toLowerCase() === myName.toLowerCase())
+		if (!tmp) {
+			let myEncodedName = encodeURIComponent(myName);
+			try {
+				axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/treattype/add/${userCid}/${myEncodedName}`)
+				let tmpArray = [{name: myName}].concat(treatTypeArray);
+				setTreatTypeArray(_.sortBy(tmpArray, 'name'));
+			} catch (e) {
+				console.log(e);
+			}	
+		}
 	}
 	
-	function updateNewTreatment(tArray) {
-		
-	}
+	function updateNewTreatment(sArray) {
+		let tmp = JSON.stringify({treatment: sArray});
+		let tmp1 = encodeURIComponent(tmp);
+		axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/treatment/update/${userCid}/${currentPatientData.pid}/${tmp1}`)
+	}	
+
 	
 	function updateTreatment() {
-		updateTreatmentToDatabase(emurName);
+		updateTreatTypeToDatabase(emurName);
 		
 		let tmp = [].concat(treatmentArray);
 		let index = emurNumber;
@@ -622,7 +651,7 @@ export default function DentalTreatment(props) {
 		setIsDrawerOpened("");
 		
 		tmp[0].treatment[index].name = emurName;
-		console.log(tmp[0].treatment);
+		//console.log(tmp[0].treatment);
 		updateNewTreatment(tmp[0].treatment)
 		setTreatmentArray(tmp);
 	}
@@ -641,8 +670,9 @@ export default function DentalTreatment(props) {
 		let tmpArray = [];
 		if (txt !== "") {
 			if (filterItem.substr(0,3) === "TRE")
-				tmpArray = [];
+				tmpArray = treatTypeArray.filter(x => x.name.toLowerCase().includes(txt.toLowerCase()))
 		} 
+		//console.log(treatTypeArray);
 		//console.log(tmpArray);
 		setFilterItemArray(tmpArray);
 	}
@@ -670,8 +700,6 @@ export default function DentalTreatment(props) {
 				<ArunTreatment />
 			}
 		</Box>
-		{/*<DisplayTeeth toothArray={emurToothArray} onClick={handleUpdate} />
-		<DisplayTeeth toothArray={myToothArray} />*/}
 		<Drawer className={classes.drawer}
 		anchor="right"
 		variant="temporary"
@@ -691,9 +719,9 @@ export default function DentalTreatment(props) {
 				value={emurName}
 			/>
 			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
-			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsTreatmentDelete} />
+			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsTreatTypeDelete} />
 			<BlankArea />
-			<DisplayTeeth toothArray={emurToothArray} onClick={handleToothUpdate} />
+			<VsTeeth toothArray={emurToothArray} onClick={handleToothUpdate} />
 			<TextValidator required fullWidth color="primary" type="number" className={gClasses.vgSpacing} 
 				id="newName" label="Professional Charge" name="newName"
 				onChange={(event) => setEmurAmount(event.target.value)}

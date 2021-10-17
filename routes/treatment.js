@@ -10,43 +10,44 @@ router.use('/', function(req, res, next) {
   next('route');
 });
 
-router.get('/list/:cid', async function(req, res, next) {
+router.post('/update/:cid/:pid/:newInfo', async function(req, res, next) {
   setHeader(res);
-	var {cid} = req.params;
-	
-	let rec = await M_Treatment.find({cid: cid}, {_id: 0}).sort({name: 1});
-	console.log(rec);
-	sendok(res, rec);
+  
+  var {cid, pid, newInfo } = req.params;
+	pid = Number(pid);
+	newInfo = JSON.parse(newInfo);
+	//console.log(newInfo.symptom);
+	//console.log(newInfo.diagnosis);
+  var iRec = await M_Treatment.findOne({cid: cid, pid: pid, treatmentNumber: 0});
+  if (!iRec) {
+		iRec = new M_Treatment();
+		iRec.cid = cid;
+		iRec.pid = pid;
+		iRec.treatmentNumber = 0;
+		iRec.enabled = true;
+		iRec.save();
+  }
+	iRec.treatmentDate = new Date();
+	iRec.treatment = newInfo.treatment;
+	console.log(iRec);
+	await iRec.save();
+	sendok(res, 'Done');
 });
 
-
-router.get('/add/:cid/:infoMsg', async function(req, res, next) {
+router.get('/list/:cid/:pid', async function(req, res, next) {
   setHeader(res);
-  var {cid, infoMsg} = req.params;
-
-	let id = getLoginName(infoMsg);
-	// just check if already exists
-	let myRec = await M_Treatment.findOne({cid: cid, id: id});
-	if (myRec) return senderr(res, 601, "Duplicate entry");
+  
+  var { cid, pid } = req.params;
+	pid = Number(pid);
 	
-
-	myRec = new M_Treatment();
-	myRec.id = id;
-	myRec.cid = cid;
-	myRec.enable = true;
-	myRec.name = infoMsg
-	myRec.save();
-	
-	sendok(res, myRec);
-});
-
-router.get('/delete/:cid/:infoMsg', async function(req, res, next) {
-  setHeader(res);
-	var {cid, infoMsg} = req.params;
-	
-	let id = getLoginName(infoMsg);
-	await M_Treatment.deleteOne({cid: cid, id: id});
-	sendok(res, "done");
+	let allRecs = await M_Treatment.find({cid: cid, pid: pid}).sort({treatmentNumber: -1})
+	if (allRecs.length > 0) {
+		if (allRecs[allRecs.length-1].treatmentNumber === 0) {	
+			allRecs = [allRecs[allRecs.length-1]].concat(allRecs.slice(0, allRecs.length-1));
+		}
+	}
+	console.log(allRecs);
+	sendok(res, allRecs);
 });
 
 function sendok(res, usrmsg) { res.send(usrmsg); }

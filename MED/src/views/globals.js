@@ -7,6 +7,7 @@ export const SupportedExtensions = ["PNG",  "JPG", "PDF"];
 export const str1by4 = String.fromCharCode(188)
 export const str1by2 = String.fromCharCode(189)
 export const str3by4 = String.fromCharCode(190)
+export const INR = String.fromCharCode(8377)
 
 export const VISITTYPE = {pending: "pending", expired: "expired", cancelled: "cancelled", visit: ""};
 export const WALLETTYPE = {all: "all", wallet: "wallet", bonus: "bonus"};

@@ -9,6 +9,37 @@ import { makeStyles } from '@material-ui/core/styles';
 
 
 const globalStyles = makeStyles((theme) => ({
+	selectedTooth: {
+		backgroundColor: green[900],
+		color: 'white',
+		fontWeight: theme.typography.fontWeightBold,
+		margin: "3px",
+	},
+	normalTooth: {
+		//backgroundColor: 'lightGreen',
+		fontWeight: theme.typography.fontWeightBold,
+		margin: "3px",
+	},
+	toothNumber: {
+		borderColour: 'black',
+		borderWidth: "1px",
+		borderRadius: "0px",
+		borderType: "solid",
+		innerPadding: "0px",
+		//padding: "10px",
+		//margin: "10px",
+	},
+	tooth: {
+		//backgroundColor: 'lightGreen',
+		fontSize: theme.typography.pxToRem(12),
+		//fontWeight: theme.typography.fontWeightBold,
+	},
+	toothType: {
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(18),
+		fontWeight: theme.typography.fontWeightBold,
+		margin: "5px",
+	},
 	blueCheckBox: {
 		color: 'blue',
 	},
