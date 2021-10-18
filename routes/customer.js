@@ -132,19 +132,36 @@ cron.schedule('5 0 * * *', async () => {
 		investRec.investigationNumber = investCount[0].count;
 		investRec.save();
 	}
+
+	// STEP 5 ---> all treatment to be closed
+	let allOpenTreat = await M_Treatment.find({treatmentNumber: 0});
+	for(let i=0; i<allOpenTreat.length; ++i) {
+		let myRec = allOpenTreat[i];
+		let countQuery = [
+			{ $match: { cid: myRec.cid, pid: myRec.pid } },
+			{ $group: { _id: '$pid', count: { $sum: 1 } } }
+		];
+		let treatCount = await M_Treatment.aggregate(countQuery)
+		myRec.treatmentNumber = treatCount[0].count;
+		myRec.save();
+	}
 	
-	// STEP 5 ---> update age based on date of birth
-	let todayTime = today.getTime();
-	let allPatients = await M_Patient.find({});
-	for(let i=0; i<allPatients.length; ++i) {
-		if (allPatients[i].dob.getFullYear() !== 1900) {
-			let timeDifference = Math.abs(todayTime - allPatients[i].dob.getTime())
-			let differentYears = Math.round(timeDifference / (1000 * 3600 * 24 * 365));
-			//console.log(allPatients[i].dob, differentYears);
-			allPatients[i].age = differentYears;
-		} else
-			allPatients[i].age = 0;
-		allPatients[i].save();
+	
+	// Last Step ---> update age based on date of birth
+	// will be done of 1st of every month
+	if (today.getDate() === 1) {
+		let todayTime = today.getTime();
+		let allPatients = await M_Patient.find({});
+		for(let i=0; i<allPatients.length; ++i) {
+			if (allPatients[i].dob.getFullYear() !== 1900) {
+				let timeDifference = Math.abs(todayTime - allPatients[i].dob.getTime())
+				let differentYears = Math.round(timeDifference / (1000 * 3600 * 24 * 365));
+				//console.log(allPatients[i].dob, differentYears);
+				allPatients[i].age = differentYears;
+			} else
+				allPatients[i].age = 0;
+			allPatients[i].save();
+		}
 	}
 });
 

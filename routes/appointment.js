@@ -167,6 +167,25 @@ router.get('/list/all/:cid', async function (req, res) {
 	publishAppointments( res, {cid: cid} );
 });		
 
+router.get('/list/all/fromtoday/:cid', async function (req, res) {
+  setHeader(res);
+	var {cid} = req.params;
+	
+	let thisTime = new Date();
+	//thisTime = new Date(thisTime.getFullYear(), thisTime.getMonth(), thisTime.getDate(), 0, 0, 0);
+	console.log(thisTime);
+	let myMon = thisTime.getMonth();
+	let myDat = thisTime.getDate();
+	
+	let chkOrder = ((thisTime.getFullYear() * 100) + thisTime.getMonth())*100 + thisTime.getDate();
+	console.log("Chkorder", chkOrder);
+	chkOrder *= 100 * 100;
+	console.log(chkOrder);
+	
+publishAppointments( res, {cid: cid, order: {$gte: chkOrder}, visit: {$nin: [VISITTYPE.cancelled, VISITTYPE.expired] } } );
+});		
+
+
 
 router.get('/count/patient/:cid/:pid', async function (req, res) {
   setHeader(res);
@@ -301,7 +320,7 @@ router.get('/cancel/pending', async function (req, res) {
 async function publishAppointments(res, filter) {
 	//console.log(filter)
 	let hRec = await M_Appointment.find(filter);
-	//console.log(hRec);
+	console.log(hRec);
 	sendok(res, hRec);
 };
 

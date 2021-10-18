@@ -263,8 +263,6 @@ router.get('/printdoc/:cid/:pid', async function(req, res, next) {
 });
 
 
-
-
 router.post('/update/:cid/:visitInfo', async function(req, res, next) {
   setHeader(res);
   var {cid, visitInfo} = req.params;
@@ -283,6 +281,15 @@ router.post('/update/:cid/:visitInfo', async function(req, res, next) {
 	myRec.nextVisitUnit = visitInfo.nextUnit;
 	console.log(myRec)
 	myRec.save();
+	
+	// now check if any pending appointment of this patient
+	// if found, declare it as over by writing visit record id in appointment
+	let myAppts = await M_Appointment.find({cid: cid, pid: visitInfo.pid});
+	for(let i=0; i < myAppts.length; ++i) {
+		myAppts[i].visit = myRec._id;
+		myAppts[i].save();
+	}
+	
 	sendok(res, "Ok");
 	return;
 	
