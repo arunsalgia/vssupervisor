@@ -58,7 +58,7 @@ router.post('/upload', (req, res, next) => {
 	console.log(req);
   const file = req.files.file;
   const filename = file.name;
-	console.log(newpath, file, filename);
+	//console.log(newpath, file, filename);
 	
   file.mv(`${newpath}${filename}`, (err) => {
     if (err) {
@@ -88,12 +88,12 @@ router.post('/uploadimage/:cid/:pid/:displayName/:fileName/:title/:desc', async 
   fileName = fileName.toUpperCase();
 
 	let fileType = path.extname(fileName).substr(1);
-	console.log(fileType);
+	//console.log(fileType);
 	let myIndex = SupportedTypes.indexOf(fileType)
 	if (myIndex < 0)
 		return senderr(res, 601, "Type not supported");
 	
-	console.log(fileName, fileType);
+	//console.log(fileName, fileType);
   upload(req, res, async (err) => {
     if (err) return res.sendStatus(500);
 

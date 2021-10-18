@@ -80,7 +80,8 @@ diagnosisRouter = require('./routes/diagnosis');
 symptomRouter = require('./routes/symptom');
 investigationRouter = require('./routes/investigation');
 treattypeRouter = require('./routes/treattype');
-treatmentRouter = require('./routes/treatment');
+dentalTreatmentRouter = require('./routes/dentaltreatment');
+profChargeRouter = require('./routes/profcharge');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -127,7 +128,8 @@ app.use('/diagnosis', diagnosisRouter);
 app.use('/symptom', symptomRouter);
 app.use('/investigation', investigationRouter);
 app.use('/treattype', treattypeRouter);
-app.use('/treatment', treatmentRouter);
+app.use('/dentaltreatment', dentalTreatmentRouter);
+app.use('/profcharge', profChargeRouter);
 //Schema
 
 UserSchema = mongoose.Schema({
@@ -154,8 +156,6 @@ MasterSettingsSchema = mongoose.Schema ({
 MedicineSchema = mongoose.Schema({
 	id: String,
 	name: String,
-	description: String,
-	precaution: String,
 	enabled: Boolean,
 	cid: String,
 });
@@ -237,7 +237,7 @@ InvestigationSchema = mongoose.Schema({
 });
 
 
-TreatmentSchema = mongoose.Schema({
+DentalTreatmentSchema = mongoose.Schema({
 	cid: String,
   pid: Number,
 	treatmentNumber: Number,
@@ -255,6 +255,17 @@ NextVisitSchema = mongoose.Schema({
 	cid: String,
 });
 
+ProfessionalChargesSchema = mongoose.Schema({
+	cid: String,
+  pid: Number,
+	tid: Number,
+	treatment: String,			// id of treatment record will be stored
+	description: String,
+	date: Date,
+	amount: Number,
+	paymentMode: String,
+	enabled: Boolean,
+});
 
 HolidaySchema = mongoose.Schema({
   date: Number,
@@ -397,8 +408,8 @@ M_Wallet = mongoose.model('wallet', WalletSchema);
 M_Diagnosis = mongoose.model('diagnosis', DiagnosisSchema);
 M_Symptom = mongoose.model('symptoms', SymptomSchema);
 M_Treattype = mongoose.model('treattype', TreatTypeSchema);
-M_Treatment = mongoose.model('treatment', TreatmentSchema);
-
+M_DentalTreatment = mongoose.model('dentaltreatment', DentalTreatmentSchema);
+M_ProfCharge = mongoose.model('profcharge', ProfessionalChargesSchema);
 M_Investigation = mongoose.model('investigations', InvestigationSchema);
 M_Payment = mongoose.model('payment', PaymentSchema);
 router = express.Router();

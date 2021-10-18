@@ -296,7 +296,7 @@ export default function Visit(props) {
 	function DisplayInvestigationDates() {
 		if (investigationArray.length === 0) {
 		return (
-			<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+			<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 			<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 				<Grid key={"VISIST"} item xs={12} sm={12} md={12} lg={12} >
 					<Typography className={classes.slotTitle} >
@@ -317,7 +317,7 @@ export default function Visit(props) {
 			myDate = `Investigation dated ${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()}`;
 		}
 	return (
-	<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 		<Grid key={"LEFT1"} item xs={2} sm={2} md={2} lg={2} >	
 			<IconButton color={'primary'} onClick={() => {changIndex(-1)}}  >
@@ -415,7 +415,7 @@ export default function Visit(props) {
 	
 	function DisplayFunctionHeader() {
 	return (
-	<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 		<DisplayFunctionItem item="Symptom" />
 		<DisplayFunctionItem item="Diagnosis" />
@@ -813,7 +813,7 @@ export default function Visit(props) {
 	{((isDrawerOpened === "ADDDIAG") || (isDrawerOpened === "EDITDIAG")) &&
 		<ValidatorForm align="center" className={gClasses.form} onSubmit={updateDiagnosis}>
 			<Typography align="center" className={classes.modalHeader}>
-				{((isDrawerOpened === "ADDDIAG") ? "New Diagnosis" : "Edit Diagnosis")+`for ${currentPatient}`}
+				{((isDrawerOpened === "ADDDIAG") ? "New Diagnosis" : "Edit Diagnosis")+` for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
 			<TextValidator required fullWidth color="primary"

@@ -9,6 +9,18 @@ import { makeStyles } from '@material-ui/core/styles';
 
 
 const globalStyles = makeStyles((theme) => ({
+	filterRadio: {
+		fontSize: theme.typography.pxToRem(14),
+		fontWeight: theme.typography.fontWeightBold,
+		color: '#000000',	
+	},
+	slotTitle: {
+		color: 'green',
+		fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		padding: "10px 10px", 
+		margin: "10px 10px", 
+	},
 	selectedTooth: {
 		backgroundColor: green[900],
 		color: 'white',
@@ -122,6 +134,11 @@ const globalStyles = makeStyles((theme) => ({
 	patientInfo2: {
 		fontSize: theme.typography.pxToRem(14),
 		fontWeight: theme.typography.fontWeightBold,
+	},
+	patientInfo2Green: {
+		fontSize: theme.typography.pxToRem(16),
+		fontWeight: theme.typography.fontWeightBold,
+		color: 'green',
 	},
 		patientInfo999: {
 		fontSize: theme.typography.pxToRem(14),

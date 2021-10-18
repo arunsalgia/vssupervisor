@@ -1,6 +1,8 @@
 const {  akshuGetUser, GroupMemberCount,  
   encrypt, decrypt, dbencrypt, dbToSvrText, svrToDbText, dbdecrypt,
-	numberDate
+	numberDate, 
+	generateOrder, generateOrderByDate,
+	setOldPendingAppointment,
 } = require('./functions'); 
 var router = express.Router();
 
@@ -28,7 +30,7 @@ router.get('/delete/:cid/:year/:month/:date/:order/:pid', async function (req, r
 	//let myFilter = {date: Number(date), month: Number(month), year: Number(year), order: Number(order), pid: Number(pid)};
 	
 	let myFilter = { cid: cid, date: Number(date), month: Number(month), year: Number(year),order: Number(order), pid: Number(pid) };
-	console.log(myFilter);
+	//console.log(myFilter);
 	let hRec = await M_Appointment.deleteOne(myFilter);
 	//console.log(hRec);
 	sendok(res, "OK");
@@ -41,10 +43,10 @@ router.get('/cancel/:cid/:pid/:order', async function (req, res) {
 	
 	
 	let myFilter = { cid: cid, pid: Number(pid), order: Number(order), visit: VISITTYPE.pending };
-	console.log(myFilter);
+	//console.log(myFilter);
 	let hRec = await M_Appointment.findOne(myFilter);
 	if (hRec) {
-		console.log(hRec);
+		//console.log(hRec);
 		hRec.visit = VISITTYPE.cancelled;
 		hRec.save();
 		sendok(res, "OK");
@@ -64,7 +66,8 @@ router.get('/add/:cid/:apptdata', async function (req, res) {
 	let hRec = await M_Appointment.find({
 		cid: cid, date: newData.date, month: newData.month, year: newData.year, 
 		order: newData.order, pid: newData.pid,
-		});
+	});
+	
 	if (hRec.count > 0) {
 		senderr(res, 601, "Duplicate Entry");
 		return;
@@ -99,6 +102,13 @@ router.get('/list/date/:cid/:year/:month/:date', async function (req, res) {
 	publishAppointments(res, {cid: cid, date: Number(date), month: Number(month), year: Number(year)})
 });		
 
+router.get('/test/:cid/:pid', async function (req, res) {
+  setHeader(res);
+  var {cid, pid, month, year } = req.params;
+	setOldPendingAppointment(cid, pid, VISITTYPE.cancelled);
+	sendok(res, "ok");
+	//publishAppointments(res, {cid: cid, date: Number(date), month: Number(month), year: Number(year)})
+});	
 
 router.get('/pendinglist/date/:cid/:year/:month/:date/:days', async function (req, res) {
   setHeader(res);
@@ -108,10 +118,10 @@ router.get('/pendinglist/date/:cid/:year/:month/:date/:days', async function (re
 	let iYear = Number(year);
 	let iDays = Number(days);
 	
-	let startOrder = getOrderNumber(iYear, iMonth, iDate, 0, 0);
+	let startOrder = generateOrder(iYear, iMonth, iDate, 0, 0);
 	
 	let endDate = new Date(iYear, iMonth, iDate +iDays);
-	let endOrder = getOrderNumber(
+	let endOrder = generateOrder(
 		endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 
 		0, 0);
 	let myFilter = { cid: cid, visit: VISITTYPE.pending, order: { $lte: endOrder, $gte: startOrder} }
@@ -173,18 +183,16 @@ router.get('/list/all/fromtoday/:cid', async function (req, res) {
 	
 	let thisTime = new Date();
 	//thisTime = new Date(thisTime.getFullYear(), thisTime.getMonth(), thisTime.getDate(), 0, 0, 0);
-	console.log(thisTime);
+	//console.log(thisTime);
 	let myMon = thisTime.getMonth();
 	let myDat = thisTime.getDate();
 	
 	let chkOrder = ((thisTime.getFullYear() * 100) + thisTime.getMonth())*100 + thisTime.getDate();
-	console.log("Chkorder", chkOrder);
 	chkOrder *= 100 * 100;
-	console.log(chkOrder);
+	console.log("Chkorder", chkOrder);
 	
 publishAppointments( res, {cid: cid, order: {$gte: chkOrder}, visit: {$nin: [VISITTYPE.cancelled, VISITTYPE.expired] } } );
 });		
-
 
 
 router.get('/count/patient/:cid/:pid', async function (req, res) {
@@ -320,7 +328,7 @@ router.get('/cancel/pending', async function (req, res) {
 async function publishAppointments(res, filter) {
 	//console.log(filter)
 	let hRec = await M_Appointment.find(filter);
-	console.log(hRec);
+	//console.log(hRec);
 	sendok(res, hRec);
 };
 
@@ -333,9 +341,9 @@ async function cancelOldAppt() {
 	let myDat = thisTime.getDate();
 	
 	let chkOrder = ((thisTime.getFullYear() * 100) + thisTime.getMonth())*100 + thisTime.getDate();
-	console.log("Chkorder", chkOrder);
+	//console.log("Chkorder", chkOrder);
 	chkOrder *= 100 * 100;
-	console.log(chkOrder);
+	console.log("Chkorder", chkOrder);
 	
 	let allPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: chkOrder} } );
 	console.log("Count: ",allPendingAppts.length);
@@ -343,7 +351,7 @@ async function cancelOldAppt() {
 	for(let i=0; i<allPendingAppts.length; ++i) {
 		allPendingAppts[i].visit = VISITTYPE.cancelled;
 		allPendingAppts[i].save();
-		console.log(allPendingAppts[i].apptTime, allPendingAppts[i].order);
+		//console.log(allPendingAppts[i].apptTime, allPendingAppts[i].order);
 	}
 }
 

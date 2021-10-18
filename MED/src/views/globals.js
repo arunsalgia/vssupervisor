@@ -85,5 +85,12 @@ export const ToothNumber = {
 	upperLeft:  [18, 17, 16, 15, 14, 13, 12, 11],
 	upperRight: [28, 27, 26, 25, 24, 23, 22, 21],
 	lowerRight: [38, 37, 36, 35, 34, 33, 32, 31],
-	lowerLeft:  [48, 47, 46, 45, 44, 43, 42, 41],
+	lowerLeft:  [48, 47, 46, 45, 44, 43, 42, 41]
+}
+
+export const ToothRange = {
+	upperLeft:  {start: 11, end: 18},
+	upperRight: {start: 21, end: 28},
+	lowerRight: {start: 31, end: 38},
+	lowerLeft:  {start: 41, end: 48}
 }

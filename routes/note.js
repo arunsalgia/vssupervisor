@@ -75,7 +75,7 @@ router.get('/delete/:cid/:delNote', async function(req, res, next) {
   var { cid, delNote } = req.params;
 	
 	let id = getLoginName(delNote);
-	console.log(id);
+	//console.log(id);
 	
 	M_Note.deleteOne({cid: cid, id: id}).then(function(){
     //console.log("Data deleted"); // Success

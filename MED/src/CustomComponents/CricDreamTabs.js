@@ -46,7 +46,7 @@ import PointSystem from "views/MED/PointSystem.js";
 import WorkingHours from "views/Settings/WorkingHours";
 import Holiday from "views/Settings/Holiday";
 import Assistant from "views/Settings/Assistant";
-import Medicine from "views/Settings/Medicine.js" 
+//import Medicine from "views/Settings/Medicine.js" 
 
 
 import Modal from 'react-modal';
@@ -288,7 +288,7 @@ export function CricDreamTabs() {
 	const handleWorkingHours = () => { handleClose(); setMenuValue(701);}
 	const handleHoliday = () => { handleClose(); setMenuValue(702);}
 	const handleAssistant = () => { handleClose(); setMenuValue(703);}
-	const handleMedicine = () => { handleClose(); setMenuValue(704);}
+	//const handleMedicine = () => { handleClose(); setMenuValue(704);}
   
 
   function DisplayCdItems() {
@@ -317,7 +317,7 @@ export function CricDreamTabs() {
 			case 701: return <WorkingHours />
 			case 702: return <Holiday />
 			case 703: return <Assistant />
-      case 704: return <Medicine />;
+      //case 704: return <Medicine />;
 
       default: return  null;
     }
@@ -486,9 +486,9 @@ export function CricDreamTabs() {
 								<MenuItem onClick={handleAssistant}>
 								<Typography className={classes.menuStyle}>User</Typography>
 								</MenuItem>
-								<MenuItem onClick={handleMedicine}>
+								{/*<MenuItem onClick={handleMedicine}>
 									<Typography className={classes.menuStyle}>Medicine</Typography>
-								</MenuItem>
+								</MenuItem>*/}
 								</div>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
 									<div>

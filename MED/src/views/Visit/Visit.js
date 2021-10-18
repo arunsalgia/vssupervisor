@@ -376,7 +376,7 @@ export default function Visit(props) {
 	
 	function DisplayFunctionHeader() {
 	return (
-	<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 		<DisplayFunctionItem item="Medicine" />
 		<DisplayFunctionItem item="User Note" />
@@ -397,7 +397,20 @@ export default function Visit(props) {
 	}
 	
 	function DisplayVisitDates() {
-	if (visitArray.length === 0) return null;
+	if (visitArray.length === 0) {
+		return (
+			<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+			<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
+				<Grid key={"VISIST"} item xs={12} sm={12} md={12} lg={12} >
+					<Typography className={classes.slotTitle} >
+						{"No Visit history available"}
+					</Typography>
+				</Grid>
+			</Grid>	
+			</Box>
+		);
+	}
+	
 	let v = visitArray[visitIndex];
 	let myDate;
 	if (v.visitNumber === 0)
@@ -407,7 +420,7 @@ export default function Visit(props) {
 		myDate = `Visit dated ${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()}`;
 	}
 	return (
-	<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 		<Grid key={"LEFT1"} item xs={2} sm={2} md={2} lg={2} >	
 			<IconButton color={'primary'} onClick={() => {changIndex(-1)}}  >
@@ -1279,7 +1292,7 @@ export default function Visit(props) {
 	let reviewDate = DATESTR[d.getDate()] + "/" + MONTHNUMBERSTR[d.getMonth()] + "/" + d.getFullYear();
 	return (
 		<div align="left">
-		<Typography className={classes.reviewDate}>{"Next Review on "+reviewDate}</Typography>
+		<Typography className={classes.reviewDate}>{"Next visit scheduled on "+reviewDate}</Typography>
 		<Grid className={classes.noPadding} key={"UNIT"} container>
 		<Grid item xs={12} sm={12} md={12} lg={12} >
 			<BlankArea />
@@ -1295,7 +1308,7 @@ export default function Visit(props) {
 				onChange={() => {updateUnit(event.target.value); }}
 			>
 			{unitArray.map ( r =>
-			<FormControlLabel className={classes.filterRadio} value={r} control={<Radio color="primary"/>} label={r} />
+			<FormControlLabel className={gClasses.filterRadio} value={r} control={<Radio color="primary"/>} label={r} />
 			)}
 			</RadioGroup>
 			</FormControl>			
@@ -1310,7 +1323,7 @@ export default function Visit(props) {
 				onChange={() => {updateTime(Number(event.target.value)); }}
 			>
 			{timeArray.map ( r =>
-			<FormControlLabel className={classes.filterRadio} value={r} control={<Radio color="primary"/>} label={r} />
+			<FormControlLabel className={gClasses.filterRadio} value={r} control={<Radio color="primary"/>} label={r} />
 			)}
 			</RadioGroup>
 			</FormControl>			

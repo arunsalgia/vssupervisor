@@ -106,6 +106,7 @@ import {
 	compareDate, makeTimeString,
 	getAllPatients,
 	vsDialog,
+	generateOrder, generateOrderByDate,
 } from "views/functions.js";
 
 
@@ -128,6 +129,30 @@ const useStyles = makeStyles((theme) => ({
 	},
 	unselIndex: {
 		fontSize: theme.typography.pxToRem(14),
+	},
+	availableSlot: {
+		padding: "5px 10px", 
+		margin: "4px 2px", 
+		borderColor: 'blue',
+		//backgroundColor: blue[300] 
+	},
+	pendingSlot: {
+		padding: "5px 10px", 
+		margin: "4px 2px", 
+		borderColor: 'blue',
+		//backgroundColor: blue[300] 
+	},
+	expiredSlot: {
+		padding: "5px 10px", 
+		margin: "4px 2px", 
+		borderColor: 'blue',
+		backgroundColor: grey[500],
+	},
+	visitSlot: {
+		padding: "5px 10px", 
+		margin: "4px 2px", 
+		borderColor: 'blue',
+		backgroundColor: lightGreen["A400"],
 	},
 	freeSlot: {
 		padding: "5px 10px", 
@@ -397,9 +422,6 @@ const yesNoModal = dynamicModal('60%');
 
 let defaultDirectoryMode=true;
 
-let searchText = "";
-function setSearchText(sss) { searchText = sss;}
-
 let aptDate = new Date();
 function setAptDate(d) { aptDate = d; }
 
@@ -413,6 +435,8 @@ export default function Appointment() {
   const classes = useStyles();
 	const gClasses = globalStyles();
 	const alert = useAlert();
+	
+	const [searchText, setSearchText] = useState("");
 	
 	const [registerStatus, setRegisterStatus] = useState(0);
 	
@@ -481,19 +505,7 @@ export default function Appointment() {
 		userCid = sessionStorage.getItem("cid");
 		
 		const getAllPendingAppointment  = async () => {
-			// get all pending apt
-			let allPending;
-			try {
-				let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/pendinglist/all/${userCid}`);
-				allPending = resp.data;
-			} catch(e) {
-				allPending = [];
-				console.log(e);
-			}
-			finally {
-				setAllPendingAppt(allPending);	
-				return	allPending;
-			}
+			allPending = await reloadAppointmentDetails();
 		}
 		const getAllHolidays  = async () => {
 			let allHolidays;
@@ -560,12 +572,29 @@ export default function Appointment() {
 		// fetch data 1 by 1 
 		PgetAllMyPatients = getAllMyPatients();
 		PgetAllHolidays = getAllHolidays();
-		PgetAllPendingAppointment = getAllPendingAppointment();
+		PgetAllPendingAppointment = reloadAppointmentDetails();
 		makeSlots();
 		PcheckFromPatient = checkFromPatient();
-		handleMyAppt();
+		//handleMyAppt();
   }, []);
 
+	async function reloadAppointmentDetails() {
+		// get all pending apt
+		let allPending;
+		try {
+			//let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/pendinglist/all/${userCid}`);
+			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/list/all/fromtoday/${userCid}`);
+			allPending = resp.data;
+		} catch(e) {
+			allPending = [];
+			console.log(e);
+		}
+		finally {
+			setAllPendingAppt(allPending);	
+			return	allPending;
+		}		
+	}
+	
 	function generateSlots(allPendingAppt, allHolidays) {
 		let d;
 		let slotData = [];
@@ -580,11 +609,25 @@ export default function Appointment() {
 	
 	// returns true if appointment of given time
 	function checkAppt(year, month, date, hr, min, allAppt) {
-		let tmp = allAppt.filter( x =>
+		//console.log(allAppt);
+		let tmp = allAppt.find( x =>
 			x.year === year && x.month === month && x.date === date &&
 			x.hour === hr && x.minute === min);
 		//console.log(date, hr, min, tmp);
-		return ((tmp.length > 0) ? tmp[0].displayName : "" );
+		let retStr = {name: `$HOURSTR[hr]}:${MINUTESTR[min]}`, visit: 'available'};
+		if (tmp) {
+			retStr.name = tmp.displayName;
+			retStr.visit = (tmp.visit === 'pending') ? 'pending' : 'visit';
+		} else {
+			// if not appointment, then check if appointment of old date time
+			let currentOrder = generateOrderByDate(new Date());
+			let requestedOrder = generateOrder(year, month, date, hr, min);
+			if (requestedOrder < currentOrder) {
+				retStr.name = "-"
+				retStr.visit = 'expired';
+			}
+		}
+		return (retStr);
 	}
 	
 	function prepareData(d, allAppt) {
@@ -602,13 +645,15 @@ export default function Appointment() {
 			if (workingHours.includes(myDay*100+blk)) {
 				let hour = Math.floor(blk / 4);
 				let minute = MINUTEBLOCK[blk % 4];
+				let apptSts = checkAppt(myYear, myMonth, myDate, hour, minute, allAppt);
 				morningSlots.push({year: myYear, month: myMonth, date: myDate,
 					hour: hour,
 					minute: minute,
 					dateTime: d, 
 					day: myDay,
 					slot: HOURSTR[hour] + ":" + MINUTESTR[minute],
-					available: checkAppt(myYear, myMonth, myDate, hour, minute, allAppt)
+					name: apptSts.name,
+					visit: apptSts.visit
 				});
 			}
 		}
@@ -617,13 +662,15 @@ export default function Appointment() {
 			if (workingHours.includes(myDay*100+blk)) {
 				let hour = Math.floor(blk / 4);
 				let minute = MINUTEBLOCK[blk % 4];
+				let apptSts = checkAppt(myYear, myMonth, myDate, hour, minute, allAppt);
 				afternoonSlots.push({year: myYear, month: myMonth, date: myDate,
 					hour: hour,
 					minute: minute,
 					dateTime: d, 
 					day: myDay,
 					slot: HOURSTR[hour] + ":" + MINUTESTR[minute],
-					available: checkAppt(myYear, myMonth, myDate, hour, minute, allAppt)
+					name: apptSts.name,
+					visit: apptSts.visit
 				});
 			}
 		}
@@ -632,13 +679,15 @@ export default function Appointment() {
 			if (workingHours.includes(myDay*100+blk)) {
 				let hour = Math.floor(blk / 4);
 				let minute = MINUTEBLOCK[blk % 4];
+				let apptSts = checkAppt(myYear, myMonth, myDate, hour, minute, allAppt);
 				eveningSlots.push({year: myYear, month: myMonth, date: myDate,
 					hour: hour,
 					minute: minute,
 					dateTime: d, 
 					day: myDay,
 					slot: HOURSTR[hour] + ":" + MINUTESTR[minute],
-					available: checkAppt(myYear, myMonth, myDate, hour, minute, allAppt)
+					name: apptSts.name,
+					visit: apptSts.visit
 				});
 			}
 		}
@@ -809,6 +858,8 @@ export default function Appointment() {
 	
 	
 	async function handleSelectPatient(rec) {
+		let tmpArray = await reloadAppointmentDetails();
+		generateSlots(tmpArray, holidayArray);
 		setSelectPatient(false);
 		setCurrentPatient(rec.displayName);
 		setCurrentPatientData(rec);
@@ -826,20 +877,6 @@ export default function Appointment() {
 		}
 	}
 
-
-	// Yes no handler
-		
-	
-	function yesNoHandler(id, action) {
-		closeModal();
-		console.log("Id is " + id + "  Action is " + action);
-		
-		if ((id === "cancel") && (action === "YES"))	{
-			handleCancelApptConfirm();
-			return;
-		}
-	}
-	//==================================
 	
 	async function prevDate() {
 		let d = getPrevDate(allTimeSlots[0].dateTime, holidayArray);
@@ -872,9 +909,13 @@ export default function Appointment() {
 	}
 	
 
-async function handleAddAppointment(slot) {	
-		let myOrder = ((slot.year * 100 + slot.month) * 100  + slot.date)*100;
-		myOrder = (myOrder + slot.hour)*100 + slot.minute;
+	async function handleAddAppointment(slot) {	
+		let myOrder = generateOrder(slot.year, slot.month, slot.date, slot.hour, slot.minute)
+		let currentValidOrder = generateOrderByDate(new Date());
+		if (myOrder < currentValidOrder) {
+			return alert.error("Appointment of past date/time is not permitted");
+		}
+			
 		let tmp = {
 			cid: userCid,
 			//data: currentPatientData,
@@ -899,13 +940,15 @@ async function handleAddAppointment(slot) {
 			alert.success("Appointment set of "+currentPatientData.displayName);
 			// update patient appointment
 			let tmpArray=[resp.data].concat(apptArray);
-			//console.log(tmpArray);
+			tmpArray = _.sortBy(tmpArray, ['order']);
 			setApptArray(tmpArray);
+			
 			// now update all pending appointment
 			tmpArray=[resp.data].concat(allPendingAppt);
-			//console.log(tmpArray);
+			tmpArray = _.sortBy(tmpArray, ['order']);
 			setAllPendingAppt(tmpArray);
-			generateSlots(tmpArray, holidayArray);
+			let xxx = await reloadAppointmentDetails();
+			generateSlots(xxx, holidayArray);
 		} catch (e) {
 			console.log(e);
 			alert.error("Error setting appointment of "+currentPatientData.displayName);
@@ -938,9 +981,9 @@ async function handleAddAppointment(slot) {
 			let dStr = (compareDate(t.dateTime, new Date()) !== 0) 
 				? t.date + "/" + (t.month + 1) + "/" + t.year
 				: "Today";
-			let freeSlots = t.morningSlots.filter(x => x.available === "").length + 
-				t.afternoonSlots.filter(x => x.available === "").length +
-				t.eveningSlots.filter(x => x.available === "").length;
+			let freeSlots = t.morningSlots.filter(x => x.visit === "available").length + 
+				t.afternoonSlots.filter(x => x.visit === "available").length +
+				t.eveningSlots.filter(x => x.visit === "available").length;
 			let myClass = (index === currentIndex) ? classes.selIndex : classes.unselIndex;
 		return (
 		<Grid key={"TIME"+index} item xs={3} sm={3} md={2} lg={2} >
@@ -970,20 +1013,30 @@ async function handleAddAppointment(slot) {
 	{allTimeSlots[currentIndex].morningSlots.map( (t, index) => {
 		return (
 			<Grid key={"MOR"+index} item xs={4} sm={4} md={2} lg={2} >
-				{(t.available !== "") &&
-					<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
-					<Typography id={t.slot}>{t.available}</Typography>
+				{(t.visit === "expired") &&
+					<Box className={classes.expiredSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography id={t.slot}>{t.name}</Typography>
 					</Box>
 				}
-				{((t.available == "") && (currentPatient === "INFO")) &&
-						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
-						<Typography>{t.slot}</Typography>
-						</Box>
+				{(t.visit === "pending") &&
+					<Box className={classes.pendingSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography id={t.slot}>{t.name}</Typography>
+					</Box>
 				}
-				{((t.available == "") && (currentPatient !== "INFO")) &&
-						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
-						<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
-						</Box>
+				{(t.visit === "visit") &&
+					<Box className={classes.visitSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography id={t.slot}>{t.name}</Typography>
+					</Box>
+				}
+				{((t.visit === "available") && (currentPatient === "INFO")) &&
+					<Box className={classes.availableSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography>{t.slot}</Typography>
+					</Box>
+				}
+				{((t.visit === "available") && (currentPatient !== "INFO")) &&
+					<Box className={classes.availableSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
+					</Box>
 				}
 			</Grid>
 		)}
@@ -999,22 +1052,34 @@ async function handleAddAppointment(slot) {
 	<Typography className={classes.slotTitle} >{"Afternoon Slots of "+tStr}</Typography>
 	</Grid>
 	{allTimeSlots[currentIndex].afternoonSlots.map( (t, index) => {
+		//console.log("Afternoon slots---------------");
+		//console.log(allTimeSlots[currentIndex].afternoonSlots);
 		return (
 			<Grid key={"AFETR"+index} item xs={4} sm={4} md={2} lg={2} >
-				{(t.available !== "") &&
-					<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
-					<Typography>{t.available}</Typography>
+				{(t.visit === "expired") &&
+					<Box className={classes.expiredSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography id={t.slot}>{t.name}</Typography>
 					</Box>
 				}
-				{((t.available == "") && (currentPatient === "INFO")) &&
-						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
-						<Typography>{t.slot}</Typography>
-						</Box>
+				{(t.visit === "pending") &&
+					<Box className={classes.pendingSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography id={t.slot}>{t.name}</Typography>
+					</Box>
 				}
-				{((t.available == "") && (currentPatient !== "INFO")) &&
-						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
-						<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
-						</Box>
+				{(t.visit === "visit") &&
+					<Box className={classes.visitSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography id={t.slot}>{t.name}</Typography>
+					</Box>
+				}
+				{((t.visit === "available") && (currentPatient === "INFO")) &&
+					<Box className={classes.availableSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography>{t.slot}</Typography>
+					</Box>
+				}
+				{((t.visit === "available") && (currentPatient !== "INFO")) &&
+					<Box className={classes.availableSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
+					</Box>
 				}
 			</Grid>
 		)}
@@ -1032,20 +1097,30 @@ async function handleAddAppointment(slot) {
 	{allTimeSlots[currentIndex].eveningSlots.map( (t, index) => {
 		return (
 			<Grid key={"EVE"+index} item xs={4} sm={4} md={2} lg={2} >
-				{(t.available !== "") &&
-					<Box className={classes.usedSlot} borderColor="blue" borderRadius={7} border={1} >
-					<Typography>{t.available}</Typography>
+				{(t.visit === "expired") &&
+					<Box className={classes.expiredSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography id={t.slot}>{t.name}</Typography>
 					</Box>
 				}
-				{((t.available == "") && (currentPatient === "INFO")) &&
-						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
-						<Typography>{t.slot}</Typography>
-						</Box>
+				{(t.visit === "pending") &&
+					<Box className={classes.pendingSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography id={t.slot}>{t.name}</Typography>
+					</Box>
 				}
-				{((t.available == "") && (currentPatient !== "INFO")) &&
-						<Box className={classes.freeSlot} borderColor="blue" borderRadius={7} border={1} >
-						<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
-						</Box>
+				{(t.visit === "visit") &&
+					<Box className={classes.visitSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography id={t.slot}>{t.name}</Typography>
+					</Box>
+				}
+				{((t.visit === "available") && (currentPatient === "INFO")) &&
+					<Box className={classes.availableSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography>{t.slot}</Typography>
+					</Box>
+				}
+				{((t.visit === "available") && (currentPatient !== "INFO")) &&
+					<Box className={classes.availableSlot} borderColor="blue" borderRadius={7} border={1} >
+					<Typography onClick={() => {handleAddAppointment(t)}}>{t.slot}</Typography>
+					</Box>
 				}
 			</Grid>
 		)}
@@ -1057,7 +1132,12 @@ async function handleAddAppointment(slot) {
 	)}
 	
 	async function handleCancelAppt(cancelAppt) {
-		vsDialog("Cancel Appointment", `Are you sure you want to cancel appointment of ${cancelAppt.displayName}?`,
+		
+		let myMsg = `Are you sure you want to cancel appointment of ${cancelAppt.displayName} dated `;
+		myMsg += `${DATESTR[cancelAppt.date]}/${MONTHNUMBERSTR[cancelAppt.month]}/${cancelAppt.year} at `;
+		myMsg += `${HOURSTR[cancelAppt.hour]}:${MINUTESTR[cancelAppt.minute]}?`;
+		
+		vsDialog("Cancel Appointment", myMsg,
 			{label: "Yes", onClick: () => handleCancelApptConfirm(cancelAppt) },
 			{label: "No" }
 		);
@@ -1082,7 +1162,8 @@ async function handleAddAppointment(slot) {
 				x.order !== cancelAppt.order 
 				);
 			setAllPendingAppt(tmpAppt);
-			generateSlots(tmpAppt, holidayArray);
+			let tmpArray = await reloadAppointmentDetails();
+			generateSlots(tmpArray, holidayArray);
 		} catch (e) {
 			console.log(e);
 			alert.error("Error cancelling appointment of "+cancelAppt.displayName);
@@ -1091,20 +1172,31 @@ async function handleAddAppointment(slot) {
 	
 	function DisplayPatientAppointments() {
 	return (
-	<Grid className={gClasses.noPadding} key="Appt" container alignItems="center" >
-	{apptArray.map( (a, index) => 
-		<Grid key={"Apt"+a.pid} item xs={12} sm={6} md={3} lg={3} >
-		<DisplayAppointmentBox 
-			appointment={a} 
-			button1={
-				<IconButton color={'secondary'} size="small" onClick={() => { handleCancelAppt(a)}}  >
-					<CancelIcon />
-				</IconButton>
-			}
-		/>
+	<Box className={gClasses.boxStyle} borderRadius={7} border={1} >
+	{(apptArray.length === 0) &&
+		<Grid className={gClasses.noPadding} key="Appt" container alignItems="center" >
+		<Grid key={"NoApt"} item xs={12} sm={12} md={12} lg={12} >
+			<Typography>No Appointment(s)</Typography>
 		</Grid>
-	)}
-	</Grid>	
+		</Grid>
+	}
+	{(apptArray.length > 0) &&
+		<Grid className={gClasses.noPadding} key="Appt" container alignItems="center" >
+		{apptArray.map( (a, index) => 
+			<Grid key={"Apt"+a.pid+index} item xs={12} sm={6} md={3} lg={3} >
+			<DisplayAppointmentBox 
+				appointment={a} 
+				button1={
+					<IconButton color={'secondary'} size="small" onClick={() => { handleCancelAppt(a)}}  >
+						<CancelIcon />
+					</IconButton>
+				}
+			/>
+			</Grid>
+		)}
+		</Grid>	
+	}
+	</Box>
 	)}
 	
 	function DisplayAllPatients() {
@@ -1113,7 +1205,12 @@ async function handleAddAppointment(slot) {
 	{patientArray.map( (m, index) => 
 		<Grid key={"PAT"+m.pid} item xs={12} sm={6} md={3} lg={3} >
 		<DisplayPatientBox 
-			patient={m} onClick={() => { handleSelectPatient(m)}} 
+			patient={m} 
+			button1={
+				<IconButton className={gClasses.blue} size="small" onClick={() => handleSelectPatient(m) }  >
+					<EventNoteIcon  />
+				</IconButton>
+			}
 		/>
 		</Grid>
 	)}
@@ -1158,7 +1255,8 @@ async function handleAddAppointment(slot) {
 		setCurrentPatientData(rec);
 		setSelectPatient(false);
 		await getAppointmentsByPid(rec.pid);
-		generateSlots(allPendingAppt, holidayArray);
+		let tmpArray = await reloadAppointmentDetails();
+		generateSlots(tmpArray, holidayArray);
 	}
 	
 	function handleAdd() {
@@ -1178,7 +1276,7 @@ async function handleAddAppointment(slot) {
 	async function handleAddEditSubmit() {
 		let myDate = patientDob.toDate();
 		let testAge = new Date().getFullYear() - myDate.getFullYear();
-		console.log(testAge, myDate);
+		//console.log(testAge, myDate);
 		if ((testAge >= 100) || (testAge <= 1)) return setRegisterStatus(1001);
 		
 		let myMobile = (patientMobile !== "") ? patientMobile : 0;
@@ -1186,8 +1284,8 @@ async function handleAddAppointment(slot) {
 		myEmail = encrypt(myEmail);
 		let dobStr = myDate.getFullYear() + MONTHNUMBERSTR[myDate.getMonth()] + DATESTR[myDate.getDate()];
 		
-		console.log(myEmail);
-		console.log("Addedit", patientName, dobStr, patientGender, myEmail, myMobile);
+		//console.log(myEmail);
+		//console.log("Addedit", patientName, dobStr, patientGender, myEmail, myMobile);
 		
 		let resp;
 		let myUrl;
@@ -1212,7 +1310,9 @@ async function handleAddAppointment(slot) {
 	
 
 
-	function handleMyAppt() {
+	async function handleMyAppt() {
+		let tmpArray = await reloadAppointmentDetails();
+		generateSlots(tmpArray, holidayArray);
 		setCurrentPatient("INFO")
 		setApptArray([]);
 	}
@@ -1238,14 +1338,13 @@ async function handleAddAppointment(slot) {
 					InputProps={{endAdornment: (<InputAdornment position="end"><SearchIcon/></InputAdornment>)}}
 				/>
 			</Grid>
-			<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
-				<Typography>Click button to add new patient</Typography>
+			<Grid key={"F4"} item xs={false} sm={false} md={3} lg={3} >
 			</Grid>
-			<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
+			<Grid key={"F5"} item xs={6} sm={6} md={1} lg={1} >
 				<VsButton name="New Patient" onClick={handleAdd} />
 				
 			</Grid>
-			<Grid key={"F6"} item xs={4} sm={4} md={2} lg={2} >
+			<Grid key={"F6"} item xs={6} sm={6} md={2} lg={2} >
 				<VsButton name="My Appointments" onClick={handleMyAppt}/> 
 			</Grid>
 			</Grid>
@@ -1264,10 +1363,10 @@ async function handleAddAppointment(slot) {
 			}
 			</Typography>	
 			<BlankArea />
-			{(apptArray.length > 0) &&
+			{(currentPatient !== "INFO") &&
 				<DisplayPatientAppointments />
 			}
-			{(apptArray.length === 0) &&
+			{(true) &&
 				<DisplayAvailableAppointments />
 			}
 			</Box>

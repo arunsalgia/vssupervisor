@@ -15,28 +15,6 @@ router.use('/', function(req, res, next) {
 // send list of in chunks of blocks.
 // Each Block will contain #medicines which is confgired in MEDBLOCK
 
-router.get('/add/:cid/:newMedicine/:desc/:precaution', async function(req, res, next) {
-  setHeader(res);
-  
-  var {cid, newMedicine, desc, precaution} = req.params;
-	
-	let id = getLoginName(newMedicine);
-  var tmp = await M_Medicine.findOne({cid: cid, id: id});
-  if (!tmp) {
-		mRec = new M_Medicine();
-		mRec.cid = cid;
-		mRec.id = id;
-		mRec.name = newMedicine;
-		mRec.description= desc;
-		mRec.precaution = precaution;
-		mRec.enabled = true;
-		mRec.save();
-    sendok(res, mRec);
-  }
-	else
-    senderr(res, 601, 'Medicine already in database.');
-});
-
 router.get('/add/:cid/:newMedicine', async function(req, res, next) {
   setHeader(res);
   
@@ -49,8 +27,6 @@ router.get('/add/:cid/:newMedicine', async function(req, res, next) {
 		mRec.cid = cid;
 		mRec.id = id;
 		mRec.name = newMedicine;
-		mRec.description= "";
-		mRec.precaution = "";
 		mRec.enabled = true;
 		mRec.save();
     sendok(res, mRec);
@@ -59,10 +35,10 @@ router.get('/add/:cid/:newMedicine', async function(req, res, next) {
     senderr(res, 601, 'Medicine already in database.');
 });
 
-router.get('/edit/:cid/:oldMedicineName/:newMedicineName/:desc/:precaution', async function(req, res, next) {
+router.get('/edit/:cid/:oldMedicineName/:newMedicineName', async function(req, res, next) {
   setHeader(res);
   
-  var {cid, oldMedicineName, newMedicineName, desc, precaution} = req.params;
+  var {cid, oldMedicineName, newMedicineName} = req.params;
 	let id;
 	var mRec;
 	
@@ -88,8 +64,6 @@ router.get('/edit/:cid/:oldMedicineName/:newMedicineName/:desc/:precaution', asy
 	// good. now update the details
 	mRec.id = new_lname;
 	mRec.name = newMedicineName;
-	mRec.description= desc;
-	mRec.precaution = precaution;
 	mRec.enabled = true;
 	mRec.save();
 	sendok(res, mRec);
@@ -117,22 +91,13 @@ router.get('/list/:cid', async function(req, res, next) {
   
   var { cid } = req.params;
 	
-	M_Medicine.find({cid: cid},  {name: 1, _id: 0, description: 1, precaution: 1}, function(err, objs) {
+	M_Medicine.find({cid: cid},  {name: 1, _id: 0}, function(err, objs) {
 		objs = _.sortBy(objs, 'name');
 		sendok(res, objs);
   });
 });
 
-router.get('/list/:cid', async function(req, res, next) {
-  setHeader(res);
-  
-  var { cid } = req.params;
-	
-	M_Medicine.find({cid: cid},  {name: 1, _id: 0, description: 1, precaution: 1}, function(err, objs) {
-		objs = _.sortBy(objs, 'name');
-		sendok(res, objs);
-  });
-});
+
 
 router.get('/listonlyname/:cid', async function(req, res, next) {
   setHeader(res);
@@ -144,6 +109,7 @@ router.get('/listonlyname/:cid', async function(req, res, next) {
 		sendok(res, objs);
   });
 });
+
 router.get('/alphabetlist/:cid/:myChar', async function(req, res, next) {
   setHeader(res);
   

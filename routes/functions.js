@@ -395,6 +395,31 @@ function checkDate(myDate) {
 		return (0);	// date is same
 }
 
+function generateOrder(year, month, date, hour, minute) {
+	let myOrder = ((year * 100 + month) * 100  + date)*100;
+	myOrder = (myOrder + hour)*100 + minute;
+	return myOrder;
+}
+
+function generateOrderByDate(d) {
+	let myOrder = ((d.getFullYear() * 100 + d.getMonth()) * 100  + d.getDate())*100;
+	myOrder = (myOrder + d.getHours())*100 + d.getMinutes();
+	return myOrder;
+}
+
+async function setOldPendingAppointment(cid, pid, newStatus) {
+	// get all pending appointment till just now
+	let myOrder = generateOrderByDate(new Date());
+	//console.log(myOrder);
+	let myFilter = { cid: cid, pid: pid, visit: VISITTYPE.pending, order: { $lte: myOrder} }
+	let myOldAppt = await M_Appointment.find(myFilter);
+	//console.log(myOldAppt);
+	for(let i=0; i<myOldAppt.length; ++i) {
+		myOldAppt[i].visit = newStatus;
+		await myOldAppt[i].save();
+	}
+}
+
 module.exports = {
 	ALPHABETSTR,
   getLoginName, getDisplayName,
@@ -415,4 +440,6 @@ module.exports = {
 	stringToBase64, base64ToString,
 	checkDate,
 	getNewPid, getCustomerNumber,
+	setOldPendingAppointment,
+	generateOrder, generateOrderByDate,
 }; 

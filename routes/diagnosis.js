@@ -19,7 +19,7 @@ router.get('/list/:cid', async function(req, res, next) {
 	//for(let i=0; i<allRecs.length; ++i) {
 	//	allRecs[i].name = stringToBase64(allRecs[i].name);
 	//}
-	console.log(allRecs);
+	//console.log(allRecs);
 	sendok(res, allRecs);
 });
 
@@ -38,7 +38,7 @@ router.post('/update/:cid/:infoMsg', async function(req, res, next) {
 		myRec.cid = cid;
 	};
 	myRec.name = infoMsg
-	console.log(myRec);
+	//console.log(myRec);
 	myRec.save();
 	
 	sendok(res, myRec);

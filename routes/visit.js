@@ -9,6 +9,8 @@ const {
 	svrToDbText, dbToSvrText,
 	getMaster, setMaster,
 	base64ToString,
+	setOldPendingAppointment,
+	generateOrder, generateOrderByDate,
 } = require('./functions'); 
 
 const MYFONT="Arial";
@@ -267,7 +269,7 @@ router.post('/update/:cid/:visitInfo', async function(req, res, next) {
   setHeader(res);
   var {cid, visitInfo} = req.params;
 	visitInfo = JSON.parse(visitInfo);
-	console.log(visitInfo);
+	//console.log(visitInfo);
 	
 	let myRec = await M_Visit.findOne({cid: cid, pid: visitInfo.pid, visitNumber: 0});
 	if (!myRec) {
@@ -279,16 +281,12 @@ router.post('/update/:cid/:visitInfo', async function(req, res, next) {
 	myRec.remarks = visitInfo.remark;
 	myRec.nextVisitTime = visitInfo.nextTime;
 	myRec.nextVisitUnit = visitInfo.nextUnit;
-	console.log(myRec)
+	//console.log(myRec)
 	myRec.save();
 	
 	// now check if any pending appointment of this patient
 	// if found, declare it as over by writing visit record id in appointment
-	let myAppts = await M_Appointment.find({cid: cid, pid: visitInfo.pid});
-	for(let i=0; i < myAppts.length; ++i) {
-		myAppts[i].visit = myRec._id;
-		myAppts[i].save();
-	}
+	setOldPendingAppointment(cid, visitInfo.pid, myRec._id)
 	
 	sendok(res, "Ok");
 	return;

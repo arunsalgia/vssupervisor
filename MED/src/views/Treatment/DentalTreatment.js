@@ -12,7 +12,7 @@ import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import VsList from "CustomComponents/VsList";
 import VsTeeth from "CustomComponents/VsTeeth";
-
+import VsTextValidator from "CustomComponents/VsTextValidator";
 import VsCheckBox from "CustomComponents/VsCheckBox";
 
 import { useLoading, Audio } from '@agney/react-loading';
@@ -84,7 +84,7 @@ SupportedMimeTypes, SupportedExtensions,
 str1by4, str1by2, str3by4, INR,
 HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR,
 ToothLeft, ToothRight,
-ToothNumber,
+ToothNumber, ToothRange,
 } from "views/globals.js";
 
 // icons
@@ -161,9 +161,10 @@ const useStyles = makeStyles((theme) => ({
 		paddingRight: '10px',
 	},
 	total: {
-		fontSize: theme.typography.pxToRem(15),
+		fontSize: theme.typography.pxToRem(18),
 		fontWeight: theme.typography.fontWeightBold,
 		paddingRight: '30px',
+		color: 'green',
 	},
     root: {
       width: '100%',
@@ -243,10 +244,6 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 
-let searchText = "";
-function setSearchText(sss) { searchText = sss;}
-
-
 var userCid;
 export default function DentalTreatment(props) {
   
@@ -323,7 +320,7 @@ export default function DentalTreatment(props) {
 	async function getPatientTreatment(patRec) {
 		let myArray = [];
 		try {
-			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/treatment/list/${userCid}/${patRec.pid}`)
+			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/dentaltreatment/list/${userCid}/${patRec.pid}`)
 			myArray = resp.data;
 		} catch (e) {
 			console.log(e)
@@ -364,7 +361,7 @@ export default function DentalTreatment(props) {
 	
 	function DisplayFunctionHeader() {
 	return (
-	<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 		<DisplayFunctionItem item="Treatment" />
 	</Grid>	
@@ -384,7 +381,7 @@ export default function DentalTreatment(props) {
 	function DisplayTreatmentDates() {
 		if (treatmentArray.length === 0) {
 			return (
-				<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
 				<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 					<Grid key={"VISIST"} item xs={12} sm={12} md={12} lg={12} >
 						<Typography className={classes.slotTitle} >
@@ -406,7 +403,7 @@ export default function DentalTreatment(props) {
 			myDate = `Treatment dated ${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()}`;
 		}
 		return (
-		<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
 		<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 			<Grid key={"LEFT1"} item xs={2} sm={2} md={2} lg={2} >	
 				<IconButton color={'primary'} onClick={() => {changIndex(-1)}}  >
@@ -562,6 +559,7 @@ export default function DentalTreatment(props) {
 	function ArunTreatment() {
 		if (treatmentArray.length === 0) return null;
 		let x = treatmentArray[treatmentIndex];
+		//console.log(x.treatment);
 		return (
 			<div> 
 			{(x.treatmentNumber === 0) && 
@@ -569,18 +567,40 @@ export default function DentalTreatment(props) {
 			}	
 			<Box borderColor="primary.main" border={1}>
 			{x.treatment.map( (un, index) => {
+				//console.log(un);
 				let arr = _.sortBy(un.toothArray);
-				let ttt = arr.toString();
+				//console.log(arr);
+				let ttt = "";
+				let tmp = arr.filter( t => t >= ToothRange.upperLeft.start &&
+					t <= ToothRange.upperLeft.end)
+				if (tmp.length > 0)
+					ttt += ((ttt.length > 0) ? " " : "") + "UL: " + tmp.toString();
+				
+				tmp = arr.filter( t => t >= ToothRange.upperRight.start &&
+					t <= ToothRange.upperRight.end)
+				if (tmp.length > 0)
+					ttt += ((ttt.length > 0) ? " " : "") + "UR: " + tmp.toString();
+				
+				tmp = arr.filter( t => t >= ToothRange.lowerLeft.start &&
+					t <= ToothRange.lowerLeft.end)
+				if (tmp.length > 0)
+					ttt += ((ttt.length > 0) ? " " : "") + "LL: " + tmp.toString();
+				
+				tmp = arr.filter( t => t >= ToothRange.lowerRight.start &&
+					t <= ToothRange.lowerRight.end)
+				if (tmp.length > 0)
+					ttt += ((ttt.length > 0) ? " " : "") + "LR: " + tmp.toString();
+				
 				return (
-					<Grid className={classes.noPadding} key={"NOTES"} container justify="center" alignItems="center" >
-					<Grid item xs={10} sm={3} md={3} lg={3} >
+					<Grid className={classes.noPadding} key={"NOTES"+index} container >
+					<Grid item align="left" xs={10} sm={3} md={3} lg={3} >
 						<Typography className={classes.heading}>{"Treatment: "+un.name}</Typography>
 					</Grid>
-					<Grid item xs={10} sm={3} md={6} lg={6} >
+					<Grid item align="left" xs={10} sm={3} md={7} lg={7} >
 						{/*\<DisplayTeeth toothArray={un.toothArray} />*/}
-						<Typography className={classes.heading}>{"Tooth: "+ttt}</Typography>
+						<Typography className={classes.heading}>{ttt}</Typography>
 					</Grid>
-					<Grid item xs={10} sm={2} md={2} lg={2} >
+					<Grid item align="right" xs={10} sm={1} md={1} lg={1} >
 						<Typography className={classes.heading}>{INR+un.amount}</Typography>
 					</Grid>
 					<Grid item xs={1} sm={1} md={1} lg={1} >
@@ -594,11 +614,17 @@ export default function DentalTreatment(props) {
 				)}
 			)}
 			</Box>
-			<Box borderColor="primary.main" border={1}>
-				<div align="right">
-					<Typography className={classes.total}>{"Total Professional Charges: "+INR+" "+_.sumBy(x.treatment, 'amount')}</Typography>
-				</div>
-			</Box>
+			{/*<Box borderColor="primary.main" border={1}>*/}
+			<Grid className={classes.noPadding} key={"PC"} container >
+			<Grid item align="right" xs={10} sm={10} md={10} lg={10} >
+			<Typography className={classes.total}>{"Total Professional Charges"}</Typography>
+			</Grid>
+			<Grid item align="right" xs={1} sm={1} md={1} lg={1} >
+			<Typography className={classes.heading}>{INR+" "+_.sumBy(x.treatment, 'amount')}</Typography>
+			</Grid>
+			<Grid item align="right" xs={1} sm={1} md={1} lg={1} />
+			</Grid>
+			{/*</Box>*/}
 			</div>
 		)}
 		
@@ -624,7 +650,7 @@ export default function DentalTreatment(props) {
 	function updateNewTreatment(sArray) {
 		let tmp = JSON.stringify({treatment: sArray});
 		let tmp1 = encodeURIComponent(tmp);
-		axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/treatment/update/${userCid}/${currentPatientData.pid}/${tmp1}`)
+		axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/dentaltreatment/update/${userCid}/${currentPatientData.pid}/${tmp1}`)
 	}	
 
 	
@@ -713,10 +739,14 @@ export default function DentalTreatment(props) {
 				{((isDrawerOpened === "ADDTREAT") ? "New Treatment" : "Edit Treatment")+` for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
-			<TextValidator required fullWidth color="primary"
+			{/*<TextValidator required fullWidth color="primary"
 				id="newName" label="Treatment type" name="newName"
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
+			/>*/}
+			<VsTextValidator type="text" label="Treatment type" value={emurName}
+				onChange={(event) => setEmurNameWithFilter(event.target.value)}
+				onClear={(event) => setEmurNameWithFilter("")}
 			/>
 			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
 			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsTreatTypeDelete} />
@@ -724,7 +754,7 @@ export default function DentalTreatment(props) {
 			<VsTeeth toothArray={emurToothArray} onClick={handleToothUpdate} />
 			<TextValidator required fullWidth color="primary" type="number" className={gClasses.vgSpacing} 
 				id="newName" label="Professional Charge" name="newName"
-				onChange={(event) => setEmurAmount(event.target.value)}
+				onChange={(event) => setEmurAmount(Number(event.target.value))}
 				value={emurAmount}
 				validators={['minNumber:100']}
         errorMessages={['Invalid Amount']}

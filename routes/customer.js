@@ -134,14 +134,14 @@ cron.schedule('5 0 * * *', async () => {
 	}
 
 	// STEP 5 ---> all treatment to be closed
-	let allOpenTreat = await M_Treatment.find({treatmentNumber: 0});
+	let allOpenTreat = await M_DentalTreatment.find({treatmentNumber: 0});
 	for(let i=0; i<allOpenTreat.length; ++i) {
 		let myRec = allOpenTreat[i];
 		let countQuery = [
 			{ $match: { cid: myRec.cid, pid: myRec.pid } },
 			{ $group: { _id: '$pid', count: { $sum: 1 } } }
 		];
-		let treatCount = await M_Treatment.aggregate(countQuery)
+		let treatCount = await M_DentalTreatment.aggregate(countQuery)
 		myRec.treatmentNumber = treatCount[0].count;
 		myRec.save();
 	}

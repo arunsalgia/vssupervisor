@@ -10,7 +10,7 @@ router.use('/', function(req, res, next) {
   // WalletRes = res;
   setHeader(res);
   if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
-	console.log("Hi");
+	//console.log("Hi");
   next('route');
 });
 
@@ -30,7 +30,7 @@ router.get('/oldset/:year/:month/:date/:desc', async function (req, res) {
   var {date, month, year, desc} = req.params;
 	
 	let hRec = await M_Holiday.findOne({date: date, month: month, year: year});
-	console.log(hRec);
+	//console.log(hRec);
 	
 	let imonth = Number(month);
 	let iyear = Number(year);
@@ -77,7 +77,7 @@ router.get('/monthly/:cid/:year/:month', async function (req, res) {
   var {cid, month, year } = req.params;
 	
 	let hRec = await M_Holiday.find({cid: cid, month: month, year: year}).sort({year: 1, month: 1, date: 1});
-	console.log(hRec);
+	//console.log(hRec);
 	sendok(res, hRec);
 });		
 
@@ -122,7 +122,7 @@ router.get('/test/:cid/:year/:month', async function (req, res) {
 	let eNum = new Date(iyear, imonth+1, 1);
 		
 	//price: { $lte: maxPrice || 1000000000, $gte: minPrice || 0 }
-	console.log(sNum, eNum);
+	//console.log(sNum, eNum);
 	let hRec = await M_Holiday.find( {cid: cid, holidayDate: {"$gte": sNum, "$lt": eNum} } );
 	sendok(res, hRec);
 });		

@@ -24,7 +24,7 @@ var bStyle =
 {padding: "5px 5px", margin: "2px 2px", 
 color: 'blue', 
 //backgroundColor: 'lightGrey',
-fontSize:'14px', 
+fontSize:'16px', 
 foneWeight: 'bold',
 borderRadius:7, 
 border: 2
@@ -36,7 +36,7 @@ let _delete = arunDelete;		//((props.onClick == null) ? dummy : props.onDelete;
 return (
 	<div align="left">
 	{props.listArray.map( item =>
-		<Box borderColor="black" borderRadius={7} border={1} >
+		<Box borderColor="black" borderRadius={20} border={1} >
 		<span style={bStyle} onClick={() => props.onSelect(item) } >
 			{item.name}
 		</span>

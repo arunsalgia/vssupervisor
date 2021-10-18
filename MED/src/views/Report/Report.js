@@ -746,37 +746,45 @@ export default function Document(props) {
 	function DisplayAllReports() {
 	return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-	<VsButton align="right" name="Add new Medical Report" onClick={addDoc} />
-	{/*<Typography align="left" className={classes.modalHeader}>
-		{"Medical Reports"}
-		</Typography>*/}
-	{(startLoading) &&
-				<Typography className={gClasses.title}>Loading report...</Typography>
-	}
-	<Grid className={gClasses.noPadding} key="AllDOCS" container alignItems="center" >
-	{documentArray.map( (d, index) => 
-		<Grid key={"DOC"+index} item xs={12} sm={6} md={3} lg={3} >
-		<DisplayDocumentDetails
-			document={d} 
-			button1={
-				<IconButton color="primary" size="small" onClick={() => {handleFileView(d)}} >
-					<VisibilityIcon	 />
-				</IconButton>	
-			}
-			button2={
-				<IconButton color="primary" size="small" onClick={() => {editDoc(d)}}  >
-					<EditIcon  />
-				</IconButton>
-			}
-			button3={
-				<IconButton color="secondary" size="small" onClick={() => {deleteDoc(d)}}  >
-					<CancelIcon  />
-				</IconButton>
-			}
-		/>
-		</Grid>
-	)}
-	</Grid>
+		<VsButton align="right" name="Add new Medical Report" onClick={addDoc} />
+		{(documentArray.length === 0) &&
+			<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
+				<Grid key={"VISIST"} item xs={12} sm={12} md={12} lg={12} >
+					<Typography className={gClasses.slotTitle} >
+						{"No Reports available"}
+					</Typography>
+				</Grid>
+			</Grid>	
+		}
+		{(startLoading) &&
+					<Typography className={gClasses.title}>Loading report...</Typography>
+		}
+		{(documentArray.length > 0) &&
+			<Grid className={gClasses.noPadding} key="AllDOCS" container alignItems="center" >
+			{documentArray.map( (d, index) => 
+				<Grid key={"DOC"+index} item xs={12} sm={6} md={3} lg={3} >
+				<DisplayDocumentDetails
+					document={d} 
+					button1={
+						<IconButton color="primary" size="small" onClick={() => {handleFileView(d)}} >
+							<VisibilityIcon	 />
+						</IconButton>	
+					}
+					button2={
+						<IconButton color="primary" size="small" onClick={() => {editDoc(d)}}  >
+							<EditIcon  />
+						</IconButton>
+					}
+					button3={
+						<IconButton color="secondary" size="small" onClick={() => {deleteDoc(d)}}  >
+							<CancelIcon  />
+						</IconButton>
+					}
+				/>
+				</Grid>
+			)}
+			</Grid>
+		}
 	</Box>
 	)}
 	

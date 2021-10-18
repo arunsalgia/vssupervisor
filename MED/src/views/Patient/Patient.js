@@ -129,11 +129,6 @@ const useStyles = makeStyles((theme) => ({
 		fontWeight: theme.typography.fontWeightBold,
 		color: "blue",
 	},
-	filterRadio: {
-		fontSize: theme.typography.pxToRem(14),
-		fontWeight: theme.typography.fontWeightBold,
-		color: '#000000',	
-	},
     root: {
       width: '100%',
     }, 
@@ -244,8 +239,8 @@ const addEditModal = (isMobile()) ? dynamicModal('90%') : dynamicModal('40%');
 const yesNoModal = dynamicModal('60%');
 
 
-let searchText = "";
-function setSearchText(sss) { searchText = sss;}
+//let searchText = "";
+//function setSearchText(sss) { searchText = sss;}
 
 var userCid;
 var customerData = JSON.parse(sessionStorage.getItem("customerData"));
@@ -257,6 +252,8 @@ export default function Patient() {
 	const alert = useAlert();
 	//customerData = sessionStorage.getItem("customerData");
 
+	const [searchText, setSearchText] = useState("");
+	
 	const [currentPatient, setCurrentPatient] = useState("");
 	const [currentPatientData, setCurrentPatientData] = useState({});
 
@@ -302,7 +299,7 @@ export default function Patient() {
 			}
 		}
 		userCid = sessionStorage.getItem("cid");
-		sessionStorage.setItem("YESNOMODAL", "");
+		//sessionStorage.setItem("YESNOMODAL", "");
 		us();
   }, [])
 
@@ -388,7 +385,7 @@ export default function Patient() {
 	// handle confirmation of YES / No
 	
 	function handleAppointmentConfirm(rec) {
-		sessionStorage.setItem("shareData", JSON.stringify(rec));
+		//sessionStorage.setItem("shareData", JSON.stringify(rec));
 		setTab(process.env.REACT_APP_APPT);
 	}
 	
@@ -451,17 +448,17 @@ export default function Patient() {
 	
 	function handleAppt(rec) {
 		console.log("Appt");
-		sessionStorage.setItem("shareData", JSON.stringify(rec));
+		//sessionStorage.setItem("shareData", JSON.stringify(rec));
 		setTab(process.env.REACT_APP_APPT);
 	}
 	
 	function handleVisit(rec) {
-		sessionStorage.setItem("shareData", JSON.stringify(rec));
+		//sessionStorage.setItem("shareData", JSON.stringify(rec));
 		setTab(process.env.REACT_APP_VISIT);
 	}
 	
 	function handleReport(rec) {
-		sessionStorage.setItem("shareData", JSON.stringify(rec));
+		//sessionStorage.setItem("shareData", JSON.stringify(rec));
 		setTab(process.env.REACT_APP_REPORT);
 	}
 	
@@ -515,30 +512,30 @@ export default function Patient() {
 
 	function DisplayPatientHeader() {
 	return (
-	<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="left">
 			<Grid key={"PAT"} item xs={12} sm={6} md={4} lg={4} >
 				<Typography>
 					<span className={gClasses.patientInfo}>Patient: </span>
-					<span className={gClasses.patientInfo2}>{currentPatient+"( Id: "+currentPatientData.pid+" )"}</span>
+					<span className={gClasses.patientInfo2Green}>{currentPatient+"( Id: "+currentPatientData.pid+" )"}</span>
 				</Typography>
 			</Grid>
 			<Grid key={"PAT1"} item xs={12} sm={6} md={2} lg={2} >
 				<Typography>
 					<span className={gClasses.patientInfo}>Age: </span>
-					<span className={gClasses.patientInfo2}>{dispAge(currentPatientData.age, currentPatientData.gender)}</span>
+					<span className={gClasses.patientInfo2Green}>{dispAge(currentPatientData.age, currentPatientData.gender)}</span>
 				</Typography>
 			</Grid>
 			<Grid key={"PAT2"} item xs={12} sm={6} md={3} lg={3} >
 				<Typography>
 					<span className={gClasses.patientInfo}>Email: </span>
-					<span className={gClasses.patientInfo2}>{dispEmail(currentPatientData.email)}</span>
+					<span className={gClasses.patientInfo2Green}>{dispEmail(currentPatientData.email)}</span>
 				</Typography>
 			</Grid>		
 			<Grid key={"PAT3"} item xs={12} sm={6} md={3} lg={3} >
 				<Typography>
 					<span className={gClasses.patientInfo}>Contact: </span>
-					<span className={gClasses.patientInfo2}>{dispMobile(currentPatientData.mobile)}</span>
+					<span className={gClasses.patientInfo2Green}>{dispMobile(currentPatientData.mobile)}</span>
 				</Typography>
 			</Grid>	
 	</Grid>	
@@ -559,14 +556,14 @@ export default function Patient() {
 	)}
 	
 	async function setSelection(item) {
-		sessionStorage.setItem("shareData",JSON.stringify(currentPatientData));
+		//sessionStorage.setItem("shareData",JSON.stringify(currentPatientData));
 		setCurrentSelection(item);
 	}
 	
 	
 	function DisplayFunctionHeader() {
 	return (
-	<Box className={gClasses.boxStyle} borderColor="black" border={1} >
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 		<DisplayFunctionItem item="Investigation" />
 		<DisplayFunctionItem item="Report" />
@@ -745,9 +742,9 @@ export default function Patient() {
 				<RadioGroup row aria-label="radioselection" name="radioselection" value={radioValue} 
 					onChange={() => {setRadioValue(event.target.value); setPatientGender(event.target.value); }}
 				>
-				<FormControlLabel className={classes.filterRadio} value="Male" 		control={<Radio color="primary"/>} label="Male" />
-				<FormControlLabel className={classes.filterRadio} value="Female" 	control={<Radio color="primary"/>} label="Female" />
-				<FormControlLabel className={classes.filterRadio} value="Other"   control={<Radio color="primary"/>} label="Other" />
+				<FormControlLabel className={gClasses.filterRadio} value="Male" 		control={<Radio color="primary"/>} label="Male" />
+				<FormControlLabel className={gClasses.filterRadio} value="Female" 	control={<Radio color="primary"/>} label="Female" />
+				<FormControlLabel className={gClasses.filterRadio} value="Other"   control={<Radio color="primary"/>} label="Other" />
 			</RadioGroup>
 			</FormControl>
 			<TextValidator   fullWidth   className={gClasses.vgSpacing} 

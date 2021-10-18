@@ -864,3 +864,15 @@ export function vsDialog(title, msg, yesB, noB) {
 	option.buttons[1] = noB;
 	confirmAlert(option);
 }
+
+export function generateOrder(year, month, date, hour, minute) {
+	let myOrder = ((year * 100 + month) * 100  + date)*100;
+	myOrder = (myOrder + hour)*100 + minute;
+	return myOrder;
+}
+
+export function generateOrderByDate(d) {
+	let myOrder = ((d.getFullYear() * 100 + d.getMonth()) * 100  + d.getDate())*100;
+	myOrder = (myOrder + d.getHours())*100 + d.getMinutes();
+	return myOrder;
+}
