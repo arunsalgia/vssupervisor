@@ -140,13 +140,6 @@ const useStyles = makeStyles((theme) => ({
 		fontWeight: theme.typography.fontWeightBold,
 		margin: "5px",
 	},
-	slotTitle: {
-		color: 'green',
-		fontSize: theme.typography.pxToRem(28),
-		fontWeight: theme.typography.fontWeightBold,
-		padding: "10px 10px", 
-		margin: "10px 10px", 
-	},
 	patientName: {
 		fontSize: theme.typography.pxToRem(16),
 		fontWeight: theme.typography.fontWeightBold,	
@@ -384,7 +377,7 @@ export default function DentalTreatment(props) {
 				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
 				<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 					<Grid key={"VISIST"} item xs={12} sm={12} md={12} lg={12} >
-						<Typography className={classes.slotTitle} >
+						<Typography className={gClasses.indexSelection} >
 							{"No Treatment history available"}
 						</Typography>
 					</Grid>
@@ -411,7 +404,7 @@ export default function DentalTreatment(props) {
 				</IconButton>
 			</Grid>
 			<Grid key={"VISIST"} item xs={8} sm={8} md={8} lg={8} >
-				<Typography className={classes.slotTitle} >
+				<Typography className={gClasses.indexSelection} >
 					{myDate}
 				</Typography>
 			</Grid>

@@ -9,6 +9,13 @@ import { makeStyles } from '@material-ui/core/styles';
 
 
 const globalStyles = makeStyles((theme) => ({
+	indexSelection: {
+		color: 'green',
+		fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		padding: "2px 2px", 
+		margin: "2px 2px", 
+	},
 	filterRadio: {
 		fontSize: theme.typography.pxToRem(14),
 		fontWeight: theme.typography.fontWeightBold,

@@ -302,7 +302,7 @@ export default function Visit(props) {
 			<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 			<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 				<Grid key={"VISIST"} item xs={12} sm={12} md={12} lg={12} >
-					<Typography className={classes.slotTitle} >
+					<Typography className={gClasses.indexSelection} >
 						{"No Investigation history available"}
 					</Typography>
 				</Grid>
@@ -328,7 +328,7 @@ export default function Visit(props) {
 			</IconButton>
 		</Grid>
 		<Grid key={"VISIST"} item xs={8} sm={8} md={8} lg={8} >
-			<Typography className={classes.slotTitle} >
+			<Typography className={gClasses.indexSelection} >
 				{myDate}
 			</Typography>
 		</Grid>

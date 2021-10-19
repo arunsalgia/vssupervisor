@@ -62,7 +62,7 @@ import Report from 'views/Report/Report';
 import Visit  from 'views/Visit/Visit';
 import Investigation from 'views/Investigation/Investigation';
 import DentalTreatment from  'views/Treatment/DentalTreatment';
-
+import ProfCharge from 'views/ProfCharge/ProfCharge';
 import {
 WEEKSTR, MONTHSTR, SHORTMONTHSTR, DATESTR, MONTHNUMBERSTR,
 } from 'views/globals';
@@ -696,9 +696,6 @@ export default function Patient() {
 			{((currentSelection === "Treatment") && (customerData.type !== "Dentist")) &&
 				<Typography>Aiyoo gochi hai gochi!!!!</Typography>
 			}
-			{(currentSelection === "Payment") &&
-				<Typography>Payment feature to be provided</Typography>
-			}
 			{(currentSelection === "Investigation") &&
 				<Investigation patient={currentPatientData} />
 			}
@@ -707,6 +704,9 @@ export default function Patient() {
 			}
 			{(currentSelection === "Visit") &&
 				<Visit patient={currentPatientData} />
+			}
+			{(currentSelection === "Payment") &&
+				<ProfCharge patient={currentPatientData} />
 			}
 			</div>
 		}

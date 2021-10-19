@@ -44,9 +44,13 @@ router.post('/update/:cid/:pid/:newInfo', async function(req, res, next) {
 		let tmp = await M_ProfCharge.find({}).limit(1).sort({tid: -1});
 		myProfChargeRec.tid = (tmp.length > 0) ? tmp[0].tid + 1 : "1";
 	}
-	myProfChargeRec.description = "professional charges dated 19-10-2021";
-	myProfChargeRec.date = new Date();
-	myProfChargeRec.amount = _.sumBy(newInfo.treatment, 'amount');
+	myProfChargeRec.description = "Professional charges dated " +
+		DATESTR[iRec.treatmentDate.getDate()] + "/" +
+		MONTHNUMBERSTR[iRec.treatmentDate.getMonth()] + "/" +
+		iRec.treatmentDate.getFullYear();
+	myProfChargeRec.date = iRec.treatmentDate;
+	myProfChargeRec.amount = -(_.sumBy(newInfo.treatment, 'amount'));
+	myProfChargeRec.treatmentDetails = _.map(newInfo.treatment,  o => _.pick(o, ['name', 'amount']));
 	myProfChargeRec.save();
 	
 	sendok(res, 'Done');
