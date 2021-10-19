@@ -9,10 +9,12 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
+
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import VsList from "CustomComponents/VsList";
 import VsCheckBox from "CustomComponents/VsCheckBox";
+import VsTextFilter from "CustomComponents/VsTextFilter";
 
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
@@ -1421,11 +1423,15 @@ export default function Visit(props) {
 			</Typography>
 			{(false) && <VsButton name="Select Medicine" align="right" onClick={() => setIsListDrawer("LIST")} />}
 			<BlankArea />
-			<TextValidator required fullWidth color="primary"
+			{/*<TextValidator required fullWidth color="primary"
 				id="newName" label="Medicine" name="newName"
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
-			/>
+			/>*/}
+			<VsTextFilter type="text" label="Medicine" value={emurName}
+				onChange={(event) => setEmurNameWithFilter(event.target.value)}
+				onClear={(event) => setEmurNameWithFilter("")}
+			/>	
 			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
 			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsMedicineDelete} />
 			<BlankArea />
@@ -1523,11 +1529,15 @@ export default function Visit(props) {
 				{((isDrawerOpened === "ADDNOTE") ? "New Note" : "Edit Note")+` for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
-			<TextValidator required fullWidth color="primary"
+			{/*<TextValidator required fullWidth color="primary"
 				id="newName" label="Note" name="newName"
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
-			/>
+			/>*/}
+			<VsTextFilter type="text" label="Note" value={emurName}
+				onChange={(event) => setEmurNameWithFilter(event.target.value)}
+				onClear={(event) => setEmurNameWithFilter("")}
+			/>				
 			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
 			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsNoteDelete} />
 			<ModalResisterStatus />
@@ -1541,11 +1551,15 @@ export default function Visit(props) {
 				{((isDrawerOpened === "ADDREM") ? "New Remark" : "Edit Remark")+` for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
-			<TextValidator required fullWidth color="primary"
+			{/*<TextValidator required fullWidth color="primary"
 				id="newName" label="Remark" name="newName"
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
-			/>
+			/>*/}
+			<VsTextFilter type="text" label="Remark" value={emurName}
+				onChange={(event) => setEmurNameWithFilter(event.target.value)}
+				onClear={(event) => setEmurNameWithFilter("")}
+			/>			
 			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
 			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsRemarkDelete} />
 			<ModalResisterStatus />

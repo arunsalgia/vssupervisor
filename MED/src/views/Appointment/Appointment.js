@@ -26,8 +26,11 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Box from '@material-ui/core/Box';
 import Modal from 'react-modal';
+
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel"
+import VsTextSearch from "CustomComponents/VsTextSearch";
+
 import { borders } from '@material-ui/system';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormLabel from '@material-ui/core/FormLabel';
@@ -242,7 +245,7 @@ const useStyles = makeStyles((theme) => ({
 		modalHeader: {
 			fontSize: theme.typography.pxToRem(20),
 			fontWeight: theme.typography.fontWeightBold,
-			color: blue[700]
+			color: 'blue',
 		},
 		messageText: {
 			color: '#4CC417',
@@ -1176,7 +1179,7 @@ export default function Appointment() {
 	{(apptArray.length === 0) &&
 		<Grid className={gClasses.noPadding} key="Appt" container alignItems="center" >
 		<Grid key={"NoApt"} item xs={12} sm={12} md={12} lg={12} >
-			<Typography>No Appointment(s)</Typography>
+			<div align="left"><Typography>No Appointment</Typography></div>
 		</Grid>
 		</Grid>
 	}
@@ -1332,11 +1335,15 @@ export default function Appointment() {
 			<Grid className={gClasses.vgSpacing} key="PatientFilter" container alignItems="center" >
 			<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
 			<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
-				<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
+				{/*<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
 					defaultValue={searchText}
 					onChange={(event) => filterPatients(event.target.value)}
 					InputProps={{endAdornment: (<InputAdornment position="end"><SearchIcon/></InputAdornment>)}}
-				/>
+				/>*/}
+				<VsTextSearch label="Search Patient by name or Id" value={searchText}
+					onChange={(event) => filterPatients(event.target.value)}
+					onClear={(event) => filterPatients("")}
+				/>				
 			</Grid>
 			<Grid key={"F4"} item xs={false} sm={false} md={3} lg={3} >
 			</Grid>

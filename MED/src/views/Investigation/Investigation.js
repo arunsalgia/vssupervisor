@@ -7,10 +7,13 @@ import SwitchBtn from '@material-ui/core/Switch';
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
+
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import VsList from "CustomComponents/VsList";
 import VsCheckBox from "CustomComponents/VsCheckBox";
+import VsTextFilter from "CustomComponents/VsTextFilter";
+
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
@@ -797,10 +800,14 @@ export default function Visit(props) {
 				{((isDrawerOpened === "ADDSYM") ? "Add Symptom" : "Edit Symptom")+` for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
-			<TextValidator required fullWidth color="primary"
+			{/*<TextValidator required fullWidth color="primary"
 				id="newName" label="Symptom" name="newName"
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
+			/>*/}
+			<VsTextFilter type="text" label="Symptom" value={emurName}
+				onChange={(event) => setEmurNameWithFilter(event.target.value)}
+				onClear={(event) => setEmurNameWithFilter("")}
 			/>
 			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
 			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsSymptomDelete} />
@@ -816,11 +823,15 @@ export default function Visit(props) {
 				{((isDrawerOpened === "ADDDIAG") ? "New Diagnosis" : "Edit Diagnosis")+` for ${currentPatient}`}
 			</Typography>
 			<BlankArea />
-			<TextValidator required fullWidth color="primary"
+			{/*<TextValidator required fullWidth color="primary"
 				id="newName" label="Diagnosis" name="newName"
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
-			/>
+			/>*/}
+			<VsTextFilter type="text" label="Diagnosis" value={emurName}
+				onChange={(event) => setEmurNameWithFilter(event.target.value)}
+				onClear={(event) => setEmurNameWithFilter("")}
+			/>			
 			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
 			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsDiagnosisDelete} />
 			<ModalResisterStatus />

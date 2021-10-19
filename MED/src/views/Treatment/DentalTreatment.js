@@ -12,7 +12,7 @@ import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import VsList from "CustomComponents/VsList";
 import VsTeeth from "CustomComponents/VsTeeth";
-import VsTextValidator from "CustomComponents/VsTextValidator";
+import VsTextFilter from "CustomComponents/VsTextFilter";
 import VsCheckBox from "CustomComponents/VsCheckBox";
 
 import { useLoading, Audio } from '@agney/react-loading';
@@ -744,7 +744,7 @@ export default function DentalTreatment(props) {
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				value={emurName}
 			/>*/}
-			<VsTextValidator type="text" label="Treatment type" value={emurName}
+			<VsTextFilter type="text" label="Treatment type" value={emurName}
 				onChange={(event) => setEmurNameWithFilter(event.target.value)}
 				onClear={(event) => setEmurNameWithFilter("")}
 			/>

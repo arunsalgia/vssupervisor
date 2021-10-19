@@ -7,8 +7,11 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SwitchBtn from '@material-ui/core/Switch';
 import Modal from 'react-modal';
 import Box from '@material-ui/core/Box';
+
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
+import VsTextSearch from "CustomComponents/VsTextSearch";
+
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import FormControl from '@material-ui/core/FormControl';
@@ -653,7 +656,7 @@ export default function Patient() {
 			<Grid className={gClasses.vgSpacing} key="PatientFilter" container alignItems="center" >
 				<Grid key={"F1"} item xs={false} sm={false} md={2} lg={2} />
 				<Grid key={"F2"} item xs={12} sm={12} md={4} lg={4} >
-				<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
+					{/*<TextField id="filter"  padding={5} fullWidth label="Search Patient by name or Id" 
 					value={searchText}
 					onChange={(event) => filterPatients(event.target.value)}
 					InputProps={
@@ -665,6 +668,10 @@ export default function Patient() {
 								)
 						}
 					}
+					/>*/}
+				<VsTextSearch label="Search Patient by name or Id" value={searchText}
+					onChange={(event) => filterPatients(event.target.value)}
+					onClear={(event) => filterPatients("")}
 				/>
 				</Grid>
 				<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
@@ -687,7 +694,7 @@ export default function Patient() {
 				<DentalTreatment patient={currentPatientData} />
 			}
 			{((currentSelection === "Treatment") && (customerData.type !== "Dentist")) &&
-				<Typography>Aiyoo gochi</Typography>
+				<Typography>Aiyoo gochi hai gochi!!!!</Typography>
 			}
 			{(currentSelection === "Payment") &&
 				<Typography>Payment feature to be provided</Typography>
