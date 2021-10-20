@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/static/css/main.2a9faa44.chunk.css",
-    "main.js": "/static/js/main.c34bf48a.chunk.js",
-    "main.js.map": "/static/js/main.c34bf48a.chunk.js.map",
+    "main.js": "/static/js/main.3f6385e3.chunk.js",
+    "main.js.map": "/static/js/main.3f6385e3.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.f59117a2.js",
     "runtime-main.js.map": "/static/js/runtime-main.f59117a2.js.map",
     "static/css/2.0a2d92ac.chunk.css": "/static/css/2.0a2d92ac.chunk.css",
@@ -12,7 +12,7 @@
     "static/css/2.0a2d92ac.chunk.css.map": "/static/css/2.0a2d92ac.chunk.css.map",
     "static/css/main.2a9faa44.chunk.css.map": "/static/css/main.2a9faa44.chunk.css.map",
     "static/js/2.e3cda1b0.chunk.js.LICENSE.txt": "/static/js/2.e3cda1b0.chunk.js.LICENSE.txt",
-    "static/js/main.c34bf48a.chunk.js.LICENSE.txt": "/static/js/main.c34bf48a.chunk.js.LICENSE.txt",
+    "static/js/main.3f6385e3.chunk.js.LICENSE.txt": "/static/js/main.3f6385e3.chunk.js.LICENSE.txt",
     "static/media/material-icons.css": "/static/media/MaterialIcons-Regular.cff684e5.woff2"
   },
   "entrypoints": [
@@ -20,6 +20,6 @@
     "static/css/2.0a2d92ac.chunk.css",
     "static/js/2.e3cda1b0.chunk.js",
     "static/css/main.2a9faa44.chunk.css",
-    "static/js/main.c34bf48a.chunk.js"
+    "static/js/main.3f6385e3.chunk.js"
   ]
 }

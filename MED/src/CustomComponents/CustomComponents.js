@@ -873,7 +873,7 @@ export function DisplayAppointmentBox(props) {
 return (
 	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 		<Typography> 
-		<span className={gClasses.patientName}>{"Appointment: "}</span>
+		<span className={gClasses.patientName}>{"Appt.: "}</span>
 		<span className={gClasses.patientInfo2}>{myDate+" "+myTime}</span>
 		<span className={gClasses.patientInfo2}>
 				{(!_button1) && props.button1}
