@@ -525,23 +525,8 @@ export default function Appointment() {
 			}
 		}
 		const getAllMyPatients  = async () => {
-			let bkpAllPatients = [];
-			try {
-				//console.log("in patient try");
-				bkpAllPatients = JSON.parse(localStorage.getItem("vdBkpPatients"+userCid));
-				//setPatientFilter(bkpAllPatients, "");
-			} catch {
-				console.log("in patient catch");
-				// no action required
-			}
-			finally {
-				//console.log("in patient finally");
-				let ppp = await getAllPatients(userCid);
-				if (ppp.length === 0) ppp = bkpAllPatients;
-				//setPatientMasterArray(ppp);
-				//setPatientFilter(ppp, "");
-				return ppp;				
-			}
+			let ppp = await getAllPatients(userCid);
+			return ppp;				
 		}
 		const makeSlots  = async () => {
 			let allHolidays = await PgetAllHolidays;
@@ -551,6 +536,9 @@ export default function Appointment() {
 		const checkFromPatient = async () => {
 			let ppp = await PgetAllMyPatients;	
 			setPatientMasterArray(ppp);
+			setSearchText("");
+			setPatientFilter(ppp, "");
+			/*** Now directly called form button and not from patient etc.			
 			try {
 				// check if has come from patient view.
 				let dirPatient = JSON.parse(sessionStorage.getItem("shareData"));
@@ -570,6 +558,7 @@ export default function Appointment() {
 				//setCurrentPatientData({});
 				//setCurrentPatient("");
 			} 
+			***/
 		}	
 		
 		// fetch data 1 by 1 
@@ -608,6 +597,74 @@ export default function Appointment() {
 		}
 		setAllTimeSlots(slotData);
 		setCurrentIndex(0);
+	}
+	
+	function setNewCurrentIndex(idx) {
+		let itIsToday = false;
+		let today = new Date();
+		if (idx === 0) {
+			//console.log(idx, allTimeSlots[idx].date, allTimeSlots[idx].month, allTimeSlots[idx].year);
+			if ((allTimeSlots[idx].date === today.getDate()) &&
+				(allTimeSlots[idx].month === today.getMonth()) &&
+				(allTimeSlots[idx].year === today.getFullYear())) {
+				itIsToday = true;
+				
+			}
+		}
+		
+		if (itIsToday) {
+			//console.log("It is today", itIsToday);
+			let currentSlot = [].concat(allTimeSlots);
+			let currentOrder = generateOrderByDate(today);
+			// update morning slots
+			for(let i=0; i<currentSlot[idx].morningSlots.length; ++i) {
+				if (currentSlot[idx].morningSlots[i].visit !== "available") continue;
+				//console.log(currentSlot[idx].morningSlots[i]);
+				let requestedOrder = generateOrder(
+					currentSlot[idx].morningSlots[i].year,
+					currentSlot[idx].morningSlots[i].month,
+					currentSlot[idx].morningSlots[i].date,
+					currentSlot[idx].morningSlots[i].hour,
+					currentSlot[idx].morningSlots[i].minute);
+					
+					//console.log(requestedOrder, currentOrder); 
+					if (requestedOrder > currentOrder) break;
+					currentSlot[idx].morningSlots[i].name = "-"
+					currentSlot[idx].morningSlots[i].visit = 'expired';
+			}
+			// update afternoon slots
+			for(let i=0; i<currentSlot[idx].afternoonSlots.length; ++i) {
+				if (currentSlot[idx].afternoonSlots[i].visit !== "available") continue;
+				let requestedOrder = generateOrder(
+					currentSlot[idx].afternoonSlots[i].year,
+					currentSlot[idx].afternoonSlots[i].month,
+					currentSlot[idx].afternoonSlots[i].date,
+					currentSlot[idx].afternoonSlots[i].hour,
+					currentSlot[idx].afternoonSlots[i].minute);
+					
+					if (requestedOrder > currentOrder) break;
+					currentSlot[idx].afternoonSlots[i].name = "-"
+					currentSlot[idx].afternoonSlots[i].visit = 'expired';
+			}
+			// update evening slots
+			for(let i=0; i<currentSlot[idx].eveningSlots.length; ++i) {
+				if (currentSlot[idx].eveningSlots[i].visit !== "available") continue;
+				let requestedOrder = generateOrder(
+					currentSlot[idx].eveningSlots[i].year,
+					currentSlot[idx].eveningSlots[i].month,
+					currentSlot[idx].eveningSlots[i].date,
+					currentSlot[idx].eveningSlots[i].hour,
+					currentSlot[idx].eveningSlots[i].minute);
+					
+					if (requestedOrder > currentOrder) break;
+					currentSlot[idx].eveningSlots[i].name = "-"
+					currentSlot[idx].eveningSlots[i].visit = 'expired';
+			}
+		
+			// now all done. Update all time slots
+			setAllTimeSlots(currentSlot);
+		}
+		setCurrentIndex(idx);
 	}
 	
 	// returns true if appointment of given time
@@ -695,10 +752,12 @@ export default function Appointment() {
 			}
 		}
 	
-		return {dateTime: d, year: myYear, month: myMonth, date: myDate,
+		let retValue = {dateTime: d, year: myYear, month: myMonth, date: myDate,
 			day: myDay, morningSlots: morningSlots, afternoonSlots: afternoonSlots,
 			eveningSlots: eveningSlots
-		}
+		};
+		//console.log(retValue);
+		return retValue;
 	}
 	
 	function clinicOff(d, myHoildays) {
@@ -825,6 +884,7 @@ export default function Appointment() {
     )
   }
 
+/*
 	async function selectFilter() {
 		//console.log("Filter:", searchText);
 		getPatientList(searchText);
@@ -856,11 +916,11 @@ export default function Appointment() {
 		}
 	}
 	
-	//=================
+*/
 	
 	
 	
-	async function handleSelectPatient(rec) {
+	async function junkandleSelectPatient_junk(rec) {
 		let tmpArray = await reloadAppointmentDetails();
 		generateSlots(tmpArray, holidayArray);
 		setSelectPatient(false);
@@ -913,6 +973,7 @@ export default function Appointment() {
 	
 
 	async function handleAddAppointment(slot) {	
+		// check if appoint time before current time. If yes then do not allow.
 		let myOrder = generateOrder(slot.year, slot.month, slot.date, slot.hour, slot.minute)
 		let currentValidOrder = generateOrderByDate(new Date());
 		if (myOrder < currentValidOrder) {
@@ -950,8 +1011,38 @@ export default function Appointment() {
 			tmpArray=[resp.data].concat(allPendingAppt);
 			tmpArray = _.sortBy(tmpArray, ['order']);
 			setAllPendingAppt(tmpArray);
-			let xxx = await reloadAppointmentDetails();
-			generateSlots(xxx, holidayArray);
+
+			// update slot as pending
+			if (true) {
+				//console.log(currentIndex);
+				
+				let myTmpSlots = [].concat(allTimeSlots);
+				// check if add apt is in morning
+				let ttt = myTmpSlots[currentIndex].morningSlots.find(x => x.hour === slot.hour &&
+					x.minute === slot.minute);
+				//console.log("morning",ttt);
+				if (ttt) {
+					ttt.name = currentPatientData.displayName
+					ttt.visit = 'pending';
+				}
+
+				ttt = myTmpSlots[currentIndex].afternoonSlots.find(x => x.hour === slot.hour &&
+					x.minute === slot.minute);
+				//console.log("afternoon",ttt);
+				if (ttt) {
+					ttt.name = currentPatientData.displayName
+					ttt.visit = 'pending';
+				}
+				
+				ttt = myTmpSlots[currentIndex].eveningSlots.find(x => x.hour === slot.hour &&
+					x.minute === slot.minute);
+				//console.log("evening",ttt);
+				if (ttt) {
+					ttt.name = currentPatientData.displayName
+					ttt.visit = 'pending';
+				}	
+				setAllTimeSlots(myTmpSlots);
+			}	
 		} catch (e) {
 			console.log(e);
 			alert.error("Error setting appointment of "+currentPatientData.displayName);
@@ -982,7 +1073,7 @@ export default function Appointment() {
 		</Grid>
 		{allTimeSlots.map( (t, index) => {
 			let dStr = (compareDate(t.dateTime, new Date()) !== 0) 
-				? t.date + "/" + (t.month + 1) + "/" + t.year
+				? DATESTR[t.date] + "/" + MONTHNUMBERSTR[t.month] + "/" + t.year
 				: "Today";
 			let freeSlots = t.morningSlots.filter(x => x.visit === "available").length + 
 				t.afternoonSlots.filter(x => x.visit === "available").length +
@@ -991,9 +1082,9 @@ export default function Appointment() {
 		return (
 		<Grid key={"TIME"+index} item xs={3} sm={3} md={2} lg={2} >
 			<div>
-			<Typography className={myClass} onClick={() => {setCurrentIndex(index)}}>{dStr}</Typography>
-			<Typography className={myClass} onClick={() => {setCurrentIndex(index)}}>{WEEKSTR[t.day]}</Typography>
-			<Typography className={myClass} onClick={() => {setCurrentIndex(index)}}>{freeSlots+" free Slots"}</Typography>
+			<Typography className={myClass} onClick={() => {setNewCurrentIndex(index)}}>{dStr}</Typography>
+			<Typography className={myClass} onClick={() => {setNewCurrentIndex(index)}}>{WEEKSTR[t.day]}</Typography>
+			<Typography className={myClass} onClick={() => {setNewCurrentIndex(index)}}>{freeSlots+" free Slots"}</Typography>
 			</div>
 		</Grid>
 		)}
@@ -1146,6 +1237,16 @@ export default function Appointment() {
 		);
 	}
 	
+	function getSlotIndex(year, month, date) {
+		for(let i=0; i<allTimeSlots.length; ++i) {
+			if ((allTimeSlots[i].date === date) && 
+				(allTimeSlots[i].month === month) &&
+				(allTimeSlots[i].year === year))
+			return (i)
+		}
+		return -1;
+	}
+	
 	async function handleCancelApptConfirm(cancelAppt) {
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/cancel/${userCid}/${cancelAppt.pid}/${cancelAppt.order}`;
@@ -1159,14 +1260,55 @@ export default function Appointment() {
 				);
 			setApptArray(tmpAppt)
 			
-			// now remove from all pending appt list
+			// now remove from all pending apt list
 			tmpAppt = allPendingAppt.filter(x => 
 				x.pid	!== cancelAppt.pid ||  
 				x.order !== cancelAppt.order 
 				);
 			setAllPendingAppt(tmpAppt);
-			let tmpArray = await reloadAppointmentDetails();
-			generateSlots(tmpArray, holidayArray);
+			//let tmpArray = await reloadAppointmentDetails();
+			//generateSlots(tmpArray, holidayArray);
+						
+			let slotIndex = getSlotIndex(cancelAppt.year, cancelAppt.month, cancelAppt.date);
+			if (slotIndex >= 0) {
+				let cancelOrder = generateOrder(cancelAppt.year, cancelAppt.month, cancelAppt.date,
+					cancelAppt.hour, cancelAppt.minute);
+				let currentOrder = generateOrderByDate(new Date());
+				let hasExpired = (cancelOrder <= currentOrder);
+				let myTmpSlots = [].concat(allTimeSlots);
+				
+				// check if cancel apt is in morning
+				let ttt = myTmpSlots[slotIndex].morningSlots.find(x => x.hour === cancelAppt.hour &&
+					x.minute === cancelAppt.minute);
+				if (ttt) {
+					if (hasExpired) {
+						ttt.name = "-"; ttt.visit = 'expired';
+					} else {
+						ttt.visit = 'available';
+					}
+				}
+
+				ttt = myTmpSlots[slotIndex].afternoonSlots.find(x => x.hour === cancelAppt.hour &&
+					x.minute === cancelAppt.minute);
+				if (ttt) {
+					if (hasExpired) {
+						ttt.name = "-"; ttt.visit = 'expired';
+					} else {
+						ttt.visit = 'available';
+					}
+				}
+				
+				ttt = myTmpSlots[slotIndex].eveningSlots.find(x => x.hour === cancelAppt.hour &&
+					x.minute === cancelAppt.minute);
+				if (ttt) {
+					if (hasExpired) {
+						ttt.name = "-"; ttt.visit = 'expired';
+					} else {
+						ttt.visit = 'available';
+					}
+				}	
+				setAllTimeSlots(myTmpSlots);
+			}
 		} catch (e) {
 			console.log(e);
 			alert.error("Error cancelling appointment of "+cancelAppt.displayName);
@@ -1258,8 +1400,8 @@ export default function Appointment() {
 		setCurrentPatientData(rec);
 		setSelectPatient(false);
 		await getAppointmentsByPid(rec.pid);
-		let tmpArray = await reloadAppointmentDetails();
-		generateSlots(tmpArray, holidayArray);
+		let tmpArray = await reloadAppointmentDetails();	
+		generateSlots(tmpArray, holidayArray); // ARS. This is okay and confirmed
 	}
 	
 	function handleAdd() {
@@ -1315,7 +1457,7 @@ export default function Appointment() {
 
 	async function handleMyAppt() {
 		let tmpArray = await reloadAppointmentDetails();
-		generateSlots(tmpArray, holidayArray);
+		generateSlots(tmpArray, holidayArray);		// ARS This is required and confirmed
 		setCurrentPatient("INFO")
 		setApptArray([]);
 	}

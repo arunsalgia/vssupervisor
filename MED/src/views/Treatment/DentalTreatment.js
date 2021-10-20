@@ -709,8 +709,15 @@ export default function DentalTreatment(props) {
 	}
 	
 	return (
-	<div className={gClasses.webPage} align="center" key="main">
-	<CssBaseline />
+	<div>
+	{(sessionStorage.getItem("userType") === "Assistant") &&
+		<Typography className={gClasses.indexSelection} >
+			{"Only Doctors are permitted to Add / View / Edit patient treatment"}
+		</Typography>
+	}
+	{(sessionStorage.getItem("userType") !== "Assistant") &&
+		<div className={gClasses.webPage} align="center" key="main">
+		<CssBaseline />
 		<DisplayTreatmentDates />
 		<DisplayFunctionHeader />
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
@@ -723,42 +730,44 @@ export default function DentalTreatment(props) {
 		anchor="right"
 		variant="temporary"
 		open={isDrawerOpened !== ""}
-	>
-	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
-	{((isDrawerOpened === "ADDTREAT") || (isDrawerOpened === "EDITTREAT")) &&
-		<ValidatorForm align="center" className={gClasses.form} onSubmit={updateTreatment}>
-			<Typography align="center" className={classes.modalHeader}>
-				{((isDrawerOpened === "ADDTREAT") ? "New Treatment" : "Edit Treatment")+` for ${currentPatient}`}
-			</Typography>
-			<BlankArea />
-			{/*<TextValidator required fullWidth color="primary"
-				id="newName" label="Treatment type" name="newName"
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				value={emurName}
-			/>*/}
-			<VsTextFilter type="text" label="Treatment type" value={emurName}
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				onClear={(event) => setEmurNameWithFilter("")}
-			/>
-			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
-			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsTreatTypeDelete} />
-			<BlankArea />
-			<VsTeeth toothArray={emurToothArray} onClick={handleToothUpdate} />
-			<TextValidator required fullWidth color="primary" type="number" className={gClasses.vgSpacing} 
-				id="newName" label="Professional Charge" name="newName"
-				onChange={(event) => setEmurAmount(Number(event.target.value))}
-				value={emurAmount}
-				validators={['minNumber:100']}
-        errorMessages={['Invalid Amount']}
-			/>
-			<ModalResisterStatus />
-			<BlankArea />
-			<VsButton type ="submit" name= {(isDrawerOpened === "ADDTREAT") ? "Add" : "Update"} />
-		</ValidatorForm>
+		>
+		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
+		{((isDrawerOpened === "ADDTREAT") || (isDrawerOpened === "EDITTREAT")) &&
+			<ValidatorForm align="center" className={gClasses.form} onSubmit={updateTreatment}>
+				<Typography align="center" className={classes.modalHeader}>
+					{((isDrawerOpened === "ADDTREAT") ? "New Treatment" : "Edit Treatment")+` for ${currentPatient}`}
+				</Typography>
+				<BlankArea />
+				{/*<TextValidator required fullWidth color="primary"
+					id="newName" label="Treatment type" name="newName"
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					value={emurName}
+				/>*/}
+				<VsTextFilter type="text" label="Treatment type" value={emurName}
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					onClear={(event) => setEmurNameWithFilter("")}
+				/>
+				<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+				<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsTreatTypeDelete} />
+				<BlankArea />
+				<VsTeeth toothArray={emurToothArray} onClick={handleToothUpdate} />
+				<TextValidator required fullWidth color="primary" type="number" className={gClasses.vgSpacing} 
+					id="newName" label="Professional Charge" name="newName"
+					onChange={(event) => setEmurAmount(Number(event.target.value))}
+					value={emurAmount}
+					validators={['minNumber:100']}
+					errorMessages={['Invalid Amount']}
+				/>
+				<ModalResisterStatus />
+				<BlankArea />
+				<VsButton type ="submit" name= {(isDrawerOpened === "ADDTREAT") ? "Add" : "Update"} />
+			</ValidatorForm>
+		}
+		</Box>
+		</Drawer>
+		</div>
 	}
-	</Box>
-	</Drawer>
 	</div>
-  );    
+ );    
 }

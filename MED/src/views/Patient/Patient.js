@@ -51,12 +51,15 @@ import "react-datetime/css/react-datetime.css";
 import moment from "moment";
 // icons
 import IconButton from '@material-ui/core/IconButton';
-import SearchIcon from '@material-ui/icons/Search';
-import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import CancelIcon from '@material-ui/icons/Cancel';
-import EventNoteIcon from '@material-ui/icons/EventNote';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import EditIcon from '@material-ui/icons/Edit';
+//import SearchIcon from '@material-ui/icons/Search';
+//import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
+//import EventNoteIcon from '@material-ui/icons/EventNote';
+//import NoteAddIcon from '@material-ui/icons/NoteAdd';
+
+
 
 import Report from 'views/Report/Report';
 import Visit  from 'views/Visit/Visit';
@@ -68,16 +71,14 @@ WEEKSTR, MONTHSTR, SHORTMONTHSTR, DATESTR, MONTHNUMBERSTR,
 } from 'views/globals';
 
 // import { UserContext } from "../../UserContext";
-import { isUserLogged, isMobile, encrypt, decrypt, callYesNo, updatePatientByFilter,
-	dispOnlyAge, dispAge, dispEmail, dispMobile,
+import { isMobile, encrypt,
+	dispOnlyAge, dispAge, dispEmail, dispMobile, checkIfBirthday,
 	validateInteger,
 	getAllPatients,
 	vsDialog,
-	getPatientDocument,
 	disableFutureDt,
  } from "views/functions.js"
-import {DisplayYesNo, DisplayPageHeader, BlankArea,
-DisplayPatientBox, DisplayDocumentDetails,
+import {DisplayPageHeader, BlankArea, DisplayPatientBox,
 } from "CustomComponents/CustomComponents.js"
 
 // styles
@@ -85,11 +86,10 @@ import globalStyles from "assets/globalStyles";
 import {dynamicModal } from "assets/dynamicModal";
 
 // icons
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
+//import DeleteIcon from '@material-ui/icons/Delete';
+//import CloseIcon from '@material-ui/icons/Close';
 //import CancelIcon from '@material-ui/icons/Cancel';
-import ClearSharpIcon from '@material-ui/icons/ClearSharp';
+//import ClearSharpIcon from '@material-ui/icons/ClearSharp';
 
 import {red, blue, yellow, orange, green, pink } from '@material-ui/core/colors';
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
@@ -256,6 +256,7 @@ export default function Patient() {
 	//customerData = sessionStorage.getItem("customerData");
 
 	const [searchText, setSearchText] = useState("");
+	const [isBirthday, setIsBirday] = useState(false);
 	
 	const [currentPatient, setCurrentPatient] = useState("");
 	const [currentPatientData, setCurrentPatientData] = useState({});
@@ -448,22 +449,8 @@ export default function Patient() {
 		alert.error("Delete all info of "+rec.displayName);
 		//console.log(rec);
 	}
-	
-	function handleAppt(rec) {
-		console.log("Appt");
-		//sessionStorage.setItem("shareData", JSON.stringify(rec));
-		setTab(process.env.REACT_APP_APPT);
-	}
-	
-	function handleVisit(rec) {
-		//sessionStorage.setItem("shareData", JSON.stringify(rec));
-		setTab(process.env.REACT_APP_VISIT);
-	}
-	
-	function handleReport(rec) {
-		//sessionStorage.setItem("shareData", JSON.stringify(rec));
-		setTab(process.env.REACT_APP_REPORT);
-	}
+
+
 	
 	async function handleAddEditSubmit() {
 		let myDate = patientDob.toDate();
@@ -509,7 +496,8 @@ export default function Patient() {
 	function handleSelectPatient(pat) {
 		setCurrentPatientData(pat);
 		setCurrentPatient(pat.displayName);
-		setCurrentSelection("Investigation");
+		setCurrentSelection("");
+		setIsBirday(checkIfBirthday(pat.dob));
 	}
 
 
@@ -517,7 +505,7 @@ export default function Patient() {
 	return (
 	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="left">
-			<Grid key={"PAT"} item xs={12} sm={6} md={4} lg={4} >
+			<Grid key={"PAT0"} item xs={12} sm={6} md={4} lg={4} >
 				<Typography>
 					<span className={gClasses.patientInfo}>Patient: </span>
 					<span className={gClasses.patientInfo2Green}>{currentPatient+"( Id: "+currentPatientData.pid+" )"}</span>
@@ -541,6 +529,13 @@ export default function Patient() {
 					<span className={gClasses.patientInfo2Green}>{dispMobile(currentPatientData.mobile)}</span>
 				</Typography>
 			</Grid>	
+			{(isBirthday) &&
+			<Grid key={"PAT11"} item xs={12} sm={12} md={12} lg={12} >
+				<Typography>
+					<span className={gClasses.patientInfo2Blue}>{"Many many happy returns of the day "+currentPatientData.displayName}</span>
+				</Typography>
+			</Grid>
+			}
 	</Grid>	
 	</Box>
 	)}

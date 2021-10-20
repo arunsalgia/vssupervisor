@@ -456,25 +456,12 @@ export function CricDreamTabs() {
 									<MenuItem onClick={handleAppointment}>
 									<Typography className={classes.menuStyle}>Appointment</Typography>
 									</MenuItem>
-									{(process.env.REACT_APP_DIRECTVISIT === 'true') &&
-										<MenuItem onClick={handleVisit}>
-										<Typography className={classes.menuStyle}>Visit</Typography>
-										</MenuItem>	
-									}
 									<MenuItem onClick={handlePatient}>
 									<Typography className={classes.menuStyle}>Patient</Typography>
 									</MenuItem>
-									{(process.env.REACT_APP_DIRECTREPORT === 'true') &&
-										<MenuItem onClick={handleReport}>
-										<Typography className={classes.menuStyle}>Report</Typography>
-										</MenuItem>	
-									}
+									<Divider className={classes.divider} />
 									</div>
 								}
-								<MenuItem onClick={handleNextVisit}>
-								<Typography className={classes.menuStyle}>Next Visit</Typography>
-								</MenuItem>
-								<Divider className={classes.divider} />
 								<div align="center">
 								<Typography className={classes.title}>Settings</Typography>
 								<MenuItem onClick={handleWorkingHours}>
@@ -486,9 +473,6 @@ export function CricDreamTabs() {
 								<MenuItem onClick={handleAssistant}>
 								<Typography className={classes.menuStyle}>User</Typography>
 								</MenuItem>
-								{/*<MenuItem onClick={handleMedicine}>
-									<Typography className={classes.menuStyle}>Medicine</Typography>
-								</MenuItem>*/}
 								</div>
 								{(window.sessionStorage.getItem("userType") === "Developer") &&
 									<div>
@@ -528,13 +512,7 @@ export function CricDreamTabs() {
 					{(itIsMobile === false) &&
 						<div>
 						<Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
-						{(process.env.REACT_APP_DIRECTVISIT === 'true') &&
-							<Button color="inherit" className={classes.visitButton} onClick={handleVisit}>Visit</Button>
-						}
 						<Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>
-						{(process.env.REACT_APP_DIRECTREPORT === 'true') &&
-							<Button color="inherit" className={classes.visitButton} onClick={handleReport}>Report</Button>
-						}
 						</div>
 					}
 					{(false) &&

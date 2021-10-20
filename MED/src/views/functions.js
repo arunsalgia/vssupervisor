@@ -1,8 +1,8 @@
 import axios from "axios";
 import download from 'js-file-download';
-import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import CircularProgressWithLabel from '@material-ui/core/LinearProgress';
+//import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
+//import LinearProgress from '@material-ui/core/LinearProgress';
+//import CircularProgressWithLabel from '@material-ui/core/LinearProgress';
 import moment from "moment";
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
@@ -872,7 +872,15 @@ export function generateOrder(year, month, date, hour, minute) {
 }
 
 export function generateOrderByDate(d) {
+	//console.log(d);
 	let myOrder = ((d.getFullYear() * 100 + d.getMonth()) * 100  + d.getDate())*100;
 	myOrder = (myOrder + d.getHours())*100 + d.getMinutes();
+	//console.log(myOrder);
 	return myOrder;
+}
+
+export function checkIfBirthday(dob) {
+	let today = new Date();
+	let ddd = new Date(dob);
+	return ((today.getDate() === ddd.getDate()) && (today.getMonth() === ddd.getMonth())) ? true : false;
 }

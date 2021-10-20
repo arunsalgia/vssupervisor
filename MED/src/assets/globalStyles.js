@@ -147,7 +147,12 @@ const globalStyles = makeStyles((theme) => ({
 		fontWeight: theme.typography.fontWeightBold,
 		color: 'green',
 	},
-		patientInfo999: {
+	patientInfo2Blue: {
+		fontSize: theme.typography.pxToRem(16),
+		fontWeight: theme.typography.fontWeightBold,
+		color: 'blue',
+	},
+	patientInfo999: {
 		fontSize: theme.typography.pxToRem(14),
 		fontWeight: theme.typography.fontWeightBold,
 		marginRight: theme.spacing(5),

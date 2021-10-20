@@ -1385,191 +1385,200 @@ export default function Visit(props) {
 	
 
 	return (
-	<div align="center" key="main">
-	<CssBaseline />
-	{(currentPatient !== "") &&
-		<Box align="left" >
-			<DisplayVisitDates />
-			<DisplayFunctionHeader />
-			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-				<DisplayNewVisitBtn />
-				<ArunVisitUpdateButton />		{/* only for visitNumber 0 i.e. new visit */}
-				{(currentSelection === "Medicine") &&
-					<ArunMedicines />
-				}
-				{(currentSelection === "User Note") &&
-					<ArunNotes />
-				}
-				{(currentSelection === "Lab Test") &&
-					<ArunRemarks  />
-				}
-				{(currentSelection === "Next Review") &&
-					<ArunFollowup />
-				}
+	<div>
+	{(sessionStorage.getItem("userType") === "Assistant") &&
+		<Typography className={gClasses.indexSelection} >
+			{"Only Doctors are permitted to Add / View / Edit patient visits"}
+		</Typography>
+	}
+	{(sessionStorage.getItem("userType") !== "Assistant") &&
+		<div align="center" key="main">
+		<CssBaseline />
+		{(currentPatient !== "") &&
+			<Box align="left" >
+				<DisplayVisitDates />
+				<DisplayFunctionHeader />
+				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+					<DisplayNewVisitBtn />
+					<ArunVisitUpdateButton />		{/* only for visitNumber 0 i.e. new visit */}
+					{(currentSelection === "Medicine") &&
+						<ArunMedicines />
+					}
+					{(currentSelection === "User Note") &&
+						<ArunNotes />
+					}
+					{(currentSelection === "Lab Test") &&
+						<ArunRemarks  />
+					}
+					{(currentSelection === "Next Review") &&
+						<ArunFollowup />
+					}
+				</Box>
 			</Box>
+		}
+		<Drawer className={classes.drawer}
+			anchor="right"
+			variant="temporary"
+			open={isDrawerOpened !== ""}
+		>
+		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
+		{((isDrawerOpened === "ADDMED") || (isDrawerOpened === "EDITMED")) &&
+			<ValidatorForm align="center" className={gClasses.form} onSubmit={handleMedicineUpdate}>
+				<Typography align="center" className={classes.modalHeader}>
+					{((isDrawerOpened === "ADDMED") ? "New Medicine" : "Edit Medicine")+` for ${currentPatient}`}
+				</Typography>
+				{(false) && <VsButton name="Select Medicine" align="right" onClick={() => setIsListDrawer("LIST")} />}
+				<BlankArea />
+				{/*<TextValidator required fullWidth color="primary"
+					id="newName" label="Medicine" name="newName"
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					value={emurName}
+				/>*/}
+				<VsTextFilter type="text" label="Medicine" value={emurName}
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					onClear={(event) => setEmurNameWithFilter("")}
+				/>	
+				<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+				<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsMedicineDelete} />
+				<BlankArea />
+				<Grid key="editmed" container justify="center" alignItems="left" >
+				<Grid className={gClasses.vgSpacing} item xs={1} sm={1} md={1} lg={1} >
+				<Typography className={classes.heading}>Dose1:</Typography>
+				</Grid>
+				<Grid className={gClasses.vgSpacing} item xs={2} sm={2} md={2} lg={2} >
+				<Select labelId='dose1' id='dose1' name="dose1" 
+					required fullWidth label="Dose 1" 
+					value={emedDose1}
+					inputProps={{
+						name: 'Group',
+						id: 'filled-age-native-simple',
+					}}
+					onChange={(event) => setEmedDose1(event.target.value)}
+					>
+				{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
+				</Select>
+				</Grid>
+				<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
+				<Typography className={classes.heading}>Dose2</Typography>
+				</Grid>
+				<Grid item className={gClasses.vgSpacing}  xs={2} sm={2} md={2} lg={2} >
+				<Select labelId='dose2' id='dose2' name="dose2" 
+					required fullWidth label="Dose 2" 
+					value={emedDose2}
+					inputProps={{
+						name: 'Group',
+						id: 'filled-age-native-simple',
+					}}
+					onChange={(event) => setEmedDose2(event.target.value)}
+					>
+				{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
+				</Select>
+				</Grid>
+				<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
+				<Typography className={classes.heading}>Dose3</Typography>
+				</Grid>
+				<Grid item className={gClasses.vgSpacing}  xs={2} sm={2} md={2} lg={2} >
+				<Select labelId='dose3' id='dose3' name="dose3" 
+					required fullWidth label="Dose 3" 
+					value={emedDose3}
+					inputProps={{
+						name: 'Group',
+						id: 'filled-age-native-simple',
+					}}
+					onChange={(event) => setEmedDose3(event.target.value)}
+					>
+				{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
+				</Select>
+				</Grid>
+				<Grid className={gClasses.vgSpacing}  item xs={1} sm={1} md={1} lg={1} />
+				<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
+				<Typography className={classes.heading}>for</Typography>
+				</Grid>
+				<Grid className={gClasses.vgSpacing} item xs={2} sm={2} md={2} lg={2} >
+				<Select labelId='time' id='time' name="time"
+					required fullWidth label="Time" 
+					value={emedTime}
+					placeholder="Arun"
+					inputProps={{
+						name: 'Group',
+						id: 'filled-age-native-simple',
+					}}
+					onChange={(event) => setEmedTime(event.target.value)}
+					>
+				{timeArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
+				</Select>
+				</Grid>
+				<Grid className={gClasses.vgSpacing}  item xs={2} sm={2} md={2} lg={2} >
+				<Select labelId='unit' id='unit' name="unit" 
+					required fullWidth label="Unit" 
+					value={emedUnit}
+					inputProps={{
+						name: 'Group',
+						id: 'filled-age-native-simple',
+					}}
+					onChange={(event) => setEmedUnit(event.target.value)}
+					>
+				{unitArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
+				</Select>
+				</Grid>
+				</Grid>
+				<ModalResisterStatus />
+				<BlankArea />
+				<VsButton type="submit" 
+				name= {(isDrawerOpened === "ADDMED") ? "Add" : "Update"}
+				/>
+			</ValidatorForm>
+		}
+		{((isDrawerOpened === "ADDNOTE") || (isDrawerOpened === "EDITNOTE")) &&
+			<ValidatorForm align="center" className={gClasses.form} onSubmit={updateUserNotes}>
+				<Typography align="center" className={classes.modalHeader}>
+					{((isDrawerOpened === "ADDNOTE") ? "New Note" : "Edit Note")+` for ${currentPatient}`}
+				</Typography>
+				<BlankArea />
+				{/*<TextValidator required fullWidth color="primary"
+					id="newName" label="Note" name="newName"
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					value={emurName}
+				/>*/}
+				<VsTextFilter type="text" label="Note" value={emurName}
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					onClear={(event) => setEmurNameWithFilter("")}
+				/>				
+				<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+				<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsNoteDelete} />
+				<ModalResisterStatus />
+				<BlankArea />
+				<VsButton type ="submit" name= {(isDrawerOpened === "ADDNOTE") ? "Add" : "Update"} />
+			</ValidatorForm>
+		}
+		{((isDrawerOpened === "ADDREM") || (isDrawerOpened === "EDITREM")) &&
+			<ValidatorForm align="center" className={gClasses.form} onSubmit={updateRemark} >
+				<Typography align="center" className={classes.modalHeader}>
+					{((isDrawerOpened === "ADDREM") ? "New Remark" : "Edit Remark")+` for ${currentPatient}`}
+				</Typography>
+				<BlankArea />
+				{/*<TextValidator required fullWidth color="primary"
+					id="newName" label="Remark" name="newName"
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					value={emurName}
+				/>*/}
+				<VsTextFilter type="text" label="Remark" value={emurName}
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					onClear={(event) => setEmurNameWithFilter("")}
+				/>			
+				<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+				<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsRemarkDelete} />
+				<ModalResisterStatus />
+				<BlankArea />
+				<VsButton type="submit" name= {(isDrawerOpened === "ADDREM") ? "Add" : "Update"}
+				/>
+			</ValidatorForm>
+		}
 		</Box>
+		</Drawer>	
+		</div>
 	}
-	<Drawer className={classes.drawer}
-		anchor="right"
-		variant="temporary"
-		open={isDrawerOpened !== ""}
-	>
-	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
-	{((isDrawerOpened === "ADDMED") || (isDrawerOpened === "EDITMED")) &&
-		<ValidatorForm align="center" className={gClasses.form} onSubmit={handleMedicineUpdate}>
-			<Typography align="center" className={classes.modalHeader}>
-				{((isDrawerOpened === "ADDMED") ? "New Medicine" : "Edit Medicine")+` for ${currentPatient}`}
-			</Typography>
-			{(false) && <VsButton name="Select Medicine" align="right" onClick={() => setIsListDrawer("LIST")} />}
-			<BlankArea />
-			{/*<TextValidator required fullWidth color="primary"
-				id="newName" label="Medicine" name="newName"
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				value={emurName}
-			/>*/}
-			<VsTextFilter type="text" label="Medicine" value={emurName}
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				onClear={(event) => setEmurNameWithFilter("")}
-			/>	
-			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
-			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsMedicineDelete} />
-			<BlankArea />
-			<Grid key="editmed" container justify="center" alignItems="left" >
-			<Grid className={gClasses.vgSpacing} item xs={1} sm={1} md={1} lg={1} >
-			<Typography className={classes.heading}>Dose1:</Typography>
-			</Grid>
-			<Grid className={gClasses.vgSpacing} item xs={2} sm={2} md={2} lg={2} >
-			<Select labelId='dose1' id='dose1' name="dose1" 
-				required fullWidth label="Dose 1" 
-				value={emedDose1}
-				inputProps={{
-					name: 'Group',
-					id: 'filled-age-native-simple',
-				}}
-				onChange={(event) => setEmedDose1(event.target.value)}
-				>
-			{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
-			</Select>
-			</Grid>
-			<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
-			<Typography className={classes.heading}>Dose2</Typography>
-			</Grid>
-			<Grid item className={gClasses.vgSpacing}  xs={2} sm={2} md={2} lg={2} >
-			<Select labelId='dose2' id='dose2' name="dose2" 
-				required fullWidth label="Dose 2" 
-				value={emedDose2}
-				inputProps={{
-					name: 'Group',
-					id: 'filled-age-native-simple',
-				}}
-				onChange={(event) => setEmedDose2(event.target.value)}
-				>
-			{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
-			</Select>
-			</Grid>
-			<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
-			<Typography className={classes.heading}>Dose3</Typography>
-			</Grid>
-			<Grid item className={gClasses.vgSpacing}  xs={2} sm={2} md={2} lg={2} >
-			<Select labelId='dose3' id='dose3' name="dose3" 
-				required fullWidth label="Dose 3" 
-				value={emedDose3}
-				inputProps={{
-					name: 'Group',
-					id: 'filled-age-native-simple',
-				}}
-				onChange={(event) => setEmedDose3(event.target.value)}
-				>
-			{medQty.map(x =>	<MenuItem key={x.str} value={x.num}>{x.str}</MenuItem>)}
-			</Select>
-			</Grid>
-			<Grid className={gClasses.vgSpacing}  item xs={1} sm={1} md={1} lg={1} />
-			<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
-			<Typography className={classes.heading}>for</Typography>
-			</Grid>
-			<Grid className={gClasses.vgSpacing} item xs={2} sm={2} md={2} lg={2} >
-			<Select labelId='time' id='time' name="time"
-				required fullWidth label="Time" 
-				value={emedTime}
-				placeholder="Arun"
-				inputProps={{
-					name: 'Group',
-					id: 'filled-age-native-simple',
-				}}
-				onChange={(event) => setEmedTime(event.target.value)}
-				>
-			{timeArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
-			</Select>
-			</Grid>
-			<Grid className={gClasses.vgSpacing}  item xs={2} sm={2} md={2} lg={2} >
-			<Select labelId='unit' id='unit' name="unit" 
-				required fullWidth label="Unit" 
-				value={emedUnit}
-				inputProps={{
-					name: 'Group',
-					id: 'filled-age-native-simple',
-				}}
-				onChange={(event) => setEmedUnit(event.target.value)}
-				>
-			{unitArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
-			</Select>
-			</Grid>
-			</Grid>
-			<ModalResisterStatus />
-			<BlankArea />
-			<VsButton type="submit" 
-			name= {(isDrawerOpened === "ADDMED") ? "Add" : "Update"}
-			/>
-		</ValidatorForm>
-	}
-	{((isDrawerOpened === "ADDNOTE") || (isDrawerOpened === "EDITNOTE")) &&
-		<ValidatorForm align="center" className={gClasses.form} onSubmit={updateUserNotes}>
-			<Typography align="center" className={classes.modalHeader}>
-				{((isDrawerOpened === "ADDNOTE") ? "New Note" : "Edit Note")+` for ${currentPatient}`}
-			</Typography>
-			<BlankArea />
-			{/*<TextValidator required fullWidth color="primary"
-				id="newName" label="Note" name="newName"
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				value={emurName}
-			/>*/}
-			<VsTextFilter type="text" label="Note" value={emurName}
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				onClear={(event) => setEmurNameWithFilter("")}
-			/>				
-			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
-			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsNoteDelete} />
-			<ModalResisterStatus />
-			<BlankArea />
-			<VsButton type ="submit" name= {(isDrawerOpened === "ADDNOTE") ? "Add" : "Update"} />
-		</ValidatorForm>
-	}
-	{((isDrawerOpened === "ADDREM") || (isDrawerOpened === "EDITREM")) &&
-		<ValidatorForm align="center" className={gClasses.form} onSubmit={updateRemark} >
-			<Typography align="center" className={classes.modalHeader}>
-				{((isDrawerOpened === "ADDREM") ? "New Remark" : "Edit Remark")+` for ${currentPatient}`}
-			</Typography>
-			<BlankArea />
-			{/*<TextValidator required fullWidth color="primary"
-				id="newName" label="Remark" name="newName"
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				value={emurName}
-			/>*/}
-			<VsTextFilter type="text" label="Remark" value={emurName}
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				onClear={(event) => setEmurNameWithFilter("")}
-			/>			
-			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
-			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsRemarkDelete} />
-			<ModalResisterStatus />
-			<BlankArea />
-			<VsButton type="submit" name= {(isDrawerOpened === "ADDREM") ? "Add" : "Update"}
-			/>
-		</ValidatorForm>
-	}
-	</Box>
-	</Drawer>		
-  </div>
+	</div>
   );    
 }
