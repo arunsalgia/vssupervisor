@@ -188,7 +188,7 @@ export default function Visit(props) {
 	const [currentPatientData, setCurrentPatientData] = useState({});
 	
 	const [filterItem, setFilterItem] = useState("");
-	//const [filterItemText, setFilterItemText] = useState("");
+	const [filterItemText, setFilterItemText] = useState("");
 	const [filterItemArray, setFilterItemArray] = useState([]);
 	
 	const [symptomArray, setSymptomArray] = useState([]);
@@ -733,75 +733,84 @@ export default function Visit(props) {
 	return (
 	<div className={gClasses.webPage} align="center" key="main">
 	<CssBaseline />
-	{(currentPatient !== "") &&
-		<Box align="left" >
-			<DisplayInvestigationDates />
-			<DisplayFunctionHeader />
-			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-				<DisplayNewBtn />
-				{(currentSelection === "Symptom") &&
-					<ArunSymptoms />
-				}
-				{(currentSelection === "Diagnosis") &&
-					<ArunDiagnosis />
-				}
+	{(sessionStorage.getItem("userType") === "Assistant") &&
+		<Typography className={gClasses.indexSelection} >
+			{"Only Doctors are permitted to Add / View / Edit patient Investigation"}
+		</Typography>
+	}
+	{(sessionStorage.getItem("userType") !== "Assistant") &&
+	<div>
+		{(currentPatient !== "") &&
+			<Box align="left" >
+				<DisplayInvestigationDates />
+				<DisplayFunctionHeader />
+				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+					<DisplayNewBtn />
+					{(currentSelection === "Symptom") &&
+						<ArunSymptoms />
+					}
+					{(currentSelection === "Diagnosis") &&
+						<ArunDiagnosis />
+					}
+				</Box>
 			</Box>
+		}
+		<Drawer className={classes.drawer}
+			anchor="right"
+			variant="temporary"
+			open={isDrawerOpened !== ""}
+		>
+		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
+		{((isDrawerOpened === "ADDSYM")) &&
+			<ValidatorForm align="center" className={gClasses.form} onSubmit={handleSymptomUpdate}>
+				<Typography align="center" className={classes.modalHeader}>
+					{((isDrawerOpened === "ADDSYM") ? "Add Symptom" : "Edit Symptom")+` for ${currentPatient}`}
+				</Typography>
+				<BlankArea />
+				{/*<TextValidator required fullWidth color="primary"
+					id="newName" label="Symptom" name="newName"
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					value={emurName}
+				/>*/}
+				<VsTextFilter type="text" label="Symptom" value={emurName}
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					onClear={(event) => setEmurNameWithFilter("")}
+				/>
+				<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+				<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsSymptomDelete} />
+				<ModalResisterStatus />
+				<BlankArea />
+				<VsButton type="submit" name= {(isDrawerOpened === "ADDSYM") ? "Add" : "Update"}
+				/>
+			</ValidatorForm>
+		}
+		{((isDrawerOpened === "ADDDIAG") || (isDrawerOpened === "EDITDIAG")) &&
+			<ValidatorForm align="center" className={gClasses.form} onSubmit={updateDiagnosis}>
+				<Typography align="center" className={classes.modalHeader}>
+					{((isDrawerOpened === "ADDDIAG") ? "New Diagnosis" : "Edit Diagnosis")+` for ${currentPatient}`}
+				</Typography>
+				<BlankArea />
+				{/*<TextValidator required fullWidth color="primary"
+					id="newName" label="Diagnosis" name="newName"
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					value={emurName}
+				/>*/}
+				<VsTextFilter type="text" label="Diagnosis" value={emurName}
+					onChange={(event) => setEmurNameWithFilter(event.target.value)}
+					onClear={(event) => setEmurNameWithFilter("")}
+				/>			
+				<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
+				<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsDiagnosisDelete} />
+				<ModalResisterStatus />
+				<BlankArea />
+				<VsButton type ="submit" name= {(isDrawerOpened === "ADDDIAG") ? "Add" : "Update"} />
+			</ValidatorForm>
+		}
 		</Box>
-	}
-	<Drawer className={classes.drawer}
-		anchor="right"
-		variant="temporary"
-		open={isDrawerOpened !== ""}
-	>
-	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
-	{((isDrawerOpened === "ADDSYM")) &&
-		<ValidatorForm align="center" className={gClasses.form} onSubmit={handleSymptomUpdate}>
-			<Typography align="center" className={classes.modalHeader}>
-				{((isDrawerOpened === "ADDSYM") ? "Add Symptom" : "Edit Symptom")+` for ${currentPatient}`}
-			</Typography>
-			<BlankArea />
-			{/*<TextValidator required fullWidth color="primary"
-				id="newName" label="Symptom" name="newName"
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				value={emurName}
-			/>*/}
-			<VsTextFilter type="text" label="Symptom" value={emurName}
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				onClear={(event) => setEmurNameWithFilter("")}
-			/>
-			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
-			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsSymptomDelete} />
-			<ModalResisterStatus />
-			<BlankArea />
-			<VsButton type="submit" name= {(isDrawerOpened === "ADDSYM") ? "Add" : "Update"}
-			/>
-		</ValidatorForm>
-	}
-	{((isDrawerOpened === "ADDDIAG") || (isDrawerOpened === "EDITDIAG")) &&
-		<ValidatorForm align="center" className={gClasses.form} onSubmit={updateDiagnosis}>
-			<Typography align="center" className={classes.modalHeader}>
-				{((isDrawerOpened === "ADDDIAG") ? "New Diagnosis" : "Edit Diagnosis")+` for ${currentPatient}`}
-			</Typography>
-			<BlankArea />
-			{/*<TextValidator required fullWidth color="primary"
-				id="newName" label="Diagnosis" name="newName"
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				value={emurName}
-			/>*/}
-			<VsTextFilter type="text" label="Diagnosis" value={emurName}
-				onChange={(event) => setEmurNameWithFilter(event.target.value)}
-				onClear={(event) => setEmurNameWithFilter("")}
-			/>			
-			<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
-			<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsDiagnosisDelete} />
-			<ModalResisterStatus />
-			<BlankArea />
-			<VsButton type ="submit" name= {(isDrawerOpened === "ADDDIAG") ? "Add" : "Update"} />
-		</ValidatorForm>
-	}
-	</Box>
-	</Drawer>		
+		</Drawer>
+		</div>
+	}	
   </div>
   );    
 }

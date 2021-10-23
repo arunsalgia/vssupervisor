@@ -4,7 +4,7 @@ import BorderWrapper from 'react-border-wrapper'
 import globalStyles from "assets/globalStyles";
 
 
-import {ToothLeft, ToothRight, ToothNumber,} from "views/globals.js";
+import {ChildToothNumber} from "views/globals.js";
 
 export default function VsTeeth(props) {
 const gClasses = globalStyles();
@@ -13,7 +13,7 @@ return (
 	<div>
 		<div align="center" className={gClasses.tooth}>
 		<span className={gClasses.toothType}>UL: </span>
-		{ToothNumber.upperLeft.map( (t) => {
+		{ChildToothNumber.upperRight.map( (t) => {
 					let myClass = (props.toothArray.includes(t)) ? gClasses.selectedTooth : gClasses.normalTooth;
 					return (
 						<BorderWrapper borderColour="#000000" borderWidth="2px" borderRadius="0px" 
@@ -23,7 +23,7 @@ return (
 					)}
 				)}
 		<span className={gClasses.toothType}>UR: </span>
-		{ToothNumber.upperRight.map( (t) => {
+		{ChildToothNumber.upperLeft.map( (t) => {
 					let myClass = (props.toothArray.includes(t)) ? gClasses.selectedTooth : gClasses.normalTooth;
 					return (
 						<BorderWrapper borderColour="#000000" borderWidth="2px" borderRadius="0px" 
@@ -35,7 +35,7 @@ return (
 		</div>
 		<div align="center" className={gClasses.tooth}>
 		<span className={gClasses.toothType}>LL: </span>
-		{ToothNumber.lowerLeft.map( (t) => {
+		{ChildToothNumber.lowerRight.map( (t) => {
 					let myClass = (props.toothArray.includes(t)) ? gClasses.selectedTooth : gClasses.normalTooth;
 					return (
 						<BorderWrapper borderColour="#000000" borderWidth="2px" borderRadius="0px" 
@@ -45,7 +45,7 @@ return (
 					)}
 				)}
 		<span className={gClasses.toothType}>LR: </span>
-		{ToothNumber.lowerRight.map( (t) => {
+		{ChildToothNumber.lowerLeft.map( (t) => {
 					let myClass = (props.toothArray.includes(t)) ? gClasses.selectedTooth : gClasses.normalTooth;
 					return (
 						<BorderWrapper borderColour="#000000" borderWidth="2px" borderRadius="0px" 

@@ -4,48 +4,27 @@ import axios from 'axios';
 import VsButton from "CustomComponents/VsButton"; 
 import VsCancel from "CustomComponents/VsCancel";
 import TextField from '@material-ui/core/TextField';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Grid from "@material-ui/core/Grid";
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import Link from '@material-ui/core/Link';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import Radio from '@material-ui/core/Radio';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import Modal from 'react-modal'; 
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
-import StepProgressBar from 'react-step-progress';
 
 // icons
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import CancelIcon from '@material-ui/icons/Cancel';
-import EventNoteIcon from '@material-ui/icons/EventNote';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 
 // styles
 import globalStyles from "assets/globalStyles";
-import modalStyles from "assets/modalStyles";
-import {dynamicModal } from "assets/dynamicModal";
 
-import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
+
+import {DisplayPageHeader, ValidComp, BlankArea,
 	DisplayPatientDetails,
-	DisplayDocumentList,
 	DisplayImage,
 	DisplayPDF,
 	LoadingMessage,
@@ -53,7 +32,7 @@ import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
 } from "CustomComponents/CustomComponents.js"
 
 import { 
-red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen,
+red, blue, yellow, orange, pink, green, deepOrange, lightGreen,
 } from '@material-ui/core/colors';
 
 import { 
@@ -319,7 +298,7 @@ export default function Document(props) {
 	const alert = useAlert();
 	
 	const [stepNo, setStepNo] = useState(0);
-	const [showProgress, setShowProgress] = useState(false);
+	//const [showProgress, setShowProgress] = useState(false);
 	
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
 	const [selectPatient, setSelectPatient] = useState(false);
@@ -788,8 +767,14 @@ export default function Document(props) {
 	const step3Content = <h1>Download visit document</h1>;
 	
 	return (
+	<div>
+	{(sessionStorage.getItem("userType") === "Assistant") &&
+		<Typography className={gClasses.indexSelection} >
+			{"Only Doctors are permitted to Add / View / Edit patient Reports"}
+		</Typography>
+	}
+	{(sessionStorage.getItem("userType") !== "Assistant") &&
 	<div className={gClasses.webPage} align="center" key="main">
-		{/* <DisplayPageHeader headerName="Medical Reports Directory" groupName="" tournament=""/> */}
 	<CssBaseline />
 		{((currentPatient === "") && (process.env.REACT_APP_DIRECTREPORT === 'true')) &&
 			<div>
@@ -802,12 +787,6 @@ export default function Document(props) {
 					InputProps={{endAdornment: (<InputAdornment position="end"><SearchIcon/></InputAdornment>)}}
 				/>
 			</Grid>
-			{/*<Grid key={"F4"} item xs={8} sm={8} md={3} lg={3} >
-				<Typography>Click button to add new patient</Typography>
-			</Grid>
-			<Grid key={"F5"} item xs={4} sm={4} md={1} lg={1} >
-				<VsButton name="New Patient" /> 
-			</Grid>*/}
 			<Grid key={"F6"} item xs={false} sm={false} md={2} lg={2} />
 			</Grid>
 			<DisplayAllPatients />
@@ -873,6 +852,8 @@ export default function Document(props) {
 		</Box>
 		</Drawer>
   </div>
+	}
+	</div>
   );    
 }
  

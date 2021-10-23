@@ -11,21 +11,19 @@ import FormControl from '@material-ui/core/FormControl';
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import VsList from "CustomComponents/VsList";
-import VsTeeth from "CustomComponents/VsTeeth";
+import VsAdultTeeth from "CustomComponents/VsAdultTeeth";
+import VsChildTeeth from "CustomComponents/VsChildTeeth";
 import VsTextFilter from "CustomComponents/VsTextFilter";
 import VsCheckBox from "CustomComponents/VsCheckBox";
 
-import { useLoading, Audio } from '@agney/react-loading';
+
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
-import fileDownload  from 'js-file-download';
-import fs from 'fs';
 import lodashSortBy from "lodash/sortBy"
 import lodashSumBy from "lodash/sumBy"
-import BorderWrapper from 'react-border-wrapper'
+
 
 import Grid from "@material-ui/core/Grid";
-import GridItem from "components/Grid/GridItem.js";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
@@ -78,8 +76,6 @@ LoadingMessage,
 
 import {
 HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR,
-ToothLeft, ToothRight,
-ToothNumber, ToothRange,
 MAGICNUMBER, INR,
 } from "views/globals.js";
 
@@ -240,6 +236,7 @@ export default function DentalTreatment(props) {
 	const gClasses = globalStyles();
 	const alert = useAlert();
 	
+	const [isChild, setIsChild] = useState(false);
 	const [currentSelection, setCurrentSelection] = useState("Treatment");
 	const [remember, setRemember] = useState(false);
 	
@@ -431,57 +428,6 @@ export default function DentalTreatment(props) {
 	
 	function dummy(num) {};
 	
-	function DisplayTeeth(props) {
-	let _Click = (props.onClick == null) ? dummy : props.onClick;
-	return (
-		<div>
-			<div align="center" className={classes.tooth}>
-				<span className={classes.toothType}>UL: </span>
-				{ToothNumber.upperLeft.map( (t) => {
-					let myClass = (props.toothArray.includes(t)) ? classes.selectedTooth : classes.normalTooth;
-					return (
-						<BorderWrapper borderColour="#000000" borderWidth="2px" borderRadius="0px" 
-							borderType="solid" innerPadding="0px" padding="10px" margin="10px" >
-							<span className={myClass} onClick= {() => _Click(t) }>{t}</span>
-						</BorderWrapper>								
-					)}
-				)}
-				<span className={classes.toothType}>UR: </span>
-				{ToothNumber.upperRight.map( (t) => {
-					let myClass = (props.toothArray.includes(t)) ? classes.selectedTooth : classes.normalTooth;
-					return (
-						<BorderWrapper borderColour="#000000" borderWidth="2px" borderRadius="0px" 
-							borderType="solid" innerPadding="0px" padding="10px" margin="10px" >
-							<span className={myClass} onClick= {() => _Click(t) }>{t}</span>
-						</BorderWrapper>								
-					)}
-				)}
-			</div>
-			<div align="center" className={classes.tooth}>
-				<span className={classes.toothType}>LL: </span>
-				{ToothNumber.lowerLeft.map( (t) => {
-					let myClass = (props.toothArray.includes(t)) ? classes.selectedTooth : classes.normalTooth;
-					return (
-						<BorderWrapper borderColour="#000000" borderWidth="2px" borderRadius="0px" 
-							borderType="solid" innerPadding="0px" padding="10px" margin="10px" >
-							<span className={myClass} onClick= {() => _Click(t) }>{t}</span>
-						</BorderWrapper>								
-					)}
-				)}
-				<span className={classes.toothType}>LR: </span>
-				{ToothNumber.lowerRight.map( (t) => {
-					let myClass = (props.toothArray.includes(t)) ? classes.selectedTooth : classes.normalTooth;
-					return (
-						<BorderWrapper borderColour="#000000" borderWidth="2px" borderRadius="0px" 
-							borderType="solid" innerPadding="0px" padding="10px" margin="10px" >
-							<span className={myClass} onClick= {() => _Click(t) } >{t}</span>
-						</BorderWrapper>								
-					)}
-				)}
-			</div>
-		</div>
-	)}
-	
 	function DisplayNewBtn() {
 		let lastIndex = treatmentArray.length - 1;
 		if ((treatmentArray.length > 0) && (treatmentArray[lastIndex].treatmentNumber === MAGICNUMBER)) return null;
@@ -513,7 +459,8 @@ export default function DentalTreatment(props) {
 		setEmurName("");
 		setEmurToothArray([]);
 		setEmurAmount(0);
-		
+		setIsChild(false);
+
 		setIsDrawerOpened("ADDTREAT");
 		// set filter
 		setFilterItem("TRE");
@@ -554,30 +501,8 @@ export default function DentalTreatment(props) {
 			}	
 			<Box borderColor="primary.main" border={1}>
 			{x.treatment.map( (un, index) => {
-				//console.log(un);
-				let arr = lodashSortBy(un.toothArray);
+				let arr = lodashSortBy(un.toothArray).toString();
 				//console.log(arr);
-				let ttt = "";
-				let tmp = arr.filter( t => t >= ToothRange.upperLeft.start &&
-					t <= ToothRange.upperLeft.end)
-				if (tmp.length > 0)
-					ttt += ((ttt.length > 0) ? " " : "") + "UL: " + tmp.toString();
-				
-				tmp = arr.filter( t => t >= ToothRange.upperRight.start &&
-					t <= ToothRange.upperRight.end)
-				if (tmp.length > 0)
-					ttt += ((ttt.length > 0) ? " " : "") + "UR: " + tmp.toString();
-				
-				tmp = arr.filter( t => t >= ToothRange.lowerLeft.start &&
-					t <= ToothRange.lowerLeft.end)
-				if (tmp.length > 0)
-					ttt += ((ttt.length > 0) ? " " : "") + "LL: " + tmp.toString();
-				
-				tmp = arr.filter( t => t >= ToothRange.lowerRight.start &&
-					t <= ToothRange.lowerRight.end)
-				if (tmp.length > 0)
-					ttt += ((ttt.length > 0) ? " " : "") + "LR: " + tmp.toString();
-				
 				return (
 					<Grid className={classes.noPadding} key={"NOTES"+index} container >
 					<Grid item align="left" xs={10} sm={3} md={3} lg={3} >
@@ -585,7 +510,7 @@ export default function DentalTreatment(props) {
 					</Grid>
 					<Grid item align="left" xs={10} sm={3} md={7} lg={7} >
 						{/*\<DisplayTeeth toothArray={un.toothArray} />*/}
-						<Typography className={classes.heading}>{ttt}</Typography>
+						<Typography className={classes.heading}>{arr}</Typography>
 					</Grid>
 					<Grid item align="right" xs={10} sm={1} md={1} lg={1} >
 						<Typography className={classes.heading}>{INR+un.amount}</Typography>
@@ -745,7 +670,13 @@ export default function DentalTreatment(props) {
 				<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
 				<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsTreatTypeDelete} />
 				<BlankArea />
-				<VsTeeth toothArray={emurToothArray} onClick={handleToothUpdate} />
+				<VsCheckBox align="left" label="Is Child" checked={isChild} onClick={() => { setEmurToothArray([]); setIsChild(!isChild); }} />
+				{(isChild) &&
+					<VsChildTeeth toothArray={emurToothArray} onClick={handleToothUpdate} />
+				}
+				{(!isChild) &&
+					<VsAdultTeeth toothArray={emurToothArray} onClick={handleToothUpdate} />
+				}
 				<TextValidator required fullWidth color="primary" type="number" className={gClasses.vgSpacing} 
 					id="newName" label="Professional Charge" name="newName"
 					onChange={(event) => setEmurAmount(Number(event.target.value))}

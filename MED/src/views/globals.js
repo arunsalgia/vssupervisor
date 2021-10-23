@@ -78,21 +78,34 @@ export const dialogOptions={
 
 // for dental
 
-export const ToothLeft =		[8,7,6,5,4,3,2,1];
-export const ToothRight =		[1,2,3,4,5,6,7,8];
+//export const ToothLeft =		[8,7,6,5,4,3,2,1];
+//export const ToothRight =		[1,2,3,4,5,6,7,8];
 
-export const ToothNumber = {
-	upperLeft:  [18, 17, 16, 15, 14, 13, 12, 11],
-	upperRight: [28, 27, 26, 25, 24, 23, 22, 21],
-	lowerRight: [38, 37, 36, 35, 34, 33, 32, 31],
-	lowerLeft:  [48, 47, 46, 45, 44, 43, 42, 41]
+export const AdultToothNumber = {
+	upperRight:  [18, 17, 16, 15, 14, 13, 12, 11],
+	upperLeft: [21, 22, 23, 24, 25, 26, 27, 28],
+	lowerLeft: [31, 32, 33, 34, 35, 36, 37, 38],
+	lowerRight:  [48, 47, 46, 45, 44, 43, 42, 41]
 }
 
-export const ToothRange = {
-	upperLeft:  {start: 11, end: 18},
-	upperRight: {start: 21, end: 28},
-	lowerRight: {start: 31, end: 38},
-	lowerLeft:  {start: 41, end: 48}
+export const ChildToothNumber = {
+	upperRight:  [55, 54, 53, 52, 51],
+	upperLeft: [61, 62, 63, 64, 65],
+	lowerLeft: [71, 72, 73, 74, 75],
+	lowerRight:  [85, 84, 83, 82, 81]
 }
 
+export const AdultToothRange = {
+	upperRight:  {start: 11, end: 18},
+	upperLeft: {start: 21, end: 28},
+	lowerLeft: {start: 31, end: 38},
+	lowerRight:  {start: 41, end: 48}
+}
+
+export const ChildToothRange = {
+	upperRight:  {start: 51, end: 55},
+	upperLeft: {start: 61, end: 65},
+	lowerLeft: {start: 71, end: 75},
+	lowerRight:  {start: 81, end: 85}
+}
 export const MAGICNUMBER = 99999;
