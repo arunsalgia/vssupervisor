@@ -328,7 +328,7 @@ export function specialSetPos() {
 }
 
 export function getImageName(teamName) {
-  let imageName = `${process.env.PUBLIC_URL}/teamimage/${teamName}.JPG`;
+  let imageName = `${process.env.PUBLIC_URL}/image/${teamName}.JPG`;
   imageName = imageName.replaceAll(" ", "");
   // imageName = imageName.replace(/ /g, " ");
   //console.log("Function Image name", imageName);

@@ -38,10 +38,10 @@ import Sample from "views/SuperUser/Sample.js"
 // import Profile from "views/Profile/Profile.js"
 import Profile from "views/Profile/UserProfile"
 import ChangePassword from "views/Login/ChangePassword.js"
-import About from "views/MED/About.js"; 
+//import About from "views/MED/About.js"; 
 import Home from "views/MED/Home.js";
-import ContactUs from "views/MED/ContactUs.js";
-import PointSystem from "views/MED/PointSystem.js";
+//import ContactUs from "views/MED/ContactUs.js";
+//import PointSystem from "views/MED/PointSystem.js";
 
 import WorkingHours from "views/Settings/WorkingHours";
 import Holiday from "views/Settings/Holiday";

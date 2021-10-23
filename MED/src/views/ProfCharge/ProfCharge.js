@@ -23,33 +23,26 @@ import Radio from '@material-ui/core/Radio';
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
-import fileDownload  from 'js-file-download';
-import fs from 'fs';
-import _ from 'lodash';
-import BorderWrapper from 'react-border-wrapper'
+//import fileDownload  from 'js-file-download';
+//import fs from 'fs';
+//import lodashSortBy from "lodash/sortBy"
+//import BorderWrapper from 'react-border-wrapper'
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import Select from "@material-ui/core/Select";
-import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
+//import Select from "@material-ui/core/Select";
+//import MenuItem from '@material-ui/core/MenuItem';
+//import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Box from '@material-ui/core/Box';
 import Modal from 'react-modal';
 import { borders } from '@material-ui/system';
-import {dynamicModal } from "assets/dynamicModal";
-import cloneDeep from 'lodash/cloneDeep';
-import StepProgressBar from 'react-step-progress';
 // import the stylesheet
 import 'react-step-progress/dist/index.css';
 
 // styles
 import globalStyles from "assets/globalStyles";
-import modalStyles from "assets/modalStyles";
 
 
 import {ValidComp, BlankArea, } from "CustomComponents/CustomComponents.js"
@@ -61,9 +54,9 @@ HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR, INR
 // icons
 import IconButton from 		'@material-ui/core/IconButton';
 import EditIcon from 			'@material-ui/icons/Edit';
-import CloseIcon from 		'@material-ui/icons/Close';
 import DeleteIcon from 		'@material-ui/icons/Cancel';
 import InfoIcon from 			'@material-ui/icons/Info';
+//import CloseIcon from 		'@material-ui/icons/Close';
 
 
 //colours 
@@ -444,7 +437,7 @@ export default function ProfCharge(props) {
 				let tmpArray = profChargeArray.filter(x => x.tid !== emurTid);
 				tmpArray.push(resp.data);
 				//console.log(tmpArray);
-				tmpArray = _.sortBy(tmpArray, 'tid');
+				tmpArray = lodashSortBy(tmpArray, 'tid');
 				setProfChargeArray(tmpArray.reverse());
 				getBalance(currentPatientData);
 				alert.success(`Successfully update payment of new amount ${emurAmount}.`);
@@ -488,12 +481,12 @@ export default function ProfCharge(props) {
 				<RadioGroup row aria-label="unitSelect" name="unitSelect" value={paymentMode} 
 					onChange={() => {setPaymentMode(event.target.value); }}
 				>
-				{paymentModeArray.map ( r =>
-				<FormControlLabel className={gClasses.filterRadio} value={r} control={<Radio color="primary"/>} label={r} />
+				{paymentModeArray.map ( (r, index) =>
+				<FormControlLabel key={"MODE"+index} className={gClasses.filterRadio} value={r} control={<Radio color="primary"/>} label={r} />
 				)}
 				</RadioGroup>
 				</FormControl>
-				<TextValidator required fullWidth color="primary" className={gClasses.vgSpacing} 
+				<TextValidator fullWidth color="primary" className={gClasses.vgSpacing} 
 					label="Description"
 					onChange={(event) => setEmurDesc(event.target.value)}
 					value={emurDesc}

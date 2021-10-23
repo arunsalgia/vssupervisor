@@ -17,12 +17,12 @@ router.post('/update/:cid/:pid/:newInfo', async function(req, res, next) {
 	pid = Number(pid);
 	newInfo = JSON.parse(newInfo);
 	console.log(newInfo);
-  var iRec = await M_DentalTreatment.findOne({cid: cid, pid: pid, treatmentNumber: 0});
+  var iRec = await M_DentalTreatment.findOne({cid: cid, pid: pid, treatmentNumber: MAGICNUMBER});
   if (!iRec) {
 		iRec = new M_DentalTreatment();
 		iRec.cid = cid;
 		iRec.pid = pid;
-		iRec.treatmentNumber = 0;
+		iRec.treatmentNumber = MAGICNUMBER;
 		iRec.enabled = true;
   }
 	iRec.treatmentDate = new Date();
@@ -31,28 +31,34 @@ router.post('/update/:cid/:pid/:newInfo', async function(req, res, next) {
 	await iRec.save();
 	
 	// now update payment
-	let myProfChargeRec = await M_ProfCharge.findOne({treatment: iRec._id});
-	if (!myProfChargeRec) {
-		myProfChargeRec = new M_ProfCharge();
-		myProfChargeRec.cid = cid;
-		myProfChargeRec.pid = pid;
-		myProfChargeRec.treatment = iRec._id;
-		myProfChargeRec.paymentmode = "";
-		myProfChargeRec.enable = true;
-		
-		// get new tid
-		let tmp = await M_ProfCharge.find({}).limit(1).sort({tid: -1});
-		myProfChargeRec.tid = (tmp.length > 0) ? tmp[0].tid + 1 : "1";
+
+	// first check if any treatment given
+	if (newInfo.treatment.length > 0) {
+		let myProfChargeRec = await M_ProfCharge.findOne({treatment: iRec._id});
+		if (!myProfChargeRec) {
+			myProfChargeRec = new M_ProfCharge();
+			myProfChargeRec.cid = cid;
+			myProfChargeRec.pid = pid;
+			myProfChargeRec.treatment = iRec._id;
+			myProfChargeRec.paymentmode = "";
+			myProfChargeRec.enable = true;
+			
+			// get new tid
+			let tmp = await M_ProfCharge.find({}).limit(1).sort({tid: -1});
+			myProfChargeRec.tid = (tmp.length > 0) ? tmp[0].tid + 1 : "1";
+		}
+		myProfChargeRec.description = "Professional charges dated " +
+			DATESTR[iRec.treatmentDate.getDate()] + "/" +
+			MONTHNUMBERSTR[iRec.treatmentDate.getMonth()] + "/" +
+			iRec.treatmentDate.getFullYear();
+		myProfChargeRec.date = iRec.treatmentDate;
+		myProfChargeRec.amount = -(_.sumBy(newInfo.treatment, 'amount'));
+		myProfChargeRec.treatmentDetails = _.map(newInfo.treatment,  o => _.pick(o, ['name', 'amount']));
+		myProfChargeRec.save();
+	} else {
+		// zero treatment. Thus if entry in payment remove it
+		await M_ProfCharge.deleteOne({treatment: iRec._id});
 	}
-	myProfChargeRec.description = "Professional charges dated " +
-		DATESTR[iRec.treatmentDate.getDate()] + "/" +
-		MONTHNUMBERSTR[iRec.treatmentDate.getMonth()] + "/" +
-		iRec.treatmentDate.getFullYear();
-	myProfChargeRec.date = iRec.treatmentDate;
-	myProfChargeRec.amount = -(_.sumBy(newInfo.treatment, 'amount'));
-	myProfChargeRec.treatmentDetails = _.map(newInfo.treatment,  o => _.pick(o, ['name', 'amount']));
-	myProfChargeRec.save();
-	
 	sendok(res, 'Done');
 });
 
@@ -62,13 +68,8 @@ router.get('/list/:cid/:pid', async function(req, res, next) {
   var { cid, pid } = req.params;
 	pid = Number(pid);
 	
-	let allRecs = await M_DentalTreatment.find({cid: cid, pid: pid}).sort({treatmentNumber: -1})
-	if (allRecs.length > 0) {
-		if (allRecs[allRecs.length-1].treatmentNumber === 0) {	
-			allRecs = [allRecs[allRecs.length-1]].concat(allRecs.slice(0, allRecs.length-1));
-		}
-	}
-	console.log(allRecs);
+	let allRecs = await M_DentalTreatment.find({cid: cid, pid: pid}).sort({treatmentNumber: 1})
+	//console.log(allRecs);
 	sendok(res, allRecs);
 });
 

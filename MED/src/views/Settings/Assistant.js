@@ -1,15 +1,22 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { makeStyles, Container, CssBaseline } from '@material-ui/core';
+import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+
 import axios from "axios";
-import _ from "lodash";
-import TextField from '@material-ui/core/TextField';
-import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
+import lodashSortBy from "lodash/sortBy";
+import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
+import VsButton from "CustomComponents/VsButton";
+import VsCancel from "CustomComponents/VsCancel"
 import IconButton from '@material-ui/core/IconButton';
+import Grid from "@material-ui/core/Grid";
+
+/*
+import SearchIcon from '@material-ui/icons/Search';
+import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SwitchBtn from '@material-ui/core/Switch';
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
-import Grid from "@material-ui/core/Grid";
-import GridItem from "components/Grid/GridItem.js";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -21,14 +28,10 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
-import Box from '@material-ui/core/Box';
 import Modal from 'react-modal';
-import VsButton from "CustomComponents/VsButton";
-import VsCancel from "CustomComponents/VsCancel"
 import { borders } from '@material-ui/system';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormLabel from '@material-ui/core/FormLabel';
@@ -37,51 +40,29 @@ import InputLabel from '@material-ui/core/InputLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import Datetime from "react-datetime";
+*/
 import "react-datetime/css/react-datetime.css";
-import moment from "moment";
-import {setTab} from "CustomComponents/CricDreamTabs.js"
 import Drawer from '@material-ui/core/Drawer';
-
-import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import Avatar from "@material-ui/core/Avatar"
+//import Avatar from "@material-ui/core/Avatar"
 import { useAlert } from 'react-alert'
 //import validator from 'validator'
 
 // styles
 import globalStyles from "assets/globalStyles";
-import modalStyles from "assets/modalStyles";
-import {dynamicModal } from "assets/dynamicModal";
+//import modalStyles from "assets/modalStyles";
+//import {dynamicModal } from "assets/dynamicModal";
 
 
-import Switch from "@material-ui/core/Switch";
-import Link from '@material-ui/core/Link';
 
 
 import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
 DisplayUserDetails, 
 } from "CustomComponents/CustomComponents.js"
 
-import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
-
-import {
-WEEKSTR, MONTHSTR, SHORTMONTHSTR, 
-HOURSTR, MINUTESTR,
-VISITTYPE,
-str1by4, str1by2,  str3by4,
-} from 'views/globals';
 
 // icons
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 //import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
-import DeleteIcon from '@material-ui/icons/Cancel';
-import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
-import EventNoteIcon from '@material-ui/icons/EventNote';
-import AddIcon from '@material-ui/icons/AddCircleOutline';
-import LeftIcon from '@material-ui/icons/ChevronLeft';
-import RightIcon from '@material-ui/icons/ChevronRight';
 import CancelIcon from '@material-ui/icons/Cancel';
 
 //colours 
@@ -90,18 +71,8 @@ red, blue, grey, yellow, orange, pink, green, brown, deepOrange, lightGreen, blu
 } from '@material-ui/core/colors';
 
 import { 
-	isMobile, callYesNo,
-	disablePastDt, disableFutureDt, disableAllDt,
-	validateInteger,
+	isMobile, 
 	encrypt, decrypt, 
-	left, right,
-	intString,
-	updatePatientByFilter,
-	dispAge, dispEmail, dispMobile,
-	ordinalSuffix,
-	compareDate, makeTimeString,
-	getAllPatients,
-	vsDialog,
 } from "views/functions.js";
 
 
@@ -378,7 +349,6 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const MINLEFT={month: 8, year: 2021};
 
 var userCid;
 var customerData;
@@ -458,7 +428,7 @@ export default function Assistant() {
 				var resp = await axios.get(myUrl);
 				console.log(resp.data); 	
 				let tmpArray = [resp.data].concat(userArray);
-				tmpArray = _.sortBy(tmpArray, 'displayName');
+				tmpArray = lodashSortBy(tmpArray, 'displayName');
 				setUserArray(tmpArray);
 				alert.success(`Successfully added user ${resp.data.displayName}`);
 				setIsDrawerOpened("");
@@ -475,7 +445,7 @@ export default function Assistant() {
 				console.log(resp.data); 	
 				let tmpArray = userArray.filter(x => x.uid !== resp.data.uid);
 				tmpArray.push(resp.data)
-				tmpArray = _.sortBy(tmpArray, 'displayName');
+				tmpArray = lodashSortBy(tmpArray, 'displayName');
 				setUserArray(tmpArray);
 				alert.success(`Successfully updated user ${resp.data.displayName}`);
 				setIsDrawerOpened("");

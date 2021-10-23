@@ -4,7 +4,7 @@ import {
   grayColor,
   hexToRgb
 } from "assets/jss/material-dashboard-react.js";
-import { red, blue, green, deepOrange, deepPurple, yellow } from '@material-ui/core/colors';
+import { red, blue, green, deepOrange, deepPurple, yellow, lightGreen } from '@material-ui/core/colors';
 import { makeStyles } from '@material-ui/core/styles';
 
 
@@ -121,7 +121,13 @@ const globalStyles = makeStyles((theme) => ({
 	boxStyle: {
 		padding: "5px 10px", 
 		margin: "4px 2px", 
-		
+		//backgroundColor: 'green',
+		//backgroundColor: blue[300] 
+	},
+  greenboxStyle: {
+		padding: "5px 10px", 
+		margin: "4px 2px", 
+		backgroundColor: lightGreen["A400"],
 		//backgroundColor: blue[300] 
 	},
 	select: {

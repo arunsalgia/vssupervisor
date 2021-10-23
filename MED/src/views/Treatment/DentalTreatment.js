@@ -20,7 +20,8 @@ import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
 import fileDownload  from 'js-file-download';
 import fs from 'fs';
-import _ from 'lodash';
+import lodashSortBy from "lodash/sortBy"
+import lodashSumBy from "lodash/sumBy"
 import BorderWrapper from 'react-border-wrapper'
 
 import Grid from "@material-ui/core/Grid";
@@ -72,29 +73,25 @@ import Avatar from "@material-ui/core/Avatar"
 // import { UserContext } from "../../UserContext";
 
 import {DisplayYesNo, DisplayPageHeader, ValidComp, BlankArea,
-DisplayPatientDetails,
-DisplayDocumentList,
-DisplayImage, DisplayPDF,
 LoadingMessage,
-DisplayDocumentDetails,
 } from "CustomComponents/CustomComponents.js"
 
 import {
-SupportedMimeTypes, SupportedExtensions,
-str1by4, str1by2, str3by4, INR,
 HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR,
 ToothLeft, ToothRight,
 ToothNumber, ToothRange,
+MAGICNUMBER, INR,
 } from "views/globals.js";
 
 // icons
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+//import FileCopyIcon from '@material-ui/icons/FileCopy';
+//import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 //import DeleteIcon from '@material-ui/icons/Delete';
+//import CloseIcon from '@material-ui/icons/Close';
+//import VisibilityIcon from '@material-ui/icons/Visibility';
+
 import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Cancel';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 
 
 //colours 
@@ -103,7 +100,6 @@ import { red, blue, green, lightGreen,
 
 import { 
 	validateInteger,
-	dispAge, dispEmail, dispMobile,
 	vsDialog,
 	ordinalSuffix,
 } from "views/functions.js";
@@ -311,15 +307,15 @@ export default function DentalTreatment(props) {
   }
 	
 	async function getPatientTreatment(patRec) {
-		let myArray = [];
 		try {
 			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/dentaltreatment/list/${userCid}/${patRec.pid}`)
-			myArray = resp.data;
-		} catch (e) {
+			setTreatmentArray(resp.data);
+			setTreatmentIndex(resp.data.length - 1);
+			} catch (e) {
 			console.log(e)
-		}
-		setTreatmentArray(myArray);
-		setTreatmentIndex(0);
+			setTreatmentArray([]);
+			setTreatmentIndex(0);
+			}
 		setCurrentSelection("Treatment");	
 	}
 	
@@ -389,7 +385,7 @@ export default function DentalTreatment(props) {
 		//console.log(treatmentArray);
 		let v = treatmentArray[treatmentIndex];
 		let myDate;
-		if (v.treatmentNumber === 0)
+		if (v.treatmentNumber === MAGICNUMBER)
 				myDate = "Today's new Treatment";
 		else {
 			let d = new Date(v.treatmentDate);
@@ -487,7 +483,8 @@ export default function DentalTreatment(props) {
 	)}
 	
 	function DisplayNewBtn() {
-		if ((treatmentArray.length > 0) && (treatmentArray[0].treatmentNumber === 0)) return null;
+		let lastIndex = treatmentArray.length - 1;
+		if ((treatmentArray.length > 0) && (treatmentArray[lastIndex].treatmentNumber === MAGICNUMBER)) return null;
 		return (
 			<div align="right">
 				<VsButton name="Add New Treatment" onClick={handleCreateNewTreatment} />
@@ -496,26 +493,23 @@ export default function DentalTreatment(props) {
 	}
 	
 	function handleCreateNewTreatment() {
-		
-		let myArray = [].concat(treatmentArray);
-		let tmp = {
+		let tmp = [{
 			pid: currentPatientData.pid,
-			treatmentNumber: 0,
+			treatmentNumber: MAGICNUMBER,
 			treatmentDate: new Date(),
 			treatment: [],
-		}
-		myArray = [tmp].concat(myArray);
-		console.log(myArray);
+		}];
+		let myArray = treatmentArray.concat(tmp);
+		//console.log(myArray);
 		setTreatmentArray(myArray);
-		//setCurrentSelection("Symptom");
-		setTreatmentIndex(0);
+		setTreatmentIndex(myArray.length - 1);
 	}
 
 	function handleVsTreatTypeDelete(treat) {
 		console.log(treat);
 	}
 	
-	function handleAddDiagnosis() {
+	function handleAddTreatmentType() {
 		setEmurName("");
 		setEmurToothArray([]);
 		setEmurAmount(0);
@@ -539,13 +533,13 @@ export default function DentalTreatment(props) {
 	}
 	
 	function handleDeleteTreatmentConfirm(itemName) {
-
+		let lastIndex = treatmentArray.length - 1;
 		let tmpArray = [].concat(treatmentArray);
 		//console.log(tmpArray);
-		tmpArray[0].treatment = tmpArray[0].treatment.filter(x => x.name !== itemName);
+		tmpArray[lastIndex].treatment = tmpArray[lastIndex].treatment.filter(x => x.name !== itemName);
 		//console.log(tmpArray);
 		setTreatmentArray(tmpArray);
-		updateNewTreatment(tmpArray[0].treatment);
+		updateNewTreatment(tmpArray[lastIndex].treatment);
 	}
 	
 
@@ -555,13 +549,13 @@ export default function DentalTreatment(props) {
 		//console.log(x.treatment);
 		return (
 			<div> 
-			{(x.treatmentNumber === 0) && 
-				<VsButton name="New treatment type" align="left" onClick={handleAddDiagnosis} />
+			{(x.treatmentNumber === MAGICNUMBER) && 
+				<VsButton name="New treatment type" align="left" onClick={handleAddTreatmentType} />
 			}	
 			<Box borderColor="primary.main" border={1}>
 			{x.treatment.map( (un, index) => {
 				//console.log(un);
-				let arr = _.sortBy(un.toothArray);
+				let arr = lodashSortBy(un.toothArray);
 				//console.log(arr);
 				let ttt = "";
 				let tmp = arr.filter( t => t >= ToothRange.upperLeft.start &&
@@ -597,7 +591,7 @@ export default function DentalTreatment(props) {
 						<Typography className={classes.heading}>{INR+un.amount}</Typography>
 					</Grid>
 					<Grid item xs={1} sm={1} md={1} lg={1} >
-						{(x.treatmentNumber === 0) &&
+						{(x.treatmentNumber === MAGICNUMBER) &&
 							<IconButton color="secondary" size="small" onClick={() => { handleDeleteTreatment(un.name)}} >
 							<DeleteIcon />
 							</IconButton>
@@ -613,7 +607,7 @@ export default function DentalTreatment(props) {
 			<Typography className={classes.total}>{"Total Professional Charges"}</Typography>
 			</Grid>
 			<Grid item align="right" xs={1} sm={1} md={1} lg={1} >
-			<Typography className={classes.heading}>{INR+" "+_.sumBy(x.treatment, 'amount')}</Typography>
+			<Typography className={classes.heading}>{INR+" "+lodashSumBy(x.treatment, 'amount')}</Typography>
 			</Grid>
 			<Grid item align="right" xs={1} sm={1} md={1} lg={1} />
 			</Grid>
@@ -633,7 +627,7 @@ export default function DentalTreatment(props) {
 			try {
 				axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/treattype/add/${userCid}/${myEncodedName}`)
 				let tmpArray = [{name: myName}].concat(treatTypeArray);
-				setTreatTypeArray(_.sortBy(tmpArray, 'name'));
+				setTreatTypeArray(lodashSortBy(tmpArray, 'name'));
 			} catch (e) {
 				console.log(e);
 			}	
@@ -652,16 +646,17 @@ export default function DentalTreatment(props) {
 		
 		let tmp = [].concat(treatmentArray);
 		let index = emurNumber;
+		let lastIndex = treatmentArray.length - 1;
 		if (isDrawerOpened === "ADDTREAT") {
-			if (tmp[0].treatment.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
+			if (tmp[lastIndex].treatment.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
 				setModalRegister(2001);
 				return;
 			} 
-			tmp[0].treatment.push({name: emurName, toothArray: emurToothArray, amount: emurAmount});
-			index = tmp[0].treatment.length - 1;
+			tmp[lastIndex].treatment.push({name: emurName, toothArray: emurToothArray, amount: emurAmount});
+			index = tmp[lastIndex].treatment.length - 1;
 		} else {
-			if (tmp[0].treatment[index].name.toLowerCase() !== emurName.toLowerCase()) {
-				if (tmp[0].treatment.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
+			if (tmp[lastIndex].treatment[index].name.toLowerCase() !== emurName.toLowerCase()) {
+				if (tmp[lastIndex].treatment.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
 					setModalRegister(2001);
 					return;
 				} 
@@ -669,9 +664,8 @@ export default function DentalTreatment(props) {
 		}
 		setIsDrawerOpened("");
 		
-		tmp[0].treatment[index].name = emurName;
-		//console.log(tmp[0].treatment);
-		updateNewTreatment(tmp[0].treatment)
+		tmp[lastIndex].treatment[index].name = emurName;
+		updateNewTreatment(tmp[lastIndex].treatment)
 		setTreatmentArray(tmp);
 	}
 	

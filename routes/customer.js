@@ -2,6 +2,7 @@ var router = express.Router();
 const { 
 	checkDate,
 	dbToSvrText,
+	svrToDbText,
 } = require('./functions');
 
 router.use('/', function(req, res, next) {
@@ -17,6 +18,7 @@ router.get('/list', async function(req, res, next) {
 	for(let i=0; i<rec.length; ++i) {
 		rec[i].email = dbToSvrText(rec[i].email);
 	}
+	console.log(rec);
 	sendok(res, rec);
 });
 
@@ -41,6 +43,65 @@ router.get('/add/:userName', async function(req, res, next) {
 	rec.save();
 	sendok(res, "done");
 });
+
+router.get('/update/:custData', async function(req, res, next) {
+  setHeader(res);
+	var {custData} = req.params;
+	
+	custData = JSON.parse(custData);
+	console.log(custData);
+
+	let oldName = "";
+	let rec = null;
+	if (custData.customerNumber > 0) {
+		rec = await M_Customer.findOne({customerNumber: custData.customerNumber});
+		if (!rec) return senderr(res, 601, "Customer record not found");
+		oldName = rec.name;
+	} else {
+		let tmp = await M_Customer.find({}).limit(1).sort({customerNumber: -1});
+		//console.log(tmp);
+		rec = new M_Customer();
+		rec.customerNumber = (tmp.length > 0) ? tmp[0].customerNumber+1 : 999;
+	}
+
+	rec.enabled = true;
+	rec.name =  custData.name;
+	rec.type = custData.type;
+	rec.email = svrToDbText(custData.email)
+	rec.mobile = custData.mobile;
+
+	rec.doctorName = custData.doctorName;
+	rec.clinicName = custData.clinicName;
+
+	rec.addr1 = custData.addr1;
+	rec.addr2 = custData.addr2;
+	rec.addr3 = custData.addr3;
+
+	rec.location = custData.location;
+	rec.pinCode = custData.pinCode;
+
+	rec.commission = custData.commission;
+	rec.referenceCid = custData.referenceCid;
+
+	rec.welcomeMessage = custData.welcomeMessage;
+	rec.plan = custData.plan;
+	rec.fee = custData.fee;
+
+	//console.log(custData.expiryDate);
+	let d = new Date(custData.expiryDate);
+	//console.log(d);
+
+	rec.expiryDate = d;
+
+	// now create user
+
+	
+	await rec.save();
+
+	rec.email = dbToSvrText(rec.email);
+	sendok(res, rec);
+});
+
 
 router.get('/setworkinghours/:cid/:workingHours', async function(req, res, next) {
   setHeader(res);
@@ -105,7 +166,7 @@ cron.schedule('5 0 * * *', async () => {
 	}
 	
 	// STEP 3 ---> all visits to be closed
-	let allOpenVisits = await M_Visit.find({visitNumber: 0});
+	let allOpenVisits = await M_Visit.find({visitNumber: MAGICNUMBER});
 	for(let i=0; i<allOpenVisits.length; ++i) {
 		let visitRec = allOpenVisits[i];
 		//console.log(visitRec);
@@ -121,7 +182,7 @@ cron.schedule('5 0 * * *', async () => {
 	}
 	
 	// STEP 4 ---> all investigation to be closed
-	let allOpenInvest = await M_Investigation.find({investigationNumber: 0});
+	let allOpenInvest = await M_Investigation.find({investigationNumber: MAGICNUMBER});
 	for(let i=0; i<allOpenInvest.length; ++i) {
 		let investRec = allOpenInvest[i];
 		let countQuery = [
@@ -134,7 +195,7 @@ cron.schedule('5 0 * * *', async () => {
 	}
 
 	// STEP 5 ---> all treatment to be closed
-	let allOpenTreat = await M_DentalTreatment.find({treatmentNumber: 0});
+	let allOpenTreat = await M_DentalTreatment.find({treatmentNumber: MAGICNUMBER});
 	for(let i=0; i<allOpenTreat.length; ++i) {
 		let myRec = allOpenTreat[i];
 		let countQuery = [

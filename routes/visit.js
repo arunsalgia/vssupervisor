@@ -56,7 +56,7 @@ function getBlankVisit(cid, pid, name) {
 	vRec.cid = cid;
 	vRec.pid = pid;
 	vRec.displayName = name;
-	vRec.visitNumber = 0;
+	vRec.visitNumber = MAGICNUMBER;
 	vRec.visitDate = new Date();
 	vRec.medicines = [];
 	vRec.userNotes = [];
@@ -90,7 +90,7 @@ router.get('/printdoc/:cid/:pid', async function(req, res, next) {
 	var {cid, pid } = req.params;
 	pid = Number(pid);
 	
-	let myVisit = await M_Visit.findOne({cid: cid, pid: pid, visitNumber: 0});
+	let myVisit = await M_Visit.findOne({cid: cid, pid: pid, visitNumber: MAGICNUMBER});
 	if (!myVisit) return senderr(res, 601, "No new visit");
 	console.log(myVisit);	
 	pRec = await getPatient({cid: cid, pid: pid});
@@ -271,7 +271,7 @@ router.post('/update/:cid/:visitInfo', async function(req, res, next) {
 	visitInfo = JSON.parse(visitInfo);
 	//console.log(visitInfo);
 	
-	let myRec = await M_Visit.findOne({cid: cid, pid: visitInfo.pid, visitNumber: 0});
+	let myRec = await M_Visit.findOne({cid: cid, pid: visitInfo.pid, visitNumber: MAGICNUMBER});
 	if (!myRec) {
 		myRec = getBlankVisit(cid, visitInfo.pid, visitInfo.displayName);
 	}
@@ -561,14 +561,8 @@ router.get('/list/:cid/:pid', async function(req, res, next) {
 	var {cid, pid} = req.params;
 	
 	//console.log(cid, pid)
-	let allRecs = await M_Visit.find({cid: cid, pid: Number(pid)}).sort({visitNumber: -1});
-	
-	// if new visit at the bottom, bring it to the top
-	if (allRecs.length > 0)
-	if (allRecs[allRecs.length-1].visitNumber === 0) {
-		allRecs = [allRecs[allRecs.length-1]].concat(allRecs.slice(0, allRecs.length-1))
-	}
-	console.log(allRecs);
+	let allRecs = await M_Visit.find({cid: cid, pid: Number(pid)}).sort({visitNumber: 1});
+	//console.log(allRecs);
 	sendok(res, allRecs);
 });
 
@@ -577,7 +571,7 @@ router.get('/list/:cid', async function(req, res, next) {
   
 	var {cid} = req.params;
 	
-	let allRecs = await M_Visit.find({cid: cid}).sort({visitNumber: -1});
+	let allRecs = await M_Visit.find({cid: cid}).sort({visitNumber: 1});
 	//console.log(allRecs);
 	sendok(res, allRecs);
 });
@@ -694,7 +688,7 @@ function medicinePara(med) {
 	//console.log(med);
 	let tmp = 	med.name + "  ";			// fixedString(med.name,30);
 	tmp += setMedQty(med.dose1)+" -- "+setMedQty(med.dose2)+" -- "+setMedQty(med.dose3)+"  ";
-	tmp += "for "+med.time+" "+med.unit;
+	tmp += "for "+med.time+" "+med.unit+((med.time > 1) ? "s" : "");
 	return normalBulletPara(tmp);
 }
 

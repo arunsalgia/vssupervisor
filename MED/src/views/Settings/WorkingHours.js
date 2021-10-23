@@ -448,7 +448,7 @@ export default function WorkingHours() {
 		let hour = Math.floor(tmp / 4);
 		let minute = MINUTEBLOCK[tmp % 4];
 		return (
-			<Grid item xs={3} sm={2} md={1} lg={1} >	
+			<Grid key={"gr"+HOURSTR[hour]+":"+MINUTESTR[minute]} item xs={3} sm={2} md={1} lg={1} >	
 			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 				{(sessionStorage.getItem("userType") === "Doctor") &&
 					<FormControlLabel 

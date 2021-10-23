@@ -1,22 +1,12 @@
-import React, { useState ,useContext} from 'react'; 
-//import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-// import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-// import { Switch, Route } from 'react-router-dom';
-// import Grid from '@material-ui/core/Grid';
-// import Box from '@material-ui/core/Box';
-//import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-//import { UserContext } from "../../UserContext";
-// import axios from "axios";
+import React, { useState, useContext, useEffect } from 'react';
+import { makeStyles, Container, CssBaseline } from '@material-ui/core';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+
+import Button from '@material-ui/core/Button';
+import Link from '@material-ui/core/Link';
+import Typography from '@material-ui/core/Typography';
+// import axios from "axios";
 import red from '@material-ui/core/colors/red';
-import { useHistory } from "react-router-dom";
-// import SignIn from "./SignIn.js";
 import {ValidComp, BlankArea, CricDreamLogo} from "CustomComponents/CustomComponents.js"
 import { cdRefresh, encrypt } from "views/functions.js";
 
@@ -52,33 +42,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-/***
-class ChildComp extends React.Component {
-
-  componentDidMount()  {
-
-    ValidatorForm.addValidationRule('isEmailOK', (value) => {
-      return validateEmail(value);
-    });
-
-  }
-
-
-  componentWillUnmount() {
-    // remove rule when it is not needed
-    ValidatorForm.removeValidationRule('isEmailOK');
-  }
-
-  render() {
-    return <br/>;
-  }
-
-}
-***/
 
 export default function ForgotPassword() {
   const classes = useStyles();
-  const history = useHistory();
+  //const history = useHistory();
   const [email, setEmail] = useState("");
   const [registerStatus, setRegisterStatus] = useState(199);
 

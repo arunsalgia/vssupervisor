@@ -44,8 +44,8 @@ import moment from "moment";
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { useAlert } from 'react-alert'
 import Drawer from '@material-ui/core/Drawer';
-import _ from 'lodash'
-
+//import _ from 'lodash'
+import lodashSortBy from "lodash/sortBy"
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Avatar from "@material-ui/core/Avatar"
@@ -69,7 +69,7 @@ DisplayAppointmentDetails, DisplayAppointmentBox,
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 
 import {
-WEEKSTR, SHORTMONTHSTR, 
+WEEKSTR, SHORTMONTHSTR, SHORTWEEKSTR,
 HOURSTR, MINUTESTR,
 MONTHSTR, DATESTR, MONTHNUMBERSTR,
 VISITTYPE,
@@ -118,6 +118,12 @@ const useStyles = makeStyles((theme) => ({
 	root: {
 		width: '100%',
 	}, 
+	greenBox: {
+		backgroundColor: 'green',
+	},
+	whiteBox: {
+		backgroundColor: 'white',
+	},
 	selIndex: {
 		color: 'blue',
 		fontSize: theme.typography.pxToRem(14),
@@ -415,8 +421,8 @@ let dense = false;
 
 let test=[];
 let medQty=[];
-const timeArray=[1,2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-const unitArray=["Day(s)", "Weeks(s)", "Month(s)"];
+//const timeArray=[1,2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+//const unitArray=["Day(s)", "Weeks(s)", "Month(s)"];
 
 const MINUTEBLOCK = [0, 15, 30, 45];
 
@@ -428,7 +434,7 @@ let defaultDirectoryMode=true;
 let aptDate = new Date();
 function setAptDate(d) { aptDate = d; }
 
-var workingHours;
+//var workingHours;
 var timeSlots;
 const NUMBEROFDAYS = (isMobile()) ? 3 : 5;
 var userCid;
@@ -448,7 +454,7 @@ export default function Appointment() {
 	const [currentPatient, setCurrentPatient] = useState("");
 	const [currentPatientData, setCurrentPatientData] = useState({});
 	const [allPendingAppt, setAllPendingAppt] = useState([])
-	const [emurName, setEmurName] = useState("");
+	//const [emurName, setEmurName] = useState("");
 	const [modalRegister, setModalRegister] = useState(0)
 	const [radioValue, setRadioValue] = useState("Male");
 	const [isDrawerOpened, setIsDrawerOpened] = useState(false);
@@ -529,9 +535,9 @@ export default function Appointment() {
 			return ppp;				
 		}
 		const makeSlots  = async () => {
-			let allHolidays = await PgetAllHolidays;
+			//let allHolidays = await PgetAllHolidays;
 			let allPendingAppt = await PgetAllPendingAppointment;
-			generateSlots(allPendingAppt, allHolidays);			
+			await generateSlots(allPendingAppt);			
 		}
 		const checkFromPatient = async () => {
 			let ppp = await PgetAllMyPatients;	
@@ -587,13 +593,13 @@ export default function Appointment() {
 		}		
 	}
 	
-	function generateSlots(allPendingAppt, allHolidays) {
+	async function generateSlots(allPendingAppt) {
 		let d;
 		let slotData = [];
 		for(let i=0; i<NUMBEROFDAYS; ++i) {
-			d = (i === 0) ? getFirstDate(allHolidays) : getNextDate(d, allHolidays);
+			d = (i === 0) ? getFirstDate() : getNextDate(d);
 			//console.log(d);
-			slotData.push(prepareData(d, allPendingAppt));
+			slotData.push(await prepareData(d, allPendingAppt));
 		}
 		setAllTimeSlots(slotData);
 		setCurrentIndex(0);
@@ -690,7 +696,12 @@ export default function Appointment() {
 		return (retStr);
 	}
 	
-	function prepareData(d, allAppt) {
+	async function checkHoliday(year, month, date) {
+		let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/holiday/isholiday/${userCid}/${year}/${month}/${date}`)
+		return resp.data.status;
+	}
+
+	async function prepareData(d, allAppt) {
 		let morningSlots = [];
 		let afternoonSlots = [];
 		let eveningSlots = [];
@@ -701,6 +712,9 @@ export default function Appointment() {
 		let myDate = d.getDate();
 		let myDay = d.getDay();
 		// for morning slots
+		let todayHoiliday = await checkHoliday(myYear, myMonth, myDate );
+		//console.log("HChk",todayHoiliday);
+
 		for(let blk=BLOCKNUMBER.morningBlockStart; blk<=BLOCKNUMBER.morningBlockEnd; ++blk) {
 			if (workingHours.includes(myDay*100+blk)) {
 				let hour = Math.floor(blk / 4);
@@ -752,38 +766,12 @@ export default function Appointment() {
 			}
 		}
 	
-		let retValue = {dateTime: d, year: myYear, month: myMonth, date: myDate,
+		let retValue = {dateTime: d, year: myYear, month: myMonth, date: myDate, holiday: todayHoiliday,
 			day: myDay, morningSlots: morningSlots, afternoonSlots: afternoonSlots,
 			eveningSlots: eveningSlots
 		};
 		//console.log(retValue);
 		return retValue;
-	}
-	
-	function clinicOff(d, myHoildays) {
-		let tmp = myHoildays.filter(x => x.date === d.getDate() &&
-				x.month === d.getMonth() && x.year === d.getFullYear());
-		if (tmp.length > 0) return true;
-			
-		// check if doctor's weekend on this date
-		tmp = customerData.workingHours.filter(x => 
-			x >= (d.getDay()*100 + BLOCKNUMBER.allBlockStart) &&
-			x <= (d.getDay()*100 + BLOCKNUMBER.allBlockEnd)
-		);
-		let isClosed = (tmp.length === 0);
-		return isClosed;
-	}
-	
-	function getNextDate(d, myHoildays) {
-		let done = false
-		//console.log("I",d)
-		while (!done) {
-			d = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 0 , 0);
-			if (clinicOff(d, myHoildays)) { continue; }
-			break;
-		}
-		//console.log("O",d)
-		return d;
 	}
 
 
@@ -811,26 +799,54 @@ export default function Appointment() {
     )
   }
 
+	
+	function clinicOff(d, myHoildays) {
+		let tmp = myHoildays.filter(x => x.date === d.getDate() &&
+				x.month === d.getMonth() && x.year === d.getFullYear());
+		if (tmp.length > 0) return true;
+			
+		// check if doctor's weekend on this date
+		tmp = customerData.workingHours.filter(x => 
+			x >= (d.getDay()*100 + BLOCKNUMBER.allBlockStart) &&
+			x <= (d.getDay()*100 + BLOCKNUMBER.allBlockEnd)
+		);
+		let isClosed = (tmp.length === 0);
+		return isClosed;
+	}
+	
+	function getNextDate(d) {
+		let done = false
+		//console.log("I",d)
+		while (!done) {
+			d = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 0 , 0);
+			//if (clinicOff(d, myHoildays)) { continue; }
+			break;
+		}
+		//console.log("O",d)
+		return d;
+	}
 
-	function getPrevDate(d, myHoildays) {
+	function getPrevDate(d) {
 		let today = new Date();
 		let done = false
 		while (!done) {
 			d = new Date(d.getFullYear(), d.getMonth(), d.getDate()-1, 0 , 0);
 			if (compareDate(d, today) < 0) return null;
-			if (clinicOff(d, myHoildays)) continue;
+			//if (clinicOff(d, myHoildays)) continue;
 			break;
 		}
 		return d;
 	}
 	
-	function getFirstDate(myHoildays) {
+	function getFirstDate() {
 		//console.log(myHoildays);
 		let d = new Date();
 		let firstDate = new Date(d.getFullYear(), d.getMonth(), d.getDate()-1);
-		return getNextDate(firstDate, myHoildays);
+		return getNextDate(firstDate);
 	}
-		
+	
+/*
+	
 	function ModalResisterStatus() {
     // console.log(`Status is ${modalRegister}`);
 		let regerr = true;
@@ -884,7 +900,6 @@ export default function Appointment() {
     )
   }
 
-/*
 	async function selectFilter() {
 		//console.log("Filter:", searchText);
 		getPatientList(searchText);
@@ -919,16 +934,6 @@ export default function Appointment() {
 */
 	
 	
-	
-	async function junkandleSelectPatient_junk(rec) {
-		let tmpArray = await reloadAppointmentDetails();
-		generateSlots(tmpArray, holidayArray);
-		setSelectPatient(false);
-		setCurrentPatient(rec.displayName);
-		setCurrentPatientData(rec);
-		await getPatientAppt(rec);
-	}
-	
 	async function getPatientAppt(rec) {
 		try {
 			var resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/pendinglist/pid/${userCid}/${rec.pid}`);
@@ -942,9 +947,9 @@ export default function Appointment() {
 
 	
 	async function prevDate() {
-		let d = getPrevDate(allTimeSlots[0].dateTime, holidayArray);
+		let d = getPrevDate(allTimeSlots[0].dateTime);
 		if (d !== null) {
-			let x = [prepareData(d, allPendingAppt)];
+			let x = [await prepareData(d, allPendingAppt)];
 			for (let i=0; i<(NUMBEROFDAYS-1); ++i) {
 				x.push(allTimeSlots[i]);
 			}
@@ -960,8 +965,8 @@ export default function Appointment() {
 		for (let i=1; i<NUMBEROFDAYS; ++i) {
 			x.push(allTimeSlots[i]);
 		}
-		let d = getNextDate(allTimeSlots[NUMBEROFDAYS-1].dateTime, holidayArray);
-		let newData = prepareData(d, allPendingAppt);
+		let d = getNextDate(allTimeSlots[NUMBEROFDAYS-1].dateTime);
+		let newData = await prepareData(d, allPendingAppt);
 		x.push(newData);
 		//console.log(x);
 		setAllTimeSlots(x);
@@ -1004,12 +1009,12 @@ export default function Appointment() {
 			alert.success("Appointment set of "+currentPatientData.displayName);
 			// update patient appointment
 			let tmpArray=[resp.data].concat(apptArray);
-			tmpArray = _.sortBy(tmpArray, ['order']);
+			tmpArray = lodashSortBy(tmpArray, ['order']);
 			setApptArray(tmpArray);
 			
 			// now update all pending appointment
 			tmpArray=[resp.data].concat(allPendingAppt);
-			tmpArray = _.sortBy(tmpArray, ['order']);
+			tmpArray = lodashSortBy(tmpArray, ['order']);
 			setAllPendingAppt(tmpArray);
 
 			// update slot as pending
@@ -1053,9 +1058,9 @@ export default function Appointment() {
 	function DisplayAvailableAppointments() {
 	if (allTimeSlots.length === 0) return null;
 	
-	let tStr = ((allTimeSlots[currentIndex].date < 10) ? "0" : "") + allTimeSlots[currentIndex].date;
+	let tStr = DATESTR[allTimeSlots[currentIndex].date];
 	tStr += "/";
-	tStr += (((allTimeSlots[currentIndex].month + 1) < 10) ? "0" : "") + (allTimeSlots[currentIndex].month+1);
+	tStr += MONTHNUMBERSTR[allTimeSlots[currentIndex].month+1];
 	tStr += "/";
 	tStr += allTimeSlots[currentIndex].year;
 
@@ -1081,11 +1086,13 @@ export default function Appointment() {
 			let myClass = (index === currentIndex) ? classes.selIndex : classes.unselIndex;
 		return (
 		<Grid key={"TIME"+index} item xs={3} sm={3} md={2} lg={2} >
-			<div>
-			<Typography className={myClass} onClick={() => {setNewCurrentIndex(index)}}>{dStr}</Typography>
-			<Typography className={myClass} onClick={() => {setNewCurrentIndex(index)}}>{WEEKSTR[t.day]}</Typography>
-			<Typography className={myClass} onClick={() => {setNewCurrentIndex(index)}}>{freeSlots+" free Slots"}</Typography>
-			</div>
+			<Box onClick={() => {setNewCurrentIndex(index)}} 
+			className={(t.holiday) ? gClasses.greenboxStyle : gClasses.boxStyle} 
+			borderRadius={7} border={1} >
+			<Typography className={myClass}>{dStr+"( "+SHORTWEEKSTR[t.day]+")"}</Typography>
+			{/*<Typography className={myClass}>{WEEKSTR[t.day]}</Typography>*/}
+			<Typography className={myClass}>{freeSlots+" free Slots"}</Typography>
+			</Box>
 		</Grid>
 		)}
 		)}
@@ -1267,7 +1274,7 @@ export default function Appointment() {
 				);
 			setAllPendingAppt(tmpAppt);
 			//let tmpArray = await reloadAppointmentDetails();
-			//generateSlots(tmpArray, holidayArray);
+			//generateSlots(tmpArray);
 						
 			let slotIndex = getSlotIndex(cancelAppt.year, cancelAppt.month, cancelAppt.date);
 			if (slotIndex >= 0) {
@@ -1401,7 +1408,7 @@ export default function Appointment() {
 		setSelectPatient(false);
 		await getAppointmentsByPid(rec.pid);
 		let tmpArray = await reloadAppointmentDetails();	
-		generateSlots(tmpArray, holidayArray); // ARS. This is okay and confirmed
+		await generateSlots(tmpArray); // ARS. This is okay and confirmed
 	}
 	
 	function handleAdd() {
@@ -1457,7 +1464,7 @@ export default function Appointment() {
 
 	async function handleMyAppt() {
 		let tmpArray = await reloadAppointmentDetails();
-		generateSlots(tmpArray, holidayArray);		// ARS This is required and confirmed
+		await generateSlots(tmpArray);		// ARS This is required and confirmed
 		setCurrentPatient("INFO")
 		setApptArray([]);
 	}

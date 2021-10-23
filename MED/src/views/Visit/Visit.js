@@ -2,49 +2,51 @@ import React, { useEffect, useState, useContext } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
 import axios from "axios";
-import SwitchBtn from '@material-ui/core/Switch';
-import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+//import SwitchBtn from '@material-ui/core/Switch';
+//import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 import InputLabel from '@material-ui/core/InputLabel';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import Radio from '@material-ui/core/Radio';
+//import FormControlLabel from '@material-ui/core/FormControlLabel';
+//import FormControl from '@material-ui/core/FormControl';
+//import RadioGroup from '@material-ui/core/RadioGroup';
+//import Radio from '@material-ui/core/Radio';
 
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import VsList from "CustomComponents/VsList";
 import VsCheckBox from "CustomComponents/VsCheckBox";
 import VsTextFilter from "CustomComponents/VsTextFilter";
+import VsRadioGroup from "CustomComponents/VsRadioGroup"
 
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
 import fileDownload  from 'js-file-download';
-import fs from 'fs';
-import _ from 'lodash';
+//import fs from 'fs';
+import lodashSortBy from 'lodash/sortBy';
+import lodashCloneDeep from 'lodash/cloneDeep';
 
 import Grid from "@material-ui/core/Grid";
 import GridItem from "components/Grid/GridItem.js";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
+//import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
+//import Accordion from '@material-ui/core/Accordion';
+//import AccordionSummary from '@material-ui/core/AccordionSummary';
+//import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Box from '@material-ui/core/Box';
-import Modal from 'react-modal';
+//import Modal from 'react-modal';
 import { borders } from '@material-ui/system';
-import {dynamicModal } from "assets/dynamicModal";
-import cloneDeep from 'lodash/cloneDeep';
+//import {dynamicModal } from "assets/dynamicModal";
+//import cloneDeep from 'lodash/cloneDeep';
 //import StepProgressBar from 'react-step-progress';
 // import the stylesheet
-import 'react-step-progress/dist/index.css';
+//import 'react-step-progress/dist/index.css';
 
 // styles
 import globalStyles from "assets/globalStyles";
-import modalStyles from "assets/modalStyles";
+//import modalStyles from "assets/modalStyles";
 
 // icons
 import IconButton from '@material-ui/core/IconButton';
@@ -56,53 +58,45 @@ import AddIcon from '@material-ui/icons/AddCircleOutline';
 import LeftIcon from '@material-ui/icons/ChevronLeft';
 import RightIcon from '@material-ui/icons/ChevronRight';
 
-import Switch from "@material-ui/core/Switch";
+//import Switch from "@material-ui/core/Switch";
 
 
-import Link from '@material-ui/core/Link';
-import Card from "components/Card/Card.js";
-import CardBody from "components/Card/CardBody.js";
-import Avatar from "@material-ui/core/Avatar"
+//import Link from '@material-ui/core/Link';
+//import Card from "components/Card/Card.js";
+//import CardBody from "components/Card/CardBody.js";
+//import Avatar from "@material-ui/core/Avatar"
 // import CardAvatar from "components/Card/CardAvatar.js";
 // import { useHistory } from "react-router-dom";
 // import { UserContext } from "../../UserContext";
 
-import {DisplayYesNo, DisplayPageHeader, ValidComp, BlankArea,
-DisplayPatientDetails,
-DisplayDocumentList,
-DisplayImage, DisplayPDF,
-LoadingMessage,
-DisplayDocumentDetails,
+import {
+DisplayPageHeader, ValidComp, BlankArea, LoadingMessage,
 } from "CustomComponents/CustomComponents.js"
 
 import {
-SupportedMimeTypes, SupportedExtensions,
 str1by4, str1by2, str3by4,
 HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR,
+MAGICNUMBER,
 } from "views/globals.js";
 
 // icons
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+//import FileCopyIcon from '@material-ui/icons/FileCopy';
+//import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 //import DeleteIcon from '@material-ui/icons/Delete';
+//import VisibilityIcon from '@material-ui/icons/Visibility';
+//import CloseIcon from '@material-ui/icons/Close';
+
 import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Cancel';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 
 
 //colours 
 import { red, blue 
 } from '@material-ui/core/colors';
 
-import { callYesNo, 
+import {  
 	downloadVisit,
-	encrypt, decrypt, 
 	validateInteger,
-	updatePatientByFilter,
-	dispAge, dispEmail, dispMobile,
-	getPatientDocument,
-	stringToBase64,
 	vsDialog,
 	ordinalSuffix,
 } from "views/functions.js";
@@ -128,23 +122,12 @@ const useStyles = makeStyles((theme) => ({
 		fontWeight: theme.typography.fontWeightBold,
 		paddingRight: '10px',
 	},
-    root: {
-      width: '100%',
-    }, 
     info: {
         color: blue[700],
     },     
     header: {
 			color: '#D84315',
     }, 
-    error:  {
-      // right: 0,
-      fontSize: '12px',
-      color: red[700],
-      // position: 'absolute',
-      alignItems: 'center',
-      marginTop: '0px',
-		},
 		editdelete: {
 			marginLeft:  '50px',
 			marginRight: '50px',
@@ -196,12 +179,6 @@ const useStyles = makeStyles((theme) => ({
 			fontSize: theme.typography.pxToRem(15),
 			fontWeight: theme.typography.fontWeightBold,
 		},
-		selectedAccordian: {
-			//backgroundColor: '#B2EBF2',
-		},
-		normalAccordian: {
-			backgroundColor: '#FFE0B2',
-		},
     secondaryHeading: {
       fontSize: theme.typography.pxToRem(15),
       color: theme.palette.text.secondary,
@@ -211,14 +188,14 @@ const useStyles = makeStyles((theme) => ({
 		}
   }));
 
-const addEditModal = dynamicModal('60%');
-const yesNoModal = dynamicModal('60%');
+//const addEditModal = dynamicModal('60%');
+//const yesNoModal = dynamicModal('60%');
 
-const COUNTPERPAGE=10;
+//const COUNTPERPAGE=10;
 // set-up the step content
-const step1Content = <h1>Request to server</h1>;
-const step2Content = <h1>Geneate visit document</h1>;
-const step3Content = <h1>Download visit document</h1>;
+//const step1Content = <h1>Request to server</h1>;
+//const step2Content = <h1>Geneate visit document</h1>;
+//const step3Content = <h1>Download visit document</h1>;
 
 let test=[];
 let medQty=[];
@@ -269,17 +246,17 @@ export default function Visit(props) {
 	const [filterItemArray, setFilterItemArray] = useState([]);
 	
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
-	const [isListDrawer, setIsListDrawer] = useState("");
-	const [selectPatient, setSelectPatient] = useState(false);
-  const [patientArray, setPatientArray] = useState([])
-	const [patientMasterArray, setPatientMasterArray] = useState([])
+	//const [isListDrawer, setIsListDrawer] = useState("");
+	//const [selectPatient, setSelectPatient] = useState(false);
+  //const [patientArray, setPatientArray] = useState([])
+	//const [patientMasterArray, setPatientMasterArray] = useState([])
 	const [currentPatient, setCurrentPatient] = useState("");
 	const [currentPatientData, setCurrentPatientData] = useState({});
 	
 	const [startLoading, setStartLoading] = useState(false);
 	
-	const [showDocument, setShowDocument] = useState(false);
-	const [documentArray, setDocumentArray] = useState([]);
+	//const [showDocument, setShowDocument] = useState(false);
+	//const [documentArray, setDocumentArray] = useState([]);
 	
 
 	const [dlMime, setDlMime] = useState("");
@@ -291,7 +268,7 @@ export default function Visit(props) {
 	
 	const [medicineArray, setMedicineArray] = useState([])
 	const [noteArray, setNoteArray] = useState([]);
-	const [remarkArray, setRemarkArray] = useState([{name: "Rem1"}, {name: "Rem2"}]);
+	const [remarkArray, setRemarkArray] = useState([]);
 	
 	//const [currentAppt, setCurrentAppt] = useState(null);
 	const [visitArray, setVisitArray] = useState([])
@@ -377,13 +354,14 @@ export default function Visit(props) {
 	
 	
 	function DisplayFunctionHeader() {
+	let lastIndex = visitArray.length - 1;
 	return (
 	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 		<DisplayFunctionItem item="Medicine" />
 		<DisplayFunctionItem item="User Note" />
 		<DisplayFunctionItem item="Lab Test" />
-		{((visitArray.length > 0) && (visitArray[0].visitNumber === 0) && (visitIndex === 0)) &&
+		{((visitArray.length > 0) && (visitIndex === lastIndex )) &&
 			<DisplayFunctionItem item="Next Review" />
 		}
 	</Grid>	
@@ -415,7 +393,7 @@ export default function Visit(props) {
 	
 	let v = visitArray[visitIndex];
 	let myDate;
-	if (v.visitNumber === 0)
+	if (v.visitNumber === MAGICNUMBER)
 			myDate = "Today's new Visit";
 	else {
 		let d = new Date(v.visitDate);
@@ -447,7 +425,7 @@ export default function Visit(props) {
 		try {
 			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/list/${userCid}/${rec.pid}`)
 			setVisitArray(resp.data);
-			setVisitIndex(0);
+			setVisitIndex(resp.data.length - 1);
 		} catch (e) {
 			console.log(e)
 			setVisitArray([]);
@@ -459,9 +437,7 @@ export default function Visit(props) {
 		if (medicineArray.length == 0) {
 			try {
 				var resp = await 
-					trackPromise(
-						axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/list/${userCid}`)
-					);
+				axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/list/${userCid}`)
 				setMedicineArray(resp.data);
 				//console.log(resp.data);
 			} catch (e) {
@@ -502,7 +478,7 @@ export default function Visit(props) {
 				regerr = false;
         break;
       case 1001:
-        myMsg = "Duplicate Medicine";
+        myMsg = `"${emurName}" already added`;
         break;
       case 1002:
         myMsg = `All the doses cannot be 0`;
@@ -511,10 +487,10 @@ export default function Visit(props) {
         myMsg = `No Medicine selected`;
         break;
       case 2001:
-        myMsg = "Duplicate User Note";
+        myMsg = `"${emurName}" already added`;
         break;
       case 3001:
-        myMsg = `Duplicate Lab Test`;
+        myMsg = `"${emurName}" already added`;
         break;
       default:
           myMsg = "Unknown Error";
@@ -527,13 +503,11 @@ export default function Visit(props) {
     )
   }
 	
-//============ starts from here
-	
-	//  handle Visit display /add / del /copy / update components and functions 
-	
+
 
 	function DisplayNewVisitBtn() {
-		if ((visitArray.length > 0) && (visitArray[0].visitNumber === 0)) return null;
+		let lastIndex = visitArray.length - 1;
+		if ((visitArray.length > 0) && (visitArray[lastIndex].visitNumber === MAGICNUMBER)) return null;
 		return (
 			<div align="right">
 				<VsButton name="Add Blank Visit" onClick={handleCreateNewVisit} />
@@ -547,7 +521,7 @@ export default function Visit(props) {
 	function handleCreateNewVisit() {
 		let x = new Date();
 		
-		let tmpArray = [{
+		let tmp = [{
 			enabled: true,
 			medicines: [],
 			pid: currentPatientData.pid,
@@ -555,14 +529,13 @@ export default function Visit(props) {
 			remarks: [],
 			userNotes: [],
 			visitDate: x.toString(),
-			visitNumber: 0,
+			visitNumber: MAGICNUMBER,
 			appointment: '',
 		}];
 		
-		//console.log(tmpArray[0]);
-		tmpArray = tmpArray.concat(visitArray);
+		let tmpArray = visitArray.concat(tmp);
 		setVisitArray(tmpArray);
-		setVisitIndex(0);
+		setVisitIndex(tmpArray.length - 1);
 		// also add date
 		
 	}
@@ -571,59 +544,18 @@ export default function Visit(props) {
 		let today = new Date();
 
 		let selectedVisit = visitArray[visitIndex];
-		let newVisit = cloneDeep(selectedVisit);
+		let newVisit = lodashCloneDeep(selectedVisit);
 		updateNewVisit(newVisit.medicines, newVisit.userNotes, newVisit.remarks, nextVisitTime, nextVisitUnit)
 		
-		newVisit.visitNumber = 0;
+		newVisit.visitNumber = MAGICNUMBER;
 		newVisit.visitDate = new Date().toString();
 		let tmpArray = [newVisit];
-		tmpArray = tmpArray.concat(visitArray);
+		tmpArray = visitArray.concat(tmpArray);
 		setVisitArray(tmpArray);
-		setVisitIndex(0);
+		setVisitIndex(tmpArray.length - 1);
 	}
 	
-	function handleDeleteNew() {
-		let tmp = visitArray.slice(1, visitArray.length);
-		setVisitArray(tmp);
-	}
-	
-	
-	
-	function validateNewVisit() {
-		let errcode = 0;
-		return (0);
-		
-		// confirm of atleast 1 medicine given
-		if (errcode == 0)
-		if (visitArray[0].medicines.length == 0) {
-			alert.error("No Medicine prescribed.");
-			return;
-		} 
-		
-		// confirm medicine name given and atleast 1 dose is non-zero
-		if (errcode == 0)
-		for(let i=0; i < visitArray[0].medicines.length; ++i) {
-			// confirm medicine name given
-			let m = visitArray[0].medicines[i];
-			console.log("X"+m.name+"X");
-			if (m.name == "") {
-				return alert.error("Medicine Name cannot be blank");
-			}
-			
-			// confirm duplicate medicine not given
-			let tmp = visitArray[0].medicines.filter(x => x.name == m.name);
-			if (tmp.length > 1) {
-				return alert.error("Medicine "+m.name+" prescribed more than once");
-			}
-			
-			// confirm atleast 1 dose is non-zero
-			if ((m.dose1 + m.dose2 + m.dose3) == 0) {
-				return alert.error("No dose specified");
-			}	
-		};
-		return (errcode);
-	}
-	
+
 	async function generateVisitDocument() {
 		try {
 			await axios.get (`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/printdoc/${userCid}/${currentPatientData.pid}`);
@@ -668,52 +600,9 @@ export default function Visit(props) {
 			alert.error("Error downloading visit document");
 		}
 	}
-	
-	function prepareVisitData() {
-		let myResult = {visit: visitArray[0], nextVisit: {after: nextVisitTime, unit: nextVisitUnit} }
-		return myResult;
-		
-		
-		let newVisit = cloneDeep(visitArray[0]);
-		// remove blank lines
-		newVisit.remarks = newVisit.remarks.filter(x => x.name.trim() !== "");
-		newVisit.userNotes = newVisit.userNotes.filter(x => x.name.trim() !== "");
 
-		for(let i=0; i<newVisit.medicines.length; ++i) {
-			newVisit.medicines[i].name = stringToBase64(newVisit.medicines[i].name);
-		}
-		for(let i=0; i<newVisit.userNotes.length; ++i) {
-			newVisit.userNotes[i].name = stringToBase64(newVisit.userNotes[i].name);
-		}
-		for(let i=0; i<newVisit.remarks.length; ++i) {
-			newVisit.remarks[i].name = stringToBase64(newVisit.remarks[i].name);
-		}
-		
-		let result = {visit: newVisit, nextVisit: {after: nextVisitTime, unit: nextVisitUnit} }
-		return result;
-	}
 	
-	async function updateVisit() {
-		let errcode = validateNewVisit();
 
-		if (errcode == 0) {	
-			let newVisitNumber = visitArray.length;
-			let newVisit = prepareVisitData();
-			// encodeURI			
-			let newVisitInfo = JSON.stringify(newVisit);
-			let tmp1 = encodeURIComponent(newVisitInfo);
-			//console.log(newVisitInfo);
-			try {
-				await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/updatenewvisit/${userCid}/${newVisitNumber}/${tmp1}`)
-				alert.success("Successfully update new visit");
-			} catch (e) {
-				console.log(e)
-				alert.success("Error updating new visit");
-			}
-		} else {
-			//setVisitError(errcode);
-		}
-	}
 	
 	//Arun Salgia new add / edit / delete Notes
 	
@@ -725,10 +614,12 @@ export default function Visit(props) {
 		setFilterItemText("");
 		setFilterItemArray([]);
 		setRemember(false);
+		setModalRegister(0);
+
 	}
 	
 	function handleEditUserNotes(vNumber, notesNumber) {
-		let tmp = visitArray.find( x => x.visitNumber == vNumber);
+		let tmp = visitArray.find( x => x.visitNumber === vNumber);
 		setEmurVisitNumber(vNumber);
 		setEmurNumber(notesNumber);
 		setEmurName(tmp.userNotes[notesNumber].name);
@@ -739,6 +630,7 @@ export default function Visit(props) {
 		setFilterItemText("");
 		setFilterItemArray([]);
 		setRemember(false);
+		setModalRegister(0);
 	}
 	
 	function updateUserNotes() {
@@ -746,16 +638,17 @@ export default function Visit(props) {
 		
 		let tmp = [].concat(visitArray);
 		let index = emurNumber;
+		let lastIndex = visitArray.length - 1;
 		if (isDrawerOpened === "ADDNOTE") {
-			if (tmp[0].userNotes.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
+			if (tmp[lastIndex].userNotes.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
 				setModalRegister(2001);
 				return;
 			} 
-			tmp[0].userNotes.push({name: ""});
-			index = tmp[0].userNotes.length - 1;
+			tmp[lastIndex].userNotes.push({name: ""});
+			index = tmp[lastIndex].userNotes.length - 1;
 		} else {
-			if (tmp[0].userNotes[index].name.toLowerCase() !== emurName.toLowerCase()) {
-				if (tmp[0].userNotes.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
+			if (tmp[lastIndex].userNotes[index].name.toLowerCase() !== emurName.toLowerCase()) {
+				if (tmp[lastIndex].userNotes.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
 					setModalRegister(2001);
 					return;
 				} 
@@ -763,32 +656,30 @@ export default function Visit(props) {
 		}
 		setIsDrawerOpened("");
 		
-		tmp[0].userNotes[index].name = emurName;
-		console.log(tmp[0].userNotes);
-		updateNewVisit(tmp[0].medicines, tmp[0].userNotes, tmp[0].remarks, nextVisitTime, nextVisitUnit)
+		tmp[lastIndex].userNotes[index].name = emurName;
+		console.log(tmp[lastIndex].userNotes);
+		updateNewVisit(tmp[lastIndex].medicines, tmp[lastIndex].userNotes, tmp[lastIndex].remarks, nextVisitTime, nextVisitUnit)
 		setVisitArray(tmp);
 	}
 	
 	function handleDeleteNotes(vNumber, mNumber) {
-		//console.log("handleDeleteMedicine "+vNumber+" Notes "+mNumber);
-		if (vNumber === 0) {
-			vsDialog("Delete User Note", `Are you sure you want to delete note ${visitArray[0].userNotes[mNumber].name}?`,
-				{label: "Yes", onClick: () => handleDeleteNotesConfirm(vNumber, mNumber) },
+		let lastIndex = visitArray.length - 1;
+		if (vNumber === MAGICNUMBER) {
+			vsDialog("Delete User Note", `Are you sure you want to delete note ${visitArray[lastIndex].userNotes[mNumber].name}?`,
+				{label: "Yes", onClick: () => handleDeleteNotesConfirm(mNumber) },
 				{label: "No" }
 			);
 		}
 	}
 	
-	function handleDeleteNotesConfirm(vNumber, mNumber) {
-		//console.log("handleDeleteMedicine "+vNumber+" Notes "+mNumber);
-		if (vNumber !== 0) return;
-		
+	function handleDeleteNotesConfirm(mNumber) {
+		let lastIndex = visitArray.length - 1;
 		var tmp = [].concat(visitArray);
-		tmp[0].userNotes = tmp[0].userNotes.filter(function(value, index, arr){ 
+		tmp[lastIndex].userNotes = tmp[lastIndex].userNotes.filter(function(value, index, arr){ 
 			return index !== mNumber;
 		});
 		setVisitArray(tmp);
-		updateNewVisit(tmp[0].medicines, tmp[0].userNotes, tmp[0].remarks, nextVisitTime, nextVisitUnit)
+		updateNewVisit(tmp[lastIndex].medicines, tmp[lastIndex].userNotes, tmp[lastIndex].remarks, nextVisitTime, nextVisitUnit)
 	}
 	
 	
@@ -801,11 +692,11 @@ export default function Visit(props) {
 		setFilterItemText("");
 		setFilterItemArray([]);
 		setRemember(false);
-
+		setModalRegister(0);
 	}
 	
 	function handleEditRemark(vNumber, remarkNumber) {
-		let tmp = visitArray.find( x => x.visitNumber == vNumber);
+		let tmp = visitArray.find( x => x.visitNumber === vNumber);
 
 		setEmurVisitNumber(vNumber);
 		setEmurNumber(remarkNumber);
@@ -817,7 +708,7 @@ export default function Visit(props) {
 		setFilterItemText("");
 		setFilterItemArray([]);
 		setRemember(false);
-
+		setModalRegister(0);
 	}
 	
 	function updateRemark() {
@@ -826,15 +717,15 @@ export default function Visit(props) {
 		let tmp = [].concat(visitArray);
 		let index = emurNumber;
 		if (isDrawerOpened === "ADDREM") {
-			if (tmp[0].remarks.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
+			if (tmp[visitIndex].remarks.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
 				setModalRegister(3001);
 				return;
 			}
-			tmp[0].remarks.push({name: ""});
-			index = tmp[0].remarks.length - 1;
+			tmp[visitIndex].remarks.push({name: ""});
+			index = tmp[visitIndex].remarks.length - 1;
 		} else {
-			if (tmp[0].remarks[index].name.toLowerCase() !== emurName.toLowerCase()) {
-				if (tmp[0].remarks.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
+			if (tmp[visitIndex].remarks[index].name.toLowerCase() !== emurName.toLowerCase()) {
+				if (tmp[visitIndex].remarks.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
 					setModalRegister(3001);
 					return;
 				}
@@ -842,30 +733,30 @@ export default function Visit(props) {
 		}
 		setIsDrawerOpened("");
 		
-		tmp[0].remarks[index].name = emurName;
+		tmp[visitIndex].remarks[index].name = emurName;
 		setVisitArray(tmp);
-		updateNewVisit(tmp[0].medicines, tmp[0].userNotes, tmp[0].remarks, nextVisitTime, nextVisitUnit)
+		updateNewVisit(tmp[visitIndex].medicines, tmp[visitIndex].userNotes, tmp[visitIndex].remarks, nextVisitTime, nextVisitUnit)
 	}
 	
 	function handleDeleteRemark(vNumber, mNumber) {
-		if (vNumber !== 0) return;
-		let item = visitArray[0].remarks[mNumber].name;
+		if (vNumber !== MAGICNUMBER) return;
+		let lastIndex = visitArray.length - 1;
+		let item = visitArray[lastIndex].remarks[mNumber].name;
 		vsDialog("Delete Examination Advice", `Are you sure you want to delete Examination advice of ${item}?`,
-		{label: "Yes", onClick: () => handleDeleteRemarkConfirm(vNumber, mNumber) },
+		{label: "Yes", onClick: () => handleDeleteRemarkConfirm(mNumber) },
 		{label: "No" }
 		);
 	}
 	
-	function handleDeleteRemarkConfirm(vNumber, mNumber) {
-		console.log("handleDeleteMedicine "+vNumber+" Remark "+mNumber);
-		if (vNumber == 0) {
-			var tmp = [].concat(visitArray);
-			tmp[0].remarks = tmp[0].remarks.filter(function(value, index, arr){ 
-        return index !== mNumber;
-			});
-			setVisitArray(tmp);
-			updateNewVisit(tmp[0].medicines, tmp[0].userNotes, tmp[0].remarks, nextVisitTime, nextVisitUnit);
-		}
+	function handleDeleteRemarkConfirm(mNumber) {
+		//console.log("handleDeleteMedicine Remark "+mNumber);
+		let lastIndex = visitArray.length - 1;
+		var tmp = [].concat(visitArray);
+		tmp[lastIndex].remarks = tmp[lastIndex].remarks.filter(function(value, index, arr){ 
+			return index !== mNumber;
+		});
+		setVisitArray(tmp);
+		updateNewVisit(tmp[lastIndex].medicines, tmp[lastIndex].userNotes, tmp[lastIndex].remarks, nextVisitTime, nextVisitUnit);
 	}
 	
 
@@ -873,9 +764,9 @@ export default function Visit(props) {
 	function handleAddNewMedicine() {
 		setEmurNumber(0);
 		setEmurName("");
-		setEmedDose1(0);
+		setEmedDose1(2);
 		setEmedDose2(0);
-		setEmedDose3(0);
+		setEmedDose3(2);
 		setEmedTime(2);
 		setEmedUnit(unitArray[1]);
 		setModalRegister(0);
@@ -884,6 +775,7 @@ export default function Visit(props) {
 		setFilterItemText("");
 		setFilterItemArray([]);
 		setRemember(false);
+		setModalRegister(0);
 		
 		setIsDrawerOpened("ADDMED");
 	}
@@ -892,7 +784,8 @@ export default function Visit(props) {
 	function handleEditMedicine(vNumber, mNumber) {
 		//await getAllMedicines();
 		console.log("handleEditMedicine "+vNumber+" Medicine "+mNumber);
-		let tmp = visitArray[0];
+		let lastIndex = visitArray.length - 1;
+		let tmp = visitArray[lastIndex];
 		setEditMedicine(tmp.medicines[mNumber]);
 		console.log(tmp.medicines[mNumber]);
 		
@@ -911,9 +804,9 @@ export default function Visit(props) {
 		setFilterItem("MED");
 		setFilterItemText("");
 		setFilterItemArray([]);
-		setRemember(false);
-		
+		setRemember(false);		
 		setModalRegister(0);
+		
 		setIsDrawerOpened("EDITMED");
 	}
 
@@ -925,7 +818,7 @@ export default function Visit(props) {
 				let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/medicine/add/${userCid}/${medName}`;
 				axios.get(myUrl);
 				let tmpArray = [{name: medName}].concat(medicineArray);
-				setMedicineArray(_.sortBy(tmpArray, 'name'));
+				setMedicineArray(lodashSortBy(tmpArray, 'name'));
 			} catch (e) {
 				console.log(e);
 			}
@@ -954,7 +847,7 @@ export default function Visit(props) {
 				let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/note/add/${userCid}/${noteName}`;
 				axios.get(myUrl);
 				let tmpArray = [{name: noteName}].concat(noteArray);
-				setNoteArray(_.sortBy(tmpArray, 'name'));
+				setNoteArray(lodashSortBy(tmpArray, 'name'));
 			} catch (e) {
 				console.log(e);
 			}
@@ -983,7 +876,7 @@ export default function Visit(props) {
 				let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/remark/add/${userCid}/${remarkName}`;
 				axios.get(myUrl);
 				let tmpArray = [{name: remarkName}].concat(remarkArray);
-				setRemarkArray(_.sortBy(tmpArray, 'name'));
+				setRemarkArray(lodashSortBy(tmpArray, 'name'));
 			} catch (e) {
 				console.log(e);
 			}
@@ -1003,7 +896,7 @@ export default function Visit(props) {
 	}
 	
 	function handleMedicineUpdate() {
-		if ((emedDose1+emedDose2+emedDose3) == 0) {
+		if ((emedDose1+emedDose2+emedDose3) === 0) {
 				setModalRegister(1002);
 				return;
 		}
@@ -1014,23 +907,23 @@ export default function Visit(props) {
 		
 		updateMedicineToDatabase(emurName);
 		let tmp = [].concat(visitArray);
+		let lastIndex = visitArray.length - 1;
 		let index = emurNumber;
 		//console.log("indx", index);
 		if (isDrawerOpened === "ADDMED") {
-			//console.log(tmp[0].medicines);
 			//console.log(emurName);
-			if (tmp[0].medicines.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
+			if (tmp[lastIndex].medicines.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
 				// duplicate medicine 
 				setModalRegister(1001);
 				return;
 			}
-			tmp[0].medicines.push({name: "", dose1: 0, dose2: 0, dose3: 0, unit: "", time: 0});
-			index = tmp[0].medicines.length - 1;
+			tmp[lastIndex].medicines.push({name: "", dose1: 0, dose2: 0, dose3: 0, unit: "", time: 0});
+			index = tmp[lastIndex].medicines.length - 1;
 		} else {
 			console.log("in edit");
-			if (tmp[0].medicines[index].name.toLowerCase() !== emurName.toLowerCase()) {
+			if (tmp[lastIndex].medicines[index].name.toLowerCase() !== emurName.toLowerCase()) {
 				//console.log("in edit different");
-				if (tmp[0].medicines.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
+				if (tmp[lastIndex].medicines.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
 					// duplicate medicine 
 					//console.log("in edit error");
 					setModalRegister(1001);
@@ -1041,34 +934,35 @@ export default function Visit(props) {
 
 		setIsDrawerOpened("");		
 
-		tmp[0].medicines[index].name = emurName;
-		tmp[0].medicines[index].dose1 = emedDose1;
-		tmp[0].medicines[index].dose2 = emedDose2;
-		tmp[0].medicines[index].dose3 = emedDose3;
-		tmp[0].medicines[index].unit = emedUnit;
-		tmp[0].medicines[index].time = emedTime;
+		tmp[lastIndex].medicines[index].name = emurName;
+		tmp[lastIndex].medicines[index].dose1 = emedDose1;
+		tmp[lastIndex].medicines[index].dose2 = emedDose2;
+		tmp[lastIndex].medicines[index].dose3 = emedDose3;
+		tmp[lastIndex].medicines[index].unit = emedUnit;
+		tmp[lastIndex].medicines[index].time = emedTime;
 		setVisitArray(tmp);
-		updateNewVisit(tmp[0].medicines, tmp[0].userNotes, tmp[0].remarks, nextVisitTime, nextVisitUnit);
+		updateNewVisit(tmp[lastIndex].medicines, tmp[lastIndex].userNotes, tmp[lastIndex].remarks, nextVisitTime, nextVisitUnit);
 	}
 	
 	function handleDeleteMedicine(vNumber, mNumber) {
-		if (vNumber !== 0) return;
-		vsDialog("Delete Medicine", `Are you sure you want to delete medicine ${visitArray[0].medicines[mNumber].name}?`,
-		{label: "Yes", onClick: () => handleDeleteMedicineConfirm(vNumber, mNumber) },
+		if (vNumber !== MAGICNUMBER) return;
+		let lastIndex = visitArray.length - 1;
+		vsDialog("Delete Medicine", `Are you sure you want to delete medicine ${visitArray[lastIndex].medicines[mNumber].name}?`,
+		{label: "Yes", onClick: () => handleDeleteMedicineConfirm(mNumber) },
 		{label: "No" }
 		);
 	}
 	
-	function handleDeleteMedicineConfirm(vNumber, mNumber) {
-		console.log("handleDeleteMedicine "+vNumber+" Medicine "+mNumber);
-		if (vNumber !== 0) return;
+	function handleDeleteMedicineConfirm(mNumber) {
+		//console.log("handleDeleteMedicine Medicine "+mNumber);
+		let lastIndex = visitArray.length - 1;
 		var tmp = [].concat(visitArray);
-		tmp[0].medicines = tmp[0].medicines.filter(function(value, index, arr){ 
+		tmp[lastIndex].medicines = tmp[lastIndex].medicines.filter(function(value, index, arr){ 
 			return index != mNumber;
 		});
-		updateNewVisit(tmp[0].medicines, tmp[0].userNotes, tmp[0].remarks, nextVisitTime, nextVisitUnit);
+		updateNewVisit(tmp[lastIndex].medicines, tmp[lastIndex].userNotes, tmp[lastIndex].remarks, nextVisitTime, nextVisitUnit);
 		setVisitArray(tmp);
-		console.log(tmp[0].medicines);
+		console.log(tmp[lastIndex].medicines);
 	}
 	
 	// handle visits
@@ -1076,9 +970,10 @@ export default function Visit(props) {
 	function ArunMedicines() {
 	if (visitArray.length === 0) return null;
 	let x = visitArray[visitIndex];
+	//let lastIndex = visitArray.length - 1;
 	return (
 	<div>	
-	{(x.visitNumber === 0) && 
+	{(x.visitNumber === MAGICNUMBER) && 
 		<VsButton name="Add new Medicine" align="left" onClick={handleAddNewMedicine} />
 	}	
 	<Box borderColor="primary.main" border={1}>
@@ -1094,14 +989,14 @@ export default function Visit(props) {
 			<Typography className={classes.heading}>{"Duration: "+m.time+" "+m.unit+((m.time > 1) ? "s" : "")}</Typography>
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
-			{(x.visitNumber === 0) &&
+			{(x.visitNumber === MAGICNUMBER) &&
 				<IconButton color="primary" size="small" onClick={() => { handleEditMedicine(x.visitNumber, index)}} >
 				<EditIcon />
 				</IconButton>
 			}
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
-			{(x.visitNumber === 0) &&
+			{(x.visitNumber === MAGICNUMBER) &&
 				<IconButton color="secondary" size="small" onClick={() => { handleDeleteMedicine(x.visitNumber, index)}} >
 				<DeleteIcon />
 				</IconButton>
@@ -1116,10 +1011,11 @@ export default function Visit(props) {
 	function ArunNotes() {
 	if (visitArray.length === 0) return null;
 	let x = visitArray[visitIndex];
+	//let lastIndex = visitArray.length - 1;
 	return (
 	<div>
 
-	{(x.visitNumber === 0) && 
+	{(x.visitNumber === MAGICNUMBER) && 
 		<VsButton name="Add new User Note" align="left"  onClick={handleAddUserNotes} />
 	}
 	<Box borderColor="primary.main" border={1}>
@@ -1129,14 +1025,14 @@ export default function Visit(props) {
 			<Typography className={classes.heading}>{un.name}</Typography>
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
-		{(x.visitNumber === 0) &&
+		{(x.visitNumber === MAGICNUMBER) &&
 			<IconButton color="primary" size="small" onClick={() => { handleEditUserNotes(x.visitNumber, index)}} >
 			<EditIcon />
 			</IconButton>
 		}
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
-		{(x.visitNumber === 0) &&
+		{(x.visitNumber === MAGICNUMBER) &&
 			<IconButton color="secondary" size="small" onClick={() => { handleDeleteNotes(x.visitNumber, index)}} >
 			<DeleteIcon />
 			</IconButton>
@@ -1147,48 +1043,14 @@ export default function Visit(props) {
 	</Box>
 	</div>
 	)}
-	
-	function newArunNotes_issues(props) {
-	let x = props.visitRec;
-	return (
-	<div>
-	<Typography>
-	<span className={classes.title}>User Notes</span>
-		{(x.visitNumber === 0) && 
-			<span>
-			<IconButton  color="primary" size="small" onClick={handleAddUserNotes} >
-				<AddIcon />
-			</IconButton>
-			</span>
-		}
-	</Typography>
-	<Box borderColor="primary.main" border={1}>
-	<Grid className={classes.noPadding} maxWidth="100%" key={"NOTES"+x.visitNumber} container justify="center" alignItems="center" >
-	<Typography border={1} className={classes.murItem}>
-		{x.userNotes.map( (un, index) =>
-			<Grid item xs={4} sm={4} md={2} lg={2} >
-				<Typography border={1} className={classes.murItem}>
-				<span key={"NOTESPAN"+index} className={classes.murItem}>
-				{un.name}
-				<IconButton color="secondary" size="small" onClick={() => { handleDeleteNotes(x.visitNumber, index)}} >
-					<DeleteIcon />
-				</IconButton>
-				</span>
-				</Typography>
-			</Grid>
-		)}
-	</Typography>
-	</Grid>
-	</Box>
-	</div>
-	)}
-	
+
 	function ArunRemarks() {
 	if (visitArray.length === 0) return null;
 	let x = visitArray[visitIndex];
+	let lastIndex = visitArray.length - 1;
 	return (
 	<div>
-	{(x.visitNumber === 0) && 
+	{(x.visitNumber === MAGICNUMBER) && 
 		<VsButton name="Add new Lab Test" align="left" onClick={handleAddNewRemark} />
 	}
 	<Box borderColor="primary.main" border={1}>
@@ -1198,14 +1060,14 @@ export default function Visit(props) {
 			<Typography className={classes.heading}>{r.name}</Typography>
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
-		{(x.visitNumber === 0) &&
+		{(x.visitNumber === MAGICNUMBER) &&
 			<IconButton color="primary" size="small" onClick={() => { handleEditRemark(x.visitNumber, index)}} >
 			<EditIcon />
 			</IconButton>
 		}
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
-			{(x.visitNumber === 0) &&
+			{(x.visitNumber === MAGICNUMBER) &&
 				<IconButton color="secondary" size="small" onClick={() => { handleDeleteRemark(x.visitNumber, index)}} >
 				<DeleteIcon />
 				</IconButton>
@@ -1219,63 +1081,24 @@ export default function Visit(props) {
 	
 	function updateUnit(value) {
 		setNextVisitUnit(value);
-		let myVisit = visitArray[0];
+		let lastIndex = visitArray.length - 1;
+		let myVisit = visitArray[lastIndex];
 		updateNewVisit(myVisit.medicines, myVisit.userNotes, myVisit.remarks, nextVisitTime, value)
 	}
 	
 	function updateTime(value) {
 		setNextVisitTime(value);
-		let myVisit = visitArray[0];
+		let lastIndex = visitArray.length - 1;
+		let myVisit = visitArray[lastIndex];
 		updateNewVisit(myVisit.medicines, myVisit.userNotes, myVisit.remarks, value, nextVisitUnit);
 	}
-	
-	function orgArunFollowup() {
-	if (visitArray.length === 0) return null;
-	let x = visitArray[visitIndex];
-	if (x.visitNumber !== 0) return null;
-	
-	return (
-	<Grid className={classes.noPadding} key={"FOLLOWUP"} container justify="center" alignItems="center" >
-		<Grid item xs={4} sm={4} md={2} lg={2} >
-		<Typography className={classes.title}>Next Review After</Typography>
-		</Grid>
-		<Grid item xs={4} sm={4} md={1} lg={1} >
-			<Select labelId='time' id='time' name="time" padding={10}
-			required fullWidth label="Time" 
-			value={nextVisitTime}
-			inputProps={{
-				name: 'Time',
-				id: 'filled-age-native-simple',
-			}}
-			onChange={(event) => setNextVisitTime(event.target.value)}
-			>
-			{timeArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
-			</Select>
-		</Grid>
-		<Grid item xs={4} sm={4} md={1} lg={1} >
-			<Select labelId='unit' id='unit' name="unit" padding={10}
-				required fullWidth label="Unit" 
-				value={nextVisitUnit}
-				inputProps={{
-					name: 'Unit',
-					id: 'filled-age-native-simple',
-					align: 'center',
-				}}
-				onChange={(event) => setNextVisitUnit(event.target.value)}
-			>
-			{unitArray.map(x =>	<MenuItem key={x} value={x}>{x}</MenuItem>)}
-			</Select>
-		</Grid>
-		<Grid item xs={false} sm={false} md={8} lg={8} />
-	</Grid>
-	)}
-	
+
 	function ArunFollowup() {
 	if (visitArray.length === 0) return null;
 	let x = visitArray[visitIndex];
-	if (x.visitNumber !== 0) return null;
+	if (x.visitNumber !== MAGICNUMBER) return null;
 	let d = new Date();
-	console.log(d, nextVisitUnit, nextVisitTime )
+	//console.log(d, nextVisitUnit, nextVisitTime )
 	switch (nextVisitUnit) {
 		case 'Day':
 			d.setDate(d.getDate()+nextVisitTime);
@@ -1290,7 +1113,7 @@ export default function Visit(props) {
 			d.setYear(d.getFullYear()+nextVisitTime);
 			break;			
 	}
-	console.log(d);
+	//console.log(d);
 	let reviewDate = DATESTR[d.getDate()] + "/" + MONTHNUMBERSTR[d.getMonth()] + "/" + d.getFullYear();
 	return (
 		<div align="left">
@@ -1301,34 +1124,20 @@ export default function Visit(props) {
 		</Grid>
 		<Grid item xs={12} sm={12} md={12} lg={12} />
 		<Grid item xs={12} sm={12} md={12} lg={12} />
-		<Grid item xs={4} sm={4} md={2} lg={2} >
+		<Grid item xs={12} sm={12} md={2} lg={2} >
 		<Typography className={classes.title}>Select Unit: </Typography>
 		</Grid>
-		<Grid item xs={4} sm={4} md={10} lg={10} >
-			<FormControl component="fieldset">
-			<RadioGroup row aria-label="unitSelect" name="unitSelect" value={nextVisitUnit} 
-				onChange={() => {updateUnit(event.target.value); }}
-			>
-			{unitArray.map ( r =>
-			<FormControlLabel className={gClasses.filterRadio} value={r} control={<Radio color="primary"/>} label={r} />
-			)}
-			</RadioGroup>
-			</FormControl>			
+		<Grid item xs={12} sm={12} md={10} lg={10} >		
+		<VsRadioGroup value={nextVisitUnit} onChange={() => {updateUnit(event.target.value); }}
+			radioList={unitArray} />
 		</Grid>
 		<Grid item xs={12} sm={12} md={12} lg={12} />
-		<Grid item xs={4} sm={4} md={2} lg={2} >
+		<Grid item xs={12} sm={12} md={2} lg={2} >
 		<Typography className={classes.title}>Select Time: </Typography>
 		</Grid>
-		<Grid item xs={4} sm={4} md={10} lg={10} >
-			<FormControl component="fieldset">
-			<RadioGroup row aria-label="timeSelect" name="timeSelect" value={nextVisitTime} 
-				onChange={() => {updateTime(Number(event.target.value)); }}
-			>
-			{timeArray.map ( r =>
-			<FormControlLabel className={gClasses.filterRadio} value={r} control={<Radio color="primary"/>} label={r} />
-			)}
-			</RadioGroup>
-			</FormControl>			
+		<Grid item xs={12} sm={12} md={10} lg={10} >	
+			<VsRadioGroup value={nextVisitTime} onChange={() => {updateTime(Number(event.target.value)); }}
+				radioList={timeArray} />
 		</Grid>
 		</Grid>
 		</div>
@@ -1338,7 +1147,7 @@ export default function Visit(props) {
 	function ArunVisitUpdateButton() {
 	if (visitArray.length === 0) return null;
 	let x = visitArray[visitIndex];
-	if  (x.visitNumber !== 0) return null;
+	if  (x.visitNumber !== MAGICNUMBER) return null;
 
 	return (
 		<div align="right">
@@ -1361,7 +1170,7 @@ export default function Visit(props) {
 			else if (filterItem.substr(0,3) === "REM")
 				tmpArray = remarkArray.filter( x => x.name.toLowerCase().includes(txt.toLowerCase()) );
 		} 
-		console.log(tmpArray);
+		//console.log(tmpArray);
 		setFilterItemArray(tmpArray);
 	}
 	
@@ -1400,7 +1209,7 @@ export default function Visit(props) {
 				<DisplayFunctionHeader />
 				<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 					<DisplayNewVisitBtn />
-					<ArunVisitUpdateButton />		{/* only for visitNumber 0 i.e. new visit */}
+					<ArunVisitUpdateButton />		{/* only for visitNumber MAGICNUMBER i.e. new visit */}
 					{(currentSelection === "Medicine") &&
 						<ArunMedicines />
 					}

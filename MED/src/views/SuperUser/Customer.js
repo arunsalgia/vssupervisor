@@ -1,9 +1,17 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, {useEffect, useState, createContext }  from 'react';
 import axios from "axios";
+import Drawer from '@material-ui/core/Drawer';
+import lodashSortBy from "lodash/sortBy"
+import { useAlert } from 'react-alert';
+
+import Link from '@material-ui/core/Link';
 import TextField from '@material-ui/core/TextField';
 import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
 import IconButton from '@material-ui/core/IconButton';
+import CancelIcon from '@material-ui/icons/Cancel';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import EditIcon from '@material-ui/icons/Edit';
+
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SwitchBtn from '@material-ui/core/Switch';
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
@@ -19,17 +27,8 @@ import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Box from '@material-ui/core/Box';
-import Modal from 'react-modal';
-import VsButton from "CustomComponents/VsButton";
-import { borders } from '@material-ui/system';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormLabel from '@material-ui/core/FormLabel';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
@@ -38,7 +37,7 @@ import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import moment from "moment";
  import VsCancel from "CustomComponents/VsCancel";
- 
+ import VsButton from "CustomComponents/VsButton";
  
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 
@@ -48,12 +47,6 @@ import Avatar from "@material-ui/core/Avatar"
 
 // styles
 import globalStyles from "assets/globalStyles";
-import modalStyles from "assets/modalStyles";
-import {dynamicModal } from "assets/dynamicModal";
-
-
-import Switch from "@material-ui/core/Switch";
-import Link from '@material-ui/core/Link';
 
 import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
 DisplayPatientDetails,
@@ -62,32 +55,17 @@ DisplayPatientDetails,
 import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
 
 
-// icons
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
-import CancelIcon from '@material-ui/icons/Cancel';
-import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
-
 //colors 
 import { 
 red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen,
 } from '@material-ui/core/colors';
 
 import { 
-	isMobile, callYesNo,
-	disablePastDt, disableFutureDt, disableAllDt,
-	validateInteger,
-	encrypt, decrypt, 
-	left, right,
-	intString,
-	updatePatientByFilter,
-	dispAge, dispEmail, dispMobile,
-	ordinalSuffix,
+	isMobile, dispEmail,
 	getOnlyDate,
 } from "views/functions.js";
+import { disablePastDt } from 'views/functions';
+import { encrypt } from 'views/functions';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -328,48 +306,50 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const VISITTYPE = {pending: "pending", cancelled: "cancelled", visit: ""};
-
-const ROWSPERPAGE = 10;
-let dense = false;
-
-const yesNoModal = dynamicModal('60%');
-
-let searchText = "";
-function setSearchText(sss) { searchText = sss;}
 
 export default function Customer() {
   const classes = useStyles();
 	const gClasses = globalStyles();
+	const alert = useAlert();
 
-	const [registerStatus, setRegisterStatus] = useState(0);
+	const [isDrawerOpened, setIsDrawerOpened] = useState("");
+
+	const [custNUmber, setCustNumber] = useState(0);
 	const [referalCode, setReferalCode] = useState("");
-  const [userName, setUserName] = useState("");
+	const [doctorName, setDoctorName] = useState("");
+	const [doctorType, setDoctorType] = useState("");
+	const [clinicName, setClinicName]  = useState("");
+  const [custName, setCustName] = useState("");
+	const [custEmail, setCustEmail] = useState("");
+	const [custMobile, setCustMobile] = useState(0);
+	const [custAddr1, setCustAddr1] = useState("");
+	const [custAddr2, setCustAddr2] = useState("");
+	const [custAddr3, setCustAddr3] = useState("");
+	const [custLocation, setCustLocation] = useState("");
+	const [custPinCode, setCustPinCode] = useState(0);
+	const [custExpiry, setCustExpiry] = useState(new Date());
+	const [custCommission, setCustCommission] = useState(10);
+
+	const [custFee, setCustFee] = useState(1000);
+	const [registerStatus, setRegisterStatus] = useState(0);
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
-  const [mobile, setMobile] = useState("");
+
+
 	
-	const [addUser, setAddUser] = useState(false);
-	const [editUser, setEditUser] = useState(false);
+	const [custOption, setCustOption] = useState("");
+
 	
 	const [customerArray, setCustomerArray] = useState([]);
 	const [customerData, setCustomerData] = useState({});
 	const [newRecharge, setNewRecharge] = useState(false);
 	const [newCustomer, setNewCustomer] = useState(false);
 	const [radioRecharge, setRadioRecharge] = useState("MONTHLY");
-	const [newExpiry, setNewExpiry] = useState(new Date());
-	const [customerName, setCustomerName] = useState("");
+
 	
 	const [radioUserType, setRadioUserType] = useState("Doctor");
 	const [radioCustomerPlan, setRadioCustomerPlan] = useState("MONTHLY");
-	const [modalIsOpen,setIsOpen] = useState("");
-	function openModal(fun) { setIsOpen(fun); }
-  function closeModal() { setIsOpen(""); }	
-  function afterOpenModal() {
-    // references are now sync'd and can be accessed.
-    //subtitle.style.color = '#f00';
-  }
+
 	
 	
   useEffect(() => {	
@@ -377,8 +357,9 @@ export default function Customer() {
 			try {
 				let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/customer/list`;
 				let resp = await axios.get(myURL);
-				console.log(resp.data);
+				//console.log(resp.data);
 				setCustomerArray(resp.data);
+				setIsDrawerOpened("");
 			} catch(e) {
 				console.log(e);
 			}
@@ -466,9 +447,9 @@ export default function Customer() {
 					</TableCell>
 					<TableCell key={"TD14"+index} align="center" component="td" scope="row" align="center" padding="none"
 						className={myClass}>
-						<Typography className={classes.link}>
-							<Link href="#" variant="body2" onClick={() => {handleNewUser(a)}}>{"New User"}</Link>
-						</Typography>
+								<IconButton className={gClasses.blue} size="small" onClick={() => {handleEditCustomer(a)}}  >
+									<EditIcon  />
+								</IconButton>
 					</TableCell>
 					</TableRow>
 				)}
@@ -524,7 +505,7 @@ export default function Customer() {
 	)}
 	
 	function addNewCustomerSubmit() {
-		alert("New Customer to be added");
+		alert.show("New Customer to be added");
 	}
 	
 	
@@ -536,11 +517,11 @@ export default function Customer() {
 				myMsg = "";
 				break;
       case 200:
-        // setUserName("");
+        // setCustName("");
         // setPassword("");
         // setRepeatPassword("");
         // setEmail("");
-        myMsg = `User ${userName} successfully regisitered.`;
+        myMsg = `User ${custName} successfully regisitered.`;
         break;
       case 602:
         myMsg = "User Name already in use";
@@ -559,21 +540,144 @@ export default function Customer() {
     )
   }
 
-	function handleNewUser(a) {
-		if (!a.enabled) return;
-		
-		setUserName("")
-		setEmail("");
-		setMobile("");
-		
-		setCustomerData(a);
-		setAddUser(true);	
+	function handleAddCUstomer() {
+		setCustNumber(0);
+		setReferalCode("");
+		setDoctorName("");
+		setDoctorType("");
+		setClinicName("");
+		setCustName("");
+		setCustEmail("");
+		setCustMobile("");
+		setCustAddr1("");
+		setCustAddr2("");
+		setCustAddr3("");
+
+		setCustLocation("");
+		setCustPinCode(0);
+
+		setCustFee(1000);
+
+		let d = new Date();
+		d.setYear(d.getFullYear()+1);
+		setCustExpiry(moment(d));
+
+		setCustCommission(10);
+
+		setIsDrawerOpened("ADDCUST");	
 	}
 	
-	function addNewUserSubmit() {
-		alert("Add new user");
+	/*
+	customerNumber: Number,
+	// Doctors details
+	name: String,
+	type: String,
+	email: String,
+	mobile: String,
+	// Clinic details
+	doctorName: String,
+	clinicName: String,
+	addr1: String,
+	addr2: String,
+	addr3: String,
+	location: String,
+	pinCode: String,
+	workingHours: [Number], // clinic weekly working slots (15 minute slots
+	
+	// 
+	commission: Number,			// commission for each referral recharge
+	referenceCid: String,		// the reference of doctor who made this customer join
+
+	welcomeMessage: String,
+	plan: String,
+	fee: Number,
+	expiryDate: Date,
+	enabled:Boolean,
+*/
+
+	function handleEditCustomer(c) {
+		setCustNumber(c.customerNumber);
+		setCustName(c.name);
+		setDoctorType(c.type);
+		setCustEmail(dispEmail(c.email));
+		setCustMobile(c.mobile);
+
+		setDoctorName(c.doctorName);
+		setClinicName(c.clinicName);
+		setCustAddr1(c.addr1);
+		setCustAddr2(c.addr2);
+		setCustAddr3(c.addr3);
+		setCustLocation(c.location);
+		setCustPinCode(c.pinCode);
+		// commission is fixed 10%
+		setCustCommission(c.commission);
+		setReferalCode(c.referenceCid)
+
+
+		setCustFee(c.fee);
+
+		let d = new Date();
+		d.setYear(d.getFullYear()+1);
+		setCustExpiry(moment(d));
+
+		setIsDrawerOpened("EDITCUST");	
+	}
+
+	async function handleAddEditCustomer() {
+	//	console.log("In add edit")
+		let tmp = {
+			customerNumber: custNUmber,
+			name: custName,
+			type: doctorType,
+			email: encrypt(custEmail),
+			mobile: custMobile,
+
+			doctorName: doctorName,
+			clinicName: clinicName,
+
+			addr1: custAddr1,
+			addr2: custAddr2,
+			addr3: custAddr3,
+
+			location: custLocation,
+			pinCode: custPinCode,
+
+			commission: custCommission,
+			referenceCid: referalCode,
+
+			welcomeMessage: "welcome to Doctor Viraag",
+			plan: "YEARLY",
+			fee: custFee,
+
+			expiryDate: custExpiry,
+		}
+
+		let myData = encodeURIComponent(JSON.stringify(tmp));
+		try {
+			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/customer/update/${myData}`);
+			//console.log(resp.data);
+			let tmpArray;
+			let oldName = "";
+			if (custNUmber > 0) {
+				tmpArray = customerArray.filter(x => x.customerNumber !== resp.data.customerNumber);
+			} else {
+				tmpArray = [].concat(customerArray);
+			}
+			tmpArray.push(resp.data)
+			setCustomerArray(lodashSortBy(tmpArray, 'customerNumber'));
+			alert.success(`Updated details of ${resp.data.name}`);
+			setIsDrawerOpened("");
+		} catch (e) {
+			console.log(e);
+			alert.error(`error updating details of ${custName}`);
+		}
 	}
 	
+	function handleDate(d) {
+		//console.log(d);
+		setCustExpiry(d);
+	}
+
 	return (
   <div className={gClasses.webPage} align="center" key="main">
 		<DisplayPageHeader headerName="Customer" groupName="" tournament=""/>
@@ -583,158 +687,112 @@ export default function Customer() {
 		<DisplayRecharge />
 	}
 	{(!newCustomer) &&
-		<div align="right">
-		<Link href="#" variant="body2" onClick={() => {setNewCustomer(true)}}>{"Add new Customer"}</Link>
-		</div>
+		<VsButton align="right" name="Add new CUstomer" onClick={handleAddCUstomer} />
 	}
-	{(newCustomer) &&
-		<Box className={classes.tdPending} width="100%">
-			<VsCancel align="right" onClick={() => {setNewCustomer(false)}} />
-			<Typography className={classes.title}>{"Add new Customer"}</Typography>
-			<BlankArea />
-			<ValidatorForm className={gClasses.form} onSubmit={addNewCustomerSubmit}>
-				{/*<TextValidator variant="outlined" fullWidth
-				id="referral" label="Referral Code" name="referral"
-				// defaultValue={userName}
+	<DisplayCustomerList />
+	<Drawer className={classes.drawer} anchor="right" variant="temporary"	open={isDrawerOpened !== ""} >
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
+	{/* Add / edit new customer */}
+	{((isDrawerOpened === "ADDCUST") || (isDrawerOpened === "EDITCUST")) &&
+			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditCustomer}>
+			<Typography className={classes.title}>{((isDrawerOpened === "ADDCUST") ? "Add" : "Edit") + " Customer of Doctor Viraag"}</Typography>
+			<TextValidator fullWidth label="Referral Code" className={gClasses.vgSpacing}
+				value={referalCode}
 				onChange={(event) => setReferalCode(event.target.value)}
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
-				// error={error.userName}
-				// helperText={helperText.userName}
-				value={referalCode}
-        />
-				<BlankArea/>*/}
-      <FormControl component="fieldset">
-			<RadioGroup row aria-label="radioselection" name="radioselection" value={radioCustomerPlan} 
-				onChange={() => {setRadioCustomerPlan(event.target.value); }}
-			>
-				<FormControlLabel className={classes.filterRadio} value="LIFETIME" control={<Radio color="primary"/>} label="Lifetime" />
-				<FormControlLabel className={classes.filterRadio} value="YEARLY" 	 control={<Radio color="primary"/>} label="Yearly" />
-				<FormControlLabel className={classes.filterRadio} value="MONTHLY"  control={<Radio color="primary"/>} label="Monthly" />
-			</RadioGroup>
-			</FormControl>
-			<TextValidator variant="outlined" required 
-				id="userName" label="Customer Name" name="username"
-				value={userName}
-				onChange={(event) => setUserName(event.target.value)}
-				validators={['required', 'minLength', 'noSpecialCharacters']}
-				errorMessages={['User Name to be provided', 'Mimumum 6 characters required', ]}
-      />
-			<BlankArea/>
-      <TextValidator variant="outlined"  required type="email"  
-				label="Email" name="email"
-				value={email}
-				onChange={(event) => setEmail(event.target.value)}
-				validators={['isEmailOK', 'required']}
-				errorMessages={['Invalid Email', 'Email to be provided']}
 			/>
-			<BlankArea/>
-      <TextValidator variant="outlined" required     
-				label="Mobile" name="mobile"
-				value={mobile}
-				onChange={(event) => setMobile(event.target.value)}
-				validators={['required', 'mobile']}
-				errorMessages={[, 'Mobile to be provided', '10 digit mobile number required']}
-      />
-			{/*<TextValidator variant="outlined" required type="password"
-      id="password" label="Password" 
-      value={password}
-      onChange={(event) => setPassword(event.target.value)}
-      validators={['required', 'minLength', 'noSpecialCharacters']}
-      errorMessages={['Password to be provided', 'Minimum 6 characters required', 'Special characters not permitted']}
+			<div align="left">
+				<Typography className={gClasses.vgSpacing}>Expiry Date</Typography>
+			</div>
+			<Datetime 
+				className={classes.dateTimeBlock}
+				inputProps={{className: classes.dateTimeNormal}}
+				timeFormat={false} 
+				initialValue={custExpiry}
+				dateFormat="DD/MM/yyyy"
+				isValidDate={disablePastDt}
+				onClose={handleDate}
+				closeOnSelect={true}
 			/>
-      <TextValidator variant="outlined" required type="password"
-				id="repeatPassword" label="Repeat Password" 
-				value={repeatPassword}
-				onChange={(event) => setRepeatPassword(event.target.value)}
-				validators={['isPasswordMatch', 'required']}
-				errorMessages={['password mismatch', 'this field is required']}
-			/>*/}
-			<ShowResisterStatus/>
-      <BlankArea/>
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        className={gClasses.submit}
-      >
-        Register
-    </Button>
-    </ValidatorForm>
-    
-    <ValidComp p1={password}/>  
-		</Box>
-	}
-	{(addUser) &&
-		<Box className={classes.tdPending} width="100%">
-			<VsCancel align="right" onClick={() => {setAddUser(false)}} />
-			<Typography className={classes.title}>{"Add new user for customer " + customerData.name}</Typography>
-			<FormControl component="fieldset">
-				{/*<FormLabel component="legend">Filter on</FormLabel>*/}
-				<RadioGroup row aria-label="radioselection" name="radioselection" value={radioUserType} 
-					onChange={() => {setRadioUserType(event.target.value); }}
-				>
-					<FormControlLabel className={classes.filterRadio} value="Doctor"  	control={<Radio color="primary"/>} label="Doctor" />
-					<FormControlLabel className={classes.filterRadio} value="Assistant" control={<Radio color="primary"/>} label="Assistant" />
-				</RadioGroup>
-			</FormControl>
-			<BlankArea/>
-			<ValidatorForm className={gClasses.form} onSubmit={addNewUserSubmit}>
-      <TextValidator variant="outlined" required 
-				id="userName" label="User Name" name="username"
-				value={userName}
-				onChange={(event) => setUserName(event.target.value)}
-				validators={['required', 'minLength', 'noSpecialCharacters']}
-				errorMessages={['User Name to be provided', 'Mimumum 6 characters required', ]}
+			<TextValidator required fullWidth label="Name of the Customer" className={gClasses.vgSpacing}
+				value={custName}
+				onChange={(event) => setCustName(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+			<TextValidator required fullWidth label="Name of the Clinic" className={gClasses.vgSpacing}
+				value={clinicName}
+				onChange={(event) => setClinicName(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+			<TextValidator required fullWidth label="Name of the Doctor" className={gClasses.vgSpacing}
+				value={doctorName}
+				onChange={(event) => setDoctorName(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+			<TextValidator required fullWidth label="Doctor's Specialisation" className={gClasses.vgSpacing}
+				value={doctorType}
+				onChange={(event) => setDoctorType(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+			<TextValidator required fullWidth label="Address1" className={gClasses.vgSpacing}
+				value={custAddr1}
+				onChange={(event) => setCustAddr1(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+			<TextValidator required fullWidth label="Address2" className={gClasses.vgSpacing}
+				value={custAddr2}
+				onChange={(event) => setCustAddr2(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+			<TextValidator required fullWidth label="Address3" className={gClasses.vgSpacing}
+				value={custAddr3}
+				onChange={(event) => setCustAddr3(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+      <TextValidator required fullWidth label="Email" type="email" className={gClasses.vgSpacing}
+				value={custEmail}
+				onChange={(event) => setCustEmail(event.target.value)}
+			/>
+			<TextValidator fullWidth required className={gClasses.vgSpacing}  label="Mobile" type="number"
+				value={custMobile} 
+				onChange={() => { setCustMobile(event.target.value) }}
+				validators={['minNumber:1000000000', 'maxNumber:9999999999']}
+        errorMessages={['Invalid Mobile number','Invalid Mobile number']}
+      />	
+      <TextValidator required fullWidth label="Location" className={gClasses.vgSpacing}
+				value={custLocation}
+				onChange={(event) => setCustLocation(event.target.value)}
+			/>
+			<TextValidator fullWidth required className={gClasses.vgSpacing} label="Pin Code" type="number"
+				value={custPinCode} 
+				onChange={() => { setCustPinCode(event.target.value) }}
+				validators={['minNumber:111111', 'maxNumber:999999']}
+        errorMessages={['Invalid Pin Code','Invalid Pin Code']}
+      />
+			<TextValidator fullWidth required className={gClasses.vgSpacing} label="Customer Fee" type="number"
+				value={custFee} 
+				onChange={() => { setCustFee(event.target.value) }}
+				validators={['minNumber:1000']}
+        errorMessages={['Invalid Customer Code']}
       />
 			<BlankArea />
-      <TextValidator variant="outlined"  required type="email"  
-				label="Email" name="email"
-				value={email}
-				onChange={(event) => setEmail(event.target.value)}
-				validators={['isEmailOK', 'required']}
-				errorMessages={['Invalid Email', 'Email to be provided']}
-			/>
-			<BlankArea />
-      <TextValidator variant="outlined" required     
-				label="Mobile" name="mobile"
-				value={mobile}
-				onChange={(event) => setMobile(event.target.value)}
-				validators={['required', 'mobile']}
-				errorMessages={[, 'Mobile to be provided', '10 digit mobile number required']}
-      />
-			{/*<TextValidator variant="outlined" required type="password"
-      id="password" label="Password" 
-      value={password}
-      onChange={(event) => setPassword(event.target.value)}
-      validators={['required', 'minLength', 'noSpecialCharacters']}
-      errorMessages={['Password to be provided', 'Minimum 6 characters required', 'Special characters not permitted']}
-			/>
-      <TextValidator variant="outlined" required type="password"
-				id="repeatPassword" label="Repeat Password" 
-				value={repeatPassword}
-				onChange={(event) => setRepeatPassword(event.target.value)}
-				validators={['isPasswordMatch', 'required']}
-				errorMessages={['password mismatch', 'this field is required']}
-			/>*/}
 			<ShowResisterStatus/>
       <BlankArea/>
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        className={gClasses.submit}
-      >
-        Add New User
-    </Button>
+			<VsButton align="center" name={(isDrawerOpened === "ADDCUST" ? "Add" : "Update")} type="submit" />
+			<ValidComp />  
     </ValidatorForm>
-    
-    <ValidComp p1={password}/>  
-		</Box>
 	}
-	<DisplayCustomerList />
+	</Box>
+	</Drawer>		
 	</Container>
   </div>
   );    

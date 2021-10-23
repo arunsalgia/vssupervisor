@@ -1,12 +1,6 @@
-import React, { useEffect, useState, useContext } from 'react';
-import TextField from '@material-ui/core/TextField';
-import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
-import axios from "axios";
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import SwitchBtn from '@material-ui/core/Switch';
-import { usePromiseTracker, trackPromise } from "react-promise-tracker";
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
+import React, { useState, useContext, useEffect } from 'react';
+import { makeStyles, Container, CssBaseline } from '@material-ui/core';
+import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
@@ -14,99 +8,61 @@ import VsList from "CustomComponents/VsList";
 import VsCheckBox from "CustomComponents/VsCheckBox";
 import VsTextFilter from "CustomComponents/VsTextFilter";
 
-import { useLoading, Audio } from '@agney/react-loading';
+//import { useLoading, Audio } from '@agney/react-loading';
+import axios from "axios";
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
-//import fileDownload  from 'js-file-download';
-//import fs from 'fs';
-import _ from 'lodash';
+import lodashSortBy from "lodash/sortBy"
 
 import Grid from "@material-ui/core/Grid";
-import GridItem from "components/Grid/GridItem.js";
-import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import Select from "@material-ui/core/Select";
-import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Box from '@material-ui/core/Box';
-//import Modal from 'react-modal';
-import { borders } from '@material-ui/system';
-import {dynamicModal } from "assets/dynamicModal";
-import cloneDeep from 'lodash/cloneDeep';
-//import StepProgressBar from 'react-step-progress';
-// import the stylesheet
 import 'react-step-progress/dist/index.css';
 
 // styles
 import globalStyles from "assets/globalStyles";
-import modalStyles from "assets/modalStyles";
+//import modalStyles from "assets/modalStyles";
 
 // icons
 import IconButton from '@material-ui/core/IconButton';
-import SearchIcon from '@material-ui/icons/Search';
-import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
-import CancelIcon from '@material-ui/icons/Cancel';
-import EventNoteIcon from '@material-ui/icons/EventNote';
-import AddIcon from '@material-ui/icons/AddCircleOutline';
 import LeftIcon from '@material-ui/icons/ChevronLeft';
 import RightIcon from '@material-ui/icons/ChevronRight';
 
-import Switch from "@material-ui/core/Switch";
 
-
-import Link from '@material-ui/core/Link';
 
 // import Table from "components/Table/Table.js";
 // import FormControlLabel from '@material-ui/core/FormControlLabel';
 // import Radio from '@material-ui/core/Radio';
-import Card from "components/Card/Card.js";
-import CardBody from "components/Card/CardBody.js";
-import Avatar from "@material-ui/core/Avatar"
+//import Card from "components/Card/Card.js";
+//import CardBody from "components/Card/CardBody.js";
+//import Avatar from "@material-ui/core/Avatar"
 // import CardAvatar from "components/Card/CardAvatar.js";
 // import { useHistory } from "react-router-dom";
 // import { UserContext } from "../../UserContext";
 
-import {DisplayYesNo, DisplayPageHeader, ValidComp, BlankArea,
-DisplayPatientDetails,
-DisplayDocumentList,
-DisplayImage, DisplayPDF,
-LoadingMessage,
-DisplayDocumentDetails,
+import {
+	BlankArea,
 } from "CustomComponents/CustomComponents.js"
 
 import {
-SupportedMimeTypes, SupportedExtensions,
-str1by4, str1by2, str3by4,
-HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR,
+//SupportedMimeTypes, SupportedExtensions,
+//str1by4, str1by2, str3by4,
+//HOURSTR, MINUTESTR, 
+DATESTR, MONTHNUMBERSTR, MONTHSTR,
+MAGICNUMBER,
 } from "views/globals.js";
 
 // icons
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-//import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Cancel';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+
 
 
 //colours 
 import { red, blue 
 } from '@material-ui/core/colors';
 
-import { callYesNo, 
-	downloadVisit,
-	encrypt, decrypt, 
-	validateInteger,
-	updatePatientByFilter,
-	dispAge, dispEmail, dispMobile,
-	getPatientDocument,
-	stringToBase64,
+import { 
 	vsDialog,
-	ordinalSuffix,
 } from "views/functions.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -207,13 +163,6 @@ const useStyles = makeStyles((theme) => ({
 		}
   }));
 
-//const addEditModal = dynamicModal('60%');
-//const yesNoModal = dynamicModal('60%');
-
-const COUNTPERPAGE=10;
-// set-up the step content
-
-
 
 let searchText = "";
 function setSearchText(sss) { searchText = sss;}
@@ -233,13 +182,13 @@ export default function Visit(props) {
 	const [investigationArray, setInvestigationArray] = useState([])
 	
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
-	const [isListDrawer, setIsListDrawer] = useState("");
+	//const [isListDrawer, setIsListDrawer] = useState("");
 
 	const [currentPatient, setCurrentPatient] = useState("");
 	const [currentPatientData, setCurrentPatientData] = useState({});
 	
 	const [filterItem, setFilterItem] = useState("");
-	const [filterItemText, setFilterItemText] = useState("");
+	//const [filterItemText, setFilterItemText] = useState("");
 	const [filterItemArray, setFilterItemArray] = useState([]);
 	
 	const [symptomArray, setSymptomArray] = useState([]);
@@ -248,15 +197,15 @@ export default function Visit(props) {
 	const [diagnosisDbArray, setDiagnosisDbArray] = useState([]);
 	const [symptomDbArray, setSymptomDbArray] = useState([]);
 	
-	const [emurVisitNumber, setEmurIndex] = useState(0);
-	const [emurNumber, setEmurNumber] = useState(0);
+	//const [emurVisitNumber, setEmurIndex] = useState(0);
+	//const [emurNumber, setEmurNumber] = useState(0);
 	const [emurName, setEmurName] = useState("");
 
 	
-	const [registerStatus, setRegisterStatus] = useState(0);
-	const [registerError, setRegisterError] = useState("");
+	//const [registerStatus, setRegisterStatus] = useState(0);
+	//const [registerError, setRegisterError] = useState("");
 	const [modalRegister, setModalRegister] = useState(0);
-	const [visitRegister, setVisitRegister] = useState(0);
+	//const [visitRegister, setVisitRegister] = useState(0);
 	//const [rowsPerPage, setRowsPerPage] = useState(COUNTPERPAGE);
   //const [page, setPage] = useState(0);
 	
@@ -288,7 +237,7 @@ export default function Visit(props) {
 		getAllSymptom();
   }, []);
 
-	function changIndex(num) {
+	function changeIndex(num) {
 		num += investigationIndex;
 		if (num < 0) return;
 		if (num === investigationArray.length) return;
@@ -313,7 +262,7 @@ export default function Visit(props) {
 		
 		let v = investigationArray[investigationIndex];
 		let myDate;
-		if (v.investigationNumber === 0)
+		if (v.investigationNumber === MAGICNUMBER)
 				myDate = "Today's new Investigation";
 		else {
 			let d = new Date(v.investigationDate);
@@ -323,7 +272,7 @@ export default function Visit(props) {
 	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
 		<Grid key={"LEFT1"} item xs={2} sm={2} md={2} lg={2} >	
-			<IconButton color={'primary'} onClick={() => {changIndex(-1)}}  >
+			<IconButton color={'primary'} onClick={() => {changeIndex(-1)}}  >
 				<LeftIcon />
 			</IconButton>
 		</Grid>
@@ -333,7 +282,7 @@ export default function Visit(props) {
 			</Typography>
 		</Grid>
 		<Grid key="RIGHT1" item xs={2} sm={2} md={2} lg={2} >
-			<IconButton color={'primary'} onClick={() => {changIndex(1)}}  >
+			<IconButton color={'primary'} onClick={() => {changeIndex(1)}}  >
 					<RightIcon />
 				</IconButton>
 		</Grid>
@@ -346,27 +295,30 @@ export default function Visit(props) {
 		try {
 			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/investigation/list/${userCid}/${rec.pid}`)
 			myArray = resp.data;
-		} catch (e) {
+			setInvestigationArray(myArray);
+			setInvestigationIndex(myArray.length - 1);
+			} catch (e) {
 			console.log(e)
+			setInvestigationArray([]);
+			setInvestigationIndex(0);
 		}
-		setInvestigationArray(myArray);
-		setInvestigationIndex(0);
 		setCurrentSelection("Symptom");
 	}
 	
 	function handleCreateNewInvestigation() {
-		let myArray = [].concat(investigationArray);
+		//
 		let tmp = {
 			pid: currentPatientData.pid,
-			investigationNumber: 0,
+			investigationNumber: MAGICNUMBER,
 			investigationDate: new Date(),
 			symptom: [],
 			diagnosis: []
-		}
-		myArray = [tmp].concat(myArray);
+		};
+		//let myArray = [].concat(investigationArray);
+		let myArray = investigationArray.concat(tmp);
 		setInvestigationArray(myArray);
+		setInvestigationIndex(myArray.length-1);
 		setCurrentSelection("Symptom");
-		setInvestigationIndex(0);
 	}
 	
 	
@@ -480,10 +432,10 @@ export default function Visit(props) {
 				regerr = false;
         break;
       case 1001:
-        myMsg = "Duplicate Symptom";
+        myMsg = `Selected Symptom already added`;
         break;
       case 2001:
-        myMsg = `Duplicate diagnosis`;
+        myMsg = `Selected Diagnosis already added`;
         break;
       default:
           myMsg = "Unknown Error";
@@ -504,6 +456,7 @@ export default function Visit(props) {
 		setFilterItemText("");
 		setFilterItemArray([]);
 		setRemember(false);
+		setModalRegister(0);
 	}
 	
 	function handleEditDiagnosis(mNumber) {
@@ -516,22 +469,23 @@ export default function Visit(props) {
 		setFilterItemText("");
 		setFilterItemArray([]);
 		setRemember(false);
-
+		setModalRegister(0);
 	}
 	
 	function updateDiagnosis() {
 		//console.log("Hi in update diag", emurName);
 		updateDiagnosisToDatabase(emurName);
-		
 		let myInvestitgation = [].concat(investigationArray);
+	//	console.log(arun)
+		//let myIndex = investigationArray.length - 1;
 		if (isDrawerOpened === "ADDDIAG") {
-			let test = myInvestitgation[0].diagnosis.find(x => x.name === emurName);
+			let test = myInvestitgation[investigationIndex].diagnosis.find(x => x.name === emurName);
 			if (!test) {
 				// not present. Thus add it
-				let tmpArray = myInvestitgation[0].diagnosis.concat([{name: emurName}]);
-				myInvestitgation[0].diagnosis = tmpArray;
+				let tmpArray = myInvestitgation[investigationIndex].diagnosis.concat([{name: emurName}]);
+				myInvestitgation[investigationIndex].diagnosis = tmpArray;
 				setInvestigationArray(myInvestitgation);
-				updateInvestigation(investigationArray[0].symptom, tmpArray);
+				updateInvestigation(investigationArray[investigationIndex].symptom, tmpArray);
 				setIsDrawerOpened("");
 			} else {
 				setModalRegister(2001);
@@ -550,9 +504,10 @@ export default function Visit(props) {
 	
 	function handleDeleteDiagnosisConfirm(itemName) {
 		let tmpArray = [].concat(investigationArray);
-		tmpArray[0].diagnosis = tmpArray[0].diagnosis.filter(x => x.name !== itemName);
+		//let myIndex = investigationArray.length - 1;
+		tmpArray[investigationIndex].diagnosis = tmpArray[investigationIndex].diagnosis.filter(x => x.name !== itemName);
 		setInvestigationArray(tmpArray);
-		updateInvestigation(tmpArray[0].symptom, tmpArray[0].diagnosis);
+		updateInvestigation(tmpArray[investigationIndex].symptom, tmpArray[investigationIndex].diagnosis);
 	}
 	
 
@@ -564,7 +519,8 @@ export default function Visit(props) {
 		setFilterItemText("");
 		setFilterItemArray([]);
 		setRemember(false);
-		
+		setModalRegister(0);
+
 		setIsDrawerOpened("ADDSYM");
 	}
 	
@@ -576,9 +532,9 @@ export default function Visit(props) {
 		setFilterItem("SYM");
 		setFilterItemText("");
 		setFilterItemArray([]);
-		setRemember(false);
-		
+		setRemember(false);		
 		setModalRegister(0);
+		
 		setIsDrawerOpened("EDITSYM");
 	}
 
@@ -590,7 +546,7 @@ export default function Visit(props) {
 			try {
 				axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/symptom/update/${userCid}/${myEncodedName}`)
 				let tmpArray = [{name: myName}].concat(symptomDbArray);
-				setSymptomDbArray(_.sortBy(tmpArray, 'name'));
+				setSymptomDbArray(lodashSortBy(tmpArray, 'name'));
 			} catch (e) {
 				console.log(e);
 			}	
@@ -616,7 +572,7 @@ export default function Visit(props) {
 		try {
 			axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/diagnosis/update/${userCid}/${myEncodedName}`)
 			let tmpArray = [{name: myName}].concat(diagnosisDbArray);
-			setDiagnosisDbArray(_.sortBy(tmpArray, 'name'));
+			setDiagnosisDbArray(lodashSortBy(tmpArray, 'name'));
 		} catch (e) {
 			console.log(e);
 		}		
@@ -638,14 +594,15 @@ export default function Visit(props) {
 		updateSymptomToDatabase(emurName);
 		
 		let myInvestitgation = [].concat(investigationArray);
+		console.log(investigationIndex);
 		if (isDrawerOpened === "ADDSYM") {
-			let test = myInvestitgation[0].symptom.find(x => x.name === emurName);
+			let test = myInvestitgation[investigationIndex].symptom.find(x => x.name === emurName);
 			if (!test) {
-				let tmpArray = myInvestitgation[0].symptom.concat([{name: emurName}]);
-				//tmpArray = _.sortBy(tmpArray, 'name');
-				myInvestitgation[0].symptom = tmpArray;
+				let tmpArray = myInvestitgation[investigationIndex].symptom.concat([{name: emurName}]);
+				//tmpArray = lodashSortBy(tmpArray, 'name');
+				myInvestitgation[investigationIndex].symptom = tmpArray;
 				setInvestigationArray(myInvestitgation);
-				updateInvestigation(tmpArray, investigationArray[0].diagnosis)
+				updateInvestigation(tmpArray, investigationArray[investigationIndex].diagnosis)
 				setIsDrawerOpened("");
 			} else {
 				setModalRegister(1001);
@@ -662,9 +619,10 @@ export default function Visit(props) {
 	
 	function handleDeleteSymptomConfirm(itemName) {
 		let myData = [].concat(investigationArray);
-		myData[0].symptom = myData[0].symptom.filter(x => x.name !== itemName);
+		//let myIndex = investigationArray.length - 1;
+		myData[investigationIndex].symptom = myData[investigationIndex].symptom.filter(x => x.name !== itemName);
 		setInvestigationArray(myData);
-		updateInvestigation(myData[0].symptom, myData[0].diagnosis);
+		updateInvestigation(myData[investigationIndex].symptom, myData[investigationIndex].diagnosis);
 	}
 	
 	// handle visits
@@ -672,10 +630,12 @@ export default function Visit(props) {
 
 	function ArunSymptoms() {
 	if (investigationArray.length === 0) return null;
+	//console.log(investigationIndex);
+	//console.log(investigationArray);
 	let x = investigationArray[investigationIndex];
 	return (
 	<div>	
-	{(x.investigationNumber === 0) && 
+	{(x.investigationNumber === MAGICNUMBER) && 
 		<VsButton name="Add new Symptom" align="left" onClick={handleAddNewSymptom} />
 	}	
 	<Box borderColor="primary.main" border={1}>
@@ -685,7 +645,7 @@ export default function Visit(props) {
 			<Typography className={classes.heading}>{m.name}</Typography>
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
-			{(x.investigationNumber === 0) &&
+			{(x.investigationNumber === MAGICNUMBER) &&
 				<IconButton color="secondary" size="small" onClick={() => { handleDeleteSymptom(m.name)}} >
 				<DeleteIcon />
 				</IconButton>
@@ -702,7 +662,7 @@ export default function Visit(props) {
 	let x = investigationArray[investigationIndex];
 	return (
 		<div> 
-		{(x.investigationNumber === 0) && 
+		{(x.investigationNumber === MAGICNUMBER) && 
 			<VsButton name="Add new diagnosis" align="left" onClick={handleAddDiagnosis} />
 		}	
 		<Box borderColor="primary.main" border={1}>
@@ -712,7 +672,7 @@ export default function Visit(props) {
 				<Typography className={classes.heading}>{un.name}</Typography>
 			</Grid>
 			<Grid item xs={1} sm={1} md={1} lg={1} >
-				{(x.investigationNumber === 0) &&
+				{(x.investigationNumber === MAGICNUMBER) &&
 					<IconButton color="secondary" size="small" onClick={() => { handleDeleteDiagnosis(un.name)}} >
 					<DeleteIcon />
 					</IconButton>
@@ -736,9 +696,9 @@ export default function Visit(props) {
 			else if (filterItem.substr(0,3) === "DIA")
 				tmpArray = diagnosisDbArray.filter(x => x.name.toLowerCase().includes(txt.toLowerCase()));
 		} 
-		console.log(symptomDbArray);
-		console.log(diagnosisDbArray);
-		console.log(tmpArray);
+		//console.log(symptomDbArray);
+		//console.log(diagnosisDbArray);
+	//	console.log(tmpArray);
 		setFilterItemArray(tmpArray);
 	}
 	
@@ -761,7 +721,8 @@ export default function Visit(props) {
 
 
 	function DisplayNewBtn() {
-		if ((investigationArray.length > 0) && (investigationArray[0].investigationNumber === 0)) return null;
+		let lastIndex = investigationArray.length - 1;
+		if ((investigationArray.length > 0) && (investigationArray[lastIndex].investigationNumber === MAGICNUMBER)) return null;
 		return (
 			<div align="right">
 				<VsButton name="Add New Investigation" onClick={handleCreateNewInvestigation} />

@@ -325,6 +325,7 @@ CustomerSchema = mongoose.Schema({
 	email: String,
 	mobile: String,
 	// Clinic details
+	doctorName: String,
 	clinicName: String,
 	addr1: String,
 	addr2: String,
@@ -333,6 +334,10 @@ CustomerSchema = mongoose.Schema({
 	pinCode: String,
 	workingHours: [Number], // clinic weekly working slots (15 minute slots
 	
+	// 
+	commission: Number,			// commission for each referral recharge
+	referenceCid: String,		// the reference of doctor who made this customer join
+
 	welcomeMessage: String,
 	plan: String,
 	fee: Number,
@@ -602,3 +607,4 @@ MINUTESTR = [
 
 // module.exports = app;
 
+MAGICNUMBER = 99999;

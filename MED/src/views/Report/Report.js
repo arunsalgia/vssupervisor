@@ -57,16 +57,7 @@ red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen,
 } from '@material-ui/core/colors';
 
 import { 
-	isMobile, callYesNo,
-	disablePastDt, disableFutureDt, disableAllDt,
-	validateInteger,
-	encrypt, decrypt, 
-	left, right,
-	intString,
-	updatePatientByFilter,
-	dispAge, dispEmail, dispMobile,
-	ordinalSuffix,
-	getOnlyDate, getDateTime,
+	isMobile, validateInteger,
 	getPatientDocument,
 	vsDialog,
 } from "views/functions.js";

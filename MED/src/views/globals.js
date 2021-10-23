@@ -94,3 +94,5 @@ export const ToothRange = {
 	lowerRight: {start: 31, end: 38},
 	lowerLeft:  {start: 41, end: 48}
 }
+
+export const MAGICNUMBER = 99999;

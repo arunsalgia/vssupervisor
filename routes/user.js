@@ -116,6 +116,7 @@ router.get('/addassistant/:userCid/:userName/:userEmail/:userMobile', async func
 		status: true,
 		email: userEmail1,
 		userType: 'Assistant',
+		password: dbencrypt(lname),
 		mobile: userMobile,
 		cid: userCid
 	});
@@ -163,6 +164,103 @@ router.get('/updateassistant/:userCid/:uid/:userName/:userEmail/:userMobile', as
 	user1.email = userEmail1;
 	user1.mobile = userMobile;
 
+	console.log(user1);
+  await user1.save();
+  console.log(user1);
+	user1.email = dbToSvrText(user1.email);
+  sendok(res, user1); 
+	
+});
+
+
+router.get('/adddoctor/:userCid/:userName/:userEmail/:userMobile', async function (req, res, next) {
+  // CricRes = res;
+  setHeader(res);
+
+  var { userCid, userName, userEmail, userMobile } = req.params;
+	
+	//var isValid = false;
+  // if user name already used up by this customer
+  var lname = getLoginName(userName);
+  var dname = getDisplayName(userName);
+  let userEmail1 = decrypt(userEmail);
+	console.log(userEmail1);
+	userEmail1 = dbencrypt(userEmail1);
+	console.log(userEmail1);
+
+  let uuu = await User.find({userName: lname, cid: userCid });
+  if (uuu.length > 0) return senderr(res, 601, "User name already used.");
+  //uuu = await User.find({ email: userEmail1, cid: userCid });
+  //if (uuu.length > 0) senderr(res, 603, "Email already used.");
+   
+  uRec = await User.find({}).limit(1).sort({ "uid": -1 });
+	/*
+	uid: Number,
+  userName: String,
+  displayName: String,
+  password: String,
+  status: Boolean,
+  email: String,
+  userType: String,
+  mobile: String,
+	cid: String,
+	*/
+  var user1 = new User({
+		uid: uRec[0].uid + 1,
+		userName: lname,
+		displayName: dname,
+		password: dbencrypt(lname),
+		status: true,
+		email: userEmail1,
+		userType: 'Doctor',
+		mobile: userMobile,
+		cid: userCid
+	});
+	console.log(user1);
+  await user1.save();
+  console.log(user1);
+	user1.email = dbToSvrText(user1.email);
+  sendok(res, user1); 
+	
+});
+
+router.get('/updatedoctor/:userCid/:oldName/:userName/:userEmail/:userMobile', async function (req, res, next) {
+  // CricRes = res;
+  setHeader(res);
+
+  var { userCid, oldName, userName, userEmail, userMobile } = req.params;
+	
+	//var isValid = false;
+  // if user name already used up by this customer
+  var oldlname = getLoginName(oldName);
+  var lname = getLoginName(userName);
+  var dname = getDisplayName(userName);
+  let userEmail1 = decrypt(userEmail);
+	console.log(userEmail1);
+	userEmail1 = dbencrypt(userEmail1);
+	console.log(userEmail1);
+
+  let user1 = await User.findOne({userName: oldlname, cid: userCid });
+  if (!user1) return senderr(res, 601, "Invalid user.");
+  
+   
+	/*
+	uid: Number,
+  userName: String,
+  displayName: String,
+  password: String,
+  status: Boolean,
+  email: String,
+  userType: String,
+  mobile: String,
+	cid: String,
+	*/
+  
+	user1.userName = lname;
+	user1.displayName = dname;
+	user1.email = userEmail1;
+	user1.mobile = userMobile;
+  user1.password = dbencrypt(lname);
 	console.log(user1);
   await user1.save();
   console.log(user1);
@@ -632,7 +730,7 @@ router.get('/cricemailpassword/:mailid', async function (req, res, next) {
   
   let text = `Dear User,
   
-    Greetings from Viraag Dental Services.
+    Greetings from Doctor Viraag Services.
 
     As requested by you, here are your login details.
 
@@ -643,7 +741,7 @@ router.get('/cricemailpassword/:mailid', async function (req, res, next) {
 	You can use Login/User name in Sigin page.
 	
     Best Regards,
-    for Auction Permier League`
+    for Doctor Viraag Services`
 
    let xxx = decrypt(mailid);
    console.log(`Send message to ${xxx}`);
@@ -676,7 +774,7 @@ router.get('/bhoolgaya/:mailid', async function (req, res, next) {
   
   let text = `Dear User,
   
-	Greetings from Viraag Dental Services.
+	Greetings from Doctor Viraag Services.
 
 	Reset your password using the link given below.
 
@@ -685,11 +783,11 @@ router.get('/bhoolgaya/:mailid', async function (req, res, next) {
 	Kindly note that this link is valid only for ${PASSWORDLINKVALIDTIME} minutes.
 	
 	Best Regards,
-	for Viraag Dental Services`
+	for Doctor Viraag Services`
 
 	let xxx = decrypt(mailid);
 	console.log(`Send message to ${xxx}`);
-	let resp = await sendCricMail(xxx, 'User info from Viraag Dental Services', text);
+	let resp = await sendCricMail(xxx, 'User info from Doctor Viraag Services', text);
 	if (resp.status) {
     console.log('Email sent: ' + resp.error);
     sendok(res, `Email sent to ${resp.error}`);

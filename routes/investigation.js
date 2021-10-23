@@ -23,14 +23,14 @@ router.post('/update/:cid/:pid/:newInfo', async function(req, res, next) {
 	newInfo = JSON.parse(newInfo);
 	//console.log(newInfo.symptom);
 	//console.log(newInfo.diagnosis);
-  var iRec = await M_Investigation.findOne({cid: cid, pid: pid, investigationNumber: 0});
+  var iRec = await M_Investigation.findOne({cid: cid, pid: pid, investigationNumber: MAGICNUMBER});
   if (!iRec) {
 		iRec = new M_Investigation();
 		iRec.cid = cid;
 		iRec.pid = pid;
-		iRec.investigationNumber = 0;
+		iRec.investigationNumber = MAGICNUMBER;
 		iRec.enabled = true;
-		iRec.save();
+		//iRec.save();
   }
 	iRec.investigationDate = new Date();
 	iRec.symptom = newInfo.symptom;
@@ -46,12 +46,12 @@ router.get('/list/:cid/:pid', async function(req, res, next) {
   var { cid, pid } = req.params;
 	pid = Number(pid);
 	
-	let allRecs = await M_Investigation.find({cid: cid, pid: pid}).sort({investigationNumber: -1})
-	if (allRecs.length > 0) {
-		if (allRecs[allRecs.length-1].investigationNumber === 0) {	
-			allRecs = [allRecs[allRecs.length-1]].concat(allRecs.slice(0, allRecs.length-1));
-		}
-	}
+	let allRecs = await M_Investigation.find({cid: cid, pid: pid}).sort({investigationNumber: 1})
+	//if (allRecs.length > 0) {
+	//	if (allRecs[allRecs.length-1].investigationNumber === 0) {	
+	//		allRecs = [allRecs[allRecs.length-1]].concat(allRecs.slice(0, allRecs.length-1));
+	//	}
+	//}
 	console.log(allRecs);
 	sendok(res, allRecs);
 });

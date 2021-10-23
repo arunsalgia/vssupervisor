@@ -35,8 +35,8 @@ let _select = arunSelect;		//(props.onClick == null) ? dummy : props.onSelect;
 let _delete = arunDelete;		//((props.onClick == null) ? dummy : props.onDelete;
 return (
 	<div align="left">
-	{props.listArray.map( item =>
-		<Box borderColor="black" borderRadius={20} border={1} >
+	{props.listArray.map( (item, index) =>
+		<Box key={"LIST"+index} borderColor="black" borderRadius={20} border={1} >
 		<span style={bStyle} onClick={() => props.onSelect(item) } >
 			{item.name}
 		</span>

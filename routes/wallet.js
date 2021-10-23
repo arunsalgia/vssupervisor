@@ -327,7 +327,7 @@ router.get('/details/:userid', async function (req, res, next) {
     });
 		*/
 		
-  console.log(myTrans);
+  //console.log(myTrans);
   sendok(res, myTrans);
 }); 
 

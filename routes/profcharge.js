@@ -49,7 +49,8 @@ router.get('/balance/:cid/:pid', async function(req, res, next) {
 	let payAmount = (payRec.length > 0) ? payRec[0].totalMoney : 0;
 	let billAmount = (billRec.length > 0) ? Math.abs(billRec[0].totalMoney) : 0;
 	let retValue = {billing: billAmount, payment: payAmount, due: (billAmount-payAmount)};
-	console.log(retValue)
+
+	//console.log(retValue)
 	sendok(res, retValue);
 });
 
