@@ -40,7 +40,6 @@ function setMedQty(num) {
 			medQty.push({num: i, str: medStr(i)});
 		}
 	}
-	//console.log(medQty);
 	return medQty[num].str;
 }
 
@@ -92,7 +91,6 @@ router.get('/printdoc/:cid/:pid', async function(req, res, next) {
 	
 	let myVisit = await M_Visit.findOne({cid: cid, pid: pid, visitNumber: MAGICNUMBER});
 	if (!myVisit) return senderr(res, 601, "No new visit");
-	console.log(myVisit);	
 	pRec = await getPatient({cid: cid, pid: pid});
 	//console.log(pRec);
 	
@@ -211,7 +209,6 @@ router.get('/printdoc/:cid/:pid', async function(req, res, next) {
 		case "W": reviewDate.setDate(reviewDate.getDate() + (7*myVisit.nextVisitTime)); break;
 		case "M": reviewDate.setMonth(reviewDate.getMonth() + myVisit.nextVisitTime); break;
 	}
-	//console.log(reviewDate);
 	
 	let myDate = reviewDate.getDate();
 	let myMonth = reviewDate.getMonth();
@@ -235,7 +232,6 @@ router.get('/printdoc/:cid/:pid', async function(req, res, next) {
 	allPara.push(blankLine());
 	
 	let customerRec = await pCustomerRec;
-	console.log(customerRec);
 	text = [];
 	text.push(boldText(customerRec.name+"   "));
 	allPara.push(rightAlignedPara(text));
@@ -255,7 +251,7 @@ router.get('/printdoc/:cid/:pid', async function(req, res, next) {
 		}]
 	});
 	
-	console.log("PWD is ",process.cwd())
+	//console.log("PWD is ",process.cwd())
 	// Used to export the file into a .docx file
 	await Packer.toBuffer(visitDoc).then((buffer) => {
 			fs.writeFileSync(process.cwd() + `/temp/${pRec.cid}_${pRec.pid}_patientVisit.docx`, buffer);
@@ -427,7 +423,7 @@ router.get('/updatenewvisit/:cid/:visitNumber/:visitInfo', async function(req, r
 	let updatefirstTime = false;
 	visitNumber = Number(visitNumber);
 	
-	console.log(visitNumber);
+	//console.log(visitNumber);
 	//let tmp = JSON.parse(visitInfo);
 	let tmp = await decodeVisitInfo(visitInfo);
 	//console.log(tmp);
@@ -435,14 +431,14 @@ router.get('/updatenewvisit/:cid/:visitNumber/:visitInfo', async function(req, r
 	let info = tmp.visit;
 	//let apptRec = tmp.appointment;
 	let nextVisitInfo =  tmp.nextVisit;
-	console.log(visitNumber);
+	//console.log(visitNumber);
 
 	// just check if already exists
 	let myRec = await M_Visit.findOne({cid: cid, pid: info.pid, visitNumber: visitNumber});
-	console.log(myRec);
+	//console.log(myRec);
 	if (!myRec) {
 		updatefirstTime = true;
-		console.log("1st time update");
+		//console.log("1st time update");
 		// updating 1st time
 		myRec = new M_Visit({ 
 		enabled: true,
@@ -468,7 +464,7 @@ router.get('/updatenewvisit/:cid/:visitNumber/:visitInfo', async function(req, r
 	myRec.remarks = info.remarks;
 	myRec.userNotes = info.userNotes;
 
-	console.log(myRec);
+	//console.log(myRec);
 	
 	// now check for appt
 	let apptRec;
@@ -484,7 +480,7 @@ router.get('/updatenewvisit/:cid/:visitNumber/:visitInfo', async function(req, r
 			
 			let myOrder = ((myYear * 100) + myMonth)*100 + myDate;
 			myOrder = (myOrder*100 + myHour) * 100 + myMin;
-			console.log("myOrder", myOrder);
+		//console.log("myOrder", myOrder);
 			
 			apptRec =  new M_Appointment();
 			apptRec.cid = cid;
@@ -519,15 +515,15 @@ router.get('/updatenewvisit/:cid/:visitNumber/:visitInfo', async function(req, r
 	
 	// next visit date 
 	let myNextVisit = new Date();
-	console.log(myNextVisit);
+	//console.log(myNextVisit);
 	switch (nextVisitInfo.unit.substr(0, 1).toUpperCase()) {
 		case 'D' : myNextVisit.setDate(myNextVisit.getDate()+nextVisitInfo.after);  break;
 		case 'W' : myNextVisit.setDate(myNextVisit.getDate()+(7*nextVisitInfo.after));  break;
 		case 'M' : myNextVisit.setMonth(myNextVisit.getMonth()+nextVisitInfo.after);  break;
 		case 'Y' : myNextVisit.setYear(myNextVisit.getFullYear()+nextVisitInfo.after);  break;
 	}
-	console.log(myNextVisit);
-	console.log(myNextVisit);
+	//console.log(myNextVisit);
+	//console.log(myNextVisit);
 	
 	// update next visit 
 	let newNext;
@@ -566,6 +562,17 @@ router.get('/list/:cid/:pid', async function(req, res, next) {
 	sendok(res, allRecs);
 });
 
+router.get('/revlist/:cid/:pid', async function(req, res, next) {`	`
+  setHeader(res);
+  
+	var {cid, pid} = req.params;
+	
+	//console.log(cid, pid)
+	let allRecs = await M_Visit.find({cid: cid, pid: Number(pid)}).sort({visitNumber: -1});
+	//console.log(allRecs);
+	sendok(res, allRecs);
+});
+
 router.get('/list/:cid', async function(req, res, next) {
   setHeader(res);
   
@@ -577,6 +584,21 @@ router.get('/list/:cid', async function(req, res, next) {
 });
 
 
+router.get('/fromtolist/:cid/:myFrom/:myTo', async function(req, res, next) {
+  setHeader(res);
+  
+	var {cid, myFrom, myTo} = req.params;
+	console.log(myFrom, myTo);
+	
+	//console.log(cid, pid)
+	let startDate = new Date(Number(myFrom.substr(0, 4)), Number(myFrom.substr(4,2))-1, Number(myFrom.substr(6,2)), 0, 0, 0);
+	let endDate = new Date(Number(myFrom.substr(0, 4)), Number(myTo.substr(4,2))-1, Number(myTo.substr(6,2))+1, 0, 0, 0);
+	console.log(startDate, endDate);
+
+	let allRecs = await M_Visit.find({cid: cid, visitDate: {$gte: startDate, $lte: endDate} }).sort({visitDate: -1});
+	//console.log(allRecs);
+	sendok(res, allRecs);
+});
 
 router.get('/nextVisit/list/:cid', async function(req, res, next) {
   setHeader(res);

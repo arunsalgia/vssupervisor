@@ -699,6 +699,7 @@ export default function Document(props) {
 
 		// Request made to the back end api
 		// Send formData object
+		title = title.trim();
 		try {
 			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/uploadimage/${userCid}/${currentPatientData.pid}/${currentPatientData.displayName}/${state.selectedFile.name}/${title}/${desc}`
 			let resp = await axios.post(myUrl, formData);

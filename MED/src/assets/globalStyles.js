@@ -9,6 +9,20 @@ import { makeStyles } from '@material-ui/core/styles';
 
 
 const globalStyles = makeStyles((theme) => ({
+  dateTimeBlock: {
+		color: 'blue',
+		//fontSize: theme.typography.pxToRem(28),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: pink[100],
+	}, 
+  dateTimeNormal: {
+		color: 'blue',
+		fontSize: theme.typography.pxToRem(14),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: pink[100],
+		align: 'center',
+		//width: (isMobile()) ? '60%' : '20%',
+	},
 	indexSelection: {
 		color: 'green',
 		fontSize: theme.typography.pxToRem(28),

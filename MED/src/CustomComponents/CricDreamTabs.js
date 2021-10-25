@@ -29,7 +29,7 @@ import Patient from "views/Patient/Patient.js"
 import NextVisit from "views/NextVisit/NextVisit";
 import Report from "views/Report/Report.js" 
 import Wallet from "views/Wallet/Wallet.js"
-
+import Summary from "views/Summary/Summary.js"
 import Customer from "views/SuperUser/Customer";
 import Sample from "views/SuperUser/Sample.js"
 
@@ -280,6 +280,7 @@ export function CricDreamTabs() {
   const handleProfile = () => { handleClose(); handleGrpClose(); setMenuValue(101);}
 	const handleWallet = () => { handleClose(); handleGrpClose(); setMenuValue(102);}
 	const handleChangePassword = () => { handleClose(); handleGrpClose(); setMenuValue(103);}
+	const handleSummary = () => { handleClose(); handleGrpClose(); setMenuValue(104);}
 	const handleContactUs = () => { handleClose(); setMenuValue(202);}
 	
 	const handleSample = () => { handleClose(); setMenuValue(801);}
@@ -305,7 +306,8 @@ export function CricDreamTabs() {
       case 101: return <Profile />;
       case 102: return <Wallet />;
 			case 103: return <ChangePassword />;
-			
+			case 104: return <Summary />;
+
 			case 801: return <Sample />
 			case 802: return <Customer />
 
@@ -459,6 +461,9 @@ export function CricDreamTabs() {
 									<MenuItem onClick={handlePatient}>
 									<Typography className={classes.menuStyle}>Patient</Typography>
 									</MenuItem>
+									<MenuItem onClick={handleSummary}>
+									<Typography className={classes.menuStyle}>Summary</Typography>
+									</MenuItem>
 									<Divider className={classes.divider} />
 									</div>
 								}
@@ -513,6 +518,7 @@ export function CricDreamTabs() {
 						<div>
 						<Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
 						<Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handleSummary}>Summary</Button>
 						</div>
 					}
 					{(false) &&

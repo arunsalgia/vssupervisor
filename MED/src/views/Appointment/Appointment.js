@@ -1,72 +1,44 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from "axios";
-import TextField from '@material-ui/core/TextField';
 import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
 import IconButton from '@material-ui/core/IconButton';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import SwitchBtn from '@material-ui/core/Switch';
-import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 import Grid from "@material-ui/core/Grid";
-import GridItem from "components/Grid/GridItem.js";
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Select from "@material-ui/core/Select";
-import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
+
 import Typography from '@material-ui/core/Typography';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
+
 import Box from '@material-ui/core/Box';
-import Modal from 'react-modal';
+
 
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel"
 import VsTextSearch from "CustomComponents/VsTextSearch";
 
-import { borders } from '@material-ui/system';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormLabel from '@material-ui/core/FormLabel';
 import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import moment from "moment";
-import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { useAlert } from 'react-alert'
 import Drawer from '@material-ui/core/Drawer';
-//import _ from 'lodash'
 import lodashSortBy from "lodash/sortBy"
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import Avatar from "@material-ui/core/Avatar"
-//import validator from 'validator'
+
+
 
 // styles
 import globalStyles from "assets/globalStyles";
-import modalStyles from "assets/modalStyles";
 import {dynamicModal } from "assets/dynamicModal";
 
-
-import Switch from "@material-ui/core/Switch";
-import Link from '@material-ui/core/Link';
-
-import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
-DisplayPatientDetails,
+import {DisplayPageHeader, ValidComp, BlankArea,
 DisplayPatientBox,
 DisplayAppointmentDetails, DisplayAppointmentBox,
+DisplayPatientHeader,
 } from "CustomComponents/CustomComponents.js"
 
-import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
+
 
 import {
 WEEKSTR, SHORTMONTHSTR, SHORTWEEKSTR,
@@ -78,6 +50,8 @@ BLOCKNUMBER,
 } from 'views/globals';
 
 // icons
+
+/*
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 //import DeleteIcon from '@material-ui/icons/Delete';
@@ -85,8 +59,9 @@ import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Cancel';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
-import EventNoteIcon from '@material-ui/icons/EventNote';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
+*/
+import EventNoteIcon from '@material-ui/icons/EventNote';
 import LeftIcon from '@material-ui/icons/ChevronLeft';
 import RightIcon from '@material-ui/icons/ChevronRight';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -97,16 +72,11 @@ red, blue, grey, yellow, orange, pink, green, brown, deepOrange, lightGreen, blu
 } from '@material-ui/core/colors';
 
 import { 
-	isMobile, callYesNo,
-	disablePastDt, disableFutureDt, disableAllDt,
+	isMobile, 
+	disablePastDt, disableFutureDt,
 	validateInteger,
 	encrypt, decrypt, 
-	left, right,
-	intString,
-	updatePatientByFilter,
-	dispAge, dispEmail, dispMobile,
-	ordinalSuffix,
-	compareDate, makeTimeString,
+	compareDate,
 	getAllPatients,
 	vsDialog,
 	generateOrder, generateOrderByDate,
@@ -1512,15 +1482,17 @@ export default function Appointment() {
 		}
 		{(currentPatient !== "") &&
 			<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<Typography align="center" className={classes.modalHeader}>
-			{(currentPatient === "INFO") ?
-				"Appointment Information" :
-				currentPatientData.displayName+" ( Id: "+currentPatientData.pid+" ) "
+			{(currentPatient === "INFO") &&
+				<Typography align="center" className={classes.modalHeader}>
+					Appointment Information
+				</Typography>	
 			}
-			</Typography>	
 			<BlankArea />
 			{(currentPatient !== "INFO") &&
+				<div>
+				<DisplayPatientHeader patient={currentPatientData} />
 				<DisplayPatientAppointments />
+				</div>
 			}
 			{(true) &&
 				<DisplayAvailableAppointments />

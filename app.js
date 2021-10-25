@@ -82,6 +82,7 @@ investigationRouter = require('./routes/investigation');
 treattypeRouter = require('./routes/treattype');
 dentalTreatmentRouter = require('./routes/dentaltreatment');
 profChargeRouter = require('./routes/profcharge');
+docxRouter = require('./routes/docx');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -130,6 +131,10 @@ app.use('/investigation', investigationRouter);
 app.use('/treattype', treattypeRouter);
 app.use('/dentaltreatment', dentalTreatmentRouter);
 app.use('/profcharge', profChargeRouter);
+app.use('/docx', docxRouter);
+
+
+
 //Schema
 
 UserSchema = mongoose.Schema({
@@ -248,11 +253,9 @@ DentalTreatmentSchema = mongoose.Schema({
 
 NextVisitSchema = mongoose.Schema({
   pid: Number,
-	displayName: String,
-	visitDate: Date,
 	nextVisit: Date,
-	status: String,
 	cid: String,
+	enabled: Boolean,
 });
 
 ProfessionalChargesSchema = mongoose.Schema({

@@ -57,8 +57,8 @@ router.get('/svrtoclient/:text', async function (req, res, next) {
   // CricRes = res;
   setHeader(res);
   var { text } = req.params;
-	let x = dbdecrypt(text);
-	console.log()
+	//let x = dbdecrypt(text);
+	//console.log()
   sendok(res, svrToDbText(text));
 });
 
@@ -163,7 +163,7 @@ router.get('/updateassistant/:userCid/:uid/:userName/:userEmail/:userMobile', as
 	user1.displayName = dname;
 	user1.email = userEmail1;
 	user1.mobile = userMobile;
-
+  user1.password = dbencrypt(lname);
 	console.log(user1);
   await user1.save();
   console.log(user1);

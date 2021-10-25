@@ -45,7 +45,9 @@ import 'react-step-progress/dist/index.css';
 import globalStyles from "assets/globalStyles";
 
 
-import {ValidComp, BlankArea, } from "CustomComponents/CustomComponents.js"
+import {ValidComp, BlankArea, 
+	DisplayProfChargeBalance, DisplayProfCharge,
+} from "CustomComponents/CustomComponents.js"
 
 import {
 HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR, INR
@@ -281,7 +283,8 @@ export default function ProfCharge(props) {
 		}
 	}
 
-	function DisplayBalance() {
+	/*
+	function junk_DisplayBalance() {
 	return (
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
 		<Grid container className={gClasses.noPadding} key="BALANCE" >
@@ -305,61 +308,7 @@ export default function ProfCharge(props) {
 	);
 	}
 
-
-	function addNewPayment() {
-		setPaymentMode(paymentModeArray[0]);
-		setEmurTid(0);
-		setEmurAmount(100);
-		setEmurDesc("");
-		setIsDrawerOpened("ADDPAY");
-	}
-	
-	function handleEditPayment(pRec) {
-		setEmurTid(pRec.tid);
-		setPaymentMode(pRec.paymentMode);
-		setEmurAmount(pRec.amount);
-		setEmurDesc(pRec.description);
-		setIsDrawerOpened("EDITPAY");
-	}
-	
-	function DisplayNewBtn() {
-	return (
-		<div align="right">
-			<VsButton name="Add New Payment" onClick={addNewPayment} />
-		</div>
-	)}
-
-	function handleDeletePayment(t) {
-		vsDialog("Delete Payment", `Are you sure you want to delete payment of amount ${Math.abs(t.amount)}?`,
-			{label: "Yes", onClick: () => handleDeleteTreatmentConfirm(t) },
-			{label: "No" }
-		);
-	}
-	
-	
-	async function handleDeleteTreatmentConfirm(t) {
-		await axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/profcharge/delete/${userCid}/${currentPatientData.pid}/${t.tid}`)
-		setProfChargeArray(profChargeArray.filter(x => x.tid !== t.tid));
-		getBalance(currentPatientData);
-		alert.success(`Delete payment of amount ${t.amount}`);
-	}
-	
-	function handleInfoPayment(t) {
-		setTreatmentDetails(t.treatmentDetails)
-		setIsInfoDrawerOpened("INFO");
-	}
-	
-	function DisplayAllToolTips() {
-	let myArray = profChargeArray.filter(x => x.treatment !== "");
-	return(
-		<div>
-		{myArray.map( t =>
-		 <ReactTooltip type="info" effect="float" id={"TREAT"+t.tid} multiline={true}/>
-		)}
-		</div>
-	)}
-	
-	
+		
 	function ArunProfCharge() {
 	return (
 	<Box borderColor="primary.main" border={1}>
@@ -411,6 +360,48 @@ export default function ProfCharge(props) {
 	</Box>
 	)}
 
+*/
+
+	function addNewPayment() {
+		setPaymentMode(paymentModeArray[0]);
+		setEmurTid(0);
+		setEmurAmount(100);
+		setEmurDesc("");
+		setIsDrawerOpened("ADDPAY");
+	}
+	
+	function handleEditPayment(pRec) {
+		setEmurTid(pRec.tid);
+		setPaymentMode(pRec.paymentMode);
+		setEmurAmount(pRec.amount);
+		setEmurDesc(pRec.description);
+		setIsDrawerOpened("EDITPAY");
+	}
+	
+	function DisplayNewBtn() {
+	return (
+		<div align="right">
+			<VsButton name="Add New Payment" onClick={addNewPayment} />
+		</div>
+	)}
+
+	function handleDeletePayment(t) {
+		vsDialog("Delete Payment", `Are you sure you want to delete payment of amount ${Math.abs(t.amount)}?`,
+			{label: "Yes", onClick: () => handleDeleteTreatmentConfirm(t) },
+			{label: "No" }
+		);
+	}
+	
+	
+	async function handleDeleteTreatmentConfirm(t) {
+		await axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/profcharge/delete/${userCid}/${currentPatientData.pid}/${t.tid}`)
+		setProfChargeArray(profChargeArray.filter(x => x.tid !== t.tid));
+		getBalance(currentPatientData);
+		alert.success(`Delete payment of amount ${t.amount}`);
+	}
+	
+	
+
 	async function updatePayment() {
 		let tmp = encodeURIComponent(JSON.stringify({
 			date: new Date(),
@@ -451,10 +442,13 @@ export default function ProfCharge(props) {
 	return (
 	<div className={gClasses.webPage} align="center" key="main">
 	<CssBaseline />
-		<DisplayBalance />
+		<DisplayProfChargeBalance balance={balance}/>
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 			<DisplayNewBtn />
-			<ArunProfCharge />
+			<DisplayProfCharge profChargeArray={profChargeArray} 
+				handleEdit={handleEditPayment} 
+				handleCancel={handleDeletePayment}
+			/>
 		</Box>
 		<Drawer className={classes.drawer}
 		anchor="right"
@@ -498,7 +492,7 @@ export default function ProfCharge(props) {
 		}
 		</Box>
 		</Drawer>
-		<DisplayAllToolTips />
+		{/*<DisplayAllToolTips />*/}
 	</div>
   );    
 }

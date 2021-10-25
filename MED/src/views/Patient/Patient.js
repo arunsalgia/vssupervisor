@@ -79,6 +79,7 @@ import { isMobile, encrypt,
 	disableFutureDt,
  } from "views/functions.js"
 import {DisplayPageHeader, BlankArea, DisplayPatientBox,
+	DisplayPatientHeader,
 } from "CustomComponents/CustomComponents.js"
 
 // styles
@@ -256,7 +257,7 @@ export default function Patient() {
 	//customerData = sessionStorage.getItem("customerData");
 
 	const [searchText, setSearchText] = useState("");
-	const [isBirthday, setIsBirday] = useState(false);
+	//const [isBirthday, setIsBirthday] = useState(false);
 	
 	const [currentPatient, setCurrentPatient] = useState("");
 	const [currentPatientData, setCurrentPatientData] = useState({});
@@ -497,48 +498,9 @@ export default function Patient() {
 		setCurrentPatientData(pat);
 		setCurrentPatient(pat.displayName);
 		setCurrentSelection("");
-		setIsBirday(checkIfBirthday(pat.dob));
+		//setIsBirday(checkIfBirthday(pat.dob));
 	}
 
-
-	function DisplayPatientHeader() {
-	return (
-	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
-	<Grid className={gClasses.noPadding} key="AllPatients" container align="left">
-			<Grid key={"PAT0"} item xs={12} sm={6} md={4} lg={4} >
-				<Typography>
-					<span className={gClasses.patientInfo}>Patient: </span>
-					<span className={gClasses.patientInfo2Green}>{currentPatient+"( Id: "+currentPatientData.pid+" )"}</span>
-				</Typography>
-			</Grid>
-			<Grid key={"PAT1"} item xs={12} sm={6} md={2} lg={2} >
-				<Typography>
-					<span className={gClasses.patientInfo}>Age: </span>
-					<span className={gClasses.patientInfo2Green}>{dispAge(currentPatientData.age, currentPatientData.gender)}</span>
-				</Typography>
-			</Grid>
-			<Grid key={"PAT2"} item xs={12} sm={6} md={3} lg={3} >
-				<Typography>
-					<span className={gClasses.patientInfo}>Email: </span>
-					<span className={gClasses.patientInfo2Green}>{dispEmail(currentPatientData.email)}</span>
-				</Typography>
-			</Grid>		
-			<Grid key={"PAT3"} item xs={12} sm={6} md={3} lg={3} >
-				<Typography>
-					<span className={gClasses.patientInfo}>Contact: </span>
-					<span className={gClasses.patientInfo2Green}>{dispMobile(currentPatientData.mobile)}</span>
-				</Typography>
-			</Grid>	
-			{(isBirthday) &&
-			<Grid key={"PAT11"} item xs={12} sm={12} md={12} lg={12} >
-				<Typography>
-					<span className={gClasses.patientInfo2Blue}>{"Many many happy returns of the day "+currentPatientData.displayName}</span>
-				</Typography>
-			</Grid>
-			}
-	</Grid>	
-	</Box>
-	)}
 
 	function DisplayFunctionItem(props) {
 	let itemName = props.item;
@@ -682,7 +644,7 @@ export default function Patient() {
 		{(currentPatient !== "") &&
 			<div>
 			<VsButton align="right" name="Back to Patient Directory" onClick={handleBack} />
-			<DisplayPatientHeader />
+			<DisplayPatientHeader patient={currentPatientData} />
 			<DisplayFunctionHeader />
 			<Divider className={gClasses.divider} /> 
 			{((currentSelection === "Treatment") && (true)) &&

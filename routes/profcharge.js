@@ -28,6 +28,48 @@ router.get('/list/:cid/:pid', async function(req, res, next) {
 	sendok(res, allRecs);
 });
 
+
+router.get('/fromtolist/:cid/:myFrom/:myTo', async function(req, res, next) {
+  setHeader(res);
+  
+	var {cid, myFrom, myTo} = req.params;
+	//console.log(myFrom, myTo);
+	
+	//console.log(cid, pid)
+	let startDate = new Date(Number(myFrom.substr(0, 4)), Number(myFrom.substr(4,2))-1, Number(myFrom.substr(6,2)), 0, 0, 0);
+	let endDate = new Date(Number(myFrom.substr(0, 4)), Number(myTo.substr(4,2))-1, Number(myTo.substr(6,2))+1, 0, 0, 0);
+	//console.log(startDate, endDate);
+
+	let allRecs = await M_ProfCharge.find({cid: cid, date: {$gte: startDate, $lte: endDate} }).sort({tid: -1});
+	//console.log(allRecs);
+	sendok(res, allRecs);
+});
+
+router.get('/balance/:cid', async function(req, res, next) {
+  setHeader(res);
+	var {cid} = req.params;
+
+	let paymentQuery = [
+		{$match: { cid: cid, amount: {$gt: 0} }},
+		{ $group: { _id: '$cid', totalMoney: { $sum: '$amount' } } }
+  ];
+	let billingQuery = [
+		{$match: { cid: cid, amount: {$lt: 0} }},
+		{$group: { _id: '$cid', totalMoney: { $sum: '$amount' } }}
+  ];
+	
+	let payRec = await M_ProfCharge.aggregate(paymentQuery);
+	let billRec = await M_ProfCharge.aggregate(billingQuery);
+	//console.log(billRec);
+	//console.log(payRec);
+	let payAmount = (payRec.length > 0) ? payRec[0].totalMoney : 0;
+	let billAmount = (billRec.length > 0) ? Math.abs(billRec[0].totalMoney) : 0;
+	let retValue = {billing: billAmount, payment: payAmount, due: (billAmount-payAmount)};
+
+	//console.log(retValue)
+	sendok(res, retValue);
+});
+
 router.get('/balance/:cid/:pid', async function(req, res, next) {
   setHeader(res);
 	var {cid, pid} = req.params;
@@ -52,6 +94,20 @@ router.get('/balance/:cid/:pid', async function(req, res, next) {
 
 	//console.log(retValue)
 	sendok(res, retValue);
+});
+
+router.get('/due/:cid', async function(req, res, next) {
+  setHeader(res);
+	var {cid} = req.params;
+
+	let dueQuery = [
+		{$match: { cid: cid}},
+		{ $group: { _id: '$pid', due: { $sum: '$amount' } } }
+  ];
+
+	let dueRecs = await M_ProfCharge.aggregate(dueQuery);
+	dueRecs = dueRecs.filter(x => x.due < 0);
+	sendok(res, dueRecs);
 });
 
 // this entry is only for the payment done by patients
