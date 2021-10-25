@@ -477,6 +477,7 @@ export default function Summary() {
 		<DisplayFunctionItem item="Date wise"  match={currentSelection} onClick={setSummaryMainSelect} />
 		<DisplayFunctionItem item="Patient wise"  match={currentSelection}  onClick={setSummaryMainSelect} />
 		<DisplayFunctionItem item="Dues"  match={currentSelection}  onClick={setSummaryMainSelect} />
+		<DisplayFunctionItem item="PendingVisit"  match={currentSelection}  onClick={setSummaryMainSelect} />
 	</Grid>	
 	</Box>
 	)}
@@ -692,9 +693,14 @@ export default function Summary() {
 					</div>
 				}
 				{(currentSelection === "Dues") && 
-			<div>
+				<div>
 				<DisplayPatientDues />
-			</div>
+				</div>
+				}	
+				{(currentSelection === "PendingVisit") && 
+				<div>
+				<Typography className={gClasses.patientInfo2Green}>Under development</Typography>
+				</div>
 				}	
 			</Box>
 		</Box>
