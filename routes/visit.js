@@ -233,7 +233,7 @@ router.get('/printdoc/:cid/:pid', async function(req, res, next) {
 	
 	let customerRec = await pCustomerRec;
 	text = [];
-	text.push(boldText(customerRec.name+"   "));
+	text.push(boldText(customerRec.doctorName+"   "));
 	allPara.push(rightAlignedPara(text));
 	
 	

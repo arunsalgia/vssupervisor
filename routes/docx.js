@@ -203,9 +203,9 @@ router.get('/visit/:cid/:pid', async function(req, res, next) {
 	allPara.push(blankLine());
 	
 	let customerRec = await pCustomerRec;
-	console.log(customerRec);
+	//console.log(customerRec);
 	text = [];
-	text.push(boldText(customerRec.name+"   "));
+	text.push(boldText(customerRec.doctorName+"   "));
 	allPara.push(rightAlignedPara(text));
 	
 	
