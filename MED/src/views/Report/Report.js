@@ -346,10 +346,10 @@ export default function Document(props) {
 			let ppp = await getAllPatients();
 			setPatientMasterArray(ppp);
 			try {
-				console.log("About to parse share data");
+				//console.log("About to parse share data");
 				let patRec = props.patient;		//JSON.parse(sessionStorage.getItem("shareData"));
 				// has come from patient page
-				console.log(patRec);
+				//console.log(patRec);
 				setSearchText(patRec.displayName);
 				setPatientArray([patRec]);
 				let ddd = await getPatientDocument(userCid, patRec.pid);
@@ -469,7 +469,7 @@ export default function Document(props) {
 		} else {
 			setRegisterStatus(0);
 			setState({ selectedFile: event.target.files[0] });
-			console.log(event.target.files[0]);
+			//console.log(event.target.files[0]);
 		}
 	};
     
@@ -699,11 +699,12 @@ export default function Document(props) {
 
 		// Request made to the back end api
 		// Send formData object
-		title = title.trim();
+		let myTitle = title.trim();
+		let myDesc = (desc.trim() !== "") ? desc.trim() : "ARUNANKIT";
 		try {
-			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/uploadimage/${userCid}/${currentPatientData.pid}/${currentPatientData.displayName}/${state.selectedFile.name}/${title}/${desc}`
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/image/uploadimage/${userCid}/${currentPatientData.pid}/${currentPatientData.displayName}/${state.selectedFile.name}/${myTitle}/${myDesc}`
 			let resp = await axios.post(myUrl, formData);
-			console.log(resp.data);
+			//console.log(resp.data);
 			setIsDrawerOpened("");		// done
 			let ddd = await getPatientDocument(userCid, currentPatientData.pid);
 			setDocumentArray(ddd);
@@ -759,13 +760,7 @@ export default function Document(props) {
 	</Box>
 	)}
 	
-	function step1Validator() { return stepNo >= 1};
-	function step2Validator() { return stepNo >= 2};
-	function step3Validator() { return stepNo >= 3};
-	function step4Validator() { return stepNo >= 4};
-	const step1Content = <h1>Request to server</h1>;
-	const step2Content = <h1>Geneate visit document</h1>;
-	const step3Content = <h1>Download visit document</h1>;
+
 	
 	return (
 	<div>
@@ -838,8 +833,8 @@ export default function Document(props) {
 						id="descDocument" label="Description" type="text"
 						value={desc} 
 						onChange={() => { setDesc(event.target.value) }}
-						validators={['required', 'noSpecialCharacters']}
-						errorMessages={['Report description to be provided', 'Special characters not permitted', ]}
+						validators={['noSpecialCharacters']}
+						errorMessages={['Special characters not permitted', ]}
 					/>
 					<input className={gClasses.vgSpacing} type="file" id="newFile" onChange={onFileChange} />
 					<ShowResisterStatus/>

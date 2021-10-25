@@ -446,6 +446,7 @@ export default function ProfCharge(props) {
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 			<DisplayNewBtn />
 			<DisplayProfCharge profChargeArray={profChargeArray} 
+				patientArray={[currentPatientData]}
 				handleEdit={handleEditPayment} 
 				handleCancel={handleDeletePayment}
 			/>

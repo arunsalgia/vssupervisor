@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
   title: {
 		fontSize: theme.typography.pxToRem(20),
 		fontWeight: theme.typography.fontWeightBold,
-		color: blue[700],
+		color: blue[300],
 	},
 	paper: {
     marginTop: theme.spacing(8),
@@ -77,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(1),
     marginRight: theme.spacing(1),
     backgroundColor: '#FFFFFF',
-    color: '#1A237E',
+    color: '#1A233E',
     fontWeight: theme.typography.fontWeightBold,
     fontSize: '16px',
     width: theme.spacing(20),
@@ -87,7 +87,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(1),
     marginRight: theme.spacing(1),
     backgroundColor: '#FFFFFF',
-    color: '#1A237E',
+    color: '#1A233E',
     fontWeight: theme.typography.fontWeightBold,
     fontSize: '16px',
     width: theme.spacing(40),
@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
     // right: 0,
     fontSize: '14px',
     fontWeight: theme.typography.fontWeightBold,
-    color: blue[700],
+    color: blue[300],
     // position: 'absolute',
     alignItems: 'center',
     marginTop: '0px',
@@ -119,16 +119,16 @@ const useStyles = makeStyles((theme) => ({
   error:  {
     // right: 0,
     fontSize: '12px',
-    color: red[700],
+    color: red[300],
     // position: 'absolute',
     alignItems: 'center',
     marginTop: '0px',
   },
   successMessage: {
-    color: green[700],
+    color: green[300],
   }, 
   failureMessage: {
-    color: red[700],
+    color: red[300],
   }, 
   table: {
     // minWidth: 650,
@@ -139,7 +139,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "none",
 		fontSize: theme.typography.pxToRem(13),
 		fontWeight: theme.typography.fontWeightBold,
-		//backgroundColor: '#FFA726',
+		//backgroundColor: '#FFA326',
 		backgroundColor: deepOrange[200],
 		borderWidth: 1,
 		borderColor: 'black',
@@ -167,7 +167,7 @@ const useStyles = makeStyles((theme) => ({
 	apptName: {
 		fontSize: theme.typography.pxToRem(15),
 		fontWeight: theme.typography.fontWeightBold,
-		color: blue[700]
+		color: blue[300]
 	},  
   ngHeader: {
     fontSize: theme.typography.pxToRem(15),
@@ -234,7 +234,7 @@ export function ShowCreateGroup() {
     2.  Number of members that will be part of this group.
     </Typography>
     <Typography paragraph>
-    3.  Member Free (e.g. 50/75/100 Rupees as desired by you.) It will be available in your wallet.
+    3.  Member Free (e.g. 50/35/100 Rupees as desired by you.) It will be available in your wallet.
     </Typography>
     <Typography paragraph>
     4.  Select the tournamenet for which you want to play.
@@ -895,7 +895,9 @@ return (
 			</Typography>
 			<Typography>
 				<span className={gClasses.patientInfo}>Desc: </span>
-				<span className={gClasses.patientInfo2}>{props.document.desc}</span>
+				<span className={gClasses.patientInfo2}>
+					{(props.document.desc !== "ARUNANKIT") ? props.document.desc : ""}
+				</span>
 			</Typography>
 			<Typography> 
 				<span className={gClasses.patientInfo}>Type: </span>
@@ -1126,7 +1128,7 @@ export function DisplayProfChargeBalance(props) {
 			</Grid>
 			<Grid key={"BAL2"} align="center" item xs={4} sm={4} md={4} lg={4} >
 				<Typography className={gClasses.indexSelection} >
-					{"Payment: "+INR+props.balance.payment}
+					{"Collection: "+INR+props.balance.payment}
 				</Typography>
 			</Grid>
 			<Grid key={"BAL3"} align="center" item xs={4} sm={4} md={4} lg={4} >
@@ -1156,20 +1158,23 @@ export function DisplayProfCharge(props) {
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
 		<div>
 		<Grid  key={"HDR"} container alignItems="center" >
-			<Grid item  align="left" xs={2} sm={2} md={2} lg={2} >
+			<Grid item  align="left" xs={2} sm={2} md={1} lg={1} >
 				<Typography className={gClasses.patientInfo2Blue}>Date</Typography>
 			</Grid>
-			<Grid item align="left" xs={7} sm={7} md={6} lg={6} >
+			<Grid item align="left" xs={3} sm={3} md={3} lg={3} >
+				<Typography className={gClasses.patientInfo2Blue}>Name</Typography>
+			</Grid>
+			<Grid item align="left" xs={4} sm={4} md={4} lg={4} >
 				<Typography className={gClasses.patientInfo2Blue}>Description</Typography>
 			</Grid>
-			<Grid item  align="left" xs={1} sm={1} md={1} lg={1} >
+			<Grid item  align="center" xs={1} sm={1} md={1} lg={1} >
 				<Typography className={gClasses.patientInfo2Blue}>Mode</Typography>
 			</Grid>
 			<Grid item align="right" xs={1} sm={1} md={1} lg={1} >
 				<Typography className={gClasses.patientInfo2Blue}>Billing</Typography>
 			</Grid>
 			<Grid item  xs={1} sm={1} md={1} lg={1} >
-			<Typography align="right" className={gClasses.patientInfo2Blue}>Payment</Typography>
+			<Typography align="right" className={gClasses.patientInfo2Blue}>Collection</Typography>
 			</Grid>
 			<Grid item xs={1} sm={1} md={1} lg={1} >
 			</Grid>
@@ -1180,6 +1185,8 @@ export function DisplayProfCharge(props) {
 		//myDate += ` ${HOURSTR[d.getHours()]}:${MINUTESTR[d.getMinutes()]}`;
 		let isBilling = (p.treatment !== "");
 		let myInfo = "";
+		let tmp = props.patientArray.find(x => x.pid === p.pid);
+		let myName = tmp.displayName;
 		for(let i=0; i<p.treatmentDetails.length; ++i) {
 			myInfo += p.treatmentDetails[i].name + ": "+p.treatmentDetails[i].amount + "<br />";
 		}
@@ -1191,10 +1198,13 @@ export function DisplayProfCharge(props) {
 		//console.log(myDesc);
 		return (
 			<Grid  key={"PAY"+index} container alignItems="center" align="center">
-			<Grid item align="left" xs={2} sm={2} md={2} lg={2} >
+			<Grid item align="left" xs={2} sm={2} md={1} lg={1} >
 				<Typography className={gClasses.patientInfo2}>{myDate}</Typography>
 			</Grid>
-			<Grid item align="left" xs={7} sm={7} md={6} lg={6} >
+			<Grid item align="left" xs={4} sm={4} md={3} lg={3} >
+			<Typography className={gClasses.patientInfo2}>{myName}</Typography>
+			</Grid>
+			<Grid item align="left" xs={4} sm={4} md={4} lg={4} >
 				<Typography >
 				<span className={gClasses.patientInfo2}>{myDesc}</span>
 				{(isBilling) &&
@@ -1208,7 +1218,7 @@ export function DisplayProfCharge(props) {
 				}
 				</Typography>
 			</Grid>
-			<Grid item align="left" xs={1} sm={1} md={1} lg={1} >
+			<Grid item align="center" xs={1} sm={1} md={1} lg={1} >
 				<Typography className={gClasses.patientInfo2}>{myMode}</Typography>
 			</Grid>
 			<Grid item align="right" xs={1} sm={1} md={1} lg={1} >

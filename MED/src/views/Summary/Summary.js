@@ -399,6 +399,7 @@ export default function Summary() {
 	function handleSelectPatient(pat) {
 		setCurrentPatientData(pat);
 		setCurrentPatient(pat.displayName);
+		setCurrentPatientWiseSelection("");
 	}
 
 
@@ -646,7 +647,7 @@ export default function Summary() {
 					{(currentDateWiseSelection === "Billing") && 
 						<div>
 							<DisplayProfChargeBalance balance={balance} />
-							<DisplayProfCharge profChargeArray={billingArray} />
+							<DisplayProfCharge profChargeArray={billingArray} patientArray={patientMasterArray} />
 						</div>
 					}														
 					</div>
@@ -685,7 +686,7 @@ export default function Summary() {
 							{(currentPatientWiseSelection === "Billing") && 
 								<div>
 								<DisplayProfChargeBalance balance={balance} />
-								<DisplayProfCharge profChargeArray={billingArray} />
+								<DisplayProfCharge profChargeArray={billingArray} patientArray={patientMasterArray} />
 								</div>
 							}
 						</div>
