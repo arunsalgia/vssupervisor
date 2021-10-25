@@ -253,7 +253,7 @@ DentalTreatmentSchema = mongoose.Schema({
 
 NextVisitSchema = mongoose.Schema({
   pid: Number,
-	nextVisit: Date,
+	nextVisitDate: Date,
 	cid: String,
 	enabled: Boolean,
 });

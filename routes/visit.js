@@ -284,6 +284,25 @@ router.post('/update/:cid/:visitInfo', async function(req, res, next) {
 	// if found, declare it as over by writing visit record id in appointment
 	setOldPendingAppointment(cid, visitInfo.pid, myRec._id)
 	
+	// added entry in pending visit
+	let nvRec = await M_NextVisit.findOne({cid: cid, pid: visitInfo.pid});
+	if (!nvRec) {
+		nvRec = new M_NextVisit();
+		nvRec.cid = cid;
+		nvRec.pid = visitInfo.pid;
+		nvRec.enabled = true;
+	}
+	let myNextVisit = new Date();
+	switch (visitInfo.nextUnit.substr(0, 1).toUpperCase()) {
+		case 'D' : myNextVisit.setDate(myNextVisit.getDate()+visitInfo.nextTime);  break;
+		case 'W' : myNextVisit.setDate(myNextVisit.getDate()+(7*visitInfo.nextTime));  break;
+		case 'M' : myNextVisit.setMonth(myNextVisit.getMonth()+visitInfo.nextTime);  break;
+		case 'Y' : myNextVisit.setYear(myNextVisit.getFullYear()+visitInfo.nextTime);  break;
+	}
+	console.log(myNextVisit);
+	nvRec.nextVisitDate = myNextVisit;
+	nvRec.save();
+
 	sendok(res, "Ok");
 	return;
 	
@@ -379,7 +398,7 @@ router.post('/update/:cid/:visitInfo', async function(req, res, next) {
 	// now save both appt and visit. now update next visit
 	
 	// next visit date 
-	let myNextVisit = new Date();
+	myNextVisit = new Date();
 	console.log(myNextVisit);
 	switch (nextVisitInfo.unit.substr(0, 1).toUpperCase()) {
 		case 'D' : myNextVisit.setDate(myNextVisit.getDate()+nextVisitInfo.after);  break;
