@@ -63,6 +63,7 @@ red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen,
 import { 
 	isMobile, dispEmail,
 	getOnlyDate,
+	vsDialog,
 } from "views/functions.js";
 import { disablePastDt } from 'views/functions';
 import { encrypt } from 'views/functions';
@@ -346,11 +347,16 @@ export default function Customer() {
 	const [newCustomer, setNewCustomer] = useState(false);
 	const [radioRecharge, setRadioRecharge] = useState("MONTHLY");
 
+	const [currentSelection, setCurrentSelection] = useState("");
 	
 	const [radioUserType, setRadioUserType] = useState("Doctor");
 	const [radioCustomerPlan, setRadioCustomerPlan] = useState("MONTHLY");
 
-	
+	const [emurData, setEmurData] = useState({});
+	const [emurName, setEmurName] = useState("");
+
+	const [doctorTypeArray, setDoctorTypeArray] = useState([]);
+	const [addOnTypeArray, setAddOnTypeArray] = useState([]);
 	
   useEffect(() => {	
 		const getAllCustomers = async () => {		
@@ -367,11 +373,227 @@ export default function Customer() {
 		getAllCustomers();
   }, []);
 
+
+	async function setSummaryMainSelect(item) {
+		if (item === "DoctorType") {
+			await getDoctorTypes()
+		} else 		if (item === "AddOn") {
+			await getDoctorTypes();
+			await getAddOnTypes();
+		}
+		setCurrentSelection(item);
+	}
+
+
+	function DisplayFunctionItem(props) {
+		let itemName = props.item;
+		return (
+		<Grid key={"BUT"+itemName} item xs={4} sm={4} md={2} lg={2} >
+		<Typography onClick={() => props.onClick(itemName)}>
+			<span 
+				className={(itemName === props.match) ? gClasses.functionSelected : gClasses.functionUnselected}>
+			{itemName}
+			</span>
+		</Typography>
+		</Grid>
+		)}
+
+	function DisplayFunctionHeader() {
+		return (
+		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
+			<DisplayFunctionItem item="DoctorType"  match={currentSelection} onClick={setSummaryMainSelect} />
+			<DisplayFunctionItem item="AddOn"  match={currentSelection}  onClick={setSummaryMainSelect} />
+			<DisplayFunctionItem item="Customer"  match={currentSelection}  onClick={setSummaryMainSelect} />
+		</Grid>	
+		</Box>
+		)}
 	function handleSelectCustomer(rec) {
 		sessionStorage.setItem("cid", rec._id);
 		sessionStorage.setItem("customerData", JSON.stringify(rec));
 	}
 	
+	//------------ Doctor Type 
+
+
+	async function getDoctorTypes() {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/doctortype/list`;
+			let resp = await axios.get(myUrl);
+			setDoctorTypeArray(resp.data);
+		} catch (e) {
+			console.log(e)
+			alert.error(`Error fetching doctor type`);
+			setDoctorTypeArray([]);
+		}
+	}
+	
+	function handleAddDoctorType() {
+		setEmurName("");
+		setIsDrawerOpened("ADDDT")
+	}
+
+	function handleEditDoctorType(d) {
+		setEmurData(d);
+		setEmurName(d.name);
+		setIsDrawerOpened("EDITDT")
+	}
+
+	async function handleAddEditDoctorType() {
+		if (isDrawerOpened === "ADDDT") {
+			try {
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/doctortype/add/${emurName}`);
+				let tmpArray = [resp.data].concat(doctorTypeArray);
+				setDoctorTypeArray(lodashSortBy(tmpArray, 'name'));
+				setIsDrawerOpened("");
+			} catch(e) {
+				alert.error(`Error adding docgtor type ${emurName}`);
+			}
+		} else {
+			try {
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/doctortype/edit/${emurData.name}/${emurName}`);
+				let tmpArray = doctorTypeArray.filter(x => x.name !== emurData.name);
+				tmpArray.push(resp.data);
+				setDoctorTypeArray(lodashSortBy(tmpArray, 'name'));
+				setIsDrawerOpened("");
+			} catch(e) {
+				alert.error(`Error update docgtor type ${emurDate.name}`);
+			}
+		}
+
+	}
+
+	function handleCancelDoctorType(d) {
+		let msg = `Are you sure you want to cancel doctor type ${d.name}?`;
+		vsDialog("Delete Doctor type", msg,
+		{label: "Yes", onClick: () => handleCancelDoctorTypeConfirm(d) },
+		{label: "No" }
+		);		
+	}
+
+	async function handleCancelDoctorTypeConfirm(d) {
+		try {
+			axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/doctortype/delete/${d.name}`);
+			setDoctorTypeArray(doctorTypeArray.filter(x => x.name !== d.name));
+		} catch(e) {
+			alert.error(`Error deleting docgtor type ${d.name}`);
+		}
+	}
+
+
+	function DisplayAllDoctorType() {
+		//console.log(doctorTypeArray);
+	return (
+	<Grid className={classes.noPadding} key="PATHDR" container >
+	{doctorTypeArray.map( (d, index) =>
+		<Grid key={"DT"+index} item xs={3} sm={3} md={3} lg={3} >
+		<Box  align="left" className={gClasses.boxStyle} borderColor="black" borderRadius={15} border={1}>
+			<span className={gClasses.patientInfo2}>{d.name}</span>
+			<span className={gClasses.patientInfo2}>
+				<EditIcon color="primary"onClick={() => handleEditDoctorType(d)} />
+				<CancelIcon color="secondary" onClick={() => handleCancelDoctorType(d)} />			
+			</span>
+		</Box>
+		</Grid>	
+
+	)}
+	</Grid>
+	)}
+
+
+	//------------ Add on Type 
+
+
+	async function getAddOnTypes() {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/addon/list`;
+			let resp = await axios.get(myUrl);
+			setAddOnTypeArray(resp.data);
+		} catch (e) {
+			console.log(e)
+			alert.error(`Error fetching add on type`);
+			setAddOnTypeArray([]);
+		}
+	}
+	
+	function handleAddAddOnType() {
+		setEmurName("");
+		setIsDrawerOpened("ADDADDON")
+	}
+
+	function handleEditAddOnType(d) {
+		setEmurData(d);
+		setEmurName(d.name);
+		setIsDrawerOpened("EDITADDON")
+	}
+
+	async function handleAddEditAddOnType() {
+		let docList = 0xFFFFFFFF;
+		if (isDrawerOpened === "ADDADDON") {
+			try {
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/add/${emurName}/${docList}`);
+				let tmpArray = [resp.data].concat(addOnTypeArray);
+				setAddOnTypeArray(lodashSortBy(tmpArray, 'name'));
+				setIsDrawerOpened("");
+			} catch(e) {
+				alert.error(`Error adding add on type ${emurName}`);
+			}
+		} else {
+			try {
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/edit/${emurData.name}/${emurName}/${docList}`);
+				let tmpArray = addOnTypeArray.filter(x => x.name !== emurData.name);
+				tmpArray.push(resp.data);
+				setAddOnTypeArray(lodashSortBy(tmpArray, 'name'));
+				setIsDrawerOpened("");
+			} catch(e) {
+				alert.error(`Error update add on type ${emurDate.name}`);
+			}
+		}
+
+	}
+
+	function handleCancelAddOnType(d) {
+		let msg = `Are you sure you want to cancel add on type ${d.name}?`;
+		vsDialog("Delete Add on type", msg,
+		{label: "Yes", onClick: () => handleCancelAddOnTypeConfirm(d) },
+		{label: "No" }
+		);		
+	}
+
+	async function handleCancelAddOnTypeConfirm(d) {
+		try {
+			axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/delete/${d.name}`);
+			setAddOnTypeArray(addOnTypeArray.filter(x => x.name !== d.name));
+		} catch(e) {
+			alert.error(`Error deleting add on type ${d.name}`);
+		}
+	}
+
+
+	function DisplayAllOnType() {
+		//console.log(doctorTypeArray);
+	return (
+	<Grid className={classes.noPadding} key="PATHDR" container >
+	{addOnTypeArray.map( (d, index) =>
+		<Grid key={"DT"+index} item xs={3} sm={3} md={3} lg={3} >
+		<Box  align="left" className={gClasses.boxStyle} borderColor="black" borderRadius={15} border={1}>
+			<span className={gClasses.patientInfo2}>{d.name}</span>
+			<span className={gClasses.patientInfo2}>
+				<EditIcon color="primary"onClick={() => handleEditAddOnType(d)} />
+				<CancelIcon color="secondary" onClick={() => handleCancelAddOnType(d)} />			
+			</span>
+		</Box>
+		</Grid>	
+
+	)}
+	</Grid>
+	)}
+
+
+
+	//-----------------------------------------
+
+	//--
 	function DisplayCustomerList() {
 	return (	
 	<Box className={classes.allAppt} width="100%">
@@ -680,16 +902,30 @@ export default function Customer() {
 
 	return (
   <div className={gClasses.webPage} align="center" key="main">
-		<DisplayPageHeader headerName="Customer" groupName="" tournament=""/>
+	<DisplayPageHeader headerName="Customer" groupName="" tournament=""/>
 	<Container component="main" maxWidth="lg">
 	<CssBaseline />
-	{(newRecharge) &&
-		<DisplayRecharge />
+	<DisplayFunctionHeader />
+	{(currentSelection === "DoctorType") &&
+		<div>
+		<VsButton align="right" name="Add new Doctor Type" onClick={handleAddDoctorType} />
+		<DisplayAllDoctorType/>
+		</div>
 	}
-	{(!newCustomer) &&
-		<VsButton align="right" name="Add new CUstomer" onClick={handleAddCUstomer} />
+	{(currentSelection === "AddOn") &&
+		<div>
+		<VsButton align="right" name="Add new Add on Type" onClick={handleAddAddOnType} />
+		<DisplayAllOnType/>
+		</div>
 	}
-	<DisplayCustomerList />
+	{(currentSelection === "Customer") &&
+		<div>
+		{(!newCustomer) &&
+			<VsButton align="right" name="Add new CUstomer" onClick={handleAddCUstomer} />
+		}
+		<DisplayCustomerList />
+		</div>
+	}	
 	<Drawer className={classes.drawer} anchor="right" variant="temporary"	open={isDrawerOpened !== ""} >
 	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
@@ -788,6 +1024,38 @@ export default function Customer() {
 			<ShowResisterStatus/>
       <BlankArea/>
 			<VsButton align="center" name={(isDrawerOpened === "ADDCUST" ? "Add" : "Update")} type="submit" />
+			<ValidComp />  
+    </ValidatorForm>
+	}
+	{((isDrawerOpened === "ADDDT") || (isDrawerOpened === "EDITDT")) &&
+			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditDoctorType}>
+			<Typography className={classes.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Doctor Type"}</Typography>
+			<TextValidator required fullWidth label="Doctor Type" className={gClasses.vgSpacing}
+				value={emurName}
+				onChange={(event) => setEmurName(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+			<BlankArea />
+			<ShowResisterStatus/>
+      <BlankArea/>
+			<VsButton align="center" name={(isDrawerOpened === "ADDDT" ? "Add" : "Update")} type="submit" />
+			<ValidComp />  
+    </ValidatorForm>
+	}
+	{((isDrawerOpened === "ADDADDON") || (isDrawerOpened === "EDITADDON")) &&
+			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditAddOnType}>
+			<Typography className={classes.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Add On Type"}</Typography>
+			<TextValidator required fullWidth label="Add On Type" className={gClasses.vgSpacing}
+				value={emurName}
+				onChange={(event) => setEmurName(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+			<BlankArea />
+			<ShowResisterStatus/>
+      <BlankArea/>
+			<VsButton align="center" name={(isDrawerOpened === "ADDADDON" ? "Add" : "Update")} type="submit" />
 			<ValidComp />  
     </ValidatorForm>
 	}

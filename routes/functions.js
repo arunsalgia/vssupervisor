@@ -4,23 +4,6 @@ const ankitsecretKey = process.env.ankitsecretKey;
 const iv = process.env.iv;           //crypto.randomBytes(16);
 
 
-const FeeDetails = [
-  {amount: 500, bonusPercent: 5},
-  {amount: 400, bonusPercent: 5},
-  {amount: 300, bonusPercent: 5},
-  {amount: 200, bonusPercent: 5},
-  {amount: 100, bonusPercent: 5},
-  {amount: 0,   bonusPercent: 0}
-];
-  
-const BonusDetails = [
-  {amount: 500, bonusPercent: 5},
-  {amount: 400, bonusPercent: 5},
-  {amount: 300, bonusPercent: 5},
-  {amount: 200, bonusPercent: 5},
-  {amount: 100, bonusPercent: 5},
-  {amount: 0,   bonusPercent: 0}
-];
 
 //zTvzr3p67VC61jmV54rIYu1545x4TlY
 let debugTest = true;
@@ -36,10 +19,7 @@ var mailOptions =  {
 
 
 var arun_user={};
-var arun_group={};
-var arun_groupMember={};
-var arun_auction={};
-var arun_tournament={};
+var arun_customer=[];
 var arun_master=[];
 
 const encrypt = (text) => {
@@ -110,61 +90,7 @@ const dbToSvrText = (text) => {
     return xxx;
   }
 
-async function nommalPasswordsendCricMail (dest, mailSubject, mailText) {
 
-  //console.log(`Destination is ${dest}`);
-  var transporter = nodemailer.createTransport({
-    service: 'gmail',
-	  port: 587,
-	  secure: false, // true for 465, false for other ports
-    auth: {
-      user: APLEMAILID,
-      pass: 'Anob@1989#93'
-    }
-  });
-
-  var mailOptions = {
-    from: APLEMAILID,
-    to: '',
-    subject: '',
-    text: ''
-  };
-
-  console.log("About to start");
-  mailOptions.to = dest;
-  mailOptions.subject = mailSubject;
-  mailOptions.text = mailText;
-
-  console.log(mailOptions.to);
-  console.log(mailOptions.subject);
-  console.log(mailOptions.text.length);
-  console.log(`About to send email`);
-  try {
-    let response = await transporter.sendMail(mailOptions);
-    console.log(response);
-    return ({status: true, error: 'Email Successfully sent'});
-  } catch (e) {
-    console.log("error sending email");
-    console.log(e);
-    return ({status: false, error: 'error sending Email'});
-  }
-  // how to handle error. don't know may be use try/catch 
-  /***
-  transporter.sendMail(mailOptions, function(error, info){
-	console.log('insertBefore');
-    if (error) {
-      console.log(error);
-	  return ({status: false, error: error});
-      //senderr(603, error);
-    } else {
-      console.log('Email sent: ' + info.response);
-	  return ({status: true, error: info.response});
-      //sendok('Email sent: ' + info.response);
-    }
-  });
-  console.log('udi baba');
-  ***/
-} 
 
 async function sendCricMail (dest, mailSubject, mailText) {
 
@@ -229,8 +155,31 @@ function akshuUpdUser(userRec) {
   arun_user[userRec.uid] = userRec;
 } 
 
+async function akshuGetCustomer(cid) {
+  // let suid = uid.toString();
 
+  if (arun_customer.length === 0) {
+    arun_customer = await M_Customer.find({});
+  }
+  let retUser = arun_customer.find(x => x.cid === cid);
+  return retUser;
+} 
 
+async function akshuUpdateCustomer(cidData) {
+  arun_customer = arun_customer.filter(x => x.cid !== cidData.cid);
+  arun_customer.push(cidData);
+  await cidData.save();
+} 
+
+async function akshuAddCustomer(cidData) {
+  arun_customer.push(cidData);
+  await cidData.save();;
+} 
+
+async function akshuDeleteCustomer(cidData) {
+  arun_customer = arun_customer.filter(x => x.cid !== cidData.cid);
+  await M_Customer.deleteOne({cid: cidData});
+} 
 
 async function getMaster(key) {
   let retVal =  arun_master.find(x => x.msKey === key);
@@ -434,6 +383,8 @@ module.exports = {
   // update
   akshuUpdUser,
   // delete
+  // customer
+  akshuGetCustomer, akshuAddCustomer, akshuUpdateCustomer, akshuDeleteCustomer,
   getUserBalance,
 	rechargeCount,
 	numberDate, intToString,
@@ -443,3 +394,5 @@ module.exports = {
 	setOldPendingAppointment,
 	generateOrder, generateOrderByDate,
 }; 
+
+// mongodb+srv://pdhsamaj:YkEW2W4RBLyNsvo0@pdhs.drlqk.mongodb.net/test

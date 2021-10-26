@@ -1,3 +1,4 @@
+
 require('dotenv').config()
 express = require('express');
 path = require('path');
@@ -83,6 +84,8 @@ treattypeRouter = require('./routes/treattype');
 dentalTreatmentRouter = require('./routes/dentaltreatment');
 profChargeRouter = require('./routes/profcharge');
 docxRouter = require('./routes/docx');
+addOnRouter = require('./routes/addon');
+doctorTypeRouter = require('./routes/doctortype')
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -132,6 +135,8 @@ app.use('/treattype', treattypeRouter);
 app.use('/dentaltreatment', dentalTreatmentRouter);
 app.use('/profcharge', profChargeRouter);
 app.use('/docx', docxRouter);
+app.use('/addon', addOnRouter);
+app.use('/doctortype', doctorTypeRouter);
 
 
 
@@ -398,6 +403,21 @@ PaymentSchema = mongoose.Schema({
   fee: Number,
 });
 
+DoctorTypeSchema = mongoose.Schema({
+	dtin: Number,
+	name: String,
+	enabled: Boolean
+});
+
+AddOnSchema = mongoose.Schema({
+	aid: Number,
+	name: String,
+	// Which doctor type can use this add on
+	// 0xFFFFFFFF indicate all types of doctors
+	doctorType: Number,			
+	enabled: Boolean
+});
+
 // models
 User = mongoose.model("user", UserSchema);
 M_Medicine = mongoose.model('Medicine', MedicineSchema);
@@ -421,6 +441,11 @@ M_DentalTreatment = mongoose.model('dentaltreatment', DentalTreatmentSchema);
 M_ProfCharge = mongoose.model('profcharge', ProfessionalChargesSchema);
 M_Investigation = mongoose.model('investigations', InvestigationSchema);
 M_Payment = mongoose.model('payment', PaymentSchema);
+M_AddOn = mongoose.model('addon', AddOnSchema);
+M_DoctorType = mongoose.model('doctortype', DoctorTypeSchema);
+
+
+
 router = express.Router();
 
 db_connection = false;      // status of mongoose connection
@@ -609,5 +634,6 @@ MINUTESTR = [
 ];
 
 // module.exports = app;
+ALLDOCTORS = 0xFFFFFFFF;
 
 MAGICNUMBER = 99999;

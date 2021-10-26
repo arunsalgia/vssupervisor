@@ -18,7 +18,7 @@ router.get('/list', async function(req, res, next) {
 	for(let i=0; i<rec.length; ++i) {
 		rec[i].email = dbToSvrText(rec[i].email);
 	}
-	console.log(rec);
+	//console.log(rec);
 	sendok(res, rec);
 });
 
