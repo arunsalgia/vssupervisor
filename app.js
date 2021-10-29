@@ -16,7 +16,7 @@ Razorpay = require("razorpay");
 fs = require('fs');
 axios = require('axios');
 multer = require('multer');
-
+unirest = require('unirest');
 
 app = express();
 
@@ -86,6 +86,8 @@ profChargeRouter = require('./routes/profcharge');
 docxRouter = require('./routes/docx');
 addOnRouter = require('./routes/addon');
 doctorTypeRouter = require('./routes/doctortype')
+festivalRouter = require('./routes/festival');
+const { smsRouter } = require('./routes/sms');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -137,7 +139,8 @@ app.use('/profcharge', profChargeRouter);
 app.use('/docx', docxRouter);
 app.use('/addon', addOnRouter);
 app.use('/doctortype', doctorTypeRouter);
-
+app.use('/festival', festivalRouter);
+app.use('/sms', smsRouter);
 
 
 //Schema
@@ -418,6 +421,36 @@ AddOnSchema = mongoose.Schema({
 	enabled: Boolean
 });
 
+FestivalSchema = mongoose.Schema({
+  date: Number,
+	month: Number,
+	year: Number,
+	festivalDate: Date,
+	desc: String,
+	greeting: String,
+	pack1: Boolean,
+	pack2: Boolean,
+	pack3: Boolean
+});
+
+SmsConfigSchema = mongoose.Schema({
+	cid: String,
+	bulkSmsPack: Boolean,
+	birthDayPack: Boolean,
+	festivalPack1: Boolean,
+	festivalPack2: Boolean,
+	festivalPack3: Boolean
+});
+
+SmsLogSchema = mongoose.Schema({
+	cid: String,
+	month: Number,
+	year: Number,
+	bulkSmsCount: Number,
+	birthDayCount: Number,
+	festivalCount: Number,
+});
+
 // models
 User = mongoose.model("user", UserSchema);
 M_Medicine = mongoose.model('Medicine', MedicineSchema);
@@ -443,7 +476,9 @@ M_Investigation = mongoose.model('investigations', InvestigationSchema);
 M_Payment = mongoose.model('payment', PaymentSchema);
 M_AddOn = mongoose.model('addon', AddOnSchema);
 M_DoctorType = mongoose.model('doctortype', DoctorTypeSchema);
-
+M_Festival = mongoose.model('festival', FestivalSchema);
+M_SmsConfig = mongoose.model('smsconfig', SmsConfigSchema);
+M_SmsLog = mongoose.model('smslog', SmsLogSchema);
 
 
 router = express.Router();
@@ -465,8 +500,9 @@ SENDSOCKET = 2;     // send data on socket
 // Error messages
 DBERROR = 990;
 DBFETCHERR = 991;
-CRICFETCHERR = 992;
-ERR_NODB = "No connection to CricDream database";
+ERR_NODB = 992;
+PLANEXIREDERR = 993;
+//ERR_NODB = "No connection to CricDream database";
 
 allUSER = 99999999;
 serverTimer = 0;
@@ -637,3 +673,8 @@ MINUTESTR = [
 ALLDOCTORS = 0xFFFFFFFF;
 
 MAGICNUMBER = 99999;
+
+today = new Date();
+todayDate = today.getDate();
+todayMonth = today.getMonth();
+todayYear = today.getFullYear();

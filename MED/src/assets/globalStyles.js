@@ -138,6 +138,9 @@ const globalStyles = makeStyles((theme) => ({
 		//backgroundColor: 'green',
 		//backgroundColor: blue[300] 
 	},
+  noPadding: {
+    padding: "none", 
+  },
   greenboxStyle: {
 		padding: "5px 10px", 
 		margin: "4px 2px", 
@@ -293,19 +296,25 @@ const globalStyles = makeStyles((theme) => ({
     fontWeight: theme.typography.fontWeightBold,
   },
   th: { 
-    spacing: 0,
+    border: 5,
     align: "center",
     padding: "none",
-    backgroundColor: '#EEEEEE',
-    color: deepOrange[700],
-    fontWeight: theme.typography.fontWeightBold,
+		fontSize: theme.typography.pxToRem(13),
+		fontWeight: theme.typography.fontWeightBold,
+		//backgroundColor: '#FFA726',
+		backgroundColor: deepOrange[200],
+		borderWidth: 1,
+		borderColor: 'black',
+		borderStyle: 'solid',
   },
   td : {
-    spacing: 0,
-    // border: 5,
+    border: 5,
     align: "center",
     padding: "none",
-    height: 10,
+    backgroundColor: blue[100],
+    borderWidth: 1,
+    borderColor: 'black',
+    borderStyle: 'solid',    
   },
   upArrowCardCategory: {
     width: "16px",

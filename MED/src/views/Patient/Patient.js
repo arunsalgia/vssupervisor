@@ -247,14 +247,13 @@ const yesNoModal = dynamicModal('60%');
 //function setSearchText(sss) { searchText = sss;}
 
 var userCid;
-var customerData = JSON.parse(sessionStorage.getItem("customerData"));
+var customerData;
 
 export default function Patient() {
 	//const history = useHistory();	
   const classes = useStyles();
 	const gClasses = globalStyles();
 	const alert = useAlert();
-	//customerData = sessionStorage.getItem("customerData");
 
 	const [searchText, setSearchText] = useState("");
 	//const [isBirthday, setIsBirthday] = useState(false);
@@ -287,7 +286,21 @@ export default function Patient() {
 	
   useEffect(() => {
 		const us = async () => {
+			
 			try {
+				console.log("starting");
+				console.log(sessionStorage.getItem("userType"));
+				if (sessionStorage.getItem("userType") !== "Developer") {
+					console.log("starting JSON");
+					customerData = JSON.parse(sessionStorage.getItem("customerData"));
+					console.log("starting axios");
+					console.log(userCid);
+					let rrr =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/patient/checkexpiry/${userCid}`);
+					console.log("over axios");
+					if (rrr.data.status) return alert.error('Plan has expired');
+				} else {
+					customerData = {type: "Developer"};
+				}
 				//console.log("in try");
 				let ppp = JSON.parse(localStorage.getItem("vdBkpPatients"+userCid));
 				setPatientMasterArray(ppp);
@@ -304,7 +317,6 @@ export default function Patient() {
 			}
 		}
 		userCid = sessionStorage.getItem("cid");
-		//sessionStorage.setItem("YESNOMODAL", "");
 		us();
   }, [])
 
@@ -647,7 +659,7 @@ export default function Patient() {
 			<DisplayPatientHeader patient={currentPatientData} />
 			<DisplayFunctionHeader />
 			<Divider className={gClasses.divider} /> 
-			{((currentSelection === "Treatment") && (true)) &&
+			{((currentSelection === "Treatment") &&  (customerData.type === "Dentist")) &&
 				<DentalTreatment patient={currentPatientData} />
 			}
 			{((currentSelection === "Treatment") && (customerData.type !== "Dentist")) &&

@@ -3,7 +3,11 @@ const {
 	checkDate,
 	dbToSvrText,
 	svrToDbText,
+	akshuClearCustomer,
+	akshuGetCustomer,
 } = require('./functions');
+
+const { sendAppointmentSms, sendExpirySms,  } = require("./sms");
 
 router.use('/', function(req, res, next) {
   setHeader(res);
@@ -34,13 +38,14 @@ router.get('/getinfo/:cid', async function(req, res, next) {
 router.get('/add/:userName', async function(req, res, next) {
   setHeader(res);
 	var {userName} = req.params;
-	
+
 	let rec = new M_Customer();
 	rec.name = userName;
 	rec.plan = "YEARLY"
 	rec.expiryDate = new Date(2030, 12, 31);
 	rec.enabled = true;
 	rec.save();
+	akshuClearCustomer();
 	sendok(res, "done");
 });
 
@@ -97,6 +102,7 @@ router.get('/update/:custData', async function(req, res, next) {
 
 	
 	await rec.save();
+	akshuClearCustomer();
 
 	rec.email = dbToSvrText(rec.email);
 	sendok(res, rec);
@@ -110,6 +116,7 @@ router.get('/setworkinghours/:cid/:workingHours', async function(req, res, next)
 	let rec = await M_Customer.findOne({_id: cid});
 	rec.workingHours = JSON.parse(workingHours);
 	rec.save();
+	akshuClearCustomer();
 	sendok(res, rec);
 })
 
@@ -140,7 +147,10 @@ cron.schedule('5 0 * * *', async () => {
 	
 	let today = new Date();
 	console.log(today);
-		
+	let tDate = today.getDate();
+	let tMonth = today.getMonth();
+	let tYear = today.getFullYear();
+
 	// STEP 1 ---> check if  expiry for any customer
 	console.log("Check for expiry");
 	let allCustomers = await M_Customer.find({});
@@ -159,10 +169,12 @@ cron.schedule('5 0 * * *', async () => {
 	//console.log(chkOrder);
 	
 	let allOldPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: chkOrder} } );	
+	//console.log(allOldPendingAppts);
 	for(let i=0; i<allOldPendingAppts.length; ++i) {
+		//console.log(allOldPendingAppts[i]);
+		sendExpirySms(allOldPendingAppts[i].cid, allOldPendingAppts[i].pid);
 		allOldPendingAppts[i].visit = VISITTYPE.expired;
 		allOldPendingAppts[i].save();
-		//console.log(allOldPendingAppts[i].apptTime, allOldPendingAppts[i].order);
 	}
 	
 	// STEP 3 ---> all visits to be closed
@@ -207,7 +219,59 @@ cron.schedule('5 0 * * *', async () => {
 		myRec.save();
 	}
 	
+	// STEP 7 ---> Declare all pending appointment of today (technically yesterday) as expired 
+	// and inform patient about expiry
+
+
+/*
+	// STEP 6 ---> Send festival greetings
+	// find out if today is festival
+	let rec = await M_Festival.findOne({date: tDate, tMonth: tYear});
+	if (rec) {
+		// today is festival. So find out all customers who have subscribed festial pack
+
+		let smsScribedCustomers = await M_SmsConfig({$or:[ { festivalPack1: true }, { festivalPack2: true }, { festivalPack2: true } ] });
+		for(let c=0; c<smsScribedCustomers.length; ++c) {
+			let cRec = akshuGetCustomer(smsScribedCustomers[c]);
+			let count = 0;
+			let myPatientList = await M_Patient.find({cid: cRec._id});
+			for(let p=0; p<myPatientList.length; ++p) {
+				let pRec = myPatientList[p];
+				if (pRec.mobile >= 1000000000) {
+					// must be mobile number
+					let sts = sendSms();
+					if (sts) count++
+				}
+			}
+		}
+
+	}
+
+	// STEP 7 ---> Send Briday greetings
+	// find out patient who have birthday
+	let sDate = new Date(tYear, tMonth, tDate, 0, 0, 0, 0);
+	let eDate = new Date(tYear, tMonth, tDate+1, 0, 0, 0, 0);
 	
+	let birthDayList = await M_Patient.find({dob: {$gte: sDate, $lt: eDate} });
+	// find out list of unique customers
+	let cidList = _.map(birthDayList, 'cid');
+	cidList = _.uniqBy(cidList); 
+	for(let c=0; c<cidList.length; ++c) {
+		if (await birthdayPackSubscribed(cidList[c])) {
+			let count = 0;
+			let myPatientList = _.filter(birthDayList, x => x.cid == cidList[c]);
+			for(let p=0; p<myPatientList.length; ++p) {
+				let pRec = myPatientList[p];
+				if (pRec.mobile >= 1000000000) {
+					// must be mobile number
+					let sts = sendSms();
+					if (sts) count++
+				}
+			}
+		}
+	}
+*/
+
 	// Last Step ---> update age based on date of birth
 	// will be done of 1st of every month
 	if (today.getDate() === 1) {

@@ -151,17 +151,20 @@ async function akshuGetUser(uid) {
   return(retUser);
 } 
 
+function akshuClearCustomer() {
+  arun_customer = [];
+}
+
 function akshuUpdUser(userRec) {
   arun_user[userRec.uid] = userRec;
 } 
 
 async function akshuGetCustomer(cid) {
-  // let suid = uid.toString();
-
   if (arun_customer.length === 0) {
+    console.log("A;; customer readomh-------------------");
     arun_customer = await M_Customer.find({});
   }
-  let retUser = arun_customer.find(x => x.cid === cid);
+  let retUser = arun_customer.find(function(post) { if(post._id == cid) return true; });
   return retUser;
 } 
 
@@ -369,6 +372,28 @@ async function setOldPendingAppointment(cid, pid, newStatus) {
 	}
 }
 
+function compareDate(d1, d2) {
+	if (d1.getFullYear() < d2.getFullYear()) return -1;
+	if (d1.getFullYear() > d2.getFullYear()) return 1;
+	
+	if (d1.getMonth() < d2.getMonth()) return -1;
+	if (d1.getMonth() > d2.getMonth()) return 1;
+	
+	if (d1.getDate() < d2.getDate()) return -1;
+	if (d1.getDate() > d2.getDate()) return 1;
+	return 0;
+};
+
+async function checkCustomerExpiry(cid) {
+  let myRec = await akshuGetCustomer(cid);
+  let sts = 0;
+  if (myRec) {
+    sts = compareDate(new  Date(), myRec.expiryDate);
+  }
+  return sts > 0;
+}
+
+
 module.exports = {
 	ALPHABETSTR,
   getLoginName, getDisplayName,
@@ -384,7 +409,7 @@ module.exports = {
   akshuUpdUser,
   // delete
   // customer
-  akshuGetCustomer, akshuAddCustomer, akshuUpdateCustomer, akshuDeleteCustomer,
+  akshuGetCustomer, akshuAddCustomer, akshuUpdateCustomer, akshuDeleteCustomer, akshuClearCustomer,
   getUserBalance,
 	rechargeCount,
 	numberDate, intToString,
@@ -393,6 +418,7 @@ module.exports = {
 	getNewPid, getCustomerNumber,
 	setOldPendingAppointment,
 	generateOrder, generateOrderByDate,
+  checkCustomerExpiry,
 }; 
 
 // mongodb+srv://pdhsamaj:YkEW2W4RBLyNsvo0@pdhs.drlqk.mongodb.net/test

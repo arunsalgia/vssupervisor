@@ -7,7 +7,7 @@ const { encrypt, decrypt, dbencrypt, dbdecrypt, dbToSvrText,
   svrToDbText, getLoginName, getDisplayName, 
 	sendCricMail, sendCricHtmlMail,
   akshuGetUser, akshuUpdUser,
-  getMaster, setMaster,
+  getMaster, setMaster, akshuGetCustomer,
 } = require('./functions'); 
 
 
@@ -453,10 +453,11 @@ router.get('/jaijinendra/:uName/:uPassword', async function (req, res, next) {
 		isValid = (uPassword === uRec.password);
 		//console.log(isValid);
   }
-	
+	 
   if (isValid) {
 		//let myDoctor = await M_Doctor.findOne({cid: uRec.cid});
-		let myCustomer = await M_Customer.findOne({_id: uRec.cid});
+		//let myCustomer = await M_Customer.findOne({_id: uRec.cid});
+    let myCustomer = await akshuGetCustomer(uRec.cid);
 		sendok(res, {user: uRec, customer: myCustomer});
 		//sendok(res, "OK");
 		console.log("Done");

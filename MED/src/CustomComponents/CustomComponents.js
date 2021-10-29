@@ -683,7 +683,7 @@ export function DisplayBalance (props) {
   const classes = useStyles();
   return (
   <div>
-    <Typography align="right" className={classes.balance} >{`Wallet balance: ${props.wallet}`}</Typography>
+    <Typography align="right" className={classes.balance} >{`Wallet balance: ${props.balance}`}</Typography>
   </div>
   );
 }
@@ -1004,6 +1004,45 @@ return (
 	</Box>
 )}
 
+export function DisplayCustomerBox(props) {
+	const gClasses = globalStyles();
+	let _button1 = (props.button1 == null);
+	let _button2 = (props.button2 == null);
+	let _button3 = (props.button3 == null);
+	let _button4 = (props.button4 == null);
+	let _button5 = (props.button5 == null);
+	return (
+	<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<div align="center" >
+		<Typography >
+		<span className={gClasses.patientName} >{props.customer.doctorName+" ("+props.customer.type+")"}</span>
+		</Typography>
+		</div>
+		<div align="left" >
+		<Typography > 
+			<span className={gClasses.patientInfo2}>{props.customer.clinicName}</span>
+		</Typography>
+		<Typography onClick={props.onClick} > 
+			<span className={gClasses.patientInfo}>Email: </span>
+			<span className={gClasses.patientInfo2}>{dispEmail(props.customer.email)}</span>
+		</Typography>
+		<Typography onClick={props.onClick} > 
+			<span className={gClasses.patientInfo}>Mob.: </span>
+			<span className={gClasses.patientInfo2}>{dispMobile(props.customer.mobile)}</span>
+		</Typography>
+		<BlankArea />
+		</div>
+		<div align="right">
+		{(!_button1) && props.button1}
+		{(!_button2) && props.button2}
+		{(!_button3) && props.button3}
+		{(!_button4) && props.button4}
+		{(!_button5) && props.button5}
+		</div>
+	</Box>
+	)}
+
+
 export function DisplayHolidayDetails(props) {
 	const gClasses = globalStyles();
 	
@@ -1314,3 +1353,37 @@ return (
 </Grid>	
 </Box>
 )}	
+
+export function DisplayCustomerHeader(props) {
+	const gClasses = globalStyles();	
+	let patRec = props.customer;
+	//let isBirthday = checkIfBirthday(patRec.dob);
+	//console.log(patRec);
+	return (
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
+	<Grid className={gClasses.noPadding} key="AllPatients" container align="left">
+		<Grid key={"PAT0"} item xs={12} sm={6} md={3} lg={3} >
+			<Typography>
+				<span className={gClasses.patientInfo2Green}>{patRec.doctorName}</span>
+			</Typography>
+		</Grid>
+		<Grid key={"PAT1"} item xs={12} sm={6} md={3} lg={3} >
+			<Typography>
+				<span className={gClasses.patientInfo2Green}>{patRec.clinicName}</span>
+			</Typography>
+		</Grid>
+		<Grid key={"PAT2"} item xs={12} sm={6} md={3} lg={3} >
+			<Typography>
+				<span className={gClasses.patientInfo}>Email: </span>
+				<span className={gClasses.patientInfo2Green}>{dispEmail(patRec.email)}</span>
+			</Typography>
+		</Grid>		
+		<Grid key={"PAT3"} item xs={12} sm={6} md={3} lg={3} >
+			<Typography>
+				<span className={gClasses.patientInfo}>Mob.: </span>
+				<span className={gClasses.patientInfo2Green}>{dispMobile(patRec.mobile)}</span>
+			</Typography>
+		</Grid>	
+	</Grid>	
+	</Box>
+	)}

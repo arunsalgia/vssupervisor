@@ -5,7 +5,7 @@ const {
 	svrToDbText, dbToSvrText,
 	dbencrypt, dbdecrypt,
 	getMaster, setMaster,
-	getNewPid, getCustomerNumber,
+	getNewPid, getCustomerNumber, checkCustomerExpiry,
 } = require('./functions'); 
 
 router.use('/', function(req, res, next) {
@@ -40,6 +40,16 @@ function getAge(birthDate)
     }
     return age;
 }
+
+router.get('/checkexpiry/:cid', async function(req, res, next) {
+  setHeader(res);
+  
+  var {cid} = req.params;
+	let tmp = await checkCustomerExpiry(cid);
+	let mRec = {status: tmp};
+	sendok(res, mRec);
+});
+
 
 router.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {
   setHeader(res);
@@ -280,6 +290,8 @@ router.get('/listbypid/:cid/:pid', async function(req, res, next) {
   
   var { cid, pid } = req.params;
 	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	var allPatient = await getPatient({cid: cid, pid: Number(pid), enabled: true});
 	sendok(res, allPatient);
 });
@@ -288,6 +300,8 @@ router.get('/listbyname/:cid/:partid', async function(req, res, next) {
   setHeader(res);
   
   var { cid, partid } = req.params;
+	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
 	
 	partid = getLoginName(partid);
 	var allPatient = await getPatient({ cid: cid, name: { $regex: partid, $options: "i" }, enabled: true });
@@ -298,6 +312,9 @@ router.get('/list/:cid', async function(req, res, next) {
   setHeader(res);
   var {cid} = req.params;
 	
+	//console.log(cid);
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	var allPatient = await getPatient({cid: cid, enabled: true})
 	sendok(res, allPatient);
 });
@@ -306,6 +323,8 @@ router.get('/alphabetlist/:cid/:myChar', async function(req, res, next) {
   setHeader(res);
   
   var { cid, myChar } = req.params;
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	myChar = myChar.toUpperCase( );
 	let allPatient = await M_Patient.find({name: new RegExp('^'+myChar, "i"), cid: cid, enabled: true }).sort({name: 1});
 	allPatient = emailForClient(allPatient);
@@ -315,6 +334,8 @@ router.get('/alphabetlist/:cid/:myChar', async function(req, res, next) {
 router.get('/count/:cid', async function(req, res, next) {
   setHeader(res);
 	var { cid } = req.params;
+	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
 	
 	let myQuery, test;
 	myQuery = [		//example
@@ -341,6 +362,8 @@ router.get('/filter/:cid/:partname', async function(req, res, next) {
   
   var { cid, partname } = req.params;
 	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	let myQuery = { name: { $regex: partname, $options: "i" }, cid: cid, enabled: true };		
 	let allPatient = await M_Patient.find(myQuery).sort({'name': 1});
 	allPatient = emailForClient(allPatient);
@@ -351,6 +374,8 @@ router.get('/filter/:cid', async function(req, res, next) {
   setHeader(res);
   var {cid} = req.params;
 	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	let myQuery = { enabled: true, cid: cid };
 	let allPatient = await M_Patient.find(myQuery).sort({'name': 1});
 	allPatient = emailForClient(allPatient);
@@ -360,6 +385,8 @@ router.get('/filter/:cid', async function(req, res, next) {
 router.get('/visitcount/:cid/:pid', async function(req, res, next) { 
   setHeader(res);
   var {cid, pid} = req.params;
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	pid = Number(pid);
 	let p, c, o;
 

@@ -387,8 +387,8 @@ router.get('/balance/:userCid', async function (req, res, next) {
   setHeader(res);
 
   var { userCid } = req.params;
-  var tmp = await getUserBalance(userCid);
-  // console.log(tmp);  
+  var tmp = await getUserBalance(userCid); 
+  //console.log(tmp);
   sendok(res, tmp);
 }); 
 

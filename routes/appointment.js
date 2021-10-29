@@ -3,7 +3,11 @@ const {  akshuGetUser, GroupMemberCount,
 	numberDate, 
 	generateOrder, generateOrderByDate,
 	setOldPendingAppointment,
+	checkCustomerExpiry,
 } = require('./functions'); 
+
+const { sendAppointmentSms } = require("./sms");
+
 var router = express.Router();
 
 function getOrderNumber(year, month, date, hours, minutes) {
@@ -92,12 +96,17 @@ router.get('/add/:cid/:apptdata', async function (req, res) {
 	hRec.visit = newData.visit;
 	
 	hRec.save();
+
+	await sendAppointmentSms(cid, newData.pid, newData.apptTime)
 	sendok(res, hRec);
 });	
 
 router.get('/list/date/:cid/:year/:month/:date', async function (req, res) {
   setHeader(res);
   var {cid, date, month, year } = req.params;
+
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	
 	publishAppointments(res, {cid: cid, date: Number(date), month: Number(month), year: Number(year)})
 });		
@@ -113,6 +122,9 @@ router.get('/test/:cid/:pid', async function (req, res) {
 router.get('/pendinglist/date/:cid/:year/:month/:date/:days', async function (req, res) {
   setHeader(res);
   var {cid, date, month, year, days } = req.params;
+
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+
 	let iDate = Number(date);
 	let iMonth = Number(month);
 	let iYear = Number(year);
@@ -139,6 +151,8 @@ router.get('/list/pid/:cid/:pid', async function (req, res) {
   setHeader(res);
   var { cid, pid } = req.params;
 	//console.log(cid, pid);
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	publishAppointments(res, { cid: cid, pid: Number(pid) })
 });		
 
@@ -146,12 +160,16 @@ router.get('/pendinglist/pid/:cid/:pid', async function (req, res) {
   setHeader(res);
   var { cid, pid } = req.params;
 	//console.log(cid, pid);
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	publishAppointments(res, { cid: cid, pid: Number(pid), visit: VISITTYPE.pending})
 });		
 
 router.get('/pendinglist/date/:cid/:year/:month/:date', async function (req, res) {
   setHeader(res);
   var {cid, date, month, year } = req.params;
+	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
 	
 	publishAppointments(res, { cid: cid, visit: VISITTYPE.pending, date: Number(date), month: Number(month), year: Number(year)})
 });		
@@ -160,12 +178,16 @@ router.get('/list/month/:cid/:year/:month', async function (req, res) {
   setHeader(res);
   var {cid, month, year } = req.params;
 	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	publishAppointments(res, {cid: cid, month: Number(month), year: Number(year)})
 });		
 
 router.get('/list/year/:cid/:year', async function (req, res) {
   setHeader(res);
   var { cid, year } = req.params;
+	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
 	
 	publishAppointments(res, {cid: cid, year: Number(year)});
 });		
@@ -174,12 +196,16 @@ router.get('/list/all/:cid', async function (req, res) {
   setHeader(res);
 	var {cid} = req.params;
 	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
+	
 	publishAppointments( res, {cid: cid} );
 });		
 
 router.get('/list/all/fromtoday/:cid', async function (req, res) {
   setHeader(res);
 	var {cid} = req.params;
+	
+	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
 	
 	let thisTime = new Date();
 	//thisTime = new Date(thisTime.getFullYear(), thisTime.getMonth(), thisTime.getDate(), 0, 0, 0);

@@ -2,73 +2,60 @@ import React, {useEffect, useState, createContext }  from 'react';
 import axios from "axios";
 import Drawer from '@material-ui/core/Drawer';
 import lodashSortBy from "lodash/sortBy"
+import lodashCloneDeep from 'lodash/cloneDeep';
 import { useAlert } from 'react-alert';
 
-import Link from '@material-ui/core/Link';
-import TextField from '@material-ui/core/TextField';
 import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import SwitchBtn from '@material-ui/core/Switch';
-import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 import Grid from "@material-ui/core/Grid";
-import GridItem from "components/Grid/GridItem.js";
+
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import Radio from '@material-ui/core/Radio';
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import moment from "moment";
  import VsCancel from "CustomComponents/VsCancel";
  import VsButton from "CustomComponents/VsButton";
- 
-import {setTab} from "CustomComponents/CricDreamTabs.js"
+ import VsCheckBox from "CustomComponents/VsCheckBox";
+
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-import Avatar from "@material-ui/core/Avatar"
-//import validator from 'validator'
+
 
 // styles
 import globalStyles from "assets/globalStyles";
 
-import {DisplayPageHeader, ValidComp, BlankArea, DisplayYesNo,
-DisplayPatientDetails,
+import {DisplayPageHeader, ValidComp, BlankArea, DisplayCustomerBox, DisplayCustomerHeader, DisplayBalance,
 } from "CustomComponents/CustomComponents.js"
 
-import { LeakRemoveTwoTone, LensTwoTone } from '@material-ui/icons';
+
 
 
 //colors 
+/*
 import { 
 red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen,
 } from '@material-ui/core/colors';
-
-import { 
-	isMobile, dispEmail,
-	getOnlyDate,
-	vsDialog,
-} from "views/functions.js";
-import { disablePastDt } from 'views/functions';
-import { encrypt } from 'views/functions';
+*/
 
 
+import { dispEmail, disablePastDt, vsDialog,  encrypt} from 'views/functions';
+import { DATESTR, MONTHNUMBERSTR } from 'views/globals';
+import { dispMobile } from 'views/functions';
+
+
+/*
 const useStyles = makeStyles((theme) => ({
 	root: {
 		width: '100%',
@@ -306,16 +293,16 @@ const useStyles = makeStyles((theme) => ({
 		borderStyle: 'solid',
 	},
 }));
-
+*/
 
 export default function Customer() {
-  const classes = useStyles();
+  //const classes = useStyles();
 	const gClasses = globalStyles();
 	const alert = useAlert();
 
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
 
-	const [custNUmber, setCustNumber] = useState(0);
+	const [custNumber, setCustNumber] = useState(0);
 	const [referalCode, setReferalCode] = useState("");
 	const [doctorName, setDoctorName] = useState("");
 	const [doctorType, setDoctorType] = useState("");
@@ -328,13 +315,12 @@ export default function Customer() {
 	const [custAddr3, setCustAddr3] = useState("");
 	const [custLocation, setCustLocation] = useState("");
 	const [custPinCode, setCustPinCode] = useState(0);
-	const [custExpiry, setCustExpiry] = useState(new Date());
+	const [emurDate1, setEmurDate1] = useState(moment());
 	const [custCommission, setCustCommission] = useState(10);
 
 	const [custFee, setCustFee] = useState(1000);
 	const [registerStatus, setRegisterStatus] = useState(0);
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
+
 
 
 	
@@ -344,20 +330,33 @@ export default function Customer() {
 	const [customerArray, setCustomerArray] = useState([]);
 	const [customerData, setCustomerData] = useState({});
 	const [newRecharge, setNewRecharge] = useState(false);
-	const [newCustomer, setNewCustomer] = useState(false);
 	const [radioRecharge, setRadioRecharge] = useState("MONTHLY");
 
 	const [currentSelection, setCurrentSelection] = useState("");
+	const [currentCustomerSelection, setCurrentCustomerSelection] = useState("");
+
+	const [balance, setBalance] = useState(0);
+	const [currentCustomer, setCurrentCustomer] = useState("");
+	const [currentCustomerData, setCurrentCustomerData] = useState({});
 	
-	const [radioUserType, setRadioUserType] = useState("Doctor");
-	const [radioCustomerPlan, setRadioCustomerPlan] = useState("MONTHLY");
+	const [smsconfig, setSmsconfig] = useState({});
+
 
 	const [emurData, setEmurData] = useState({});
-	const [emurName, setEmurName] = useState("");
+	const [emurText1, setEmurText1] = useState("");
+	const [emurText2, setEmurText2] = useState("");
+	const [emurCb1, setEmurCb1] = useState(false);
+	const [emurCb2, setEmurCb2] = useState(false);
+	const [emurCb3, setEmurCb3] = useState(false);
+	const [emurCb4, setEmurCb4] = useState(false);
+	const [emurCb5, setEmurCb5] = useState(false);
+	
 
 	const [doctorTypeArray, setDoctorTypeArray] = useState([]);
 	const [addOnTypeArray, setAddOnTypeArray] = useState([]);
-	
+	const [festivalArray, setFestivalArray] = useState([]);
+
+
   useEffect(() => {	
 		const getAllCustomers = async () => {		
 			try {
@@ -380,6 +379,8 @@ export default function Customer() {
 		} else 		if (item === "AddOn") {
 			await getDoctorTypes();
 			await getAddOnTypes();
+		} else if (item === "Festival") {
+			await getFestivalDates();
 		}
 		setCurrentSelection(item);
 	}
@@ -399,20 +400,278 @@ export default function Customer() {
 		)}
 
 	function DisplayFunctionHeader() {
-		return (
-		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-		<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
-			<DisplayFunctionItem item="DoctorType"  match={currentSelection} onClick={setSummaryMainSelect} />
-			<DisplayFunctionItem item="AddOn"  match={currentSelection}  onClick={setSummaryMainSelect} />
-			<DisplayFunctionItem item="Customer"  match={currentSelection}  onClick={setSummaryMainSelect} />
-		</Grid>	
-		</Box>
-		)}
-	function handleSelectCustomer(rec) {
-		sessionStorage.setItem("cid", rec._id);
-		sessionStorage.setItem("customerData", JSON.stringify(rec));
+	return (
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
+		<DisplayFunctionItem item="DoctorType"  match={currentSelection} onClick={setSummaryMainSelect} />
+		<DisplayFunctionItem item="AddOn"  match={currentSelection}  onClick={setSummaryMainSelect} />
+		<DisplayFunctionItem item="Festival"  match={currentSelection} onClick={setSummaryMainSelect} />
+		<DisplayFunctionItem item="Customer"  match={currentSelection}  onClick={setSummaryMainSelect} />
+	</Grid>	
+	</Box>
+	)}
+
+	async function getSMSConfig(cid) {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/sms/getconfig/${cid}`;
+			let resp = await axios.get(myUrl);
+			setSmsconfig(resp.data);
+		} catch (e) {
+			console.log(e)
+			alert.error(`Error fetching SMS subscription `);
+			setSmsconfig({});
+		}
+	}
+
+	function handleEditSmsConfig() {
+		setEmurCb1(smsconfig.bulkSmsPack);
+		setEmurCb2(smsconfig.birthDayPack);
+		setEmurCb3(smsconfig.festivalPack1);
+		setEmurCb4(smsconfig.festivalPack2);
+		setEmurCb5(smsconfig.festivalPack3);
+		setIsDrawerOpened("EDITSMSCONFIG");
+	}
+
+	async function handleAddEditSmsConfig() {
+		let tmpConfig = lodashCloneDeep(smsconfig);
+		tmpConfig.bulkSmsPack = emurCb1;
+		tmpConfig.birthDayPack = emurCb2;
+		tmpConfig.festivalPack1 = emurCb3;
+		tmpConfig.festivalPack2 = emurCb4;
+		tmpConfig.festivalPack3 = emurCb5;
+		//console.log(tmpConfig);
+		try {
+			let myData = JSON.stringify(tmpConfig);
+			//console.log(myData);
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/sms/setconfig/${currentCustomerData._id}/${myData}`;
+			await axios.get(myUrl);
+			setSmsconfig(tmpConfig);
+			setIsDrawerOpened("");
+			alert.success("Succes. Now charge/refund in the wallet as per new SMS configuration");
+		} catch (e) {
+			console.log(e)
+			alert.error(`Error updateing SMS subscription `);
+			//setSmsconfig({});
+		}
 	}
 	
+	function DisplaySmsConfig() {
+	return (
+		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+			<VsButton align="right" name="Edit SMS Config" onClick={handleEditSmsConfig} />
+			<DisplaySingleLine msg1="Bulk SMS Pack" msg2={(smsconfig.bulkSmsPack) ? "Yes" : "No"} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Birthday Pack" msg2={(smsconfig.birthDayPack) ? "Yes" : "No"} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Festival Pack 1" msg2={(smsconfig.festivalPack1) ? "Yes" : "No"} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Festival Pack 2" msg2={(smsconfig.festivalPack2) ? "Yes" : "No"} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Festival Pack 3" msg2={(smsconfig.festivalPack3) ? "Yes" : "No"} />
+		</Box>	
+	)}
+
+	async function setSummaryCustomerSelect(item) {
+		if (item === "Sms") {
+			await getSMSConfig(currentCustomerData._id);
+		}
+		setCurrentCustomerSelection(item)
+	}
+
+
+	function DisplayCustomerFunctionHeader() {
+	return (
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
+		<DisplayFunctionItem item="Details"  match={currentCustomerSelection} onClick={setSummaryCustomerSelect} />
+		<DisplayFunctionItem item="Sms"  match={currentCustomerSelection}  onClick={setSummaryCustomerSelect} />
+		<DisplayFunctionItem item="AddOn"  match={currentCustomerSelection} onClick={setSummaryCustomerSelect} />
+		<DisplayFunctionItem item="Recharge"  match={currentCustomerSelection}  onClick={setSummaryCustomerSelect} />
+	</Grid>	
+	</Box>
+	)}
+	
+
+	async function getWalletBalance(cid) {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${cid}`;
+			let resp = await axios.get(myUrl);
+			setBalance(resp.data.wallet);
+		} catch (e) {
+			console.log(e)
+			alert.error(`Error fetching balance `);
+			setBalance(0);
+		}
+	}
+
+	async function handleSelectCustomer(rec) {
+		await getWalletBalance(rec._id);
+		setCurrentCustomerData(rec);
+		setCurrentCustomer(rec.name);
+	}
+	
+	// --------------- Festival
+
+	async function getFestivalDates() {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/festival/list`;
+			let resp = await axios.get(myUrl);
+			setFestivalArray(resp.data);
+		} catch (e) {
+			console.log(e)
+			alert.error(`Error fetching festival `);
+			setFestivalArray([]);
+		}
+	}
+
+
+
+
+	async function handleAddEditFestivalDate() {
+		console.log(emurDate1);
+		if (!emurCb1 && !emurCb2 && !emurCb3) return setRegisterStatus(1001);
+
+		let d = emurDate1.toDate();
+		let myMonth = d.getMonth();
+		let myYear = d .getFullYear();
+		let myDate = d.getDate();
+		let dateStr = myYear + MONTHNUMBERSTR[myMonth] + DATESTR[myDate];
+		console.log(myDate, myMonth, myYear);
+		let tmp = festivalArray.find(x => x.date === myDate && x.month === myMonth && x.year === myYear);
+		if (tmp) return setRegisterStatus(1002);
+		try {
+			let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/festival/add/${dateStr}/${emurText1}/${emurText2}/${emurCb1}/${emurCb2}/${emurCb3}`);
+			let tmpArray = [resp.data].concat(festivalArray);
+			setFestivalArray(lodashSortBy(tmpArray, 'year', 'month', 'date'));
+			setIsDrawerOpened("");
+		} catch(e) {
+			alert.error(`Error adding festival date ${emurText1}`);
+		}
+	}
+
+	async function handleCancelFestivalDate(a) {
+		//alert.info("To be implemented");
+		let dateStr = `${a.year}${MONTHNUMBERSTR[a.month]}${DATESTR[a.date]}`;
+		try {
+			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/festival/del/${dateStr}`);
+			setFestivalArray(festivalArray.filter(x => x.date !== a.date || x.month !== a.month || x.year !== a.year));
+		} catch(e) {
+			alert.error(`Error deleteing festival ${a.desc}`);
+		}		
+	}
+
+	function addNewFestivalDate() {
+		let t = moment();
+		console.log(t);
+		setEmurDate1(t);
+		setEmurText1("");
+		setEmurText2("");
+		setEmurCb1(true);
+		setEmurCb2(false);
+		setEmurCb3(false);
+		setRegisterStatus(0);
+		setIsDrawerOpened("ADDFESTIVALDATE")
+
+	}
+
+
+	function DisplayFestivalDates() {
+	return (	
+	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={15} border={1}>
+			<TableContainer>
+			<Table style={{ width: '100%' }}>
+			<TableHead>
+				<TableRow align="center">
+					<TableCell key={"TH1"} colSpan={7} component="th" scope="row" align="center" padding="none"
+					className={gClasses.th} >
+					Festival Dates
+					</TableCell>
+				</TableRow>
+				<TableRow align="center">
+					<TableCell key={"TH21"} component="th" scope="row" align="center" padding="none"
+					className={gClasses.th} >
+					Date
+					</TableCell>
+					<TableCell key={"TH22"} component="th" scope="row" align="center" padding="none"
+					className={gClasses.th} >
+						Description
+					</TableCell>
+					<TableCell key={"TH23"} component="th" scope="row" align="center" padding="none"
+					className={gClasses.th} >
+						Greeting
+					</TableCell>
+					<TableCell key={"TH31"} component="th" scope="row" align="center" padding="none"
+					className={gClasses.th} >
+						Pack1
+					</TableCell>
+					<TableCell key={"TH32"} component="th" scope="row" align="center" padding="none"
+					className={gClasses.th} >
+						Pack2
+					</TableCell>
+					<TableCell key={"TH33"} component="th" scope="row" align="center" padding="none"
+					className={gClasses.th} >
+						Pack3
+					</TableCell>
+					<TableCell key={"TH41"} component="th" scope="row" align="center" padding="none"
+					className={gClasses.th} >
+					</TableCell>
+				</TableRow>
+			</TableHead>
+			<TableBody>  
+			{festivalArray.map( (a, index) => {
+				let myDate = `${DATESTR[a.date]}/${MONTHNUMBERSTR[a.month]}/${a.year}`;
+				return(
+					<TableRow key={"TROW"+index}>
+					<TableCell key={"TD1"+index} component="td" scope="row" padding="none"
+					className={gClasses.td} >
+						<Typography align="center"  className={gClasses.patientInfo2}>
+							{myDate}
+						</Typography>
+					</TableCell>
+					<TableCell key={"TD2"+index} component="td" scope="row" padding="none"
+					className={gClasses.td} >
+						<Typography className={gClasses.patientInfo2}>
+							{a.desc}
+						</Typography>
+					</TableCell>
+					<TableCell key={"TD3"+index} component="td" scope="row" padding="none"
+					className={gClasses.td} >
+						<Typography className={gClasses.patientInfo2}>
+							{a.greeting}
+						</Typography>
+					</TableCell>
+					<TableCell key={"TD4"+index} align="center" component="td" scope="row" padding="none"
+					className={gClasses.td} >
+						<Typography align="center" className={gClasses.patientInfo2}>
+							{(a.pack1) ? "Yes" : ""}
+						</Typography>
+					</TableCell>
+					<TableCell key={"TD5"+index} align="center" component="td" scope="row" padding="none"
+					className={gClasses.td} >
+						<Typography align="center" className={gClasses.patientInfo2}>
+							{(a.pack2) ? "Yes" : ""}
+						</Typography>
+					</TableCell>
+					<TableCell key={"TD6"+index} align="center" component="td" scope="row" padding="none"
+					className={gClasses.td} >
+						<Typography align="center" className={gClasses.patientInfo2}>
+							{(a.pack3) ? "Yes" : ""}
+						</Typography>
+					</TableCell>
+					<TableCell key={"TD11"+index} align="center" component="td" scope="row" padding="none"
+					className={gClasses.td} >
+						<div align="center" >
+						<CancelIcon color="secondary" size="small" onClick={() => handleCancelFestivalDate(a)}  />
+						</div>
+					</TableCell>
+					</TableRow>
+				)}
+			)}
+			</TableBody> 
+			</Table>
+			</TableContainer>
+		</Box>	
+	)}
 	//------------ Doctor Type 
 
 
@@ -429,29 +688,29 @@ export default function Customer() {
 	}
 	
 	function handleAddDoctorType() {
-		setEmurName("");
+		setEmurText1("");
 		setIsDrawerOpened("ADDDT")
 	}
 
 	function handleEditDoctorType(d) {
 		setEmurData(d);
-		setEmurName(d.name);
+		setEmurText1(d.name);
 		setIsDrawerOpened("EDITDT")
 	}
 
 	async function handleAddEditDoctorType() {
 		if (isDrawerOpened === "ADDDT") {
 			try {
-				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/doctortype/add/${emurName}`);
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/doctortype/add/${emurText1}`);
 				let tmpArray = [resp.data].concat(doctorTypeArray);
 				setDoctorTypeArray(lodashSortBy(tmpArray, 'name'));
 				setIsDrawerOpened("");
 			} catch(e) {
-				alert.error(`Error adding docgtor type ${emurName}`);
+				alert.error(`Error adding docgtor type ${emurText1}`);
 			}
 		} else {
 			try {
-				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/doctortype/edit/${emurData.name}/${emurName}`);
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/doctortype/edit/${emurData.name}/${emurText1}`);
 				let tmpArray = doctorTypeArray.filter(x => x.name !== emurData.name);
 				tmpArray.push(resp.data);
 				setDoctorTypeArray(lodashSortBy(tmpArray, 'name'));
@@ -484,7 +743,7 @@ export default function Customer() {
 	function DisplayAllDoctorType() {
 		//console.log(doctorTypeArray);
 	return (
-	<Grid className={classes.noPadding} key="PATHDR" container >
+	<Grid className={gClasses.noPadding} key="PATHDR" container >
 	{doctorTypeArray.map( (d, index) =>
 		<Grid key={"DT"+index} item xs={3} sm={3} md={3} lg={3} >
 		<Box  align="left" className={gClasses.boxStyle} borderColor="black" borderRadius={15} border={1}>
@@ -517,13 +776,13 @@ export default function Customer() {
 	}
 	
 	function handleAddAddOnType() {
-		setEmurName("");
+		setEmurText1("");
 		setIsDrawerOpened("ADDADDON")
 	}
 
 	function handleEditAddOnType(d) {
 		setEmurData(d);
-		setEmurName(d.name);
+		setEmurText1(d.name);
 		setIsDrawerOpened("EDITADDON")
 	}
 
@@ -531,16 +790,16 @@ export default function Customer() {
 		let docList = 0xFFFFFFFF;
 		if (isDrawerOpened === "ADDADDON") {
 			try {
-				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/add/${emurName}/${docList}`);
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/add/${emurText1}/${docList}`);
 				let tmpArray = [resp.data].concat(addOnTypeArray);
 				setAddOnTypeArray(lodashSortBy(tmpArray, 'name'));
 				setIsDrawerOpened("");
 			} catch(e) {
-				alert.error(`Error adding add on type ${emurName}`);
+				alert.error(`Error adding add on type ${emurText1}`);
 			}
 		} else {
 			try {
-				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/edit/${emurData.name}/${emurName}/${docList}`);
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/edit/${emurData.name}/${emurText1}/${docList}`);
 				let tmpArray = addOnTypeArray.filter(x => x.name !== emurData.name);
 				tmpArray.push(resp.data);
 				setAddOnTypeArray(lodashSortBy(tmpArray, 'name'));
@@ -573,7 +832,7 @@ export default function Customer() {
 	function DisplayAllOnType() {
 		//console.log(doctorTypeArray);
 	return (
-	<Grid className={classes.noPadding} key="PATHDR" container >
+	<Grid className={gClasses.noPadding} key="PATHDR" container >
 	{addOnTypeArray.map( (d, index) =>
 		<Grid key={"DT"+index} item xs={3} sm={3} md={3} lg={3} >
 		<Box  align="left" className={gClasses.boxStyle} borderColor="black" borderRadius={15} border={1}>
@@ -593,96 +852,28 @@ export default function Customer() {
 
 	//-----------------------------------------
 
-	//--
-	function DisplayCustomerList() {
-	return (	
-	<Box className={classes.allAppt} width="100%">
-			<TableContainer>
-			<Table style={{ width: '100%' }}>
-			<TableHead>
-				<TableRow align="center">
-					<TableCell key={"TH1"} colSpan={7} component="th" scope="row" align="center" padding="none"
-					className={classes.th} >
-					Customer List
-					</TableCell>
-				</TableRow>
-				<TableRow align="center">
-					<TableCell key={"TH21"} component="th" scope="row" align="center" padding="none"
-					className={classes.th} >
-					Customer Name
-					</TableCell>
-					<TableCell key={"TH22"} component="th" scope="row" align="center" padding="none"
-					className={classes.th} >
-						Plan Type
-					</TableCell>
-					<TableCell key={"TH23"} component="th" scope="row" align="center" padding="none"
-					className={classes.th} >
-					Expiry Date
-					</TableCell>
-					<TableCell colSpan={4} key={"TH31"} component="th" scope="row" align="center" padding="none"
-					className={classes.th} >
-					cmds
-					</TableCell>
-				</TableRow>
-			</TableHead>
-			<TableBody>  
-			{customerArray.map( (a, index) => {
-				let myExpiry = getOnlyDate(a.expiryDate);
-				let myClass = (a.enabled) ? classes.tdPending : classes.tdCancel;
-				return(
-					<TableRow key={"TROW"+index}>
-					<TableCell key={"TD1"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={myClass}>
-						<Typography className={classes.apptName}>
-							{a.name}
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD2"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={myClass}>
-						<Typography className={classes.apptName}>
-							{a.plan}
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD3"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={myClass}>
-						<Typography className={classes.apptName}>
-							{myExpiry}
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD11"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={myClass}>
-						<Typography className={classes.link}>
-							<Link href="#" variant="body2" disabled={a.enabled === false} onClick={() => {handleSelectCustomer(a) }}>Select</Link>
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD12"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={myClass}>
-						<Typography className={classes.link}>
-						<Link href="#" variant="body2" disabled={a.enabled === false}  onClick={() => {setCustomerData(a); setNewExpiry(a.expiryDate); setRadioRecharge(""); setNewRecharge(true); }}>Recharge</Link>
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD13"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={myClass}>
-						<Typography className={classes.link}>
-							<Link href="#" variant="body2" onClick={() => {handleEnable(a)}}>{"Set " + ((a.enabled) ? "Disable" : "Enable")}</Link>
-						</Typography>
-					</TableCell>
-					<TableCell key={"TD14"+index} align="center" component="td" scope="row" align="center" padding="none"
-						className={myClass}>
-								<IconButton className={gClasses.blue} size="small" onClick={() => {handleEditCustomer(a)}}  >
-									<EditIcon  />
-								</IconButton>
-					</TableCell>
-					</TableRow>
-				)}
-			)}
-			</TableBody> 
-			</Table>
-			</TableContainer>
-		</Box>	
-	)}
+
 	
-	async function handleEnable(rec) {
+	function DisplayCustomerList() {
+		return (	
+			<Grid className={gClasses.noPadding} key="AllPatients" container alignItems="center" >
+			{customerArray.map( (m, index) => 
+				<Grid key={"PAT"+m.name} item xs={12} sm={6} md={3} lg={3} >
+				<DisplayCustomerBox customer={m}
+					button1={
+						<VisibilityIcon className={gClasses.blue} size="small" onClick={() => handleSelectCustomer(m) } />
+					}
+					button2={
+						<EditIcon className={gClasses.blue} size="small" onClick={() => handleEditCustomer(m) } />
+					}					
+				/>
+				</Grid>
+				)}
+			</Grid>	
+			)}
+
+
+		async function handleEnable(rec) {
 		let tmpArray = [].concat(customerArray);
 		let tmp = tmpArray.find(x => x._id === rec._id);
 		tmp.enabled = !tmp.enabled;
@@ -700,31 +891,7 @@ export default function Customer() {
 		setRadioRecharge(newRadio);
 	}
 	
-	function DisplayRecharge() {
-	if (!customerData.enabled) return null;
-	return (	
-		<Box className={classes.tdPending} width="100%">
-			<VsCancel align="right" onClick={() => {setNewRecharge(false)}} />
-			<Typography className={classes.title}>{"Recharge of "+customerData.name}</Typography>
-			<BlankArea />
-			<FormControl component="fieldset">
-				{/*<FormLabel component="legend">Filter on</FormLabel>*/}
-				<RadioGroup row aria-label="radioselection" name="radioselection" value={radioRecharge} 
-					onChange={() => {handleRecharge(event.target.value); }}
-				>
-					<FormControlLabel className={classes.filterRadio} value="LIFETIME" control={<Radio color="primary"/>} label="Lifetime" />
-					<FormControlLabel className={classes.filterRadio} value="YEARLY"   control={<Radio color="primary"/>} label="Yearly" />
-					<FormControlLabel className={classes.filterRadio} value="MONTHLY"  control={<Radio color="primary"/>} label="Monthly" />
-				</RadioGroup>
-			</FormControl>
-			<BlankArea />
-			<Typography className={classes.title}>{"Current Expiry: "+getOnlyDate(customerData.expiryDate)}</Typography>
-			<BlankArea />
-			<Typography className={classes.title}>{"Next    Expiry: "+getOnlyDate(newExpiry)}</Typography>
-			<BlankArea />
-			<VsButton name="Update Expiry" />
-		</Box>
-	)}
+
 	
 	function addNewCustomerSubmit() {
 		alert.show("New Customer to be added");
@@ -751,7 +918,13 @@ export default function Customer() {
       case 603:
         myMsg = "Email id already in use";
         break;
-      default:
+			case 1001:
+				myMsg = "Festival date should be part of atleast 1 Pack";
+				break;
+			case 1002:
+					myMsg = "Selected festival date already added";
+					break;
+			default:
           myMsg = "Unknown Error";
           break;
     }
@@ -762,7 +935,9 @@ export default function Customer() {
     )
   }
 
-	function handleAddCUstomer() {
+	async function handleAddCustomer() {
+		await getDoctorTypes();
+
 		setCustNumber(0);
 		setReferalCode("");
 		setDoctorName("");
@@ -782,7 +957,7 @@ export default function Customer() {
 
 		let d = new Date();
 		d.setYear(d.getFullYear()+1);
-		setCustExpiry(moment(d));
+		setEmurDate1(moment(d));
 
 		setCustCommission(10);
 
@@ -838,9 +1013,9 @@ export default function Customer() {
 
 		setCustFee(c.fee);
 
-		let d = new Date();
-		d.setYear(d.getFullYear()+1);
-		setCustExpiry(moment(d));
+		//let d = new Date();
+		//d.setYear(d.getFullYear()+1);
+		setEmurDate1(moment(c.expiryDate));
 
 		setIsDrawerOpened("EDITCUST");	
 	}
@@ -848,7 +1023,7 @@ export default function Customer() {
 	async function handleAddEditCustomer() {
 	//	console.log("In add edit")
 		let tmp = {
-			customerNumber: custNUmber,
+			customerNumber: custNumber,
 			name: custName,
 			type: doctorType,
 			email: encrypt(custEmail),
@@ -871,7 +1046,7 @@ export default function Customer() {
 			plan: "YEARLY",
 			fee: custFee,
 
-			expiryDate: custExpiry,
+			expiryDate: emurDate1,
 		}
 
 		let myData = encodeURIComponent(JSON.stringify(tmp));
@@ -880,12 +1055,13 @@ export default function Customer() {
 			//console.log(resp.data);
 			let tmpArray;
 			let oldName = "";
-			if (custNUmber > 0) {
+			if (custNumber > 0) {
 				tmpArray = customerArray.filter(x => x.customerNumber !== resp.data.customerNumber);
 			} else {
 				tmpArray = [].concat(customerArray);
 			}
 			tmpArray.push(resp.data)
+			setCurrentCustomerData(resp.data);
 			setCustomerArray(lodashSortBy(tmpArray, 'customerNumber'));
 			alert.success(`Updated details of ${resp.data.name}`);
 			setIsDrawerOpened("");
@@ -895,9 +1071,53 @@ export default function Customer() {
 		}
 	}
 	
-	function handleDate(d) {
+	function DisplaySingleLine(props) {
+		return(
+			<Grid className={gClasses.noPadding} key={props.msg1+props.msg2} container align="center">
+			<Grid align="left"  item xs={4} sm={4} md={2} lg={2} >
+				<Typography className={gClasses.patientInfo2Blue}>{props.msg1}</Typography>
+			</Grid>	
+			<Grid align="left"  item xs={8} sm={8} md={10} lg={10} >
+				<Typography className={gClasses.patientInfo2}>{props.msg2}</Typography>
+			</Grid>	
+			</Grid>
+	
+		)} 
+
+		function DisplayCustomerDetails() {
+		return (
+		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+			<VsButton align="right" name="Edit Details" onClick={() => handleEditCustomer(currentCustomerData)} />
+			<DisplaySingleLine msg1="Name" msg2={currentCustomerData.name} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Doctor Name" msg2={currentCustomerData.doctorName} />
+			<DisplaySingleLine msg1="" msg2={currentCustomerData.type} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Clinic Name" msg2={currentCustomerData.clinicName} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Clinic Addres" msg2={currentCustomerData.addr1} />
+			<DisplaySingleLine msg1="" msg2={currentCustomerData.addr2} />
+			<DisplaySingleLine msg1="" msg2={currentCustomerData.addr3} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Mobile" msg2={dispMobile(currentCustomerData.mobile)} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Email" msg2={dispEmail(currentCustomerData.email)} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Location" msg2={currentCustomerData.location} />
+			<BlankArea />
+			<DisplaySingleLine msg1="Pin Code" msg2={currentCustomerData.pinCode} />
+			<BlankArea />
+		</Box>	
+		)}
+		
+
+	function DisplaySmsDetails() {
+
+	}
+
+	function handleDate1(d) {
 		//console.log(d);
-		setCustExpiry(d);
+		setEmurDate1(d);
 	}
 
 	return (
@@ -918,21 +1138,57 @@ export default function Customer() {
 		<DisplayAllOnType/>
 		</div>
 	}
+	{(currentSelection === "Festival") &&
+		<div>
+		<VsButton name="Add new Date" align="right" onClick={addNewFestivalDate} />
+		<DisplayFestivalDates />
+		</div>
+	}
 	{(currentSelection === "Customer") &&
 		<div>
-		{(!newCustomer) &&
-			<VsButton align="right" name="Add new CUstomer" onClick={handleAddCUstomer} />
+		{(currentCustomer === "") &&
+			<div>
+			<VsButton align="right" name="Add new Customer" onClick={handleAddCustomer} />
+			<DisplayCustomerList />
+			</div>
 		}
-		<DisplayCustomerList />
+		{(currentCustomer !== "") &&
+			<div>
+			<VsButton align="right" name="Back to Customer list" onClick={() => { setCurrentCustomer("")}} />
+			<DisplayCustomerHeader customer={currentCustomerData} />
+			<DisplayCustomerFunctionHeader />
+			{(currentCustomerSelection == "Details") &&
+				<DisplayCustomerDetails />
+			}
+			{(currentCustomerSelection == "Sms") &&
+			<div>
+			<DisplayBalance balance={balance} />
+			<DisplaySmsConfig />
+			</div>
+			}
+			{(currentCustomerSelection == "AddOn") &&
+			<div>
+			<DisplayBalance balance={balance} />
+			<Typography>AddOn</Typography>
+			</div>
+			}
+			{(currentCustomerSelection == "Recharge") &&
+			<div>
+			<DisplayBalance balance={balance} />
+			<Typography>Recharge</Typography>
+			</div>
+			}
+			</div>
+		}
 		</div>
 	}	
-	<Drawer className={classes.drawer} anchor="right" variant="temporary"	open={isDrawerOpened !== ""} >
+	<Drawer anchor="right" variant="temporary"	open={isDrawerOpened !== ""} >
 	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
 	{/* Add / edit new customer */}
 	{((isDrawerOpened === "ADDCUST") || (isDrawerOpened === "EDITCUST")) &&
 			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditCustomer}>
-			<Typography className={classes.title}>{((isDrawerOpened === "ADDCUST") ? "Add" : "Edit") + " Customer of Doctor Viraag"}</Typography>
+			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDCUST") ? "Add" : "Edit") + " Customer of Doctor Viraag"}</Typography>
 			<TextValidator fullWidth label="Referral Code" className={gClasses.vgSpacing}
 				value={referalCode}
 				onChange={(event) => setReferalCode(event.target.value)}
@@ -943,13 +1199,13 @@ export default function Customer() {
 				<Typography className={gClasses.vgSpacing}>Expiry Date</Typography>
 			</div>
 			<Datetime 
-				className={classes.dateTimeBlock}
-				inputProps={{className: classes.dateTimeNormal}}
+				className={gClasses.dateTimeBlock}
+				inputProps={{className: gClasses.dateTimeNormal}}
 				timeFormat={false} 
-				initialValue={custExpiry}
+				initialValue={emurDate1}
 				dateFormat="DD/MM/yyyy"
 				isValidDate={disablePastDt}
-				onClose={handleDate}
+				onClose={handleDate1}
 				closeOnSelect={true}
 			/>
 			<TextValidator required fullWidth label="Name of the Customer" className={gClasses.vgSpacing}
@@ -970,12 +1226,25 @@ export default function Customer() {
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
       />
-			<TextValidator required fullWidth label="Doctor's Specialisation" className={gClasses.vgSpacing}
+			{/*<TextValidator required fullWidth label="Doctor's Specialisation" className={gClasses.vgSpacing}
 				value={doctorType}
 				onChange={(event) => setDoctorType(event.target.value)}
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
-      />
+			/>*/}
+			<Typography>Doctor Type</Typography>
+			<Select labelId='Doctor Type' id='time' name="time" padding={10}
+			variant="outlined" required fullWidth label="Time" 
+			value={doctorType}
+			placeholder="Arun"
+			inputProps={{
+				name: 'Time',
+				id: 'filled-age-native-simple',
+			}}
+			onChange={(event) => setDoctorType(event.target.value)}
+			>
+			{doctorTypeArray.map(x =>	<MenuItem key={x.anme} value={x.name}>{x.name}</MenuItem>)}
+			</Select>
 			<TextValidator required fullWidth label="Address1" className={gClasses.vgSpacing}
 				value={custAddr1}
 				onChange={(event) => setCustAddr1(event.target.value)}
@@ -1029,10 +1298,10 @@ export default function Customer() {
 	}
 	{((isDrawerOpened === "ADDDT") || (isDrawerOpened === "EDITDT")) &&
 			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditDoctorType}>
-			<Typography className={classes.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Doctor Type"}</Typography>
+			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Doctor Type"}</Typography>
 			<TextValidator required fullWidth label="Doctor Type" className={gClasses.vgSpacing}
-				value={emurName}
-				onChange={(event) => setEmurName(event.target.value)}
+				value={emurText1}
+				onChange={(event) => setEmurText1(event.target.value)}
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
       />
@@ -1045,10 +1314,10 @@ export default function Customer() {
 	}
 	{((isDrawerOpened === "ADDADDON") || (isDrawerOpened === "EDITADDON")) &&
 			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditAddOnType}>
-			<Typography className={classes.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Add On Type"}</Typography>
+			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Add On Type"}</Typography>
 			<TextValidator required fullWidth label="Add On Type" className={gClasses.vgSpacing}
-				value={emurName}
-				onChange={(event) => setEmurName(event.target.value)}
+				value={emurText1}
+				onChange={(event) => setEmurText1(event.target.value)}
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
       />
@@ -1059,6 +1328,71 @@ export default function Customer() {
 			<ValidComp />  
     </ValidatorForm>
 	}
+	{((isDrawerOpened === "ADDFESTIVALPACK") || (isDrawerOpened === "EDITFESTIVALPACK")) &&
+		<ValidatorForm className={gClasses.form} onSubmit={handleAddEditFestivalPack}>
+		<Typography className={gClasses.title}>{((isDrawerOpened === "ADDFESTIVALPACK") ? "Add" : "Edit") + " Festival Pack"}</Typography>
+		<TextValidator required fullWidth label="Festival Pack Name" className={gClasses.vgSpacing}
+			value={emurText1}
+			onChange={(event) => setEmurText1(event.target.value)}
+			validators={['noSpecialCharacters']}
+			errorMessages={[`Special Characters not permitted`]}
+		/>
+		<BlankArea />
+		<ShowResisterStatus/>
+		<BlankArea/>
+		<VsButton align="center" name={(isDrawerOpened === "ADDFESTIVALPACK" ? "Add" : "Update")} type="submit" />
+		<ValidComp />  
+		</ValidatorForm>
+	}
+	{((isDrawerOpened === "ADDFESTIVALDATE") ) &&
+		<ValidatorForm className={gClasses.form} onSubmit={handleAddEditFestivalDate}>
+		<Typography className={gClasses.title}>{((isDrawerOpened === "ADDFESTIVALDATE") ? "Add" : "Edit") + " new date to Festival"}</Typography>
+		<Datetime 
+			className={gClasses.dateTimeBlock}
+			inputProps={{className: gClasses.dateTimeNormal}}
+			timeFormat={false} 
+			initialValue={emurDate1}
+			dateFormat="DD/MM/yyyy"
+			onClose={handleDate1}
+			closeOnSelect={true}
+		/>
+		<TextValidator required fullWidth label="Description" className={gClasses.vgSpacing}
+			value={emurText1}
+			onChange={(event) => setEmurText1(event.target.value)}
+			validators={['noSpecialCharacters']}
+			errorMessages={[`Special Characters not permitted`]}
+		/>
+		<TextValidator required fullWidth label="Greeting" className={gClasses.vgSpacing}
+			value={emurText2}
+			onChange={(event) => setEmurText2(event.target.value)}
+			validators={['noSpecialCharacters']}
+			errorMessages={[`Special Characters not permitted`]}
+		/>
+		<VsCheckBox label="Part of festival pack 1" align="left" checked={emurCb1} onClick={() => setEmurCb1(!emurCb1)} />
+		<VsCheckBox label="Part of festival pack 2" align="left" checked={emurCb2} onClick={() => setEmurCb2(!emurCb2)} />
+		<VsCheckBox label="Part of festival pack 3" align="left" checked={emurCb3} onClick={() => setEmurCb3(!emurCb3)} />
+		<BlankArea />
+		<ShowResisterStatus/>
+		<BlankArea/>
+		<VsButton align="center" name={(isDrawerOpened === "ADDFESTIVALDATE" ? "Add" : "Update")} type="submit" />
+		<ValidComp />  
+		</ValidatorForm>
+	}	
+	{((isDrawerOpened === "EDITSMSCONFIG") ) &&
+		<ValidatorForm className={gClasses.form} onSubmit={handleAddEditSmsConfig}>
+		<Typography className={gClasses.title}>{"Edit SMS subscription"}</Typography>
+		<VsCheckBox label="Bulk SMS pack" align="left" checked={emurCb1} onClick={() => setEmurCb1(!emurCb1)} />
+		<VsCheckBox label="Birthday Pack" align="left" checked={emurCb2} onClick={() => setEmurCb2(!emurCb2)} />
+		<VsCheckBox label="Festival pack 1" align="left" checked={emurCb3} onClick={() => setEmurCb3(!emurCb3)} />
+		<VsCheckBox label="Festival pack 2" align="left" checked={emurCb4} onClick={() => setEmurCb4(!emurCb4)} />
+		<VsCheckBox label="Festival pack 3" align="left" checked={emurCb5} onClick={() => setEmurCb5(!emurCb5)} />
+		<BlankArea />
+		<ShowResisterStatus/>
+		<BlankArea/>
+		<VsButton align="center" name={"Update"} type="submit" />
+		<ValidComp />  
+		</ValidatorForm>
+	}		
 	</Box>
 	</Drawer>		
 	</Container>

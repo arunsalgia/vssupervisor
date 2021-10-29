@@ -475,14 +475,28 @@ export default function Appointment() {
 	const [allTimeSlots, setAllTimeSlots] = useState([]);
 	
   useEffect(() => {	
+
+		userCid = sessionStorage.getItem("cid");
 		let PgetAllHolidays;
 		let PgetAllPendingAppointment;
 		let PgetAllMyPatients;
 		let PcheckFromPatient;
 		
-		customerData = JSON.parse(sessionStorage.getItem("customerData"));
-		userCid = sessionStorage.getItem("cid");
-		
+		//customerData = JSON.parse(sessionStorage.getItem("customerData"));
+		const getCustomerDetails  = async () => {
+			if (sessionStorage.getItem("userType") !== "Developer") {
+				console.log("starting JSON");
+				customerData = JSON.parse(sessionStorage.getItem("customerData"));
+				console.log("starting axios");
+				console.log(userCid);
+				let rrr =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/patient/checkexpiry/${userCid}`);
+				console.log("over axios");
+				if (rrr.data.status) return alert.error('Plan has expired');
+			} else {
+				customerData = {type: "Developer"};
+			}			
+		}
+
 		const getAllPendingAppointment  = async () => {
 			allPending = await reloadAppointmentDetails();
 		}
@@ -501,6 +515,12 @@ export default function Appointment() {
 			}
 		}
 		const getAllMyPatients  = async () => {
+			let rrr =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/patient/checkexpiry/${userCid}`);
+			if (rrr.data.status) {
+				alert.error('Plan has expired');
+				return [];
+			}
+	
 			let ppp = await getAllPatients(userCid);
 			return ppp;				
 		}
@@ -538,6 +558,7 @@ export default function Appointment() {
 		}	
 		
 		// fetch data 1 by 1 
+		getCustomerDetails();
 		PgetAllMyPatients = getAllMyPatients();
 		PgetAllHolidays = getAllHolidays();
 		PgetAllPendingAppointment = reloadAppointmentDetails();
