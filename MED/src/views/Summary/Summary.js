@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 //import TextField from '@material-ui/core/TextField';
-import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
+import { CssBaseline } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import axios from "axios";
 import Box from '@material-ui/core/Box';
@@ -51,11 +51,12 @@ import globalStyles from "assets/globalStyles";
 
 
 
-import {red, blue, yellow,  green, pink } from '@material-ui/core/colors';
 import { compareDate } from 'views/functions';
 
 
 const AVATARHEIGHT=4;
+
+/*
 const useStyles = makeStyles((theme) => ({
 	dateTime: {
 		color: 'blue',
@@ -191,7 +192,7 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
-
+*/
 
 
 var userCid;
@@ -205,7 +206,7 @@ const ZEROBALANCE = {billing: 0, payment: 0, due: 0};
 
 export default function Summary() {
 	//const history = useHistory();	
-  const classes = useStyles();
+ // const classes = useStyles();
 	const gClasses = globalStyles();
 	const alert = useAlert();
 	//customerData = sessionStorage.getItem("customerData");
@@ -225,6 +226,8 @@ export default function Summary() {
 	const [currentSelection, setCurrentSelection] = useState("");
 	const [currentDateWiseSelection, setCurrentDateWiseSelection] = useState("");
 	const [currentPatientWiseSelection, setCurrentPatientWiseSelection] = useState("");
+	const [currentPendingApptSelection, setCurrentPendingApptSelection] = useState("");
+
 	const [date1, setDate1] = useState(new Date());
 	const [date2, setDate2] = useState(new Date());
 
@@ -293,7 +296,7 @@ export default function Summary() {
 	function DisplayPatientVisit() {
 	return (
 	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
-	<Grid className={classes.noPadding} key="PATHDR" container justify="center" alignItems="center" >
+	<Grid className={gClasses.noPadding} key="PATHDR" container justify="center" alignItems="center" >
 	<Grid item xs={4} sm={4} md={2} lg={2} >
 		<Typography className={gClasses.patientInfo2Blue}>Date</Typography>
 	</Grid>
@@ -317,7 +320,7 @@ export default function Summary() {
 		let d = new Date(v.visitDate);
 		let myDate = `${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()} ${HOURSTR[d.getHours()]}:${MINUTESTR[d.getMinutes()]}`;
 		return (
-		<Grid className={classes.noPadding} key={"VISIT"+index} container justify="center" alignItems="center" >
+		<Grid className={gClasses.noPadding} key={"VISIT"+index} container justify="center" alignItems="center" >
 		<Grid item xs={4} sm={4} md={2} lg={2} >
 			<Typography className={gClasses.patientInfo2}>{myDate}</Typography>
 		</Grid>
@@ -344,7 +347,7 @@ export default function Summary() {
 		let totalDue = Math.abs(lodashSumBy(dueArray, 'due'));
 		return (
 		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
-		<Grid className={classes.noPadding} key="DUESHDR" container justify="center" alignItems="left" >
+		<Grid className={gClasses.noPadding} key="DUESHDR" container justify="center" alignItems="left" >
 			<Grid item xs={4} sm={4} md={4} lg={4} >
 				<Typography className={gClasses.patientInfo2Blue}>Name</Typography>
 			</Grid>
@@ -365,7 +368,7 @@ export default function Summary() {
 			let myPat = patientMasterArray.find(x => x.pid === v._id);
 			let myName = (myPat) ? myPat.displayName : "";
 			return (
-			<Grid className={classes.noPadding} key={"DUES"+index} container justify="center" alignItems="center" >
+			<Grid className={gClasses.noPadding} key={"DUES"+index} container justify="center" alignItems="center" >
 			<Grid item xs={4} sm={4} md={4} lg={4} >
 				<Typography className={gClasses.patientInfo2}>{myName}</Typography>
 			</Grid>
@@ -384,7 +387,7 @@ export default function Summary() {
 			</Grid>
 			)}
 		)}
-		<Grid className={classes.noPadding} key="DUESTTOAL" container justify="center" alignItems="center" >
+		<Grid className={gClasses.noPadding} key="DUESTTOAL" container justify="center" alignItems="center" >
 			<Grid item align="right" xs={10} sm={10} md={10} lg={10} >
 			<Typography className={gClasses.patientInfo2Green}>Total Dues</Typography>
 			</Grid>
@@ -425,6 +428,7 @@ export default function Summary() {
 		setCurrentPatientWiseSelection("");
 		setCurrentPatient("");
 		setCurrentPatientData({});
+		setCurrentPendingApptSelection("");
 		setCurrentSelection(item);
 	}
 	
@@ -471,6 +475,111 @@ export default function Summary() {
 		setCurrentDateWiseSelection(item);
 	}
 
+	async function handleDateWiseSelect(item) {
+		//validate start date and end date
+		if (compareDate(date1, date2) > 0) return alert.error('From date later than To date');
+
+		if (item === "Visit") {
+			let myFrom = date1.getFullYear() + MONTHNUMBERSTR[date1.getMonth()] + DATESTR[date1.getDate()];
+			let myTo = date2.getFullYear() + MONTHNUMBERSTR[date2.getMonth()] + DATESTR[date2.getDate()];
+			try {
+				let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/fromtolist/${userCid}/${myFrom}/${myTo}`)
+				setVisitArray(resp.data);
+			} catch (e) {
+				console.log(e)
+				setVisitArray([]);
+			} 
+		} else if (item === "Billing") {
+			await getBalance(0);
+			await getBilling(0);
+		} else if (item === "Dues") {
+			// shifted to Main
+			//await getBalance(0);
+			//await getDues();
+		}
+		setCurrentDateWiseSelection(item);
+	}
+
+	function DisplayPendingVisit() {
+		//console.log("About to display");
+		//console.log(visitArray);
+		return (
+		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
+		<Grid className={gClasses.noPadding} key="DUESHDR" container justify="center" alignItems="left" >
+			<Grid item xs={4} sm={4} md={2} lg={2} >
+				<Typography className={gClasses.patientInfo2Blue}>Date</Typography>
+			</Grid>
+			<Grid item xs={4} sm={4} md={4} lg={4} >
+				<Typography className={gClasses.patientInfo2Blue}>Name</Typography>
+			</Grid>
+			<Grid item xs={4} sm={4} md={1} lg={1} >
+				<Typography className={gClasses.patientInfo2Blue}>Age</Typography>
+			</Grid>
+			<Grid item xs={4} sm={4} md={3} lg={3} >
+				<Typography className={gClasses.patientInfo2Blue}>Email</Typography>
+			</Grid>
+			<Grid item xs={4} sm={4} md={2} lg={2} >
+				<Typography className={gClasses.patientInfo2Blue}>Mobile</Typography>
+			</Grid>
+		</Grid>
+		{visitArray.map( (v, index) => {
+			let myPat = patientArray.find(x => x.pid === v.pid);
+			let myName = (myPat) ? myPat.displayName : "";
+			let d = new Date(v.nextVisitDate);
+			let visitDate = `${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()}`;
+			return (
+			<Grid className={gClasses.noPadding} key={"DUES"+index} container justify="center" alignItems="center" >
+			<Grid item xs={4} sm={4} md={2} lg={2} >
+				<Typography className={gClasses.patientInfo2}>{visitDate}</Typography>
+			</Grid>
+			<Grid item xs={4} sm={4} md={4} lg={4} >
+				<Typography className={gClasses.patientInfo2}>{myName}</Typography>
+			</Grid>
+			<Grid item xs={4} sm={4} md={1} lg={1} >
+				<Typography className={gClasses.patientInfo2}>{dispAge(myPat.age, myPat.gender)}</Typography>
+			</Grid>
+			<Grid item xs={4} sm={4} md={3} lg={3} >
+				<Typography className={gClasses.patientInfo2}>{dispEmail(myPat.email)}</Typography>
+			</Grid>
+			<Grid item xs={4} sm={4} md={2} lg={2} >
+				<Typography className={gClasses.patientInfo2}>{dispMobile(myPat.mobile)}</Typography>
+			</Grid>
+			</Grid>
+			)}
+		)}
+		</Box>
+		)}
+
+	async function handlePendingApptSelect(item) {
+		//validate start date and end date
+		setCurrentPendingApptSelection("");
+		if (item === "Missed") {
+			try {
+				let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nextvisit/missed/${userCid}`)
+				setVisitArray(resp.data.visit);
+				setPatientArray(resp.data.patient);
+				//console.log(resp.data);
+				setCurrentPendingApptSelection(item);
+			} catch (e) {
+				console.log(e)
+				setVisitArray([]);
+				setPatientArray([]);
+			} 
+		} else if (item === "Upcoming") {
+			try {
+				let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nextvisit/upcoming/${userCid}`)
+				setVisitArray(resp.data.visit);
+				setPatientArray(resp.data.patient);
+				//console.log(resp.data);
+				setCurrentPendingApptSelection(item);
+			} catch (e) {
+				console.log(e)
+				setVisitArray([]);
+				setPatientArray([]);
+			} 
+		}
+	}
+
 	function DisplayFunctionHeader() {
 	return (
 	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
@@ -503,6 +612,16 @@ export default function Summary() {
 		</Grid>	
 		</Box>
 		)}
+	
+		function DisplayPendingApptFunctionHeader() {
+			return (
+			<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+			<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
+				<DisplayFunctionItem item="Missed" match={currentPendingApptSelection} onClick={handlePendingApptSelect} />
+				<DisplayFunctionItem item="Upcoming" match={currentPendingApptSelection} onClick={handlePendingApptSelect} />
+			</Grid>	
+			</Box>
+			)}
 	
 	function DisplayAllPatients() {
 	//console.log(patientArray);
@@ -700,7 +819,10 @@ export default function Summary() {
 				}	
 				{(currentSelection === "PendingVisit") && 
 				<div>
-				<Typography className={gClasses.patientInfo2Green}>Under development</Typography>
+				<DisplayPendingApptFunctionHeader />
+				{((currentPendingApptSelection === "Missed") || (currentPendingApptSelection === "Upcoming")) && 
+					<DisplayPendingVisit />
+				}
 				</div>
 				}	
 			</Box>

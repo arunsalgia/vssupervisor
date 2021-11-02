@@ -87,6 +87,8 @@ docxRouter = require('./routes/docx');
 addOnRouter = require('./routes/addon');
 doctorTypeRouter = require('./routes/doctortype')
 festivalRouter = require('./routes/festival');
+nextVisitRouter = require('./routes/nextvisit');
+
 const { smsRouter } = require('./routes/sms');
 
 app.set('view engine', 'html');
@@ -140,6 +142,7 @@ app.use('/docx', docxRouter);
 app.use('/addon', addOnRouter);
 app.use('/doctortype', doctorTypeRouter);
 app.use('/festival', festivalRouter);
+app.use('/nextvisit', nextVisitRouter);
 app.use('/sms', smsRouter);
 
 
