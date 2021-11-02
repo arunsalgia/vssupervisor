@@ -13,6 +13,8 @@ const {
 	generateOrder, generateOrderByDate,
 } = require('./functions'); 
 
+const { sendVisitSms } = require("./sms");
+
 const MYFONT="Arial";
 const MYSIZE=12*2;
 
@@ -47,6 +49,7 @@ function setMedQty(num) {
 router.use('/', function(req, res, next) {
   setHeader(res);
   if (!db_connection) { senderr(res, DBERROR,  ERR_NODB); return; }
+	console.log("In visist");
   next('route');
 });
 
@@ -434,6 +437,22 @@ router.post('/update/:cid/:visitInfo', async function(req, res, next) {
 	sendok(res, myRec);
 });
 
+router.get('/closevisit/:cid/:pid', async function(req, res, next) {
+  setHeader(res);
+  var {cid, pid} = req.params;
+	pid = Number(pid); 
+	
+	// visistNUmber as MAGICNUMER is current active visist. Get it
+	let myRec = await M_Visit.findOne({cid: cid, pid: pid, visitNumber: MAGICNUMBER});
+	if (!myRec) return senderr(res, 601, "No current visit");
+	
+	// change MAGICNUMBer to visit number
+	let visitCountRec = await M_Visit.find({cid: cid, pid: pid});
+	myRec.visitNumber = visitCountRec.length;
+	myRec.save();
+	sendVisitSms(cid, pid, myRec.nextVisitTime, myRec.nextVisitUnit);
+	sendok(res, myRec);	
+});
 
 
 router.get('/updatenewvisit/:cid/:visitNumber/:visitInfo', async function(req, res, next) {

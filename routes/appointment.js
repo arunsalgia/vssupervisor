@@ -6,7 +6,7 @@ const {  akshuGetUser, GroupMemberCount,
 	checkCustomerExpiry,
 } = require('./functions'); 
 
-const { sendAppointmentSms } = require("./sms");
+const { sendAppointmentSms, sendCancelSms } = require("./sms");
 
 var router = express.Router();
 
@@ -53,6 +53,7 @@ router.get('/cancel/:cid/:pid/:order', async function (req, res) {
 		//console.log(hRec);
 		hRec.visit = VISITTYPE.cancelled;
 		hRec.save();
+		sendCancelSms(cid, pid, hRec.apptTime)
 		sendok(res, "OK");
 	} else {
 		senderr(res, 601, "Appoint not found");
@@ -68,11 +69,10 @@ router.get('/add/:cid/:apptdata', async function (req, res) {
 	console.log(newData);
 	
 	let hRec = await M_Appointment.find({
-		cid: cid, date: newData.date, month: newData.month, year: newData.year, 
-		order: newData.order, pid: newData.pid,
+		cid: cid, order: newData.order, visit: VISITTYPE.pending
 	});
 	
-	if (hRec.count > 0) {
+	if (hRec.length > 0) {
 		senderr(res, 601, "Duplicate Entry");
 		return;
 	}

@@ -1,21 +1,64 @@
 var router = express.Router();
 //original import { Document, Packer, Paragraph, TextRun } from "docx";
 const { Document, Packer, Paragraph, TextRun, Header, Footer,
-	AlignmentType,
+	Table, TableCell, TableRow, VerticalAlign, HorizontalPositionAlign,
+	AlignmentType, ITableCellMarginOptions, WidthType, HeightRule, ITableRowOptions,
  } = require("docx");
 
 const { 
-	getLoginName, getDisplayName,
-	svrToDbText, dbToSvrText,
-	getMaster, setMaster,
-	base64ToString,
-	setOldPendingAppointment,
-	generateOrder, generateOrderByDate,
+	akshuGetCustomer,
 } = require('./functions'); 
 
 const MYFONT="Arial";
 const MYSIZE=12*2;
 
+function triConvert(num){
+	if (num == 0) {
+			return 'dontAddBigSufix';
+	}
+	
+	var output = '';
+	var numString = num.toString();
+	let tmp = "";
+	let value;
+	// if number 1lakh or above
+	//console.log(numString);
+	if (numString.length > 3) {
+		value = Number(numString.substr(0, numString.length - 3));
+		//console.log("Above thousand",value)
+		if (value > 0) {
+			if (value < 20) {
+				tmp += ONESSTR[value];
+			} else {
+				tmp += TENSSTR[Math.trunc(value / 10)];
+				tmp += ONESSTR[value % 10];
+			}
+			
+			output += ((output.length > 0) ? " " : "") + tmp + THOUSANDSTR;
+			//console.log(output);
+		}
+		numString = numString.substr(numString.length-3);
+	}
+	//100 and more
+	if (numString.length === 3) {
+		if (numString[0] !== '0') {
+			if (output.length > 0) output += " ";
+			output += ONESSTR[Number(numString.substr(0,1))] + HUMDREDSTR;
+		}
+		numString = numString.substr(1);
+	}
+	value = Number(numString);
+	if (value > 0) {
+		if (value < 20) {
+			output += ONESSTR[value];
+		} else {
+			output += TENSSTR[Math.trunc(value / 10)];
+			output += ONESSTR[value % 10];
+		}
+	}
+	output = output.trim();
+	return output.substr(0,1).toUpperCase() + output.substr(1);
+}   
 
 const str1by4 = String.fromCharCode(188)
 const str1by2 = String.fromCharCode(189)
@@ -52,6 +95,12 @@ router.use('/', function(req, res, next) {
 });
 
 
+router.get('/amount/:amount', async function(req, res, next) {
+	setHeader(res);
+	var {amount} = req.params;
+	let strstr = triConvert(Number(amount));
+	sendok(res, strstr);
+})
 
 router.get('/visit/:cid/:pid', async function(req, res, next) {
   setHeader(res);
@@ -232,6 +281,153 @@ router.get('/visit/:cid/:pid', async function(req, res, next) {
 	sendok(res, "ok");
 });
 
+router.get('/receipt/:cid/:pid/:tid', async function(req, res, next) {
+  setHeader(res);
+	var {cid, pid, tid } = req.params;
+	pid = Number(pid);
+	tid = Number(tid);
+	
+	let myPc = await M_ProfCharge.findOne({cid: cid, tid: tid});
+	if (!myPc) return senderr(res, 601, "No Such billiing");
+	//console.log(myPc);	
+
+	if (myPc.treatment === "") return senderr(res, 602, "Not professional charge recharge");
+	
+	//console.log(myPc.date);
+
+	// get total billing amount till this professtional charge
+	let billingQuery = [
+		{$match: { cid: cid, pid: pid, tid: {$lte: myPc.tid}, amount: {$lt: 0} }},
+		{ $group: { _id: '$pid', total: { $sum: '$amount' } } }
+  ];
+	let billRec = await M_ProfCharge.aggregate(billingQuery);
+
+	// get total payment till date
+	let paymentQuery = [
+		{$match: { cid: cid, pid: pid, amount: {$gt: 0} }},
+		{ $group: { _id: '$pid', total: { $sum: '$amount' } } }
+  ];
+	let payRec = await M_ProfCharge.aggregate(paymentQuery);
+
+	let balance = billRec[0].total + ((payRec.length > 0) ? payRec[0].total : 0);
+	//console.log(balance);
+	if (balance < 0) return senderr(res, 603, "Full payment not yet done");
+
+	//console.log(myPc);
+
+	// not get the patient details
+	//console.log(ITableRowOptions);
+
+	let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	// now prepare for invoice
+
+	let allPara = [];
+	let text = [];
+	
+	// leave initial few lines for header
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+
+	// Write date 
+	text = [];
+	text.push(normalText("Date: "));
+	let myDate = `${DATESTR[myPc.date.getDate()]}/${MONTHNUMBERSTR[myPc.date.getMonth()]}/${myPc.date.getFullYear()}`;
+	text.push(boldText(myDate));
+	allPara.push(rightAlignedPara(text));
+
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+
+	// write received with thanks message
+	text = [];
+	text.push(normalText("Received with thanks from "));
+	text.push(boldUnderlineText(patRec.displayName));
+	text.push(normalText(" the sum of "));
+	text.push(boldUnderlineText("Rupees "+triConvert(Math.abs(myPc.amount))+" only"));
+	text.push(normalText(" towards the following treatment:"));
+	allPara.push(normalSpacingPara(text));
+
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+
+	let myRows = [];
+	let hdr = new TableRow({
+		height: {height: 1000, rule: HeightRule.ATLEAST },
+		children: [
+			new TableCell({
+				width: {size: 600, type: WidthType.DXA,},
+				children: [centerAlignedPara([boldText("  Sr.")])], 
+				verticalAlign: VerticalAlign.CENTER}),
+			new TableCell({
+				width: {size: 3500, type: WidthType.DXA,},
+				children: [centerAlignedPara([boldText("  Treatment  ")])], 
+				verticalAlign: VerticalAlign.CENTER}),
+			new TableCell({
+				width: {size: 2000, type: WidthType.DXA,},
+				children: [centerAlignedPara([boldText("  Charges  ")])], 
+				verticalAlign: VerticalAlign.CENTER}),
+		],
+	});
+	myRows.push(hdr);
+
+	for(let i=0; i<myPc.treatmentDetails.length; ++i) {
+		let datarow = new TableRow({
+			children: [
+					new TableCell({children: [centerAlignedPara([normalText((i+1).toString())])], verticalAlign: VerticalAlign.CENTER}),
+					new TableCell({children: [normalPara([normalText(" "+myPc.treatmentDetails[i].name)])], verticalAlign: VerticalAlign.CENTER}),
+					new TableCell({children: [normalPara([normalText("  ₹ "+myPc.treatmentDetails[i].amount+"/-")])], verticalAlign: VerticalAlign.CENTER}),
+			],
+		});
+		myRows.push(datarow);
+	}
+	let finalamountrow = new TableRow({
+		children: [
+				new TableCell({children: [centerAlignedPara([boldText("Total Amount")])], columnSpan: [2], verticalAlign: VerticalAlign.CENTER}),
+				new TableCell({children: [normalPara([boldText("  ₹ "+Math.abs(myPc.amount)+"/-")])], verticalAlign: VerticalAlign.CENTER}),
+		],
+	});
+	myRows.push(finalamountrow);
+
+	const amountTable = new Table({rows: myRows, });
+	allPara.push(amountTable);
+
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+	allPara.push(blankLine());
+
+	let customerRec = await akshuGetCustomer(cid);
+	text = [];
+	text.push(boldText(customerRec.doctorName));
+	allPara.push(normalPara(text));
+	
+	const receiptDoc = new Document({
+		sections: [{
+			properties: {}, 
+			children: allPara,
+		}]
+	});
+	
+	//console.log("PWD is ",process.cwd())
+	// Used to export the file into a .docx file
+	await Packer.toBuffer(receiptDoc).then((buffer) => {
+			fs.writeFileSync(process.cwd() + `/temp/${cid}_${pid}_patientReceipt.docx`, buffer);
+	});
+		
+	sendok(res, myPc);
+
+	return;
+
+	
+});
+
 
 router.get('/downloadvisit/:cid/:pid', async function (req, res) {
   setHeader(res);
@@ -239,6 +435,23 @@ router.get('/downloadvisit/:cid/:pid', async function (req, res) {
   console.log("in download");
   
   let myFile = process.cwd() + `/temp/${cid}_${pid}_patientVisit.docx`;		// getFileName(pname, myProduct[0].versionNumber, ptype);
+  console.log(myFile);
+
+  if (fs.existsSync(myFile)) {
+    res.contentType("application/docx");
+		console.log("..............file found", myFile);
+    await res.status(200).sendFile(myFile);
+  } else
+    senderr(res, 601, "Doc not found");  
+})
+
+
+router.get('/downloadreceipt/:cid/:pid', async function (req, res) {
+  setHeader(res);
+	var {cid, pid} = req.params;
+  console.log("in download");
+  
+  let myFile = process.cwd() + `/temp/${cid}_${pid}_patientReceipt.docx`;		// getFileName(pname, myProduct[0].versionNumber, ptype);
   console.log(myFile);
 
   if (fs.existsSync(myFile)) {
@@ -298,6 +511,13 @@ function normalPara(text) {
 	let para = new Paragraph({children: text});
 	return para;
 }
+
+function normalSpacingPara(text) {
+	let para = new Paragraph({
+		children: text, 
+	});
+	return para;
+}
 						
 function boldBulletPara(text) {
 	//console.log(text);
@@ -327,6 +547,17 @@ function normalBulletPara(text) {
 
 function rightAlignedPara(text) {
 	let para = new Paragraph({children: text, alignment: AlignmentType.RIGHT,});
+	return para;
+}
+
+function justifiedAlignedPara(text) {
+	let para = new Paragraph({children: text, alignment: AlignmentType.JUSTIFIED,});
+	return para;
+}
+
+
+function centerAlignedPara(text) {
+	let para = new Paragraph({children: text, alignment: AlignmentType.CENTER,});
 	return para;
 }
 

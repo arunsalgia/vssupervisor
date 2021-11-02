@@ -188,14 +188,7 @@ const useStyles = makeStyles((theme) => ({
 		}
   }));
 
-//const addEditModal = dynamicModal('60%');
-//const yesNoModal = dynamicModal('60%');
 
-//const COUNTPERPAGE=10;
-// set-up the step content
-//const step1Content = <h1>Request to server</h1>;
-//const step2Content = <h1>Geneate visit document</h1>;
-//const step3Content = <h1>Download visit document</h1>;
 
 let test=[];
 let medQty=[];
@@ -252,19 +245,13 @@ export default function Visit(props) {
 	//const [patientMasterArray, setPatientMasterArray] = useState([])
 	const [currentPatient, setCurrentPatient] = useState("");
 	const [currentPatientData, setCurrentPatientData] = useState({});
-	
+	const [showCloseVisit, setShowCloseVisit] = useState(false);
+
 	const [startLoading, setStartLoading] = useState(false);
 	
 	//const [showDocument, setShowDocument] = useState(false);
 	//const [documentArray, setDocumentArray] = useState([]);
 	
-
-	const [dlMime, setDlMime] = useState("");
-	const [dlFile, setDlFile] = useState("");
-	const [isPdf, setIsPdf] = useState(false);
-	const [dlSrc, setDlSrc] = useState("");
-	const [dlDoc, setDlDoc] = useState({});
-	const [viewImage, setViewImage] = useState(false);
 	
 	const [medicineArray, setMedicineArray] = useState([])
 	const [noteArray, setNoteArray] = useState([]);
@@ -278,9 +265,6 @@ export default function Visit(props) {
 	
 	const [addEditNotes, setAddEditNotes] = useState(false);
 	
-	const [standard, setStandard] = useState(true);
-	const [info, setInfo] = useState("");
-	const [hideInfo, setHideInfo] = useState(true);
 	const [editMedicine, setEditMedicine] = useState({});
 	
 	const [newPatient, setNewPatient] = useState(false)
@@ -580,7 +564,20 @@ export default function Visit(props) {
 		//setShowProgress(false);
 	}
 	
-	
+	async function closeVisitDocument() {
+		try {
+			let response = await axios.get (`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/closevisit/${userCid}/${currentPatientData.pid}`);
+			let tmpArray = visitArray.filter(x => x.visitNumber !== MAGICNUMBER );
+			tmpArray.push(response.data);
+			setVisitArray(tmpArray);
+			setShowCloseVisit(false);
+		} catch (e) {
+			console.log(e)
+			alert.error("Error closing visit");
+		}
+		//setShowProgress(false);
+	}
+
 	function updateNewVisit(med, note, rem, nextime, nextunit) {	
 		let newVisit = {
 			pid: currentPatientData.pid, displayName: currentPatientData.displayName,
@@ -590,6 +587,7 @@ export default function Visit(props) {
 		let newVisitInfo = encodeURIComponent(JSON.stringify(newVisit));
 		axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/visit/update/${userCid}/${newVisitInfo}`);
 		//console.log("posted");
+		setShowCloseVisit(true);
 	}
 	
 	async function printVisit() {	
@@ -1151,7 +1149,10 @@ export default function Visit(props) {
 
 	return (
 		<div align="right">
-			<VsButton name="Print Visit Document"  onClick={generateVisitDocument} />
+			{(showCloseVisit) &&
+				<VsButton name="Close Visit"  onClick={closeVisitDocument} />
+			}
+			<VsButton name="Print Visit"  onClick={generateVisitDocument} />
 			{/*<VsButton name="Download Visit Document"  onClick={printVisit} />*/}
 		</div>
 	);

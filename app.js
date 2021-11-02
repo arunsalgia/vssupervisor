@@ -669,7 +669,12 @@ MINUTESTR = [
 "50", "51", "52", "53", "54", "55", "56", "57", "58", "59"
 ];
 
-// module.exports = app;
+ONESSTR = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+TENSSTR = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+HUMDREDSTR = ' hundred';
+THOUSANDSTR = ' thousand';
+LAKHSTR = ' lakh';
+
 ALLDOCTORS = 0xFFFFFFFF;
 
 MAGICNUMBER = 99999;

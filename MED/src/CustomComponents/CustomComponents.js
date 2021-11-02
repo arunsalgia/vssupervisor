@@ -43,6 +43,7 @@ import EditIcon from 			'@material-ui/icons/Edit';
 //import PreviewIcon from '@material-ui/icons/Preview';
 //import VisibilityIcon from '@material-ui/icons/Visibility';
 import InfoIcon from 			'@material-ui/icons/Info';
+import ReceiptRoundedIcon from '@material-ui/icons/ReceiptRounded';
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -1188,6 +1189,7 @@ export function DisplayProfCharge(props) {
 	const gClasses = globalStyles();	
 	let _edit =   (props.handleEdit == null);
 	let _cancel = (props.handleCancel == null);
+	let _receipt = (props.handleReceipt == null);
 	let tmp = props.profChargeArray.filter(x => x.amount > 0);
 	let myCollection = lodashSumBy(tmp, 'amount');
 	tmp = props.profChargeArray.filter(x => x.amount < 0);
@@ -1281,6 +1283,9 @@ export function DisplayProfCharge(props) {
 					}
 				</div>
 				}
+				{((isBilling) && (!_receipt)) &&
+					<ReceiptRoundedIcon color="primary" size="small" onClick={() =>  props.handleReceipt(p)}  />
+				}				
 			</Grid>
 			</Grid>
 		)}
@@ -1307,7 +1312,7 @@ export function DisplayAllToolTips(props) {
 	return(
 		<div>
 		{myArray.map( t =>
-			<ReactTooltip type="info" effect="float" id={"TREAT"+t.tid} multiline={true}/>
+			<ReactTooltip key={"TT"+t.tid} type="info" effect="float" id={"TREAT"+t.tid} multiline={true}/>
 		)}
 		</div>
 	)}	

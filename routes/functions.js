@@ -393,6 +393,17 @@ async function checkCustomerExpiry(cid) {
   return sts > 0;
 }
 
+function getNextVisit(after, unit) {
+  let myNextVisit = new Date();
+	//console.log(myNextVisit);
+	switch (unit.substr(0, 1).toUpperCase()) {
+		case 'D' : myNextVisit.setDate(myNextVisit.getDate()+after);  break;
+		case 'W' : myNextVisit.setDate(myNextVisit.getDate()+(7*after));  break;
+		case 'M' : myNextVisit.setMonth(myNextVisit.getMonth()+after);  break;
+		case 'Y' : myNextVisit.setYear(myNextVisit.getFullYear()+after);  break;
+	}
+	return myNextVisit;
+}
 
 module.exports = {
 	ALPHABETSTR,
@@ -419,6 +430,7 @@ module.exports = {
 	setOldPendingAppointment,
 	generateOrder, generateOrderByDate,
   checkCustomerExpiry,
+  getNextVisit,
 }; 
 
 // mongodb+srv://pdhsamaj:YkEW2W4RBLyNsvo0@pdhs.drlqk.mongodb.net/test

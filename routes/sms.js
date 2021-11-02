@@ -1,18 +1,18 @@
-const { akshuGetCustomer } = require("./functions");
+const { akshuGetCustomer, getNextVisit,
+ } = require("./functions");
 
 var smsRouter = express.Router();
 
+async function fast2SmsSend(senderid, messageid, myParams, destMobile) {
 
-async function fast2SmsSendAppointment(destMobile, docName, clinicName, apptDateStr, clinicMobile) {
+	if (process.env.SENDSMS !== "TRUE") return;
 
-	let myParams = `${docName}|${clinicName}|${apptDateStr}|${clinicMobile}`;
-	
 	var f2s = unirest("GET", "https://www.fast2sms.com/dev/bulkV2");
 
 	let queryMsg = {
 		"authorization": process.env.FAST2SMSKEY,
-		"sender_id": process.env.APPTHDR,
-		"message": Number(process.env.APPTMSG),
+		"sender_id": senderid,
+		"message": Number(messageid),
 		"variables_values": myParams,
 		"route": "dlt",
 		"numbers": destMobile
@@ -27,49 +27,40 @@ async function fast2SmsSendAppointment(destMobile, docName, clinicName, apptDate
 	});
 	
 	let retVal;
-	
-	let resp = await f2s.end();
 
-	console.log(resp, resp.body, resp.status);
-	retval = resp;
-	
 
-	return retVal;
+	f2s.end(function (resp) {
+		console.log(resp.body);
+		return resp.body;
+	});
 
 }
 
+async function fast2SmsSendAppointment(destMobile, docName, clinicName, apptDateStr, clinicMobile) {
+	let myParams = `${docName}|${clinicName}|${apptDateStr}|${clinicMobile}`;
+	let status = await fast2SmsSend(process.env.APPTHDR, process.env.APPTMSG, myParams, destMobile);
+	return status;
+}
+
 async function fast2SmsSendExpiry(destMobile, docName, clinicName, clinicMobile) {
-
 	let myParams = `${docName}|${clinicName}|${clinicMobile}`;
-	
-	var f2s = unirest("GET", "https://www.fast2sms.com/dev/bulkV2");
-
-	let queryMsg = {
-		"authorization": process.env.FAST2SMSKEY,
-		"sender_id": process.env.EXPRHDR,
-		"message": Number(process.env.EXPRMSG),
-		"variables_values": myParams,
-		"route": "dlt",
-		"numbers": destMobile
-	};
-
-	console.log(queryMsg);
-	f2s.query(queryMsg);
+	let status = await fast2SmsSend(process.env.EXPRHDR, process.env.EXPRMSG, myParams, destMobile);
+	return status;
+}
 
 
-	f2s.headers({
-		"cache-control": "no-cache"
-	});
-	
-	let retVal;
-	
-	await f2s.end(function (resp) {
-		console.log(resp.body);
-		retval = resp.body;
-	});
 
-	return retVal;
 
+async function fast2SmsSendVisit(destMobile, docName, clinicName, visitDateStr, clinicMobile) {
+	let myParams = `${docName}|${clinicName}|${visitDateStr}|${clinicMobile}`;
+	let status = await fast2SmsSend(process.env.VISTHDR, process.env.VISTMSG, myParams, destMobile);
+	return status;
+}
+
+async function fast2SmsCancelVisit(destMobile, docName, clinicName, cancelDateStr, clinicMobile) {
+	let myParams = `${docName}|${clinicName}|${cancelDateStr}|${clinicMobile}`;
+	let status = await fast2SmsSend(process.env.CNCLHDR, process.env.CNCLMSG, myParams, destMobile);
+	return status;
 }
 
 let arun_smsconfig=[];
@@ -322,14 +313,13 @@ async function sendAppointmentSms(cid, pid, apptTime) {
 		customerRec.mobile
 		);
 	
-	console.log("Output",resp);
+	//console.log("Output",resp);
 
 	if (false) {
 		++customerSmsLog.bulkSmsCount
 
 	}
 }
-
 
 async function sendExpirySms(cid, pid) {
 	// first find out if pastinet has mobile number
@@ -363,7 +353,7 @@ async function sendExpirySms(cid, pid) {
 		customerRec.mobile
 		);
 	
-	console.log("Output",resp);
+	//console.log("Output",resp);
 
 	if (false) {
 		++customerSmsLog.bulkSmsCount
@@ -371,7 +361,80 @@ async function sendExpirySms(cid, pid) {
 	}
 }
 
+async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
+	// first find out if pastinet has mobile number
+	let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	if (patRec < 1000000000) {
+		console.log("Mobile number not configured");
+		return;
+	}
 
+	// find out how many sms sent by user this month
+	let customerSmsLog = await akshuGetSmsLog(cid, todayMonth, todayYear);
+	//console.log(customerSmsLog);
+	if (customerSmsLog.bulkSmsCount >= defaultPatinetSms) {
+		// if default count has passed. CHeck if subscribed for bulk sms for patients
+		let customerConfig = await akshuGetSMSConfig(cid);
+		//console.log(customerConfig);
+		if (!customerConfig.bulkSmsPack) {
+			console.log("Buls Sms count Over");
+			return;
+		}
+	}
+
+	// now prepare to send SMS
+	let customerRec = await akshuGetCustomer(cid);
+	//console.log(customerRec);
+
+	let d = getNextVisit(nextVisitTime, nextVisitUnit);
+	let resp = await fast2SmsSendVisit(
+		patRec.mobile, 
+		customerRec.doctorName,
+		customerRec.clinicName,
+		makeDateTimeString(d),
+		customerRec.mobile
+		);
+	
+	//console.log("Output",resp);
+
+	if (false) {
+		++customerSmsLog.bulkSmsCount
+
+	}
+}
+
+async function sendCancelSms(cid, pid, cancelTime) {
+	// first find out if pastinet has mobile number
+	let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	if (patRec < 1000000000) {
+		console.log("Mobile number not configured");
+		return;
+	}
+
+	// find out how many sms sent by user this month
+	let customerSmsLog = await akshuGetSmsLog(cid, todayMonth, todayYear);
+	//console.log(customerSmsLog);
+	if (customerSmsLog.bulkSmsCount >= defaultPatinetSms) {
+		// if default count has passed. CHeck if subscribed for bulk sms for patients
+		let customerConfig = await akshuGetSMSConfig(cid);
+		//console.log(customerConfig);
+		if (!customerConfig.bulkSmsPack) {
+			console.log("Buls Sms count Over");
+			return;
+		}
+	}
+
+	// now prepare to send SMS
+	let customerRec = await akshuGetCustomer(cid);
+	//console.log(customerRec);
+
+
+
+	if (false) {
+		++customerSmsLog.bulkSmsCount
+
+	}
+}
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
 function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
@@ -384,4 +447,6 @@ module.exports = {
 	smsRouter,
 	sendAppointmentSms,
 	sendExpirySms,
+	sendVisitSms,
+	sendCancelSms,
 }

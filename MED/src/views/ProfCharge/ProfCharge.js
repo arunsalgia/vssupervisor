@@ -6,6 +6,7 @@ import SwitchBtn from '@material-ui/core/Switch';
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 import InputLabel from '@material-ui/core/InputLabel';
 import ReactTooltip from "react-tooltip";
+import fileDownload  from 'js-file-download';
 
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
@@ -23,7 +24,6 @@ import Radio from '@material-ui/core/Radio';
 import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
-//import fileDownload  from 'js-file-download';
 //import fs from 'fs';
 //import lodashSortBy from "lodash/sortBy"
 //import BorderWrapper from 'react-border-wrapper'
@@ -53,12 +53,7 @@ import {
 HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR, INR
 } from "views/globals.js";
 
-// icons
-import IconButton from 		'@material-ui/core/IconButton';
-import EditIcon from 			'@material-ui/icons/Edit';
-import DeleteIcon from 		'@material-ui/icons/Cancel';
-import InfoIcon from 			'@material-ui/icons/Info';
-//import CloseIcon from 		'@material-ui/icons/Close';
+
 
 
 //colours 
@@ -67,10 +62,7 @@ import { red, blue, green, lightGreen,
 
 
 import { 
-	validateInteger,
-	dispAge, dispEmail, dispMobile,
 	vsDialog,
-	ordinalSuffix,
 } from "views/functions.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -203,6 +195,7 @@ const useStyles = makeStyles((theme) => ({
 
 const paymentModeArray = ["Cash", "Cheque", "On-line", "Others"];
 var userCid;
+
 export default function ProfCharge(props) {
   
   const classes = useStyles();
@@ -212,19 +205,17 @@ export default function ProfCharge(props) {
 	const [profChargeArray, setProfChargeArray] = useState([]);
 	const [balance, setBalance] = useState({billing: 0, payment: 0, due: 0})
 	
-	const [remember, setRemember] = useState(false);
 	const [paymentMode, setPaymentMode] = useState("Cash");
 	const [currentPatient, setCurrentPatient] = useState("");
 	const [currentPatientData, setCurrentPatientData] = useState({});
 	const [isDrawerOpened, setIsDrawerOpened] = useState("");
-	const [isInfoDrawerOpened, setIsInfoDrawerOpened] = useState("");
+
 	
 	const [emurTid, setEmurTid] = useState(0);
 	const [emurAmount, setEmurAmount] = useState(100);
 	const [emurDesc, setEmurDesc] = useState("");
 	const [modalRegister, setModalRegister] = useState(0);
 	
-	const [treatmentDetails, setTreatmentDetails] = useState([]);
 	
   useEffect(() => {	
 		userCid = sessionStorage.getItem("cid");
@@ -392,6 +383,37 @@ export default function ProfCharge(props) {
 		);
 	}
 	
+	async function handleReceipt(t) {
+		try {
+			await axios.get (`${process.env.REACT_APP_AXIOS_BASEPATH}/docx/receipt/${t.cid}/${t.pid}/${t.tid}`);
+			
+			// now prepare for download
+			let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/docx/downloadreceipt/${t.cid}/${t.pid}`;
+			let response = await axios({ method: 'get', url: myURL, responseType: 'arraybuffer',
+
+			});
+			let myFile = "patientReceipt.docx";
+			console.log(myFile);
+			console.log(response.data);
+			await fileDownload (response.data, myFile);
+			//setStepNo(3);
+			console.log("download over");
+
+			alert.success("Successfully generated receipt document");
+		} catch (e) {
+			let isufficientPayment = false;
+			if (e.response) {
+				console.log(e.response);
+				if (e.response.status === 603)
+					isufficientPayment = true;
+			}
+			if (isufficientPayment)
+				return alert.info("Receipt available only on full payment");
+			console.log(e)
+			alert.error("Error generating visit document");
+		}		
+	}
+
 	
 	async function handleDeleteTreatmentConfirm(t) {
 		await axios.post(`${process.env.REACT_APP_AXIOS_BASEPATH}/profcharge/delete/${userCid}/${currentPatientData.pid}/${t.tid}`)
@@ -447,11 +469,12 @@ export default function ProfCharge(props) {
 			<DisplayNewBtn />
 			<DisplayProfCharge profChargeArray={profChargeArray} 
 				patientArray={[currentPatientData]}
+				handleReceipt={handleReceipt}
 				handleEdit={handleEditPayment} 
 				handleCancel={handleDeletePayment}
 			/>
 		</Box>
-		<Drawer className={classes.drawer}
+		<Drawer
 		anchor="right"
 		variant="temporary"
 		open={isDrawerOpened !== ""}
