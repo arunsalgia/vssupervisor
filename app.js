@@ -454,6 +454,12 @@ SmsLogSchema = mongoose.Schema({
 	festivalCount: Number,
 });
 
+SubscribeSchema = mongoose.Schema({
+	cid: String,
+	name: String,		
+	enabled: Boolean
+});
+
 // models
 User = mongoose.model("user", UserSchema);
 M_Medicine = mongoose.model('Medicine', MedicineSchema);
@@ -482,6 +488,7 @@ M_DoctorType = mongoose.model('doctortype', DoctorTypeSchema);
 M_Festival = mongoose.model('festival', FestivalSchema);
 M_SmsConfig = mongoose.model('smsconfig', SmsConfigSchema);
 M_SmsLog = mongoose.model('smslog', SmsLogSchema);
+M_Subscribe = mongoose.model('subscribe', SubscribeSchema);
 
 
 router = express.Router();

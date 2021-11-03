@@ -403,12 +403,9 @@ export default function ProfCharge(props) {
 		} catch (e) {
 			let isufficientPayment = false;
 			if (e.response) {
-				console.log(e.response);
-				if (e.response.status === 603)
-					isufficientPayment = true;
+				if (e.response.status === 603) return alert.info("Receipt available only on full payment");
+				if (e.response.status === 604) return alert.info("Kindly subscribe 'Billing' add on to avail bill generation functionality");
 			}
-			if (isufficientPayment)
-				return alert.info("Receipt available only on full payment");
 			console.log(e)
 			alert.error("Error generating visit document");
 		}		

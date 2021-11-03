@@ -71,6 +71,45 @@ router.post('/delete/:delType', async function(req, res, next) {
 
 });
 
+router.get('/subscribe/:cid/:addonname', async function(req, res, next) {
+  setHeader(res);
+  
+  var { cid, addonname } = req.params;
+	
+	let tmpRec = await M_Subscribe.findOne({cid: cid, name: addonname});
+	if (!tmpRec) {
+		tmpRec = new M_Subscribe();
+		tmpRec.cid = cid;
+		tmpRec.name = addonname
+	}
+	tmpRec.enabled = true;
+	tmpRec.save();
+
+	sendok(res, tmpRec);
+
+});
+
+router.get('/unsubscribe/:cid/:addonname', async function(req, res, next) {
+  setHeader(res);
+  
+  var { cid, addonname } = req.params;
+	
+	let tmpRec = await M_Subscribe.findOne({cid: cid, name: addonname});
+	if (!tmpRec) {
+		tmpRec = new M_Subscribe();
+		tmpRec.cid = cid;
+		tmpRec.name = addonname
+	}
+	tmpRec.enabled = false;
+	tmpRec.save();
+
+	sendok(res, tmpRec);
+
+});
+
+
+
+
 router.get('/list', async function(req, res, next) {
   setHeader(res);
   

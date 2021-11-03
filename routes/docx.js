@@ -7,6 +7,7 @@ const { Document, Packer, Paragraph, TextRun, Header, Footer,
 
 const { 
 	akshuGetCustomer,
+	checksubscription,
 } = require('./functions'); 
 
 const MYFONT="Arial";
@@ -286,6 +287,9 @@ router.get('/receipt/:cid/:pid/:tid', async function(req, res, next) {
 	var {cid, pid, tid } = req.params;
 	pid = Number(pid);
 	tid = Number(tid);
+
+	let sts = await checksubscription(cid, 'Billing');
+	if (!sts) return senderr(res, 604, "No subscription");
 	
 	let myPc = await M_ProfCharge.findOne({cid: cid, tid: tid});
 	if (!myPc) return senderr(res, 601, "No Such billiing");

@@ -405,6 +405,15 @@ function getNextVisit(after, unit) {
 	return myNextVisit;
 }
 
+async function checksubscription(cid, addonname) {
+	let subscription = false;
+	let tmpRec = await M_Subscribe.findOne({cid: cid, name: addonname});
+	if (tmpRec) {
+		subscription = tmpRec.enabled;
+	}
+	return subscription;
+}
+
 module.exports = {
 	ALPHABETSTR,
   getLoginName, getDisplayName,
@@ -431,6 +440,5 @@ module.exports = {
 	generateOrder, generateOrderByDate,
   checkCustomerExpiry,
   getNextVisit,
+  checksubscription,
 }; 
-
-// mongodb+srv://pdhsamaj:YkEW2W4RBLyNsvo0@pdhs.drlqk.mongodb.net/test
