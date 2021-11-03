@@ -336,6 +336,11 @@ router.get('/receipt/:cid/:pid/:tid', async function(req, res, next) {
 	allPara.push(blankLine());
 	allPara.push(blankLine());
 
+	text = [];
+	text.push(boldUnderlineText("RECEIPT"));
+	allPara.push(centerAlignedPara(text));
+	allPara.push(blankLine());
+	
 	// Write date 
 	text = [];
 	text.push(normalText("Date: "));
