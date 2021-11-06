@@ -15,11 +15,12 @@ router.use('/', function(req, res, next) {
 // send list of in chunks of blocks.
 // Each Block will contain #medicines which is confgired in MEDBLOCK
 
-router.get('/add/:newType/:eligible', async function(req, res, next) {
+router.get('/add/:newType/:charges/:desc/:eligible', async function(req, res, next) {
   setHeader(res);
   
-  var {newType, eligible } = req.params;
-	
+  var {newType, charges, desc, eligible } = req.params;
+	charges = Number(charges);
+
   var tmp = await M_AddOn.findOne({name: newType});
   if (tmp) return  senderr(res, 601, 'Add on type already in database.');
 
@@ -29,19 +30,21 @@ router.get('/add/:newType/:eligible', async function(req, res, next) {
 	mRec.aid = (tmp.length > 0) ? tmp[0].aid + 1 : 1;
 	mRec.name = newType;
 	mRec.doctorType = Number(eligible);
+	mRec.charges = charges;
 	mRec.enabled = true;
+	mRec.description = desc;
 	mRec.save();
 	sendok(res, mRec);
 
 });
 
-router.get('/edit/:oldType/:newType/:eligible', async function(req, res, next) {
+router.get('/edit/:oldType/:newType/:charges/:desc/:eligible', async function(req, res, next) {
   setHeader(res);
   
-  var {oldType, newType, eligible } = req.params;
+  var {oldType, newType, charges, desc, eligible } = req.params;
+	charges = Number(charges);
 
 	var mRec;
-	
 	
 	if (oldType !== newType) {
 		// just check that of new medicine already in database
@@ -55,7 +58,9 @@ router.get('/edit/:oldType/:newType/:eligible', async function(req, res, next) {
 		
 	mRec.name = newType;
 	mRec.eligible = Number(eligible);
+	mRec.charges = charges;
 	mRec.enabled = true;
+	mRec.description = desc;
 	mRec.save();
 	sendok(res, mRec);
 });
@@ -107,7 +112,14 @@ router.get('/unsubscribe/:cid/:addonname', async function(req, res, next) {
 
 });
 
-
+router.get('/subscribelist/:cid', async function(req, res, next) {
+  setHeader(res);
+  
+  var { cid } = req.params;
+	
+	let tmpRec = await M_Subscribe.find({cid: cid});
+	sendok(res, tmpRec);
+});
 
 
 router.get('/list', async function(req, res, next) {

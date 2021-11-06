@@ -3,6 +3,7 @@ const {
 	checkDate,
 	dbToSvrText,
 	svrToDbText,
+	generateOrder,
 	akshuClearCustomer,
 	akshuGetCustomer,
 } = require('./functions');
@@ -163,9 +164,10 @@ cron.schedule('5 0 * * *', async () => {
 	//let myMon = today.getMonth();
 	//let myDat = today.getDate();
 	
-	let chkOrder = ((today.getFullYear() * 100) + today.getMonth())*100 + today.getDate();
-	console.log("Chkorder", chkOrder);
-	chkOrder *= 100 * 100;
+	//let chkOrder = ((today.getFullYear() * 100) + today.getMonth())*100 + today.getDate();
+	//console.log("Chkorder", chkOrder);
+	//chkOrder *= 100 * 100;
+	let chkOrder = generateOrder(today.getFullYear(),  today.getMonth(), today.getDate(), 0, 0)
 	//console.log(chkOrder);
 	
 	let allOldPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: chkOrder} } );	
@@ -219,9 +221,6 @@ cron.schedule('5 0 * * *', async () => {
 		myRec.save();
 	}
 	
-	// STEP 7 ---> Declare all pending appointment of today (technically yesterday) as expired 
-	// and inform patient about expiry
-
 
 /*
 	// STEP 6 ---> Send festival greetings
@@ -292,7 +291,7 @@ cron.schedule('5 0 * * *', async () => {
 
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

@@ -472,6 +472,74 @@ router.get('/refill/:userId/:amount/:paymentId', async function (req, res, next)
   sendok(res, myTrans);
 }); 
 
+router.get('/add/:userCid/:amount', async function (req, res, next) {
+  setHeader(res);
+  var {userCid, amount} = req.params;
+	
+  //let customerRec = await M_Customer.findOne({_id: userCid});
+	
+	/*
+	cid: Number,
+  email: String,
+  amount: Number,
+  status: String,
+  requestId: String,
+  requestTime: Date,
+  paymentId: String,
+  paymentTime: Date,
+  fee: Number,
+	*/
+	
+  
+  let myTrans = createWalletTransaction(userCid);
+  myTrans.transType = 'Manual Transaction';
+  myTrans.transSubType = "Recharge";
+  myTrans.amount = parseFloat(amount);
+  await myTrans.save();
+  
+  return sendok(res, myTrans);
+
+
+
+
+	
+  sendok(res, myTrans);
+}); 
+
+router.get('/deduct/:userCid/:amount/:desc', async function (req, res, next) {
+  setHeader(res);
+  var {userCid, amount, desc} = req.params;
+	
+  //let customerRec = await M_Customer.findOne({_id: userCid});
+	
+	/*
+	cid: Number,
+  email: String,
+  amount: Number,
+  status: String,
+  requestId: String,
+  requestTime: Date,
+  paymentId: String,
+  paymentTime: Date,
+  fee: Number,
+	*/
+	
+  
+  let myTrans = createWalletTransaction(userCid);
+  myTrans.transType = 'Manual Transaction';
+  myTrans.transSubType = desc;
+  myTrans.amount = -parseFloat(amount);
+  await myTrans.save();
+  
+  return sendok(res, myTrans);
+
+
+
+
+	
+  sendok(res, myTrans);
+}); 
+
 router.get('/refillcount/:userId', async function (req, res, next) {
   setHeader(res);
   var {userId} = req.params;

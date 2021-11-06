@@ -420,7 +420,9 @@ AddOnSchema = mongoose.Schema({
 	name: String,
 	// Which doctor type can use this add on
 	// 0xFFFFFFFF indicate all types of doctors
-	doctorType: Number,			
+	doctorType: Number,	
+	charges: Number,	
+	description: String,	
 	enabled: Boolean
 });
 
@@ -456,7 +458,8 @@ SmsLogSchema = mongoose.Schema({
 
 SubscribeSchema = mongoose.Schema({
 	cid: String,
-	name: String,		
+	name: String,	
+	expiryDate: Date,	
 	enabled: Boolean
 });
 
@@ -512,6 +515,7 @@ DBERROR = 990;
 DBFETCHERR = 991;
 ERR_NODB = 992;
 PLANEXIREDERR = 993;
+SENDSMSDISABLED=994
 //ERR_NODB = "No connection to CricDream database";
 
 allUSER = 99999999;
@@ -689,7 +693,4 @@ ALLDOCTORS = 0xFFFFFFFF;
 
 MAGICNUMBER = 99999;
 
-today = new Date();
-todayDate = today.getDate();
-todayMonth = today.getMonth();
-todayYear = today.getFullYear();
+defaultPatientSms = 500;

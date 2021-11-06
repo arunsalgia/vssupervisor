@@ -53,6 +53,7 @@ red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen,
 import { dispEmail, disablePastDt, vsDialog,  encrypt} from 'views/functions';
 import { DATESTR, MONTHNUMBERSTR } from 'views/globals';
 import { dispMobile } from 'views/functions';
+import { compareDate } from 'views/functions';
 
 
 /*
@@ -340,11 +341,13 @@ export default function Customer() {
 	const [currentCustomerData, setCurrentCustomerData] = useState({});
 	
 	const [smsconfig, setSmsconfig] = useState({});
-
+	const [subscriptionList, setSubscriptionList] = useState([]);
 
 	const [emurData, setEmurData] = useState({});
 	const [emurText1, setEmurText1] = useState("");
 	const [emurText2, setEmurText2] = useState("");
+	const [emurAmount, setEmurAmount] = useState(0);
+
 	const [emurCb1, setEmurCb1] = useState(false);
 	const [emurCb2, setEmurCb2] = useState(false);
 	const [emurCb3, setEmurCb3] = useState(false);
@@ -381,6 +384,9 @@ export default function Customer() {
 			await getAddOnTypes();
 		} else if (item === "Festival") {
 			await getFestivalDates();
+		} else if (item === "Customer") {
+			setCurrentCustomerData({});
+			setCurrentCustomer("");
 		}
 		setCurrentSelection(item);
 	}
@@ -420,6 +426,18 @@ export default function Customer() {
 			console.log(e)
 			alert.error(`Error fetching SMS subscription `);
 			setSmsconfig({});
+		}
+	}
+
+	async function getSubscription(cid) {
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/addon/subscribelist/${cid}`;
+			let resp = await axios.get(myUrl);
+			setSubscriptionList(resp.data);
+		} catch (e) {
+			console.log(e)
+			alert.error(`Error fetching subscription list`);
+			setSubscriptionList([]);
 		}
 	}
 
@@ -474,6 +492,9 @@ export default function Customer() {
 	async function setSummaryCustomerSelect(item) {
 		if (item === "Sms") {
 			await getSMSConfig(currentCustomerData._id);
+		}
+		if (item === "AddOn") {
+			await getSubscription(currentCustomerData._id);
 		}
 		setCurrentCustomerSelection(item)
 	}
@@ -777,12 +798,16 @@ export default function Customer() {
 	
 	function handleAddAddOnType() {
 		setEmurText1("");
+		setEmurAmount(100);
+		setEmurText2("");
 		setIsDrawerOpened("ADDADDON")
 	}
 
 	function handleEditAddOnType(d) {
 		setEmurData(d);
 		setEmurText1(d.name);
+		setEmurAmount(d.charges);
+		setEmurText2(d.description);
 		setIsDrawerOpened("EDITADDON")
 	}
 
@@ -790,7 +815,7 @@ export default function Customer() {
 		let docList = 0xFFFFFFFF;
 		if (isDrawerOpened === "ADDADDON") {
 			try {
-				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/add/${emurText1}/${docList}`);
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/add/${emurText1}/${emurAmount}/${emurText2}/${docList}`);
 				let tmpArray = [resp.data].concat(addOnTypeArray);
 				setAddOnTypeArray(lodashSortBy(tmpArray, 'name'));
 				setIsDrawerOpened("");
@@ -799,7 +824,7 @@ export default function Customer() {
 			}
 		} else {
 			try {
-				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/edit/${emurData.name}/${emurText1}/${docList}`);
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/edit/${emurData.name}/${emurText1}/${emurAmount}/${emurText2}/${docList}`);
 				let tmpArray = addOnTypeArray.filter(x => x.name !== emurData.name);
 				tmpArray.push(resp.data);
 				setAddOnTypeArray(lodashSortBy(tmpArray, 'name'));
@@ -832,23 +857,61 @@ export default function Customer() {
 	function DisplayAllOnType() {
 		//console.log(doctorTypeArray);
 	return (
-	<Grid className={gClasses.noPadding} key="PATHDR" container >
-	{addOnTypeArray.map( (d, index) =>
-		<Grid key={"DT"+index} item xs={3} sm={3} md={3} lg={3} >
-		<Box  align="left" className={gClasses.boxStyle} borderColor="black" borderRadius={15} border={1}>
+		<div>
+		{addOnTypeArray.map( (d, index) =>
+		<Box key={"DT"+index}  align="left" className={gClasses.boxStyle} borderColor="black" borderRadius={15} border={1}>
+		<Grid className={gClasses.noPadding} key="PATHDR" container >
+		<Grid item xs={6} sm={6} md={2} lg={2} >
 			<span className={gClasses.patientInfo2}>{d.name}</span>
-			<span className={gClasses.patientInfo2}>
+		</Grid>
+		<Grid item xs={6} sm={6} md={2} lg={2} >
+			<span className={gClasses.patientInfo2}>{d.charges+"/- per annum"}</span>
+		</Grid>
+		<Grid item xs={12} sm={12} md={7} lg={7} >
+			<span className={gClasses.patientInfo2}>{d.description}</span>
+		</Grid>
+		<Grid item xs={2} sm={2} md={1} lg={1} >
 				<EditIcon color="primary"onClick={() => handleEditAddOnType(d)} />
 				<CancelIcon color="secondary" onClick={() => handleCancelAddOnType(d)} />			
-			</span>
+		</Grid>
+		</Grid>
 		</Box>
-		</Grid>	
-
-	)}
-	</Grid>
+		)}
+		</div>
 	)}
 
+	function addToWallet() {
+		setEmurAmount(0);
+		setIsDrawerOpened("ADDWALLET");
+	}
 
+	async function handleAddWallet() {
+		try {
+			axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/add/${currentCustomerData._id}/${emurAmount}`);
+			setBalance(balance+emurAmount);
+			setIsDrawerOpened("");
+		} catch(e) {
+			alert.error(`Error adding Amount to wallet`);
+		}
+
+	}
+
+	function DisplayWalletBalance(props) {
+		//console.log(doctorTypeArray);
+	return (
+		<Box key={"WALLET"}  className={gClasses.boxStyle} borderColor="black" borderRadius={15} border={1}>
+		<Grid align="center"  className={gClasses.noPadding} key="PATHDR" container >
+		<Grid item xs={6} sm={6} md={2} lg={2} >
+			<span className={gClasses.patientInfo2Blue}>{"Wallet Balance: ₹"}</span>
+			<span className={gClasses.patientInfo2Blue}>{props.balance}</span>
+		</Grid>
+		<Grid item xs={3} sm={3} md={9} lg={9} />
+		<Grid item xs={3} sm={3} md={1} lg={1} >
+			<VsButton name="Add wallet" onClick={addToWallet} />
+		</Grid>
+		</Grid>
+		</Box>
+	)}
 
 	//-----------------------------------------
 
@@ -992,6 +1055,38 @@ export default function Customer() {
 	enabled:Boolean,
 */
 
+	async function handleCustomerPlanRecharge(c) {
+		if (balance < c.fee)
+			return alert.error(`Insufficient amount in wallet. Customer fee is ${c.fee}`);
+
+		try {
+			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/deduct/${c._id}/${c.fee}/Plan Recharge`);
+			setIsDrawerOpened("");
+			setBalance(balance-c.fee);
+			// extend expiry date of customer by 1 year
+			let tmp = lodashCloneDeep(currentCustomerData);
+			let n = new Date(tmp.expiryDate);
+			n.setYear(n.getFullYear()+1);
+			tmp.expiryDate = n;
+			// update customer exiry data changes to database
+			let status = await updateCustomer(tmp);
+			if (status.success) {
+				let tmpArray;
+				tmpArray = customerArray.filter(x => x.customerNumber !== status.data.customerNumber);
+				tmpArray.push(status.data)
+				setCurrentCustomerData(status.data);
+				setCustomerArray(lodashSortBy(tmpArray, 'customerNumber'));
+				alert.success(`Updated new expiry date of ${status.data.name}`);
+			} else {
+				console.log(e);
+				alert.error(`error updating expiry date`);
+			}
+		} catch (e) {
+			console.log(e);
+			alert.error("Failed to deduct plan fee from walletr");
+		}
+	}
+
 	function handleEditCustomer(c) {
 		setCustNumber(c.customerNumber);
 		setCustName(c.name);
@@ -1018,6 +1113,17 @@ export default function Customer() {
 		setEmurDate1(moment(c.expiryDate));
 
 		setIsDrawerOpened("EDITCUST");	
+	}
+
+	async function updateCustomer(rec) {
+		let myData = encodeURIComponent(JSON.stringify(rec));
+		try {
+			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/customer/update/${myData}`);
+			return {success: true, data: resp.data}
+		} catch (e) {
+			console.log(e);
+			return {success: false}
+		}
 	}
 
 	async function handleAddEditCustomer() {
@@ -1049,23 +1155,22 @@ export default function Customer() {
 			expiryDate: emurDate1,
 		}
 
-		let myData = encodeURIComponent(JSON.stringify(tmp));
-		try {
-			let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/customer/update/${myData}`);
-			//console.log(resp.data);
+		let status = await updateCustomer(tmp);
+		
+		if (status.success) {
 			let tmpArray;
-			let oldName = "";
+			//let oldName = "";
 			if (custNumber > 0) {
-				tmpArray = customerArray.filter(x => x.customerNumber !== resp.data.customerNumber);
+				tmpArray = customerArray.filter(x => x.customerNumber !== status.data.customerNumber);
 			} else {
 				tmpArray = [].concat(customerArray);
 			}
-			tmpArray.push(resp.data)
-			setCurrentCustomerData(resp.data);
+			tmpArray.push(status.data)
+			setCurrentCustomerData(status.data);
 			setCustomerArray(lodashSortBy(tmpArray, 'customerNumber'));
-			alert.success(`Updated details of ${resp.data.name}`);
+			alert.success(`Updated details of ${status.data.name}`);
 			setIsDrawerOpened("");
-		} catch (e) {
+		} else {
 			console.log(e);
 			alert.error(`error updating details of ${custName}`);
 		}
@@ -1085,11 +1190,23 @@ export default function Customer() {
 		)} 
 
 		function DisplayCustomerDetails() {
+		let t = new Date();
+		let e = new Date(currentCustomerData.expiryDate);
+		let hasexpired = compareDate(e, t);
+		let expiryDate = `${DATESTR[e.getDate()]}/${MONTHNUMBERSTR[e.getMonth()]}/${e.getFullYear()}`;
 		return (
 		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<VsButton align="right" name="Edit Details" onClick={() => handleEditCustomer(currentCustomerData)} />
+			<div align="right" >
+			{(hasexpired < 0) &&
+			<VsButton name="Recharge Plan" onClick={() => handleCustomerPlanRecharge(currentCustomerData)} />
+			}
+			<VsButton name="Edit Details" onClick={() => handleEditCustomer(currentCustomerData)} />
+			</div>
 			<DisplaySingleLine msg1="Name" msg2={currentCustomerData.name} />
 			<BlankArea />
+			<DisplaySingleLine msg1="Plan Status" msg2={(hasexpired < 0) ? "Plan expired" : "Plan Valid"} />
+			<DisplaySingleLine msg1="Plan Expiry" msg2={expiryDate} />
+			<DisplaySingleLine msg1="Plan Charges" msg2={currentCustomerData.fee} />
 			<DisplaySingleLine msg1="Doctor Name" msg2={currentCustomerData.doctorName} />
 			<DisplaySingleLine msg1="" msg2={currentCustomerData.type} />
 			<BlankArea />
@@ -1156,6 +1273,7 @@ export default function Customer() {
 			<div>
 			<VsButton align="right" name="Back to Customer list" onClick={() => { setCurrentCustomer("")}} />
 			<DisplayCustomerHeader customer={currentCustomerData} />
+			<DisplayWalletBalance balance={balance} />
 			<DisplayCustomerFunctionHeader />
 			{(currentCustomerSelection == "Details") &&
 				<DisplayCustomerDetails />
@@ -1226,12 +1344,6 @@ export default function Customer() {
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
       />
-			{/*<TextValidator required fullWidth label="Doctor's Specialisation" className={gClasses.vgSpacing}
-				value={doctorType}
-				onChange={(event) => setDoctorType(event.target.value)}
-				validators={['noSpecialCharacters']}
-				errorMessages={[`Special Characters not permitted`]}
-			/>*/}
 			<Typography>Doctor Type</Typography>
 			<Select labelId='Doctor Type' id='time' name="time" padding={10}
 			variant="outlined" required fullWidth label="Time" 
@@ -1243,7 +1355,7 @@ export default function Customer() {
 			}}
 			onChange={(event) => setDoctorType(event.target.value)}
 			>
-			{doctorTypeArray.map(x =>	<MenuItem key={x.anme} value={x.name}>{x.name}</MenuItem>)}
+			{doctorTypeArray.map(x =>	<MenuItem key={x.name} value={x.name}>{x.name}</MenuItem>)}
 			</Select>
 			<TextValidator required fullWidth label="Address1" className={gClasses.vgSpacing}
 				value={custAddr1}
@@ -1287,7 +1399,7 @@ export default function Customer() {
 				value={custFee} 
 				onChange={() => { setCustFee(event.target.value) }}
 				validators={['minNumber:1000']}
-        errorMessages={['Invalid Customer Code']}
+        errorMessages={['Invalid Customer Fee']}
       />
 			<BlankArea />
 			<ShowResisterStatus/>
@@ -1318,6 +1430,18 @@ export default function Customer() {
 			<TextValidator required fullWidth label="Add On Type" className={gClasses.vgSpacing}
 				value={emurText1}
 				onChange={(event) => setEmurText1(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+      />
+			<TextValidator required fullWidth type="number" label="Yearly Charges" className={gClasses.vgSpacing}
+				value={emurAmount}
+				onChange={(event) => setEmurAmount(Number(event.target.value))}
+				validators={['minNumber:100']}
+				errorMessages={[`Yearly charges should be alleast 100`]}
+      />
+			<TextValidator required fullWidth label="Description" className={gClasses.vgSpacing}
+				value={emurText2}
+				onChange={(event) => setEmurText2(event.target.value)}
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
       />
@@ -1393,6 +1517,22 @@ export default function Customer() {
 		<ValidComp />  
 		</ValidatorForm>
 	}		
+	{(isDrawerOpened === "ADDWALLET") &&
+			<ValidatorForm className={gClasses.form} onSubmit={handleAddWallet}>
+			<Typography className={gClasses.title}>{"Add to wallet"}</Typography>
+			<TextValidator required fullWidth type="number" label="Wallet Amount" className={gClasses.vgSpacing}
+				value={emurAmount}
+				onChange={(event) => setEmurAmount(Number(event.target.value))}
+				validators={['minNumber:100']}
+				errorMessages={[`Amount should be at least 100`]}
+      />
+			<BlankArea />
+			<ShowResisterStatus/>
+      <BlankArea/>
+			<VsButton align="center" name={"Add"} type="submit" />
+			<ValidComp />  
+    </ValidatorForm>
+	}
 	</Box>
 	</Drawer>		
 	</Container>
