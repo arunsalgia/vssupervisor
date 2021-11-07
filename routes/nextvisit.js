@@ -17,8 +17,9 @@ router.get('/upcoming/:cid', async function(req, res, next) {
 	let d = new Date();
 	d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
 	let rec = await M_NextVisit.find({cid: cid, nextVisitDate: {$gte: d}}).sort({nextVisitDate: 1});
-	console.log(rec);
+	//console.log(rec);
 
+	/*
 	if (rec.length === 0) return sendok(res, {visit: [], patient: []});
 
 	let allPids = _.map(rec, 'pid');
@@ -27,7 +28,9 @@ router.get('/upcoming/:cid', async function(req, res, next) {
 	for(let i=0; i<allPatients.length; ++i) {
 		allPatients[i].email = dbToSvrText(allPatients[i].email)
 	}
-	sendok(res, {visit: rec, patient: allPatients});
+	*/
+
+	sendok(res, {visit: rec, patient: null});
 });
 
 router.get('/missed/:cid', async function(req, res, next) {
@@ -37,17 +40,20 @@ router.get('/missed/:cid', async function(req, res, next) {
 	let d = new Date();
 	d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
 	let rec = await M_NextVisit.find({cid: cid, nextVisitDate: {$lte: d}}).sort({nextVisitDate: -1});
-	console.log(rec);
+	//console.log(rec);
 
-	if (rec.length === 0) return sendok(res, {visit: [], patient: []});
 	
+	/*
+	if (rec.length === 0) return sendok(res, {visit: [], patient: []});
+
 	let allPids = _.map(rec, 'pid');
 	allPids = _.uniqBy(allPids);
 	let allPatients = await M_Patient.find({cid: cid, pid: {$in: allPids}});
 	for(let i=0; i<allPatients.length; ++i) {
 		allPatients[i].email = dbToSvrText(allPatients[i].email)
 	}
-	sendok(res, {visit: rec, patient: allPatients});
+	*/
+	sendok(res, {visit: rec, patient: null});
 });
 
 

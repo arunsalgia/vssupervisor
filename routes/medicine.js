@@ -1,9 +1,34 @@
 var router = express.Router();
 const { 
 	ALPHABETSTR,
-	getLoginName, getDisplayName,
-	getMaster, setMaster,
+	getLoginName, 
 } = require('./functions'); 
+
+let arun_medicine = {};
+
+function clearMedicine(cid)  {arun_medicine[cid] = []};
+
+async function loadMedicine(cid) {
+	let hasData = false;
+	if (arun_medicine[cid]) 
+	if (arun_medicine[cid].length > 0)
+		hasData = true;
+
+	//console.log(hasData);
+
+	if (!hasData) {
+		console.log("Reading medicine for ", cid);
+		let hRec = await M_Medicine.find({cid: cid},  {name: 1, _id: 0}).sort({name: 1});
+		arun_medicine[cid] = hRec;
+		//console.log(arun_medicine[cid]);
+	}
+} 
+
+async function getAllMedicine(cid) {
+	await loadMedicine(cid);
+	return arun_medicine[cid];
+}
+
 
 router.use('/', function(req, res, next) {
   setHeader(res);
@@ -20,6 +45,8 @@ router.get('/add/:cid/:newMedicine', async function(req, res, next) {
   
   var {cid, newMedicine } = req.params;
 	
+	clearMedicine(cid);
+
 	let id = getLoginName(newMedicine);
   var tmp = await M_Medicine.findOne({cid: cid, id: id});
   if (!tmp) {
@@ -38,6 +65,8 @@ router.get('/add/:cid/:newMedicine', async function(req, res, next) {
 router.get('/edit/:cid/:oldMedicineName/:newMedicineName', async function(req, res, next) {
   setHeader(res);
   
+	clearMedicine(cid);
+
   var {cid, oldMedicineName, newMedicineName} = req.params;
 	let id;
 	var mRec;
@@ -74,6 +103,8 @@ router.get('/delete/:cid/:delMedicine', async function(req, res, next) {
   
   var { cid, delMedicine } = req.params;
 	
+	clearMedicine(cid);
+
 	let id = getLoginName(delMedicine);
 	console.log(id);
 	
@@ -91,10 +122,12 @@ router.get('/list/:cid', async function(req, res, next) {
   
   var { cid } = req.params;
 	
-	M_Medicine.find({cid: cid},  {name: 1, _id: 0}, function(err, objs) {
-		objs = _.sortBy(objs, 'name');
-		sendok(res, objs);
-  });
+	//M_Medicine.find({cid: cid},  {name: 1, _id: 0}, function(err, objs) {
+	//	objs = _.sortBy(objs, 'name');
+	//	sendok(res, objs);
+ /// });
+ let allRecs = await getAllMedicine(cid);
+ sendok(res, allRecs);
 });
 
 
@@ -162,7 +195,7 @@ router.get('/filter/:cid', async function(req, res, next) {
 });
  
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

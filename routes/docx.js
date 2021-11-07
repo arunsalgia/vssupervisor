@@ -115,7 +115,7 @@ router.get('/visit/:cid/:pid', async function(req, res, next) {
 	//console.log(pRec);
 	
 	// need doctor name in the end
-	let pCustomerRec = M_Customer.findOne({_id: cid});
+	//let pCustomerRec = akshuGetCustomer(cid);
 	
 	
 	// Documents contain sections, you can have multiple sections per document, go here to learn more about sections
@@ -252,7 +252,7 @@ router.get('/visit/:cid/:pid', async function(req, res, next) {
 	allPara.push(blankLine());
 	allPara.push(blankLine());
 	
-	let customerRec = await pCustomerRec;
+	let customerRec = await akshuGetCustomer(cid);
 	//console.log(customerRec);
 	text = [];
 	text.push(boldText(customerRec.doctorName+"   "));
@@ -413,6 +413,9 @@ router.get('/receipt/:cid/:pid/:tid', async function(req, res, next) {
 	allPara.push(blankLine());
 
 	let customerRec = await akshuGetCustomer(cid);
+	console.log(customerRec);
+
+	
 	text = [];
 	text.push(boldText(customerRec.doctorName));
 	allPara.push(normalPara(text));

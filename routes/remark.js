@@ -1,9 +1,33 @@
 var router = express.Router();
 const { 
-	ALPHABETSTR,
-	getLoginName, getDisplayName,
-	getMaster, setMaster,
+	getLoginName, 
 } = require('./functions'); 
+
+let arun_remark = {};
+
+function clearRemark(cid)  {arun_remark[cid] = []};
+
+async function loadRemark(cid) {
+	let hasData = false;
+	if (arun_remark[cid]) 
+	if (arun_remark[cid].length > 0)
+		hasData = true;
+
+	//console.log(hasData);
+
+	if (!hasData) {
+		console.log("Reading remark for ", cid);
+		let hRec = await M_Medicine.find({cid: cid},  {name: 1, _id: 0}).sort({name: 1});
+		arun_remark[cid] = hRec;
+		//console.log(arun_remark[cid]);
+	}
+} 
+
+async function getAllRemarks(cid) {
+	await loadRemark(cid);
+	return arun_remark[cid];
+}
+
 
 router.use('/', function(req, res, next) {
   setHeader(res);
@@ -20,6 +44,7 @@ router.get('/add/:cid/:newNote', async function(req, res, next) {
   
   var {cid, newNote } = req.params;
 	
+	clearRemark(cid);
 	let id = getLoginName(newNote);
   var mRec = await M_Remark.findOne({cid: cid, id: id});
 	if (mRec) return senderr(res, 601, 'Note already in database.');
@@ -37,10 +62,12 @@ router.get('/add/:cid/:newNote', async function(req, res, next) {
 router.get('/edit/:cid/:oldNote/:newNote', async function(req, res, next) {
   setHeader(res);
   
-  var {cid, oldNote, newNote, desc, precaution} = req.params;
+  var {cid, oldNote, newNote } = req.params;
 	let id;
 	var mRec;
 	
+	clearRemark(cid);
+
 	let old_lname = getLoginName(oldNote);
 	let new_lname = getLoginName(newNote);
 	
@@ -76,6 +103,8 @@ router.get('/delete/:cid/:delNote', async function(req, res, next) {
 	let id = getLoginName(delNote);
 	console.log(id);
 	
+	clearRemark(cid);
+
 	M_Remark.deleteOne({cid: cid, id: id}).then(function(){
     //console.log("Data deleted"); // Success
 		sendok(res, "1 note deleted");
@@ -90,14 +119,18 @@ router.get('/list/:cid', async function(req, res, next) {
   
   var { cid } = req.params;
 	
+	/*
 	M_Remark.find({cid: cid}, {_id: 0, name: 1}, function(err, objs) {
 		objs = _.sortBy(objs, 'name');
 		sendok(res, objs);
   });
+	*/
+	let allRecs = getAllRemarks(cid);
+	sendok(res, allRecs);
 });
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

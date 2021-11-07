@@ -1,4 +1,4 @@
-var router = express.Router();
+var patientRouter = express.Router();
 const { 
 	ALPHABETSTR,
 	getLoginName, getDisplayName,
@@ -8,7 +8,40 @@ const {
 	getNewPid, getCustomerNumber, checkCustomerExpiry,
 } = require('./functions'); 
 
-router.use('/', function(req, res, next) {
+
+let arun_patient = {};
+
+function clearPatient(cid)  {arun_patient[cid] = []};
+
+async function loadPatient(cid) {
+	let hasData = false;
+	if (arun_patient[cid]) 
+	if (arun_patient[cid].length > 0)
+		hasData = true;
+
+	//console.log(hasData);
+
+	if (!hasData) {
+		console.log("Reading patient for ", cid);
+		let hRec = await M_Patient.find({cid: cid, enabled: true}).sort({displayName: 1});
+		hRec = emailForClient(hRec);
+		arun_patient[cid] = hRec;
+		//console.log(arun_patient[cid]);
+	}
+}
+
+async function getAllPatients(cid) {
+	await loadPatient(cid);
+	return arun_patient[cid];
+}
+
+async function getPatientByPid(cid, pid) {
+	await loadPatient(cid);
+	let ppp = arun_patient.find(x => x.cid == cid && x.pid == pid);
+	return ppp;
+}
+
+patientRouter.use('/', function(req, res, next) {
   setHeader(res);
   if (!db_connection) { senderr(res, DBERROR,  ERR_NODB); return; }
  
@@ -17,6 +50,13 @@ router.use('/', function(req, res, next) {
 
 // send list of in chunks of blocks.
 // Each Block will contain #medicines which is configured in MEDBLOCK
+function emailForClient(myArray) {
+	for(let i=0; i<myArray.length; ++i) {
+		myArray[i].email = dbToSvrText(myArray[i].email);
+	}
+	return myArray;
+}
+
 function getDob(age) {
 	let myBirthYear;
 	if (age === 0) {
@@ -41,7 +81,7 @@ function getAge(birthDate)
     return age;
 }
 
-router.get('/checkexpiry/:cid', async function(req, res, next) {
+patientRouter.get('/checkexpiry/:cid', async function(req, res, next) {
   setHeader(res);
   
   var {cid} = req.params;
@@ -51,13 +91,15 @@ router.get('/checkexpiry/:cid', async function(req, res, next) {
 });
 
 
-router.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {
+patientRouter.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {
   setHeader(res);
   
   var {cid, pName, pGender, pAge, pEmail, pMobile} = req.params;
 	let mRec;
 	let lname = getLoginName(pName);
 	
+	clearPatient(cid);
+
 	// verify if name already exists
 	mRec = await M_Patient.findOne({cid: cid, name: lname});
   if (mRec) { senderr(res, 601, 'Patient name already in database.'); return; }
@@ -89,12 +131,14 @@ router.get('/add/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(re
 });
 
 
-router.get('/addwithdob/:cid/:pName/:pDob/:pGender/:pEmail/:pMobile', async function(req, res, next) {
+patientRouter.get('/addwithdob/:cid/:pName/:pDob/:pGender/:pEmail/:pMobile', async function(req, res, next) {
   setHeader(res);
   
   var {cid, pName, pGender, pDob, pEmail, pMobile} = req.params;
 	let mRec;
 	let lname = getLoginName(pName);
+	
+	clearPatient(cid);
 	
 	// verify if name already exists
 	mRec = await M_Patient.findOne({cid: cid, name: lname});
@@ -127,11 +171,14 @@ router.get('/addwithdob/:cid/:pName/:pDob/:pGender/:pEmail/:pMobile', async func
 	sendok(res, mRec);
 });
 
-router.get('/edit/:cid/:oldName/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {
+patientRouter.get('/edit/:cid/:oldName/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {
   setHeader(res);
   
   var {cid, oldName, pName, pGender, pAge, pEmail, pMobile} = req.params;
 	var mRec;
+
+	clearPatient(cid);
+	
 
 	let old_lname = getLoginName(oldName);
 	let new_lname = getLoginName(pName);
@@ -165,12 +212,14 @@ router.get('/edit/:cid/:oldName/:pName/:pAge/:pGender/:pEmail/:pMobile', async f
 	sendok(res, mRec);
 });
 
-router.get('/editwithdob/:cid/:oldName/:pName/:pDob/:pGender/:pEmail/:pMobile', async function(req, res, next) {
+patientRouter.get('/editwithdob/:cid/:oldName/:pName/:pDob/:pGender/:pEmail/:pMobile', async function(req, res, next) {
   setHeader(res);
   
   var {cid, oldName, pName, pGender, pDob, pEmail, pMobile} = req.params;
 	var mRec;
 
+	clearPatient(cid);
+	
 	let old_lname = getLoginName(oldName);
 	let new_lname = getLoginName(pName);
 	
@@ -206,7 +255,7 @@ router.get('/editwithdob/:cid/:oldName/:pName/:pDob/:pGender/:pEmail/:pMobile', 
 	sendok(res, mRec);
 });
 
-router.get('/new/:cid/:pName', async function(req, res, next) {
+patientRouter.get('/new/:cid/:pName', async function(req, res, next) {
   setHeader(res);
   
   var {cid, pName} = req.params;
@@ -237,10 +286,13 @@ router.get('/new/:cid/:pName', async function(req, res, next) {
 	sendok(res, mRec);
 });
 
-router.get('/update/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {
+patientRouter.get('/update/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function(req, res, next) {
   setHeader(res);
   var {cid, pName, pGender, pAge, pEmail, pMobile} = req.params;
 	
+	clearPatient(cid);
+	
+
 	let lname = getLoginName(pName);
 	let dname = getDisplayName(pName);
 	let email = svrToDbText(pEmail);
@@ -261,10 +313,12 @@ router.get('/update/:cid/:pName/:pAge/:pGender/:pEmail/:pMobile', async function
     senderr(res, 601, `Patient ${pName} not in database.`);
 });
 
-router.get('/delete/:cid/:patient', async function(req, res, next) {
+patientRouter.get('/delete/:cid/:patient', async function(req, res, next) {
   setHeader(res);
   
   var { cid, patient } = req.params;
+	
+	clearPatient(cid);
 	
 	let id = getLoginName(patient);
 	console.log(id);
@@ -278,14 +332,9 @@ router.get('/delete/:cid/:patient', async function(req, res, next) {
 	});
 });
 
-function emailForClient(myArray) {
-	for(let i=0; i<myArray.length; ++i) {
-		myArray[i].email = dbToSvrText(myArray[i].email);
-	}
-	return myArray;
-}
 
-router.get('/listbypid/:cid/:pid', async function(req, res, next) { 
+
+patientRouter.get('/listbypid/:cid/:pid', async function(req, res, next) { 
   setHeader(res);
   
   var { cid, pid } = req.params;
@@ -296,7 +345,7 @@ router.get('/listbypid/:cid/:pid', async function(req, res, next) {
 	sendok(res, allPatient);
 });
 
-router.get('/listbyname/:cid/:partid', async function(req, res, next) { 
+patientRouter.get('/listbyname/:cid/:partid', async function(req, res, next) { 
   setHeader(res);
   
   var { cid, partid } = req.params;
@@ -308,18 +357,20 @@ router.get('/listbyname/:cid/:partid', async function(req, res, next) {
 	sendok(res, allPatient);
 });
 
-router.get('/list/:cid', async function(req, res, next) {
+patientRouter.get('/list/:cid', async function(req, res, next) {
   setHeader(res);
   var {cid} = req.params;
 	
 	//console.log(cid);
 	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
 	
-	var allPatient = await getPatient({cid: cid, enabled: true})
-	sendok(res, allPatient);
+	//var allPatient = await getPatient({cid: cid, enabled: true})
+	let allPatients = await getAllPatients(cid);
+	//console.log(allPatients);
+	sendok(res, allPatients);
 });
 
-router.get('/alphabetlist/:cid/:myChar', async function(req, res, next) {
+patientRouter.get('/alphabetlist/:cid/:myChar', async function(req, res, next) {
   setHeader(res);
   
   var { cid, myChar } = req.params;
@@ -331,7 +382,7 @@ router.get('/alphabetlist/:cid/:myChar', async function(req, res, next) {
 	sendok(res, allPatient);
 });
 
-router.get('/count/:cid', async function(req, res, next) {
+patientRouter.get('/count/:cid', async function(req, res, next) {
   setHeader(res);
 	var { cid } = req.params;
 	
@@ -357,7 +408,7 @@ router.get('/count/:cid', async function(req, res, next) {
 });
 
 
-router.get('/filter/:cid/:partname', async function(req, res, next) { 
+patientRouter.get('/filter/:cid/:partname', async function(req, res, next) { 
   setHeader(res);
   
   var { cid, partname } = req.params;
@@ -370,7 +421,7 @@ router.get('/filter/:cid/:partname', async function(req, res, next) {
 	sendok(res, allPatient);
 });
 
-router.get('/filter/:cid', async function(req, res, next) { 
+patientRouter.get('/filter/:cid', async function(req, res, next) { 
   setHeader(res);
   var {cid} = req.params;
 	
@@ -382,7 +433,7 @@ router.get('/filter/:cid', async function(req, res, next) {
 	sendok(res, allPatient);
 });
  
-router.get('/visitcount/:cid/:pid', async function(req, res, next) { 
+patientRouter.get('/visitcount/:cid/:pid', async function(req, res, next) { 
   setHeader(res);
   var {cid, pid} = req.params;
 	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
@@ -418,7 +469,7 @@ router.get('/visitcount/:cid/:pid', async function(req, res, next) {
 });
 
 
-router.get('/test', async function(req, res, next) { 
+patientRouter.get('/test', async function(req, res, next) { 
   setHeader(res);
   
 	let allRecs = await M_Visit.find({});
@@ -434,7 +485,7 @@ router.get('/test', async function(req, res, next) {
 	sendok(res, "Done");
 });
 
-router.get('/pidtest', async function(req, res, next) { 
+patientRouter.get('/pidtest', async function(req, res, next) { 
   setHeader(res);
   
 	let allRecs = await M_Patient.find({});
@@ -456,10 +507,13 @@ async function getPatient(filter) {
 
  
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 } 
 
-module.exports = router;
+module.exports = {
+	patientRouter,
+	getPatientByPid,
+}

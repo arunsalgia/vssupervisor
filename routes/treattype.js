@@ -1,7 +1,33 @@
 var router = express.Router();
 const { 
-	getLoginName, getDisplayName,
+	getLoginName,
 } = require('./functions'); 
+
+let arun_treatType = {};
+
+function clearTreatType(cid)  {arun_treatType[cid] = []};
+
+async function loadTreatType(cid) {
+	let hasData = false;
+	if (arun_treatType[cid]) 
+	if (arun_treatType[cid].length > 0)
+		hasData = true;
+
+	//console.log(hasData);
+
+	if (!hasData) {
+		console.log("Reading treaytype for ", cid);
+		let hRec = await M_Treattype.find({cid: cid}, {_id: 0}).sort({name: 1});
+		arun_treatType[cid] = hRec;
+		//console.log(arun_treatType[cid]);
+	}
+}
+
+async function getAllTreatType(cid) {
+	await loadTreatType(cid);
+	return arun_treatType[cid];
+}
+
 
 router.use('/', function(req, res, next) {
   setHeader(res);
@@ -14,8 +40,9 @@ router.get('/list/:cid', async function(req, res, next) {
   setHeader(res);
 	var {cid} = req.params;
 	
-	let rec = await M_Treattype.find({cid: cid}, {_id: 0}).sort({name: 1});
+	//let rec = await M_Treattype.find({cid: cid}, {_id: 0}).sort({name: 1});
 	//console.log(rec);
+	let rec = getAllTreatType(cid);
 	sendok(res, rec);
 });
 
@@ -23,6 +50,8 @@ router.get('/list/:cid', async function(req, res, next) {
 router.post('/add/:cid/:infoMsg', async function(req, res, next) {
   setHeader(res);
   var {cid, infoMsg} = req.params;
+
+	clearTreatType(cid);
 
 	let id = getLoginName(infoMsg);
 	// just check if already exists
@@ -44,13 +73,15 @@ router.post('/delete/:cid/:infoMsg', async function(req, res, next) {
   setHeader(res);
 	var {cid, infoMsg} = req.params;
 	
+	clearTreatType(cid);
+	
 	let id = getLoginName(infoMsg);
 	await M_Treattype.deleteOne({cid: cid, id: id});
 	sendok(res, "done");
 });
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

@@ -163,24 +163,34 @@ async function akshuGetCustomer(cid) {
   if (arun_customer.length === 0) {
     console.log("A;; customer readomh-------------------");
     arun_customer = await M_Customer.find({});
+    //console.log(arun_customer);
   }
-  let retUser = arun_customer.find(function(post) { if(post._id == cid) return true; });
+  let tmp = arun_customer.find(function(post) { if(post._id == cid) return true; });
+  let retUser;
+  if (tmp) retUser = _.cloneDeep(tmp)
   return retUser;
 } 
 
-async function akshuUpdateCustomer(cidData) {
-  arun_customer = arun_customer.filter(x => x.cid !== cidData.cid);
-  arun_customer.push(cidData);
-  await cidData.save();
+async function akshuGetAllCustomer() {
+  if (arun_customer.length === 0) {
+    console.log("A;; customer readomh-------------------");
+    arun_customer = await M_Customer.find({});
+    //console.log(arun_customer); 
+  }
+  let retUser = _.cloneDeep(arun_customer);
+  return retUser;
+}  
+
+function akshuUpdateCustomer(cidData) {
+  arun_customer = [];
 } 
 
-async function akshuAddCustomer(cidData) {
-  arun_customer.push(cidData);
-  await cidData.save();;
+function akshuAddCustomer(cidData) {
+  arun_customer = [];
 } 
 
 async function akshuDeleteCustomer(cidData) {
-  arun_customer = arun_customer.filter(x => x.cid !== cidData.cid);
+  arun_customer = [];
   await M_Customer.deleteOne({cid: cidData});
 } 
 
@@ -429,7 +439,8 @@ module.exports = {
   akshuUpdUser,
   // delete
   // customer
-  akshuGetCustomer, akshuAddCustomer, akshuUpdateCustomer, akshuDeleteCustomer, akshuClearCustomer,
+  akshuGetCustomer, akshuAddCustomer, akshuUpdateCustomer, 
+  akshuDeleteCustomer, akshuClearCustomer, akshuGetAllCustomer,
   getUserBalance,
 	rechargeCount,
 	numberDate, intToString,

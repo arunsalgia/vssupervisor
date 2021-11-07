@@ -6,6 +6,10 @@ const {
 	generateOrder,
 	akshuClearCustomer,
 	akshuGetCustomer,
+	akshuAddCustomer,
+	akshuUpdateCustomer,
+	akshuGetAllCustomer,
+	rechargeCount,
 } = require('./functions');
 
 const { sendAppointmentSms, sendExpirySms,  } = require("./sms");
@@ -19,19 +23,21 @@ router.use('/', function(req, res, next) {
 
 router.get('/list', async function(req, res, next) {
   setHeader(res);
-	let rec = await M_Customer.find({});
+	let rec = await akshuGetAllCustomer();
 	for(let i=0; i<rec.length; ++i) {
+		//console.log(rec[i].email);
 		rec[i].email = dbToSvrText(rec[i].email);
+		//console.log(rec[i].email);
 	}
 	//console.log(rec);
 	sendok(res, rec);
-});
+}); 
 
 router.get('/getinfo/:cid', async function(req, res, next) {
   setHeader(res);
 	var {cid} = req.params;
 	
-	let rec = await M_Customer.findOne({_id: cid});
+	let rec = await akshuGetCustomer(cid);
 	if (rec)	sendok(res, rec);
 	else      senderr(res, 601, "Invalid cid");
 })
@@ -45,9 +51,8 @@ router.get('/add/:userName', async function(req, res, next) {
 	rec.plan = "YEARLY"
 	rec.expiryDate = new Date(2030, 12, 31);
 	rec.enabled = true;
-	rec.save();
-	akshuClearCustomer();
-	sendok(res, "done");
+	akshuAddCustomer(rec);
+	sendok(res, rec);
 });
 
 router.get('/update/:custData', async function(req, res, next) {
@@ -55,16 +60,17 @@ router.get('/update/:custData', async function(req, res, next) {
 	var {custData} = req.params;
 	
 	custData = JSON.parse(custData);
-	console.log(custData);
+	//console.log(custData);
 
 	let oldName = "";
 	let rec = null;
+
 	if (custData.customerNumber > 0) {
 		rec = await M_Customer.findOne({customerNumber: custData.customerNumber});
 		if (!rec) return senderr(res, 601, "Customer record not found");
 		oldName = rec.name;
 	} else {
-		let tmp = await M_Customer.find({}).limit(1).sort({customerNumber: -1});
+		let tmp = await M_Customer.find({}, {_id: 0, customerNumber: 1}).limit(1).sort({customerNumber: -1});
 		//console.log(tmp);
 		rec = new M_Customer();
 		rec.customerNumber = (tmp.length > 0) ? tmp[0].customerNumber+1 : 999;
@@ -99,25 +105,26 @@ router.get('/update/:custData', async function(req, res, next) {
 
 	rec.expiryDate = d;
 
-	// now create user
+	// now create user 
 
-	
+	if (oldName !== "")
+		akshuUpdateCustomer(rec);
+	else
+		akshuAddCustomer(rec); 
 	await rec.save();
-	akshuClearCustomer();
-
+	
 	rec.email = dbToSvrText(rec.email);
 	sendok(res, rec);
-});
+}); 
 
-
+ 
 router.get('/setworkinghours/:cid/:workingHours', async function(req, res, next) {
   setHeader(res);
 	var {cid, workingHours} = req.params;
 	
-	let rec = await M_Customer.findOne({_id: cid});
+	let rec = await akshuGetCustomer(cid);
 	rec.workingHours = JSON.parse(workingHours);
-	rec.save();
-	akshuClearCustomer();
+	akshuUpdateCustomer(rec);
 	sendok(res, rec);
 })
 
@@ -125,7 +132,7 @@ router.get('/test', async function(req, res, next) {
   setHeader(res);
 	let i, cNum;
 
-	let allRecs = await M_Customer.find({})
+	let allRecs = await akshuGetAllCustomer();
 	for(i=0,cNum=100; i<allRecs.length; ++i, ++cNum) {
 		//allRecs[i].customerNumber = cNum;
 		//allRecs[i].save();
@@ -154,7 +161,7 @@ cron.schedule('5 0 * * *', async () => {
 
 	// STEP 1 ---> check if  expiry for any customer
 	console.log("Check for expiry");
-	let allCustomers = await M_Customer.find({});
+	let allCustomers = await akshuGetAllCustomer();
 	for(let i = 0; i < allCustomers.length; ++i) {
 		let isExpired = checkDate(allCustomers[i].expiryDate);
 		console.log(allCustomers[i].name, isExpired);
@@ -172,9 +179,10 @@ cron.schedule('5 0 * * *', async () => {
 	
 	let allOldPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: chkOrder} } );	
 	//console.log(allOldPendingAppts);
+
 	for(let i=0; i<allOldPendingAppts.length; ++i) {
 		//console.log(allOldPendingAppts[i]);
-		sendExpirySms(allOldPendingAppts[i].cid, allOldPendingAppts[i].pid);
+		sendExpirySms(allOldPendingAppts[i].cid, allOldPendingAppts[i].pid, allOldPendingAppts[i].apptTime);
 		allOldPendingAppts[i].visit = VISITTYPE.expired;
 		allOldPendingAppts[i].save();
 	}

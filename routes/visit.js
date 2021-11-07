@@ -10,7 +10,7 @@ const {
 	getMaster, setMaster,
 	base64ToString,
 	setOldPendingAppointment,
-	generateOrder, generateOrderByDate,
+	generateOrder, generateOrderByDate, akshuGetCustomer,
 } = require('./functions'); 
 
 const { sendVisitSms } = require("./sms");
@@ -98,7 +98,7 @@ router.get('/printdoc/:cid/:pid', async function(req, res, next) {
 	//console.log(pRec);
 	
 	// need doctor name in the end
-	let pCustomerRec = M_Customer.findOne({_id: cid});
+	//let pCustomerRec = M_Customer.findOne({_id: cid});
 	
 	
 	// Documents contain sections, you can have multiple sections per document, go here to learn more about sections
@@ -234,7 +234,7 @@ router.get('/printdoc/:cid/:pid', async function(req, res, next) {
 	allPara.push(blankLine());
 	allPara.push(blankLine());
 	
-	let customerRec = await pCustomerRec;
+	let customerRec = await akshuGetCustomer(cid);
 	text = [];
 	text.push(boldText(customerRec.doctorName+"   "));
 	allPara.push(rightAlignedPara(text));
@@ -763,7 +763,7 @@ function testPara(test) {
 }
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

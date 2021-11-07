@@ -6,6 +6,7 @@ var router = express.Router();
 
 const {
 	encrypt, decrypt, dbencrypt, dbdecrypt, dbToSvrText, 
+	akshuGetCustomer,
 } = require('./functions'); 
 
 
@@ -49,7 +50,7 @@ router.get('/order/:userCid/:amount', async function( req, res) {
 
 	var {userCid, amount} = req.params;
 	
-	let customerRec = await M_Customer.findOne({_id: userCid});
+	let customerRec = await akshuGetCustomer(userCid);
 	if (!customerRec) return senderr(res, 601, "Invalid Customer Id");
 	//console.log(customerRec);
 	

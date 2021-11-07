@@ -4,6 +4,51 @@ const {  akshuGetUser, GroupMemberCount,
 } = require('./functions'); 
 var router = express.Router();
 
+let arun_holiday = {};
+
+function clearHoliday(cid)  {arun_holiday[cid] = []};
+
+async function loadHoliday(cid) {
+	let hasData = false;
+	if (arun_holiday[cid]) 
+	if (arun_holiday[cid].length > 0)
+		hasData = true;
+
+	//console.log(hasData);
+
+	if (!hasData) {
+		console.log("Reading holidays for ", cid);
+		let d = new Date();
+		d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+		//console.log(d)
+		let hRec = await M_Holiday.find({cid: cid, holidayDate: {$gte: d} });
+		arun_holiday[cid] = hRec;
+		//console.log(arun_holiday[cid]);
+	}
+}
+
+async function isHoliday(cid, year, month, date) {
+	await loadHoliday(cid);
+	let tmp = arun_holiday[cid].filter(x => x.date == date && x.month == month && x.year == year);
+	return tmp.length > 0;
+}
+
+async function monthlyHoliday(cid, year, month) {
+	await loadHoliday(cid);
+	//console.log("Monthly", year, month);
+	//console.log(arun_holiday[cid]);
+	let tmp = arun_holiday[cid].filter(x => (x.month == month) && (x.year == year));
+	//console.log("res", tmp)
+	return tmp;
+}
+
+async function fromTodayHoliday(cid) {
+	await loadHoliday(cid);
+	let d = new Date();
+	d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+	let tmp = arun_holiday[cid].filter(x => x.holidayDate.getTime() >= d.getTime());
+	return tmp;
+}
 
 /* GET users listing. */
 router.use('/', function(req, res, next) {
@@ -19,7 +64,7 @@ router.get('/delete/:cid/:year/:month/:date', async function (req, res) {
   setHeader(res);
   var {cid, date, month, year } = req.params;
 	
-	
+	clearHoliday(cid)
 	let hRec = await M_Holiday.deleteOne({cid: cid, date: Number(date), month: Number(month), year: Number(year)});
 	sendok(res, "OK");
 });
@@ -55,6 +100,8 @@ router.get('/set/:cid/:year/:month/:date/:desc', async function (req, res) {
   setHeader(res);
   var {cid, date, month, year, desc} = req.params;
 	
+	clearHoliday(cid);
+
 	let hRec = await M_Holiday.findOne({cid: cid, date: date, month: month, year: year});
 	console.log(hRec);
 	
@@ -74,9 +121,10 @@ router.get('/set/:cid/:year/:month/:date/:desc', async function (req, res) {
 
 router.get('/monthly/:cid/:year/:month', async function (req, res) {
   setHeader(res);
-  var {cid, month, year } = req.params;
+  var {cid, year, month } = req.params;
 	
-	let hRec = await M_Holiday.find({cid: cid, month: month, year: year}).sort({year: 1, month: 1, date: 1});
+	//let hRec = await M_Holiday.find({cid: cid, month: month, year: year}).sort({year: 1, month: 1, date: 1});
+	let hRec = await monthlyHoliday(cid, year, month);
 	//console.log(hRec);
 	sendok(res, hRec);
 });		
@@ -94,11 +142,11 @@ router.get('/yearly/:cid/:year', async function (req, res) {
 router.get('/fromtoday/:cid', async function (req, res) {
   setHeader(res);
   var {cid} = req.params;
-	let d = new Date();
-	d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+//	let d = new Date();
+	//d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
 	
-	let hRec = await M_Holiday.find({cid: cid, holidayDate: {$gte: d} });
-
+	//let hRec = await M_Holiday.find({cid: cid, holidayDate: {$gte: d} });
+	let hRec = fromTodayHoliday(cid);
 	sendok(res, hRec);
 });		
 
@@ -107,8 +155,8 @@ router.get('/isholiday/:cid/:year/:month/:date', async function (req, res) {
   setHeader(res);
   var { cid, year, month, date } = req.params;
 	
-	let hRec = await M_Holiday.findOne({cid: cid, date: date, month: month, year: year});
-	sendok(res, {status: (hRec != null) });
+	//let hRec = await M_Holiday.findOne({cid: cid, date: date, month: month, year: year});
+	sendok(res, {status: await isHoliday(cid, year, month, date) });
 });		
 
 router.get('/test/:cid/:year/:month', async function (req, res) {

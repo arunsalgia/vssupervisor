@@ -523,7 +523,7 @@ export default function Summary() {
 			</Grid>
 		</Grid>
 		{visitArray.map( (v, index) => {
-			let myPat = patientArray.find(x => x.pid === v.pid);
+			let myPat = patientMasterArray.find(x => x.pid === v.pid);
 			let myName = (myPat) ? myPat.displayName : "";
 			let d = new Date(v.nextVisitDate);
 			let visitDate = `${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()}`;
@@ -557,25 +557,25 @@ export default function Summary() {
 			try {
 				let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nextvisit/missed/${userCid}`)
 				setVisitArray(resp.data.visit);
-				setPatientArray(resp.data.patient);
+				//setPatientArray(resp.data.patient);
 				//console.log(resp.data);
 				setCurrentPendingApptSelection(item);
 			} catch (e) {
 				console.log(e)
 				setVisitArray([]);
-				setPatientArray([]);
+				//setPatientArray([]);
 			} 
 		} else if (item === "Upcoming") {
 			try {
 				let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nextvisit/upcoming/${userCid}`)
 				setVisitArray(resp.data.visit);
-				setPatientArray(resp.data.patient);
+				//setPatientArray(resp.data.patient);
 				//console.log(resp.data);
 				setCurrentPendingApptSelection(item);
 			} catch (e) {
 				console.log(e)
 				setVisitArray([]);
-				setPatientArray([]);
+				//setPatientArray([]);
 			} 
 		}
 	}

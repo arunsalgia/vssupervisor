@@ -64,7 +64,7 @@ router = express.Router();
 indexRouter = require('./routes/index');
 usersRouter = require('./routes/user');
 medicineRouter = require('./routes/medicine');
-patientRouter = require('./routes/patient');
+
 visitRouter = require('./routes/visit');
 holidayRouter = require('./routes/holiday');
 appointmentRouter = require('./routes/appointment');
@@ -90,6 +90,7 @@ festivalRouter = require('./routes/festival');
 nextVisitRouter = require('./routes/nextvisit');
 
 const { smsRouter } = require('./routes/sms');
+const { patientRouter } = require('./routes/patient');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));

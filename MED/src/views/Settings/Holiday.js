@@ -377,7 +377,8 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const MINLEFT={month: 8, year: 2021};
+let d = new Date();
+const MINLEFT={month: d.getMonth(), year: d.getFullYear()};
 
 var userCid;
 var customerData;
@@ -430,14 +431,15 @@ export default function Holiday() {
 				myMonth = 0;
 			}
 		} else {
+			// check if already at current month and year. If yes, then no shift to prev month
+			if ((myMonth === MINLEFT.month) && (myYear === MINLEFT.year))	return;
 			--myMonth;
 			if (myMonth < 0) {
 				--myYear;
 				myMonth = 11;
 			}
 		}
-		if ((myMonth === MINLEFT.month) && (myYear === MINLEFT.year))
-			return;
+		
 		setMonth(myMonth);
 		setYear(myYear);
 		getHolidays(myMonth, myYear);

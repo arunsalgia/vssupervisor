@@ -4,6 +4,7 @@ const { akshuGetUser, GroupMemberCount, akshuGetGroup,
    getUserBalance, feeBreakup,
    calculateBonus,
 	 rechargeCount,
+   akshuGetCustomer,
 } = require('./functions'); 
 var router = express.Router();
 
@@ -238,7 +239,7 @@ router.get('/razorgeneratepaymentrequest/:userCid/:amount', async function (req,
 	let { userCid, amount } = req.params;
 	let PAYMENT_REQUEST_URL = '';
 	
-	let customerRec = await M_Customer.findOne({_id: userCid});
+	let customerRec = await akshuGetCustomer(userCid);
 	//console.log(customerRec);
 	razorOptions.amount = Number(amount) * 100;			// convert to paise
 	razorOptions.prefill.name = customerRec.name;
@@ -254,7 +255,7 @@ router.get('/razorpaymentok/:userCid/:amount/:paymentId', async function (req, r
   console.log("In success payment");
   var {userCid, amount, paymentId } = req.params;
 	
-	let customerRec = await M_Customer.findOne({_id: userCid});
+	let customerRec = await akshuGetCustomer(userCid);
 	
 	/*
 	cid: Number,
@@ -476,8 +477,6 @@ router.get('/add/:userCid/:amount', async function (req, res, next) {
   setHeader(res);
   var {userCid, amount} = req.params;
 	
-  //let customerRec = await M_Customer.findOne({_id: userCid});
-	
 	/*
 	cid: Number,
   email: String,
@@ -509,8 +508,6 @@ router.get('/add/:userCid/:amount', async function (req, res, next) {
 router.get('/deduct/:userCid/:amount/:desc', async function (req, res, next) {
   setHeader(res);
   var {userCid, amount, desc} = req.params;
-	
-  //let customerRec = await M_Customer.findOne({_id: userCid});
 	
 	/*
 	cid: Number,

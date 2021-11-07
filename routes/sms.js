@@ -309,8 +309,9 @@ smsRouter.get('/delete/:cid/:pid', async function(req, res, next) {
 
 
 async function sendAppointmentSms(cid, pid, apptTime) {
-	// first find out if pastinet has mobile number
-	let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	// first find out if patinet has mobile number
+	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	let patRec = await getPatientByPid(cid, pid);
 	if (patRec < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
@@ -350,9 +351,10 @@ async function sendAppointmentSms(cid, pid, apptTime) {
 		})
 }
 
-async function sendExpirySms(cid, pid) {
+async function sendExpirySms(cid, pid, apptTime) {
 	// first find out if pastinet has mobile number
-	let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	let patRec = await getPatientByPid(cid, pid);
 	if (patRec < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
@@ -396,8 +398,9 @@ async function sendExpirySms(cid, pid) {
 }
 
 async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
-	// first find out if pastinet has mobile number
-	let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	// first find out if patinet has mobile number
+	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	let patRec = await getPatientByPid(cid, pid);
 	if (patRec < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
@@ -442,8 +445,9 @@ async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
 }
 
 async function sendCancelSms(cid, pid, cancelTime) {
-	// first find out if pastinet has mobile number
-	let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	// first find out if patinet has mobile number
+	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	let patRec = await getPatientByPid(cid, pid);
 	if (patRec < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
