@@ -76,19 +76,30 @@ router.post('/delete/:delType', async function(req, res, next) {
 
 });
 
-router.get('/subscribe/:cid/:addonname', async function(req, res, next) {
+router.get('/subscribe/:cid/:addonname/:amount', async function(req, res, next) {
   setHeader(res);
   
-  var { cid, addonname } = req.params;
+  var { cid, addonname, amount } = req.params;
+	amount = Number(amount);
 	
+	let d = new Date();
+	d.setFullYear(d.getFullYear()+1);
 	let tmpRec = await M_Subscribe.findOne({cid: cid, name: addonname});
 	if (!tmpRec) {
 		tmpRec = new M_Subscribe();
 		tmpRec.cid = cid;
 		tmpRec.name = addonname
 	}
+	tmpRec.expiryDate = d;
 	tmpRec.enabled = true;
 	tmpRec.save();
+
+	// now deduct amount 
+	let myTrans = createWalletTransaction(cid);
+  myTrans.transType = `Addon ${addonname} subscription`;
+  myTrans.transSubType = "Recharge";
+  myTrans.amount = -parseFloat(amount);
+  await myTrans.save();
 
 	sendok(res, tmpRec);
 

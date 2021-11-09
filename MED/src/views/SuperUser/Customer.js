@@ -29,6 +29,8 @@ import moment from "moment";
  import VsButton from "CustomComponents/VsButton";
  import VsCheckBox from "CustomComponents/VsCheckBox";
 
+import CustomerInformation from "views/SuperUser/CustomerInformation";
+
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 
@@ -41,19 +43,9 @@ import {DisplayPageHeader, ValidComp, BlankArea, DisplayCustomerBox, DisplayCust
 
 
 
-
-//colors 
-/*
-import { 
-red, blue, yellow, orange, pink, green, brown, deepOrange, lightGreen,
-} from '@material-ui/core/colors';
-*/
-
-
 import { dispEmail, disablePastDt, vsDialog,  encrypt} from 'views/functions';
 import { DATESTR, MONTHNUMBERSTR } from 'views/globals';
-import { dispMobile } from 'views/functions';
-import { compareDate } from 'views/functions';
+
 
 
 /*
@@ -322,16 +314,14 @@ export default function Customer() {
 	const [custFee, setCustFee] = useState(1000);
 	const [registerStatus, setRegisterStatus] = useState(0);
 
-
-
 	
-	const [custOption, setCustOption] = useState("");
+	//const [custOption, setCustOption] = useState("");
 
 	
 	const [customerArray, setCustomerArray] = useState([]);
 	const [customerData, setCustomerData] = useState({});
 	const [newRecharge, setNewRecharge] = useState(false);
-	const [radioRecharge, setRadioRecharge] = useState("MONTHLY");
+	//const [radioRecharge, setRadioRecharge] = useState("MONTHLY");
 
 	const [currentSelection, setCurrentSelection] = useState("");
 	const [currentCustomerSelection, setCurrentCustomerSelection] = useState("");
@@ -340,8 +330,8 @@ export default function Customer() {
 	const [currentCustomer, setCurrentCustomer] = useState("");
 	const [currentCustomerData, setCurrentCustomerData] = useState({});
 	
-	const [smsconfig, setSmsconfig] = useState({});
-	const [subscriptionList, setSubscriptionList] = useState([]);
+	//const [smsconfig, setSmsconfig] = useState({});
+//	const [subscriptionList, setSubscriptionList] = useState([]);
 
 	const [emurData, setEmurData] = useState({});
 	const [emurText1, setEmurText1] = useState("");
@@ -351,8 +341,8 @@ export default function Customer() {
 	const [emurCb1, setEmurCb1] = useState(false);
 	const [emurCb2, setEmurCb2] = useState(false);
 	const [emurCb3, setEmurCb3] = useState(false);
-	const [emurCb4, setEmurCb4] = useState(false);
-	const [emurCb5, setEmurCb5] = useState(false);
+	//const [emurCb4, setEmurCb4] = useState(false);
+	//const [emurCb5, setEmurCb5] = useState(false);
 	
 
 	const [doctorTypeArray, setDoctorTypeArray] = useState([]);
@@ -379,7 +369,7 @@ export default function Customer() {
 	async function setSummaryMainSelect(item) {
 		if (item === "DoctorType") {
 			await getDoctorTypes()
-		} else 		if (item === "AddOn") {
+		} else if (item === "AddOn") {
 			await getDoctorTypes();
 			await getAddOnTypes();
 		} else if (item === "Festival") {
@@ -403,7 +393,7 @@ export default function Customer() {
 			</span>
 		</Typography>
 		</Grid>
-		)}
+	)}
 
 	function DisplayFunctionHeader() {
 	return (
@@ -417,17 +407,6 @@ export default function Customer() {
 	</Box>
 	)}
 
-	async function getSMSConfig(cid) {
-		try {
-			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/sms/getconfig/${cid}`;
-			let resp = await axios.get(myUrl);
-			setSmsconfig(resp.data);
-		} catch (e) {
-			console.log(e)
-			alert.error(`Error fetching SMS subscription `);
-			setSmsconfig({});
-		}
-	}
 
 	async function getSubscription(cid) {
 		try {
@@ -441,94 +420,20 @@ export default function Customer() {
 		}
 	}
 
-	function handleEditSmsConfig() {
-		setEmurCb1(smsconfig.bulkSmsPack);
-		setEmurCb2(smsconfig.birthDayPack);
-		setEmurCb3(smsconfig.festivalPack1);
-		setEmurCb4(smsconfig.festivalPack2);
-		setEmurCb5(smsconfig.festivalPack3);
-		setIsDrawerOpened("EDITSMSCONFIG");
-	}
 
-	async function handleAddEditSmsConfig() {
-		let tmpConfig = lodashCloneDeep(smsconfig);
-		tmpConfig.bulkSmsPack = emurCb1;
-		tmpConfig.birthDayPack = emurCb2;
-		tmpConfig.festivalPack1 = emurCb3;
-		tmpConfig.festivalPack2 = emurCb4;
-		tmpConfig.festivalPack3 = emurCb5;
-		//console.log(tmpConfig);
-		try {
-			let myData = JSON.stringify(tmpConfig);
-			//console.log(myData);
-			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/sms/setconfig/${currentCustomerData._id}/${myData}`;
-			await axios.get(myUrl);
-			setSmsconfig(tmpConfig);
-			setIsDrawerOpened("");
-			alert.success("Succes. Now charge/refund in the wallet as per new SMS configuration");
-		} catch (e) {
-			console.log(e)
-			alert.error(`Error updateing SMS subscription `);
-			//setSmsconfig({});
-		}
-	}
-	
-	function DisplaySmsConfig() {
-	return (
-		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<VsButton align="right" name="Edit SMS Config" onClick={handleEditSmsConfig} />
-			<DisplaySingleLine msg1="Bulk SMS Pack" msg2={(smsconfig.bulkSmsPack) ? "Yes" : "No"} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Birthday Pack" msg2={(smsconfig.birthDayPack) ? "Yes" : "No"} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Festival Pack 1" msg2={(smsconfig.festivalPack1) ? "Yes" : "No"} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Festival Pack 2" msg2={(smsconfig.festivalPack2) ? "Yes" : "No"} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Festival Pack 3" msg2={(smsconfig.festivalPack3) ? "Yes" : "No"} />
-		</Box>	
-	)}
 
 	async function setSummaryCustomerSelect(item) {
-		if (item === "Sms") {
-			await getSMSConfig(currentCustomerData._id);
-		}
 		if (item === "AddOn") {
 			await getSubscription(currentCustomerData._id);
 		}
 		setCurrentCustomerSelection(item)
 	}
-
-
-	function DisplayCustomerFunctionHeader() {
-	return (
-	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-	<Grid className={gClasses.noPadding} key="AllPatients" container align="center">
-		<DisplayFunctionItem item="Details"  match={currentCustomerSelection} onClick={setSummaryCustomerSelect} />
-		<DisplayFunctionItem item="Sms"  match={currentCustomerSelection}  onClick={setSummaryCustomerSelect} />
-		<DisplayFunctionItem item="AddOn"  match={currentCustomerSelection} onClick={setSummaryCustomerSelect} />
-		<DisplayFunctionItem item="Recharge"  match={currentCustomerSelection}  onClick={setSummaryCustomerSelect} />
-	</Grid>	
-	</Box>
-	)}
 	
 
-	async function getWalletBalance(cid) {
-		try {
-			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/balance/${cid}`;
-			let resp = await axios.get(myUrl);
-			setBalance(resp.data.wallet);
-		} catch (e) {
-			console.log(e)
-			alert.error(`Error fetching balance `);
-			setBalance(0);
-		}
-	}
-
-	async function handleSelectCustomer(rec) {
-		await getWalletBalance(rec._id);
+	function handleSelectCustomer(rec) {
 		setCurrentCustomerData(rec);
 		setCurrentCustomer(rec.name);
+		console.log("Now should call Cust info");
 	}
 	
 	// --------------- Festival
@@ -893,29 +798,7 @@ export default function Customer() {
 		} catch(e) {
 			alert.error(`Error adding Amount to wallet`);
 		}
-
 	}
-
-	function DisplayWalletBalance(props) {
-		//console.log(doctorTypeArray);
-	return (
-		<Box key={"WALLET"}  className={gClasses.boxStyle} borderColor="black" borderRadius={15} border={1}>
-		<Grid align="center"  className={gClasses.noPadding} key="PATHDR" container >
-		<Grid item xs={6} sm={6} md={2} lg={2} >
-			<span className={gClasses.patientInfo2Blue}>{"Wallet Balance: ₹"}</span>
-			<span className={gClasses.patientInfo2Blue}>{props.balance}</span>
-		</Grid>
-		<Grid item xs={3} sm={3} md={9} lg={9} />
-		<Grid item xs={3} sm={3} md={1} lg={1} >
-			<VsButton name="Add wallet" onClick={addToWallet} />
-		</Grid>
-		</Grid>
-		</Box>
-	)}
-
-	//-----------------------------------------
-
-
 	
 	function DisplayCustomerList() {
 		return (	
@@ -935,24 +818,6 @@ export default function Customer() {
 			</Grid>	
 			)}
 
-
-		async function handleEnable(rec) {
-		let tmpArray = [].concat(customerArray);
-		let tmp = tmpArray.find(x => x._id === rec._id);
-		tmp.enabled = !tmp.enabled;
-		setCustomerArray(tmpArray);
-	}
-	
-	function handleRecharge(newRadio) {
-		let myExpiry = new Date(customerData.expiryDate);
-		switch (newRadio) {
-			case 'LIFETIME' : myExpiry = new Date(2031, 1, 1); break;
-			case 'YEARLY': 	myExpiry.setYear(myExpiry.getFullYear()+1); break;
-			case 'MONTHLY': myExpiry.setMonth(myExpiry.getMonth()+1); break;
-		}
-		setNewExpiry(myExpiry);
-		setRadioRecharge(newRadio);
-	}
 	
 
 	
@@ -1175,62 +1040,7 @@ export default function Customer() {
 			alert.error(`error updating details of ${custName}`);
 		}
 	}
-	
-	function DisplaySingleLine(props) {
-		return(
-			<Grid className={gClasses.noPadding} key={props.msg1+props.msg2} container align="center">
-			<Grid align="left"  item xs={4} sm={4} md={2} lg={2} >
-				<Typography className={gClasses.patientInfo2Blue}>{props.msg1}</Typography>
-			</Grid>	
-			<Grid align="left"  item xs={8} sm={8} md={10} lg={10} >
-				<Typography className={gClasses.patientInfo2}>{props.msg2}</Typography>
-			</Grid>	
-			</Grid>
-	
-		)} 
 
-		function DisplayCustomerDetails() {
-		let t = new Date();
-		let e = new Date(currentCustomerData.expiryDate);
-		let hasexpired = compareDate(e, t);
-		let expiryDate = `${DATESTR[e.getDate()]}/${MONTHNUMBERSTR[e.getMonth()]}/${e.getFullYear()}`;
-		return (
-		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-			<div align="right" >
-			{(hasexpired < 0) &&
-			<VsButton name="Recharge Plan" onClick={() => handleCustomerPlanRecharge(currentCustomerData)} />
-			}
-			<VsButton name="Edit Details" onClick={() => handleEditCustomer(currentCustomerData)} />
-			</div>
-			<DisplaySingleLine msg1="Name" msg2={currentCustomerData.name} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Plan Status" msg2={(hasexpired < 0) ? "Plan expired" : "Plan Valid"} />
-			<DisplaySingleLine msg1="Plan Expiry" msg2={expiryDate} />
-			<DisplaySingleLine msg1="Plan Charges" msg2={currentCustomerData.fee} />
-			<DisplaySingleLine msg1="Doctor Name" msg2={currentCustomerData.doctorName} />
-			<DisplaySingleLine msg1="" msg2={currentCustomerData.type} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Clinic Name" msg2={currentCustomerData.clinicName} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Clinic Addres" msg2={currentCustomerData.addr1} />
-			<DisplaySingleLine msg1="" msg2={currentCustomerData.addr2} />
-			<DisplaySingleLine msg1="" msg2={currentCustomerData.addr3} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Mobile" msg2={dispMobile(currentCustomerData.mobile)} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Email" msg2={dispEmail(currentCustomerData.email)} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Location" msg2={currentCustomerData.location} />
-			<BlankArea />
-			<DisplaySingleLine msg1="Pin Code" msg2={currentCustomerData.pinCode} />
-			<BlankArea />
-		</Box>	
-		)}
-		
-
-	function DisplaySmsDetails() {
-
-	}
 
 	function handleDate1(d) {
 		//console.log(d);
@@ -1238,304 +1048,250 @@ export default function Customer() {
 	}
 
 	return (
-  <div className={gClasses.webPage} align="center" key="main">
-	<DisplayPageHeader headerName="Customer" groupName="" tournament=""/>
-	<Container component="main" maxWidth="lg">
-	<CssBaseline />
-	<DisplayFunctionHeader />
-	{(currentSelection === "DoctorType") &&
-		<div>
-		<VsButton align="right" name="Add new Doctor Type" onClick={handleAddDoctorType} />
-		<DisplayAllDoctorType/>
-		</div>
-	}
-	{(currentSelection === "AddOn") &&
-		<div>
-		<VsButton align="right" name="Add new Add on Type" onClick={handleAddAddOnType} />
-		<DisplayAllOnType/>
-		</div>
-	}
-	{(currentSelection === "Festival") &&
-		<div>
-		<VsButton name="Add new Date" align="right" onClick={addNewFestivalDate} />
-		<DisplayFestivalDates />
-		</div>
-	}
-	{(currentSelection === "Customer") &&
-		<div>
-		{(currentCustomer === "") &&
+		<div className={gClasses.webPage} align="center" key="main">
+		<DisplayPageHeader headerName="Customer" groupName="" tournament=""/>
+		<Container component="main" maxWidth="lg">
+		<CssBaseline />
+		<DisplayFunctionHeader />
+		{(currentSelection === "DoctorType") &&
 			<div>
-			<VsButton align="right" name="Add new Customer" onClick={handleAddCustomer} />
-			<DisplayCustomerList />
+			<VsButton align="right" name="Add new Doctor Type" onClick={handleAddDoctorType} />
+			<DisplayAllDoctorType/>
 			</div>
 		}
-		{(currentCustomer !== "") &&
+		{(currentSelection === "AddOn") &&
 			<div>
-			<VsButton align="right" name="Back to Customer list" onClick={() => { setCurrentCustomer("")}} />
-			<DisplayCustomerHeader customer={currentCustomerData} />
-			<DisplayWalletBalance balance={balance} />
-			<DisplayCustomerFunctionHeader />
-			{(currentCustomerSelection == "Details") &&
-				<DisplayCustomerDetails />
-			}
-			{(currentCustomerSelection == "Sms") &&
-			<div>
-			<DisplayBalance balance={balance} />
-			<DisplaySmsConfig />
-			</div>
-			}
-			{(currentCustomerSelection == "AddOn") &&
-			<div>
-			<DisplayBalance balance={balance} />
-			<Typography>AddOn</Typography>
-			</div>
-			}
-			{(currentCustomerSelection == "Recharge") &&
-			<div>
-			<DisplayBalance balance={balance} />
-			<Typography>Recharge</Typography>
-			</div>
-			}
+			<VsButton align="right" name="Add new Add on Type" onClick={handleAddAddOnType} />
+			<DisplayAllOnType/>
 			</div>
 		}
-		</div>
-	}	
-	<Drawer anchor="right" variant="temporary"	open={isDrawerOpened !== ""} >
-	<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-	<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
-	{/* Add / edit new customer */}
-	{((isDrawerOpened === "ADDCUST") || (isDrawerOpened === "EDITCUST")) &&
-			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditCustomer}>
-			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDCUST") ? "Add" : "Edit") + " Customer of Doctor Viraag"}</Typography>
-			<TextValidator fullWidth label="Referral Code" className={gClasses.vgSpacing}
-				value={referalCode}
-				onChange={(event) => setReferalCode(event.target.value)}
+		{(currentSelection === "Festival") &&
+			<div>
+			<VsButton name="Add new Date" align="right" onClick={addNewFestivalDate} />
+			<DisplayFestivalDates />
+			</div>
+		}
+		{(currentSelection === "Customer") &&
+			<div>
+			{(currentCustomer === "") &&
+				<div>
+				<VsButton align="right" name="Add new Customer" onClick={handleAddCustomer} />
+				<DisplayCustomerList />
+				</div>
+			}
+			{(currentCustomer !== "") &&
+				<div>
+				<VsButton align="right" name="Back to Customer list" onClick={() => { setCurrentCustomer("")}} />
+				<CustomerInformation customer={currentCustomerData} />
+				</div>
+			}
+			</div>
+		}	
+		<Drawer anchor="right" variant="temporary"	open={isDrawerOpened !== ""} >
+		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
+		<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
+		{/* Add / edit new customer */}
+		{((isDrawerOpened === "ADDCUST") || (isDrawerOpened === "EDITCUST")) &&
+				<ValidatorForm className={gClasses.form} onSubmit={handleAddEditCustomer}>
+				<Typography className={gClasses.title}>{((isDrawerOpened === "ADDCUST") ? "Add" : "Edit") + " Customer of Doctor Viraag"}</Typography>
+				<TextValidator fullWidth label="Referral Code" className={gClasses.vgSpacing}
+					value={referalCode}
+					onChange={(event) => setReferalCode(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<div align="left">
+					<Typography className={gClasses.vgSpacing}>Expiry Date</Typography>
+				</div>
+				<Datetime 
+					className={gClasses.dateTimeBlock}
+					inputProps={{className: gClasses.dateTimeNormal}}
+					timeFormat={false} 
+					initialValue={emurDate1}
+					dateFormat="DD/MM/yyyy"
+					isValidDate={disablePastDt}
+					onClose={handleDate1}
+					closeOnSelect={true}
+				/>
+				<TextValidator required fullWidth label="Name of the Customer" className={gClasses.vgSpacing}
+					value={custName}
+					onChange={(event) => setCustName(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<TextValidator required fullWidth label="Name of the Clinic" className={gClasses.vgSpacing}
+					value={clinicName}
+					onChange={(event) => setClinicName(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<TextValidator required fullWidth label="Name of the Doctor" className={gClasses.vgSpacing}
+					value={doctorName}
+					onChange={(event) => setDoctorName(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<Typography>Doctor Type</Typography>
+				<Select labelId='Doctor Type' id='time' name="time" padding={10}
+				variant="outlined" required fullWidth label="Time" 
+				value={doctorType}
+				placeholder="Arun"
+				inputProps={{
+					name: 'Time',
+					id: 'filled-age-native-simple',
+				}}
+				onChange={(event) => setDoctorType(event.target.value)}
+				>
+				{doctorTypeArray.map(x =>	<MenuItem key={x.name} value={x.name}>{x.name}</MenuItem>)}
+				</Select>
+				<TextValidator required fullWidth label="Address1" className={gClasses.vgSpacing}
+					value={custAddr1}
+					onChange={(event) => setCustAddr1(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<TextValidator required fullWidth label="Address2" className={gClasses.vgSpacing}
+					value={custAddr2}
+					onChange={(event) => setCustAddr2(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<TextValidator required fullWidth label="Address3" className={gClasses.vgSpacing}
+					value={custAddr3}
+					onChange={(event) => setCustAddr3(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<TextValidator required fullWidth label="Email" type="email" className={gClasses.vgSpacing}
+					value={custEmail}
+					onChange={(event) => setCustEmail(event.target.value)}
+				/>
+				<TextValidator fullWidth required className={gClasses.vgSpacing}  label="Mobile" type="number"
+					value={custMobile} 
+					onChange={() => { setCustMobile(event.target.value) }}
+					validators={['minNumber:1000000000', 'maxNumber:9999999999']}
+					errorMessages={['Invalid Mobile number','Invalid Mobile number']}
+				/>	
+				<TextValidator required fullWidth label="Location" className={gClasses.vgSpacing}
+					value={custLocation}
+					onChange={(event) => setCustLocation(event.target.value)}
+				/>
+				<TextValidator fullWidth required className={gClasses.vgSpacing} label="Pin Code" type="number"
+					value={custPinCode} 
+					onChange={() => { setCustPinCode(event.target.value) }}
+					validators={['minNumber:111111', 'maxNumber:999999']}
+					errorMessages={['Invalid Pin Code','Invalid Pin Code']}
+				/>
+				<TextValidator fullWidth required className={gClasses.vgSpacing} label="Customer Fee" type="number"
+					value={custFee} 
+					onChange={() => { setCustFee(event.target.value) }}
+					validators={['minNumber:1000']}
+					errorMessages={['Invalid Customer Fee']}
+				/>
+				<BlankArea />
+				<ShowResisterStatus/>
+				<BlankArea/>
+				<VsButton align="center" name={(isDrawerOpened === "ADDCUST" ? "Add" : "Update")} type="submit" />
+				<ValidComp />  
+			</ValidatorForm>
+		}
+		{((isDrawerOpened === "ADDDT") || (isDrawerOpened === "EDITDT")) &&
+				<ValidatorForm className={gClasses.form} onSubmit={handleAddEditDoctorType}>
+				<Typography className={gClasses.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Doctor Type"}</Typography>
+				<TextValidator required fullWidth label="Doctor Type" className={gClasses.vgSpacing}
+					value={emurText1}
+					onChange={(event) => setEmurText1(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<BlankArea />
+				<ShowResisterStatus/>
+				<BlankArea/>
+				<VsButton align="center" name={(isDrawerOpened === "ADDDT" ? "Add" : "Update")} type="submit" />
+				<ValidComp />  
+			</ValidatorForm>
+		}
+		{((isDrawerOpened === "ADDADDON") || (isDrawerOpened === "EDITADDON")) &&
+				<ValidatorForm className={gClasses.form} onSubmit={handleAddEditAddOnType}>
+				<Typography className={gClasses.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Add On Type"}</Typography>
+				<TextValidator required fullWidth label="Add On Type" className={gClasses.vgSpacing}
+					value={emurText1}
+					onChange={(event) => setEmurText1(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<TextValidator required fullWidth type="number" label="Yearly Charges" className={gClasses.vgSpacing}
+					value={emurAmount}
+					onChange={(event) => setEmurAmount(Number(event.target.value))}
+					validators={['minNumber:100']}
+					errorMessages={[`Yearly charges should be alleast 100`]}
+				/>
+				<TextValidator required fullWidth label="Description" className={gClasses.vgSpacing}
+					value={emurText2}
+					onChange={(event) => setEmurText2(event.target.value)}
+					validators={['noSpecialCharacters']}
+					errorMessages={[`Special Characters not permitted`]}
+				/>
+				<BlankArea />
+				<ShowResisterStatus/>
+				<BlankArea/>
+				<VsButton align="center" name={(isDrawerOpened === "ADDADDON" ? "Add" : "Update")} type="submit" />
+				<ValidComp />  
+			</ValidatorForm>
+		}
+		{((isDrawerOpened === "ADDFESTIVALPACK") || (isDrawerOpened === "EDITFESTIVALPACK")) &&
+			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditFestivalPack}>
+			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDFESTIVALPACK") ? "Add" : "Edit") + " Festival Pack"}</Typography>
+			<TextValidator required fullWidth label="Festival Pack Name" className={gClasses.vgSpacing}
+				value={emurText1}
+				onChange={(event) => setEmurText1(event.target.value)}
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
 			/>
-			<div align="left">
-				<Typography className={gClasses.vgSpacing}>Expiry Date</Typography>
-			</div>
+			<BlankArea />
+			<ShowResisterStatus/>
+			<BlankArea/>
+			<VsButton align="center" name={(isDrawerOpened === "ADDFESTIVALPACK" ? "Add" : "Update")} type="submit" />
+			<ValidComp />  
+			</ValidatorForm>
+		}
+		{((isDrawerOpened === "ADDFESTIVALDATE") ) &&
+			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditFestivalDate}>
+			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDFESTIVALDATE") ? "Add" : "Edit") + " new date to Festival"}</Typography>
 			<Datetime 
 				className={gClasses.dateTimeBlock}
 				inputProps={{className: gClasses.dateTimeNormal}}
 				timeFormat={false} 
 				initialValue={emurDate1}
 				dateFormat="DD/MM/yyyy"
-				isValidDate={disablePastDt}
 				onClose={handleDate1}
 				closeOnSelect={true}
 			/>
-			<TextValidator required fullWidth label="Name of the Customer" className={gClasses.vgSpacing}
-				value={custName}
-				onChange={(event) => setCustName(event.target.value)}
-				validators={['noSpecialCharacters']}
-				errorMessages={[`Special Characters not permitted`]}
-      />
-			<TextValidator required fullWidth label="Name of the Clinic" className={gClasses.vgSpacing}
-				value={clinicName}
-				onChange={(event) => setClinicName(event.target.value)}
-				validators={['noSpecialCharacters']}
-				errorMessages={[`Special Characters not permitted`]}
-      />
-			<TextValidator required fullWidth label="Name of the Doctor" className={gClasses.vgSpacing}
-				value={doctorName}
-				onChange={(event) => setDoctorName(event.target.value)}
-				validators={['noSpecialCharacters']}
-				errorMessages={[`Special Characters not permitted`]}
-      />
-			<Typography>Doctor Type</Typography>
-			<Select labelId='Doctor Type' id='time' name="time" padding={10}
-			variant="outlined" required fullWidth label="Time" 
-			value={doctorType}
-			placeholder="Arun"
-			inputProps={{
-				name: 'Time',
-				id: 'filled-age-native-simple',
-			}}
-			onChange={(event) => setDoctorType(event.target.value)}
-			>
-			{doctorTypeArray.map(x =>	<MenuItem key={x.name} value={x.name}>{x.name}</MenuItem>)}
-			</Select>
-			<TextValidator required fullWidth label="Address1" className={gClasses.vgSpacing}
-				value={custAddr1}
-				onChange={(event) => setCustAddr1(event.target.value)}
-				validators={['noSpecialCharacters']}
-				errorMessages={[`Special Characters not permitted`]}
-      />
-			<TextValidator required fullWidth label="Address2" className={gClasses.vgSpacing}
-				value={custAddr2}
-				onChange={(event) => setCustAddr2(event.target.value)}
-				validators={['noSpecialCharacters']}
-				errorMessages={[`Special Characters not permitted`]}
-      />
-			<TextValidator required fullWidth label="Address3" className={gClasses.vgSpacing}
-				value={custAddr3}
-				onChange={(event) => setCustAddr3(event.target.value)}
-				validators={['noSpecialCharacters']}
-				errorMessages={[`Special Characters not permitted`]}
-      />
-      <TextValidator required fullWidth label="Email" type="email" className={gClasses.vgSpacing}
-				value={custEmail}
-				onChange={(event) => setCustEmail(event.target.value)}
-			/>
-			<TextValidator fullWidth required className={gClasses.vgSpacing}  label="Mobile" type="number"
-				value={custMobile} 
-				onChange={() => { setCustMobile(event.target.value) }}
-				validators={['minNumber:1000000000', 'maxNumber:9999999999']}
-        errorMessages={['Invalid Mobile number','Invalid Mobile number']}
-      />	
-      <TextValidator required fullWidth label="Location" className={gClasses.vgSpacing}
-				value={custLocation}
-				onChange={(event) => setCustLocation(event.target.value)}
-			/>
-			<TextValidator fullWidth required className={gClasses.vgSpacing} label="Pin Code" type="number"
-				value={custPinCode} 
-				onChange={() => { setCustPinCode(event.target.value) }}
-				validators={['minNumber:111111', 'maxNumber:999999']}
-        errorMessages={['Invalid Pin Code','Invalid Pin Code']}
-      />
-			<TextValidator fullWidth required className={gClasses.vgSpacing} label="Customer Fee" type="number"
-				value={custFee} 
-				onChange={() => { setCustFee(event.target.value) }}
-				validators={['minNumber:1000']}
-        errorMessages={['Invalid Customer Fee']}
-      />
-			<BlankArea />
-			<ShowResisterStatus/>
-      <BlankArea/>
-			<VsButton align="center" name={(isDrawerOpened === "ADDCUST" ? "Add" : "Update")} type="submit" />
-			<ValidComp />  
-    </ValidatorForm>
-	}
-	{((isDrawerOpened === "ADDDT") || (isDrawerOpened === "EDITDT")) &&
-			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditDoctorType}>
-			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Doctor Type"}</Typography>
-			<TextValidator required fullWidth label="Doctor Type" className={gClasses.vgSpacing}
-				value={emurText1}
-				onChange={(event) => setEmurText1(event.target.value)}
-				validators={['noSpecialCharacters']}
-				errorMessages={[`Special Characters not permitted`]}
-      />
-			<BlankArea />
-			<ShowResisterStatus/>
-      <BlankArea/>
-			<VsButton align="center" name={(isDrawerOpened === "ADDDT" ? "Add" : "Update")} type="submit" />
-			<ValidComp />  
-    </ValidatorForm>
-	}
-	{((isDrawerOpened === "ADDADDON") || (isDrawerOpened === "EDITADDON")) &&
-			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditAddOnType}>
-			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Add On Type"}</Typography>
-			<TextValidator required fullWidth label="Add On Type" className={gClasses.vgSpacing}
-				value={emurText1}
-				onChange={(event) => setEmurText1(event.target.value)}
-				validators={['noSpecialCharacters']}
-				errorMessages={[`Special Characters not permitted`]}
-      />
-			<TextValidator required fullWidth type="number" label="Yearly Charges" className={gClasses.vgSpacing}
-				value={emurAmount}
-				onChange={(event) => setEmurAmount(Number(event.target.value))}
-				validators={['minNumber:100']}
-				errorMessages={[`Yearly charges should be alleast 100`]}
-      />
 			<TextValidator required fullWidth label="Description" className={gClasses.vgSpacing}
+				value={emurText1}
+				onChange={(event) => setEmurText1(event.target.value)}
+				validators={['noSpecialCharacters']}
+				errorMessages={[`Special Characters not permitted`]}
+			/>
+			<TextValidator required fullWidth label="Greeting" className={gClasses.vgSpacing}
 				value={emurText2}
 				onChange={(event) => setEmurText2(event.target.value)}
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
-      />
+			/>
+			<VsCheckBox label="Part of festival pack 1" align="left" checked={emurCb1} onClick={() => setEmurCb1(!emurCb1)} />
+			<VsCheckBox label="Part of festival pack 2" align="left" checked={emurCb2} onClick={() => setEmurCb2(!emurCb2)} />
+			<VsCheckBox label="Part of festival pack 3" align="left" checked={emurCb3} onClick={() => setEmurCb3(!emurCb3)} />
 			<BlankArea />
 			<ShowResisterStatus/>
-      <BlankArea/>
-			<VsButton align="center" name={(isDrawerOpened === "ADDADDON" ? "Add" : "Update")} type="submit" />
+			<BlankArea/>
+			<VsButton align="center" name={(isDrawerOpened === "ADDFESTIVALDATE" ? "Add" : "Update")} type="submit" />
 			<ValidComp />  
-    </ValidatorForm>
-	}
-	{((isDrawerOpened === "ADDFESTIVALPACK") || (isDrawerOpened === "EDITFESTIVALPACK")) &&
-		<ValidatorForm className={gClasses.form} onSubmit={handleAddEditFestivalPack}>
-		<Typography className={gClasses.title}>{((isDrawerOpened === "ADDFESTIVALPACK") ? "Add" : "Edit") + " Festival Pack"}</Typography>
-		<TextValidator required fullWidth label="Festival Pack Name" className={gClasses.vgSpacing}
-			value={emurText1}
-			onChange={(event) => setEmurText1(event.target.value)}
-			validators={['noSpecialCharacters']}
-			errorMessages={[`Special Characters not permitted`]}
-		/>
-		<BlankArea />
-		<ShowResisterStatus/>
-		<BlankArea/>
-		<VsButton align="center" name={(isDrawerOpened === "ADDFESTIVALPACK" ? "Add" : "Update")} type="submit" />
-		<ValidComp />  
-		</ValidatorForm>
-	}
-	{((isDrawerOpened === "ADDFESTIVALDATE") ) &&
-		<ValidatorForm className={gClasses.form} onSubmit={handleAddEditFestivalDate}>
-		<Typography className={gClasses.title}>{((isDrawerOpened === "ADDFESTIVALDATE") ? "Add" : "Edit") + " new date to Festival"}</Typography>
-		<Datetime 
-			className={gClasses.dateTimeBlock}
-			inputProps={{className: gClasses.dateTimeNormal}}
-			timeFormat={false} 
-			initialValue={emurDate1}
-			dateFormat="DD/MM/yyyy"
-			onClose={handleDate1}
-			closeOnSelect={true}
-		/>
-		<TextValidator required fullWidth label="Description" className={gClasses.vgSpacing}
-			value={emurText1}
-			onChange={(event) => setEmurText1(event.target.value)}
-			validators={['noSpecialCharacters']}
-			errorMessages={[`Special Characters not permitted`]}
-		/>
-		<TextValidator required fullWidth label="Greeting" className={gClasses.vgSpacing}
-			value={emurText2}
-			onChange={(event) => setEmurText2(event.target.value)}
-			validators={['noSpecialCharacters']}
-			errorMessages={[`Special Characters not permitted`]}
-		/>
-		<VsCheckBox label="Part of festival pack 1" align="left" checked={emurCb1} onClick={() => setEmurCb1(!emurCb1)} />
-		<VsCheckBox label="Part of festival pack 2" align="left" checked={emurCb2} onClick={() => setEmurCb2(!emurCb2)} />
-		<VsCheckBox label="Part of festival pack 3" align="left" checked={emurCb3} onClick={() => setEmurCb3(!emurCb3)} />
-		<BlankArea />
-		<ShowResisterStatus/>
-		<BlankArea/>
-		<VsButton align="center" name={(isDrawerOpened === "ADDFESTIVALDATE" ? "Add" : "Update")} type="submit" />
-		<ValidComp />  
-		</ValidatorForm>
-	}	
-	{((isDrawerOpened === "EDITSMSCONFIG") ) &&
-		<ValidatorForm className={gClasses.form} onSubmit={handleAddEditSmsConfig}>
-		<Typography className={gClasses.title}>{"Edit SMS subscription"}</Typography>
-		<VsCheckBox label="Bulk SMS pack" align="left" checked={emurCb1} onClick={() => setEmurCb1(!emurCb1)} />
-		<VsCheckBox label="Birthday Pack" align="left" checked={emurCb2} onClick={() => setEmurCb2(!emurCb2)} />
-		<VsCheckBox label="Festival pack 1" align="left" checked={emurCb3} onClick={() => setEmurCb3(!emurCb3)} />
-		<VsCheckBox label="Festival pack 2" align="left" checked={emurCb4} onClick={() => setEmurCb4(!emurCb4)} />
-		<VsCheckBox label="Festival pack 3" align="left" checked={emurCb5} onClick={() => setEmurCb5(!emurCb5)} />
-		<BlankArea />
-		<ShowResisterStatus/>
-		<BlankArea/>
-		<VsButton align="center" name={"Update"} type="submit" />
-		<ValidComp />  
-		</ValidatorForm>
-	}		
-	{(isDrawerOpened === "ADDWALLET") &&
-			<ValidatorForm className={gClasses.form} onSubmit={handleAddWallet}>
-			<Typography className={gClasses.title}>{"Add to wallet"}</Typography>
-			<TextValidator required fullWidth type="number" label="Wallet Amount" className={gClasses.vgSpacing}
-				value={emurAmount}
-				onChange={(event) => setEmurAmount(Number(event.target.value))}
-				validators={['minNumber:100']}
-				errorMessages={[`Amount should be at least 100`]}
-      />
-			<BlankArea />
-			<ShowResisterStatus/>
-      <BlankArea/>
-			<VsButton align="center" name={"Add"} type="submit" />
-			<ValidComp />  
-    </ValidatorForm>
-	}
-	</Box>
-	</Drawer>		
-	</Container>
-  </div>
-  );    
+			</ValidatorForm>
+		}		
+		</Box>
+		</Drawer>		
+		</Container>
+		</div>
+		);    
 }

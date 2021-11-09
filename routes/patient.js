@@ -37,14 +37,13 @@ async function getAllPatients(cid) {
 
 async function getPatientByPid(cid, pid) {
 	await loadPatient(cid);
-	let ppp = arun_patient.find(x => x.cid == cid && x.pid == pid);
+	let ppp = arun_patient[cid].find(x => x.pid == pid);
 	return ppp;
 }
 
 patientRouter.use('/', function(req, res, next) {
   setHeader(res);
   if (!db_connection) { senderr(res, DBERROR,  ERR_NODB); return; }
- 
   next('route');
 });
 
@@ -361,9 +360,9 @@ patientRouter.get('/list/:cid', async function(req, res, next) {
   setHeader(res);
   var {cid} = req.params;
 	
-	//console.log(cid);
-	if (await checkCustomerExpiry(cid)) return senderr(res, PLANEXIREDERR, "Expiry");
-	
+	let sts = await checkCustomerExpiry(cid);
+	if (sts) return senderr(res, PLANEXIREDERR, "Expiry");
+
 	//var allPatient = await getPatient({cid: cid, enabled: true})
 	let allPatients = await getAllPatients(cid);
 	//console.log(allPatients);
@@ -507,7 +506,7 @@ async function getPatient(filter) {
 
  
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

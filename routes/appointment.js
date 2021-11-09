@@ -66,7 +66,7 @@ router.get('/add/:cid/:apptdata', async function (req, res) {
   var {cid, apptdata} = req.params;
 	
 	let newData = JSON.parse(apptdata);
-	console.log(newData);
+	//console.log(newData);
 	
 	let hRec = await M_Appointment.find({
 		cid: cid, order: newData.order, visit: VISITTYPE.pending

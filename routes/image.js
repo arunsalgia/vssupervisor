@@ -95,7 +95,7 @@ router.post('/uploadimage/:cid/:pid/:displayName/:fileName/:title/:desc', async 
 	
 	//console.log(fileName, fileType);
   upload(req, res, async (err) => {
-    if (err) return res.sendStatus(500);
+    if (err) return res.status(500);
 
     let xxx = fileName.split(".");
 	

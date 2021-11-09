@@ -24,11 +24,6 @@ router.use('/', function(req, res, next) {
 router.get('/list', async function(req, res, next) {
   setHeader(res);
 	let rec = await akshuGetAllCustomer();
-	for(let i=0; i<rec.length; ++i) {
-		//console.log(rec[i].email);
-		rec[i].email = dbToSvrText(rec[i].email);
-		//console.log(rec[i].email);
-	}
 	//console.log(rec);
 	sendok(res, rec);
 }); 
@@ -299,7 +294,7 @@ cron.schedule('5 0 * * *', async () => {
 
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

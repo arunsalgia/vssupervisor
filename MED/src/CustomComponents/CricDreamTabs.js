@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 //import { createBrowserHistory } from "history";
 import { useHistory } from "react-router-dom";
-import { useParams } from 'react-router-dom'
+//import { useParams } from 'react-router-dom'
 import axios from "axios";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -10,14 +10,23 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
-import HomeIcon from '@material-ui/icons/Home';
 import MenuIcon from '@material-ui/icons/Menu';
-import GroupIcon from '@material-ui/icons/Group';
-import Button from '@material-ui/core/Button';
+
+/*
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
+import HomeIcon from '@material-ui/icons/Home';
+import GroupIcon from '@material-ui/icons/Group';
+
+import NextVisit from "views/NextVisit/NextVisit";
+import Report from "views/Report/Report.js" 
+import Wallet from "views/Wallet/Wallet.js"
+import Sample from "views/SuperUser/Sample.js"
+import Profile from "views/Profile/UserProfile"
+*/
+import Button from '@material-ui/core/Button';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu'; 
 import {red, blue, green, deepOrange, white} from '@material-ui/core/colors';
@@ -26,27 +35,17 @@ import Divider from '@material-ui/core/Divider';
 import Visit from "views/Visit/Visit"
 import Appointment from "views/Appointment/Appointment"
 import Patient from "views/Patient/Patient.js" 
-import NextVisit from "views/NextVisit/NextVisit";
-import Report from "views/Report/Report.js" 
-import Wallet from "views/Wallet/Wallet.js"
 import Summary from "views/Summary/Summary.js"
 import Customer from "views/SuperUser/Customer";
-import Sample from "views/SuperUser/Sample.js"
+import CustomerInformation from 'views/SuperUser/CustomerInformation';
 
-
-//import PlayerInfo from "views/MED/PlayerInfo";
-// import Profile from "views/Profile/Profile.js"
-import Profile from "views/Profile/UserProfile"
 import ChangePassword from "views/Login/ChangePassword.js"
-//import About from "views/MED/About.js"; 
 import Home from "views/MED/Home.js";
 //import ContactUs from "views/MED/ContactUs.js";
-//import PointSystem from "views/MED/PointSystem.js";
 
 import WorkingHours from "views/Settings/WorkingHours";
 import Holiday from "views/Settings/Holiday";
 import Assistant from "views/Settings/Assistant";
-//import Medicine from "views/Settings/Medicine.js" 
 
 
 import Modal from 'react-modal';
@@ -171,9 +170,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export function setTab(num) {
-  
-  //myTabPosition = num;
-  //console.log(`Menu pos ${num}`);
   localStorage.setItem("menuValue", num);
   cdRefresh();
 }
@@ -202,6 +198,7 @@ export function CricDreamTabs() {
   //console.log(location.pathname);
 
   useEffect(() => {       
+/*    
     const checkVersion = async () => {
       //console.log("about to call upgrade");
       let upg = await upGradeRequired();
@@ -211,7 +208,7 @@ export function CricDreamTabs() {
       setUpgrade(upg.status);
       if (upg.status) setIsOpen(true);
     }
-		
+*/    
     function setMenuValue() {
       setValue(parseInt(localStorage.getItem("menuValue")));
       setIdle(false);
@@ -219,8 +216,6 @@ export function CricDreamTabs() {
     setMenuValue();
 }, []);
 
-
-  //console.log(`in Tab function  ${localStorage.getItem("menuValue")}`);
 
   const handleChange = (event) => {
     setAuth(event.target.checked);
@@ -236,22 +231,6 @@ export function CricDreamTabs() {
 		setArunGroup(true);
   };
 
-  async function handleGroupSelect(index) {
-    setArunGroup(false);
-    let gRec = userGroup[index];
-    try {
-      await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/setdefaultgroup/${localStorage.getItem("uid")}/${gRec.gid}`);
-      localStorage.setItem("gid", gRec.gid);
-      localStorage.setItem("groupName", gRec.groupName);
-      localStorage.setItem("tournament", gRec.tournament);
-      localStorage.setItem("admin", gRec.admin);
-      clearBackupData();
-      cdRefresh();
-    } catch (e) {
-      console.log(e);
-      console.log("error setting default group");
-    }
-  }
   
   const handleClose = () => {
     setAnchorEl(null);
@@ -271,25 +250,28 @@ export function CricDreamTabs() {
 
 	const handleHome = () => { setMenuValue(1);  }
   const handleAppointment = () => { setMenuValue(2);  }
-  const handleVisit = () => { setMenuValue(3);  }
 
-  const handlePatient = () => { handleClose(); setMenuValue(901);}
+/*
+  //const handleVisit = () => { setMenuValue(3);  }
 	const handleNextVisit = () => { handleClose(); setMenuValue(904);}
 	const handleReport = () => { handleClose(); setMenuValue(905);}
+	const handleSample = () => { handleClose(); setMenuValue(801);}
+	const handleCustomer = () => { handleClose(); setMenuValue(802);}
+	//const handleMedicine = () => { handleClose(); setMenuValue(704);}
+*/
+
+  const handlePatient = () => { handleClose(); setMenuValue(901);}
 	
   const handleProfile = () => { handleClose(); handleGrpClose(); setMenuValue(101);}
 	const handleWallet = () => { handleClose(); handleGrpClose(); setMenuValue(102);}
 	const handleChangePassword = () => { handleClose(); handleGrpClose(); setMenuValue(103);}
 	const handleSummary = () => { handleClose(); handleGrpClose(); setMenuValue(104);}
-	const handleContactUs = () => { handleClose(); setMenuValue(202);}
+	//const handleContactUs = () => { handleClose(); setMenuValue(202);}
 	
-	const handleSample = () => { handleClose(); setMenuValue(801);}
-	const handleCustomer = () => { handleClose(); setMenuValue(802);}
 	
 	const handleWorkingHours = () => { handleClose(); setMenuValue(701);}
 	const handleHoliday = () => { handleClose(); setMenuValue(702);}
 	const handleAssistant = () => { handleClose(); setMenuValue(703);}
-	//const handleMedicine = () => { handleClose(); setMenuValue(704);}
   
 
   function DisplayCdItems() {
@@ -301,20 +283,23 @@ export function CricDreamTabs() {
 				else 
 					return <Patient />
       case 2: return <Appointment/>;
-      case 3: return <Visit/>; 
-			
-      case 101: return <Profile />;
-      case 102: return <Wallet />;
+      case 3: return <Visit/>; 	
+      case 101: 
+        if (window.sessionStorage.getItem("userType") === "Developer")
+          return <Customer />
+        else
+          return <CustomerInformation />;
+      //case 102: return <Wallet />;
 			case 103: return <ChangePassword />;
 			case 104: return <Summary />;
 
-			case 801: return <Sample />
-			case 802: return <Customer />
+			//case 801: return <Sample />
+			//case 802: return <Customer />
 
       case 901: return <Patient />;
 			//case 903: return <Sample />
-			case 904: return <NextVisit />
-			case 905: return <Report />
+			//case 904: return <NextVisit />
+			//case 905: return <Report />
 
 			case 701: return <WorkingHours />
 			case 702: return <Holiday />
@@ -341,41 +326,6 @@ export function CricDreamTabs() {
  
   function closeModal(){ setIsOpen(false); }
 
-  function DisplayUpgrade() {
-    //console.log(`Upgrate: ${upgrade} Menu Item:   ${value}`)
-    // console.log("Current",process.env.REACT_APP_VERSION);
-    if (upgrade)
-      return(
-        <Modal
-        isOpen={modalIsOpen}
-        onAfterOpen={afterOpenModal}
-        onRequestClose={closeModal}
-        style={customStyles}
-        contentLabel="Example Modal"
-        ariaHideApp={false}
-      >
-        <Typography className={classes.new} align="center">
-          Latest Version {latestApk.version}
-        </Typography>
-        <BlankArea/>
-        <Typography className={classes.new} align="center">
-          What is new
-        </Typography>
-        <TextField variant="outlined" multiline fullWidth disabled
-          id="producttext"
-          // label="What is new" 
-          className={classes.whatIsNew}
-          defaultValue={latestApk.text} 
-        />
-        <BlankArea />
-        <Button align="center" key="upgrade" variant="contained" color="primary" size="medium"
-        className={classes.visitButton} onClick={handleUpgrade}>Update Now
-        </Button>
-      </Modal>
-      )
-    else
-      return(null);
-  }
 
   function DisplayGroupMenu() {
    //console.log("Group length");
@@ -441,17 +391,14 @@ export function CricDreamTabs() {
               >
 								<Typography className={classes.title}>{sessionStorage.getItem("userName")}</Typography>
 								<Divider className={classes.divider} />
+                {(window.sessionStorage.getItem("userType") !== "Assistant") &&
                 <MenuItem onClick={handleProfile}>
 									<Typography className={classes.menuStyle}>Profile</Typography>
 								</MenuItem>
+                }
 								<MenuItem onClick={handleChangePassword}>
 									<Typography className={classes.menuStyle}>Change Password</Typography>
 								</MenuItem>
-								{(window.sessionStorage.getItem("userType") === "Doctor") &&
-									<MenuItem onClick={handleWallet}>
-									<Typography className={classes.menuStyle}>Wallet</Typography>
-									</MenuItem>
-								}
                 <Divider className={classes.divider}/>
 								{(itIsMobile) &&
 									<div>
@@ -466,7 +413,7 @@ export function CricDreamTabs() {
 									</MenuItem>
 									<Divider className={classes.divider} />
 									</div>
-								}
+								} 
 								<div align="center">
 								<Typography className={classes.title}>Settings</Typography>
 								<MenuItem onClick={handleWorkingHours}>
@@ -479,7 +426,7 @@ export function CricDreamTabs() {
 								<Typography className={classes.menuStyle}>User</Typography>
 								</MenuItem>
 								</div>
-								{(window.sessionStorage.getItem("userType") === "Developer") &&
+								{((false) && (window.sessionStorage.getItem("userType") === "Developer")) &&
 									<div>
 									<Divider className={classes.divider}/>
 									<MenuItem onClick={handleSample}>

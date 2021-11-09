@@ -57,7 +57,7 @@ router.get('/list/:cid/:pid', async function(req, res, next) {
 });
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
 function setHeader(res) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

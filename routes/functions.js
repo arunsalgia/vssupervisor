@@ -159,12 +159,19 @@ function akshuUpdUser(userRec) {
   arun_user[userRec.uid] = userRec;
 } 
 
-async function akshuGetCustomer(cid) {
+async function loadCustomer() {
   if (arun_customer.length === 0) {
     console.log("A;; customer readomh-------------------");
     arun_customer = await M_Customer.find({});
     //console.log(arun_customer);
+    for(let i=0; i<arun_customer.length; ++i) {
+      arun_customer[i].email = dbToSvrText(arun_customer[i].email);
+    }
   }
+}
+
+async function akshuGetCustomer(cid) {
+  await loadCustomer();
   let tmp = arun_customer.find(function(post) { if(post._id == cid) return true; });
   let retUser;
   if (tmp) retUser = _.cloneDeep(tmp)
@@ -172,11 +179,7 @@ async function akshuGetCustomer(cid) {
 } 
 
 async function akshuGetAllCustomer() {
-  if (arun_customer.length === 0) {
-    console.log("A;; customer readomh-------------------");
-    arun_customer = await M_Customer.find({});
-    //console.log(arun_customer); 
-  }
+  await loadCustomer();
   let retUser = _.cloneDeep(arun_customer);
   return retUser;
 }  

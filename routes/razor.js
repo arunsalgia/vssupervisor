@@ -46,7 +46,7 @@ var razorOptions = {
 };
 			
 router.get('/order/:userCid/:amount', async function( req, res) {
-	console.log("Hello");
+//	console.log("Hello");
 
 	var {userCid, amount} = req.params;
 	
@@ -72,7 +72,7 @@ router.get('/order/:userCid/:amount', async function( req, res) {
 			// update order id and user details
 			razorOptions.order_id = data.id;
 			razorOptions.name = customerRec.name;
-			razorOptions.prefill.email = dbdecrypt(customerRec.email);
+			razorOptions.prefill.email = decrypt(customerRec.email);
 			razorOptions.prefill.contact = customerRec.mobile;
       sendok(res, razorOptions);
     })

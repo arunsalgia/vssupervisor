@@ -2,6 +2,8 @@ var smsRouter = express.Router();
 const { akshuGetCustomer, getNextVisit,
  } = require("./functions");
 
+ const { getPatientByPid  } = require("./patient");
+
  let headerIdList = [];
  let messageIdList = [];
  let arun_smsconfig=[];
@@ -448,6 +450,8 @@ async function sendCancelSms(cid, pid, cancelTime) {
 	// first find out if patinet has mobile number
 	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
 	let patRec = await getPatientByPid(cid, pid);
+	//console.log(patRec);
+
 	if (patRec < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
@@ -488,7 +492,7 @@ async function sendCancelSms(cid, pid, cancelTime) {
 }
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
-function senderr(res, errcode, errmsg) { res.sendStatus(errcode).send(errmsg); }
+function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
 function setHeader(res) { 
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
