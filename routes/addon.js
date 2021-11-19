@@ -1,11 +1,56 @@
-var router = express.Router();
+var addOnRouter = express.Router();
+
 const { 
 	ALPHABETSTR,
 	getLoginName, getDisplayName,
 	getMaster, setMaster,
+	compareDate,
 } = require('./functions'); 
 
-router.use('/', function(req, res, next) {
+
+let arun_subscriptionList = {};
+
+function clearSubscritonList(cid)  {arun_subscriptionList[cid] = []};
+
+async function loadSubscriptionList(cid) {
+	let hasData = false;
+	if (arun_subscriptionList[cid]) 
+	if (arun_subscriptionList[cid].length > 0)
+		hasData = true;
+
+	//console.log(hasData);
+
+	if (!hasData) {
+		console.log("Reading subscription for ", cid);
+		let hRec = await M_Subscribe.find({cid: cid});
+		arun_subscriptionList[cid] = hRec;
+		//console.log(arun_subscriptionList[cid]);
+	}
+}
+
+async function getAllSubscriptions(cid) {
+	await loadSubscriptionList(cid);
+	return arun_subscriptionList[cid];
+}
+
+async function hasSubscribed(cid, subscriptionName) {
+	await loadSubscriptionList(cid);
+	let hasSub = false;
+	let tmp = arun_subscriptionList[cid].find(x => x.name == subscriptionName);
+	if (tmp) {
+	// also check if it has not expired. i.e. still active
+	if (compareDate(tmp.expiryDate, new Date()) >= 0) hasSub = true;
+	}
+	return hasSub;
+}
+
+async function getSubscribed(cid, subscriptionName) {
+	await loadSubscriptionList(cid);
+	let tmp = arun_subscriptionList[cid].find(x => x.name == subscriptionName);
+	return tmp;
+}
+
+addOnRouter.use('/', function(req, res, next) {
   setHeader(res);
   if (!db_connection) { senderr(res, DBERROR,  ERR_NODB); return; }
  
@@ -15,7 +60,7 @@ router.use('/', function(req, res, next) {
 // send list of in chunks of blocks.
 // Each Block will contain #medicines which is confgired in MEDBLOCK
 
-router.get('/add/:newType/:charges/:desc/:eligible', async function(req, res, next) {
+addOnRouter.get('/add/:newType/:charges/:desc/:eligible', async function(req, res, next) {
   setHeader(res);
   
   var {newType, charges, desc, eligible } = req.params;
@@ -38,7 +83,7 @@ router.get('/add/:newType/:charges/:desc/:eligible', async function(req, res, ne
 
 });
 
-router.get('/edit/:oldType/:newType/:charges/:desc/:eligible', async function(req, res, next) {
+addOnRouter.get('/edit/:oldType/:newType/:charges/:desc/:eligible', async function(req, res, next) {
   setHeader(res);
   
   var {oldType, newType, charges, desc, eligible } = req.params;
@@ -65,7 +110,7 @@ router.get('/edit/:oldType/:newType/:charges/:desc/:eligible', async function(re
 	sendok(res, mRec);
 });
 
-router.post('/delete/:delType', async function(req, res, next) {
+addOnRouter.post('/delete/:delType', async function(req, res, next) {
   setHeader(res);
   
   var { delType } = req.params;
@@ -76,23 +121,25 @@ router.post('/delete/:delType', async function(req, res, next) {
 
 });
 
-router.get('/subscribe/:cid/:addonname/:amount', async function(req, res, next) {
+addOnRouter.get('/subscribe/:cid/:addonname/:amount', async function(req, res, next) {
   setHeader(res);
   
   var { cid, addonname, amount } = req.params;
 	amount = Number(amount);
 	
-	let d = new Date();
-	d.setFullYear(d.getFullYear()+1);
-	let tmpRec = await M_Subscribe.findOne({cid: cid, name: addonname});
+	let tmpRec = await getSubscribed(cid, addonname);    //await M_Subscribe.findOne({cid: cid, name: addonname});
 	if (!tmpRec) {
 		tmpRec = new M_Subscribe();
 		tmpRec.cid = cid;
 		tmpRec.name = addonname
 	}
+	let d = new Date();
+	d.setFullYear(d.getFullYear()+1);
 	tmpRec.expiryDate = d;
 	tmpRec.enabled = true;
 	tmpRec.save();
+
+	clearSubscritonList(cid);
 
 	// now deduct amount 
 	let myTrans = createWalletTransaction(cid);
@@ -105,11 +152,13 @@ router.get('/subscribe/:cid/:addonname/:amount', async function(req, res, next) 
 
 });
 
-router.get('/unsubscribe/:cid/:addonname', async function(req, res, next) {
+addOnRouter.get('/unsubscribe/:cid/:addonname', async function(req, res, next) {
   setHeader(res);
   
   var { cid, addonname } = req.params;
 	
+	clearSubscritonList(cid);
+
 	let tmpRec = await M_Subscribe.findOne({cid: cid, name: addonname});
 	if (!tmpRec) {
 		tmpRec = new M_Subscribe();
@@ -123,17 +172,18 @@ router.get('/unsubscribe/:cid/:addonname', async function(req, res, next) {
 
 });
 
-router.get('/subscribelist/:cid', async function(req, res, next) {
+addOnRouter.get('/subscribelist/:cid', async function(req, res, next) {
   setHeader(res);
   
   var { cid } = req.params;
 	
-	let tmpRec = await M_Subscribe.find({cid: cid});
+	//let tmpRec = await M_Subscribe.find({cid: cid});
+	let tmpRec = await getAllSubscriptions(cid);
 	sendok(res, tmpRec);
 });
 
 
-router.get('/list', async function(req, res, next) {
+addOnRouter.get('/list', async function(req, res, next) {
   setHeader(res);
   
 	
@@ -148,4 +198,7 @@ function setHeader(res) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 } 
 
-module.exports = router;
+module.exports = {
+	addOnRouter,
+	hasSubscribed,
+}

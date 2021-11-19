@@ -1,4 +1,4 @@
-const {  akshuGetUser, GroupMemberCount,  
+const {  akshuGetUser,  
   encrypt, decrypt, dbencrypt, dbToSvrText, svrToDbText, dbdecrypt,
 	numberDate, 
 	generateOrder, generateOrderByDate,
@@ -97,7 +97,7 @@ router.get('/add/:cid/:apptdata', async function (req, res) {
 	
 	hRec.save();
 
-	await sendAppointmentSms(cid, newData.pid, newData.apptTime)
+	sendAppointmentSms(cid, newData.pid, newData.apptTime)
 	sendok(res, hRec);
 });	
 

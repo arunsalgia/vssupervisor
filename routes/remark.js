@@ -17,7 +17,7 @@ async function loadRemark(cid) {
 
 	if (!hasData) {
 		console.log("Reading remark for ", cid);
-		let hRec = await M_Medicine.find({cid: cid},  {name: 1, _id: 0}).sort({name: 1});
+		let hRec = await M_Remark.find({cid: cid},  {name: 1, _id: 0}).sort({name: 1});
 		arun_remark[cid] = hRec;
 		//console.log(arun_remark[cid]);
 	}
@@ -125,7 +125,7 @@ router.get('/list/:cid', async function(req, res, next) {
 		sendok(res, objs);
   });
 	*/
-	let allRecs = getAllRemarks(cid);
+	let allRecs = await getAllRemarks(cid);
 	sendok(res, allRecs);
 });
 
@@ -136,4 +136,4 @@ function setHeader(res) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 } 
 
-module.exports = router;
+module.exports = router; 

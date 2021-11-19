@@ -41,8 +41,8 @@ router.get('/list/:cid', async function(req, res, next) {
 	var {cid} = req.params;
 	
 	//let rec = await M_Treattype.find({cid: cid}, {_id: 0}).sort({name: 1});
+	let rec = await getAllTreatType(cid);
 	//console.log(rec);
-	let rec = getAllTreatType(cid);
 	sendok(res, rec);
 });
 

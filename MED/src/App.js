@@ -9,9 +9,9 @@ import "assets/css/material-dashboard-react.css?v=1.9.0";
 import { CricDreamTabs, setTab }from "CustomComponents/CricDreamTabs"
 import axios from "axios";
 import SignIn from "views/Login/SignIn"
-import SignUp from "views/Login/SignUp.js";
 import Welcome from "views/MED/Welcome";
-import Doctor from "views/MED/Doctor";
+//import SignUp from "views/Login/SignUp.js";
+//import Doctor from "views/MED/Doctor";
 import ResetPassword from "views/Login/ResetPassword";
 //import Session from "views/Session/Session"
 //import JoinGroup from "views/Group/JoinGroup.js"
@@ -128,15 +128,17 @@ function AppRouter() {
 		else if (sessionStorage.getItem("currentLogin") ===  "SIGNIN") {
 			return <SignIn />
 		} 
-		else if (sessionStorage.getItem("currentLogin") ===  "SIGNUP") {
-			return <SignUp />
-		} 
 		else if (sessionStorage.getItem("currentLogin") ===  "FORGOT") {
 			return <ForgotPassword />
+		} 
+/*
+    else if (sessionStorage.getItem("currentLogin") ===  "SIGNUP") {
+			return <SignUp />
 		} 
 		else if (sessionStorage.getItem("currentLogin") ===  "DOCTOR") {
 			return <Doctor />
 		} 
+*/
 		else  {
 			let myLink = checkResetPasswordRequest();
 			//console.log("Link", myLink);

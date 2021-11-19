@@ -463,10 +463,36 @@ export default function DentalTreatment(props) {
 
 		setIsDrawerOpened("ADDTREAT");
 		// set filter
-		setFilterItem("TRE");
+		setFilterItem("TREATMENT");
 		setFilterItemText("");
 		setFilterItemArray([]);
 		setRemember(false);
+	}
+	
+	function handleEditTreatmentType(index) {
+		let xxx = treatmentArray[treatmentIndex].treatment[index];
+		//console.log(xxx);
+
+		setEmurIndex(index);
+		setEmurName(xxx.name);
+		setEmurToothArray(xxx.toothArray);
+		setEmurAmount(xxx.amount);
+		let childtooth = false;
+		for(let i=0; i<xxx.toothArray.length; ++i) {
+			if (xxx.toothArray[i] > 50) {
+				childtooth = true;
+				break;
+			}
+		}
+		setIsChild(childtooth);
+
+		// set filter
+		setFilterItem("TREATMENT");
+		setFilterItemText("");
+		setFilterItemArray([]);
+		setRemember(false);
+
+		setIsDrawerOpened("EDITTREAT");
 	}
 	
 		
@@ -517,9 +543,10 @@ export default function DentalTreatment(props) {
 					</Grid>
 					<Grid item xs={1} sm={1} md={1} lg={1} >
 						{(x.treatmentNumber === MAGICNUMBER) &&
-							<IconButton color="secondary" size="small" onClick={() => { handleDeleteTreatment(un.name)}} >
-							<DeleteIcon />
-							</IconButton>
+							<div>
+							<EditIcon color="primary" size="small" onClick={() => { handleEditTreatmentType(index)}} />
+							<DeleteIcon color="secondary" size="small" onClick={() => { handleDeleteTreatment(un.name)}} />
+							</div>
 						}
 					</Grid>
 					</Grid>
@@ -578,14 +605,19 @@ export default function DentalTreatment(props) {
 				return;
 			} 
 			tmp[lastIndex].treatment.push({name: emurName, toothArray: emurToothArray, amount: emurAmount});
-			index = tmp[lastIndex].treatment.length - 1;
+			setTreatTypeArray(tmp);
+			//index = tmp[lastIndex].treatment.length - 1;
 		} else {
-			if (tmp[lastIndex].treatment[index].name.toLowerCase() !== emurName.toLowerCase()) {
+			if (tmp[lastIndex].treatment[emurIndex].name.toLowerCase() !== emurName.toLowerCase()) {
 				if (tmp[lastIndex].treatment.find(x => x.name.toLowerCase() === emurName.toLowerCase())) {
 					setModalRegister(2001);
 					return;
 				} 
 			}
+			tmp[lastIndex].treatment[emurIndex].name = emurName;
+			tmp[lastIndex].treatment[emurIndex].toothArray = emurToothArray;
+			tmp[lastIndex].treatment[emurIndex].amount = emurAmount;
+			setTreatmentArray(tmp);
 		}
 		setIsDrawerOpened("");
 		
@@ -603,12 +635,17 @@ export default function DentalTreatment(props) {
 	
 	function setEmurNameWithFilter(txt) {
 		//console.log("Iin filter", txt);
+		//console.log(filterItem);
+		//console.log(treatTypeArray);
 		setEmurName(txt);
 		setFilterItemText(txt);
 		let tmpArray = [];
 		if (txt !== "") {
-			if (filterItem.substr(0,3) === "TRE")
+			if (filterItem.substr(0,3) === "TRE") {
+				//console.log(treatTypeArray);
+				//console.log(txt);
 				tmpArray = treatTypeArray.filter(x => x.name.toLowerCase().includes(txt.toLowerCase()))
+			}
 		} 
 		//console.log(treatTypeArray);
 		//console.log(tmpArray);
@@ -665,7 +702,7 @@ export default function DentalTreatment(props) {
 				/>*/}
 				<VsTextFilter type="text" label="Treatment type" value={emurName}
 					onChange={(event) => setEmurNameWithFilter(event.target.value)}
-					onClear={(event) => setEmurNameWithFilter("")}
+					onClear={() => setEmurNameWithFilter("")}
 				/>
 				<VsCheckBox align='left' label="Remember" checked={remember} onClick={() => setRemember(!remember)} />
 				<VsList listArray={filterItemArray} onSelect={handleVsSelect} onDelete={handleVsTreatTypeDelete} />

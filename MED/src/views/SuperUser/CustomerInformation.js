@@ -677,16 +677,8 @@ export default function CustomerInformations(props) {
 		let status = await updateCustomer(tmp);
 		
 		if (status.success) {
-			let tmpArray;
-			//let oldName = "";
-			if (custNumber > 0) {
-				tmpArray = customerArray.filter(x => x.customerNumber !== status.data.customerNumber);
-			} else {
-				tmpArray = [].concat(customerArray);
-			}
-			tmpArray.push(status.data)
 			setCurrentCustomerData(status.data);
-			setCustomerArray(lodashSortBy(tmpArray, 'customerNumber'));
+			sessionStorage.setItem("customerData", JSON.stringify(status.data));
 			alert.success(`Updated details of ${status.data.name}`);
 			setIsDrawerOpened("");
 		} else {
@@ -694,6 +686,36 @@ export default function CustomerInformations(props) {
 			alert.error(`error updating details of ${custName}`);
 		}
 	}
+	
+	async function handleCustomerPlanRecharge(c) {
+		if (balance < c.fee)
+			return alert.error(`Insufficient amount in wallet. Customer fee is ${c.fee}`);
+
+		try {
+			await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/wallet/deduct/${c._id}/${c.fee}/Plan Recharge`);
+			setIsDrawerOpened("");
+			setBalance(balance-c.fee);
+			// extend expiry date of customer by 1 year
+			let tmp = lodashCloneDeep(currentCustomerData);
+			let n = new Date(tmp.expiryDate);
+			n.setYear(n.getFullYear()+1);
+			tmp.expiryDate = n;
+			// update customer exiry data changes to database
+			let status = await updateCustomer(tmp);
+			if (status.success) {
+				setCurrentCustomerData(status.data);
+				sessionStorage.setItem("customerData", JSON.stringify(status.data));
+				alert.success(`Updated new expiry date of ${status.data.name}`);
+			} else {
+				console.log(e);
+				alert.error(`error updating expiry date`);
+			}
+		} catch (e) {
+			console.log(e);
+			alert.error("Failed to deduct plan fee from walletr");
+		}
+	}
+
 	
 	function DisplaySingleLine(props) {
 		return(

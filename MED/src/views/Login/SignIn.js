@@ -138,12 +138,6 @@ export default function SignIn() {
     cdRefresh();
   }
 
-  function handleRegister() {
-    //console.log("Call for register here");
-    // history.push("/admin/register")
-    sessionStorage.setItem("currentLogin", "SIGNUP");
-    cdRefresh();
-  }
 
   const handleClick = async () => {
     let myUserName = document.getElementById("userName").value;

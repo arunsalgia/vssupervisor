@@ -1,13 +1,9 @@
-var smsRouter = express.Router();
+//var smsRouter = express.Router();
 const { akshuGetCustomer, getNextVisit,
  } = require("./functions");
 
  const { getPatientByPid  } = require("./patient");
-
- let headerIdList = [];
- let messageIdList = [];
- let arun_smsconfig=[];
- let arun_smslog=[];
+ const { hasSubscribed  } = require("./addon");
 
  function makeDateTimeString(dStr) {
 	let d = new Date(dStr)
@@ -16,36 +12,9 @@ const { akshuGetCustomer, getNextVisit,
 }
 
 
-function akshuClearSmsConfig() {
-  arun_smsconfig = [];
-}
-
-function getBlankSmsConfig(cid) {
-	let tmpRec = new M_SmsConfig({
-		cid: cid,
-		bulkSmsPack: false,
-		birthDayPack: false,
-		festivalPack1: false,
-		festivalPack2: false,
-		festivalPack3: false
-		})
-	return tmpRec;
-}
-
-
-function getBlankSmsLog(cid, month, year) {
-	let tmpRec = new M_SmsLog({
-		cid: cid,
-		month: month,
-		year: year,
-		bulkSmsCount: 0,
-		birthDayCount: 0,
-		festivalCount: 0,
-	})
-	return tmpRec;
-}
- 
-function getSMSIds() {
+ let headerIdList = [];
+ let messageIdList = [];
+ function getSMSIds() {
 	if (headerIdList.length === 0) {
 		let tmp = process.env.HEADERID;
 		headerIdList = tmp.split(",");
@@ -59,6 +28,47 @@ function getSMSIds() {
 		}
 	}
 }
+
+
+ let arun_smslog=[];
+
+ function getBlankSmsLog(cid, month, year) {
+	let tmpRec = new M_SmsLog({
+		cid: cid,
+		month: month,
+		year: year,
+		bulkSmsCount: 0,
+		birthDayCount: 0,
+		festivalCount: 0,
+	})
+	return tmpRec;
+}
+
+async function loadSmsLog() {
+	let hasData = false;
+	let t = new Date();
+
+	if (arun_smslog.length > 0) 
+	if ((arun_smslog[0].month == t.getMonth()) && (arun_smslog[0].year == t.getFullYear()))
+			hasData = true;
+	
+	if (!hasData)
+		arun_smslog = await M_SmsLog.find({month: t.getMonth(), year: t.getFullYear()});
+}
+
+
+ async function generateSMSLogs(cstomerList, month, year) {
+	let tmpLIst = [];
+	for(let i=0; i<cstomerList.length; ++i) {
+		let tmpRec = await M_SmsLog.findOne({cid: cstomerList[i]._id, month: month, year: year});
+		if (!tmpRec) {
+			tmpRec = getBlankSmsLog(cstomerList[i]._id, month, year);
+			tmpRec.save();
+		}
+		tmpLIst.push(tmpRec);
+	}
+	arun_smslog = tmpLIst;
+ }
 
 
 
@@ -108,9 +118,6 @@ async function fast2SmsSendExpiry(destMobile, docName, clinicName, clinicMobile)
 	return status;
 }
 
-
-
-
 async function fast2SmsSendVisit(destMobile, docName, clinicName, visitDateStr, clinicMobile) {
 	let myParams = `${docName}|${clinicName}|${visitDateStr}|${clinicMobile}`;
 	getSMSIds();
@@ -125,36 +132,40 @@ async function fast2SmsCancel(destMobile, docName, clinicName, cancelDateStr, cl
 	return status;
 }
 
-async function fast2SmsReminder(destMobile, docName, clinicName, cancelDateStr, clinicMobile) {
-	let myParams = `${docName}|${clinicName}|${cancelDateStr}|${clinicMobile}`;
+async function fast2SmsReminder(destMobile, docName, clinicName, apptDateStr, clinicMobile) {
+	let myParams = `${docName}|${clinicName}|${apptDateStr}|${clinicMobile}`;
 	getSMSIds();
 	let status = await fast2SmsSend(headerIdList[4], messageIdList[4], myParams, destMobile);
 	return status;
 }
 
 
-
-
-function akshuGetSMSLogInternal(cid, month, year)  {
-	let retUser = arun_smslog.find(function(post) { if ((post.cid === cid ) && (post.month === month) && (post.year === year)) return true; });
-	if (retUser) return retUser;
-	retUser =  getBlankSmsLog(cid, month, year)
-	retUser.save();
-	arun_smslog.push(retUser);
-	return retUser
+async function fast2SmsSendFestival(destMobile, greeting, clinicName) {
+	let myParams = `${greeting}|${clinicName}`;
+	getSMSIds();
+	let status = await fast2SmsSend(headerIdList[5], messageIdList[5], myParams, destMobile);
+	return status;
 }
 
+async function fast2SmsSendBirthday(destMobile, greeting, clinicName) {
+	let myParams = `${greeting}|${clinicName}`;
+	getSMSIds();
+	let status = await fast2SmsSend(headerIdList[6], messageIdList[6], myParams, destMobile);
+	return status;
+}
+
+
+
 async function akshuGetSmsLog(cid, month, year) {
-	if (arun_smslog.length === 0) {
-    //console.log("A;; sms log  reading frmo database-------------------");
-		docs = await M_SmsLog.find({month: month, year: year});
-		arun_smslog = docs;
-		let retRec = akshuGetSMSLogInternal(cid, month, year);
-		return retRec;
-	} else {
-		return akshuGetSMSLogInternal(cid, month, year);
-  }
-  
+	await loadSmsLog()
+	let tmpRec = arun_smslog.find(x => x.cid == cid && x.month == month && x.year == year);
+	if (!tmpRec) {
+		console.log("Should come for new customer only");
+		tmpRec = getBlankSmsLog(cid, month, year);
+		tmpRec.save();
+		arun_smslog.push(tmpRec);
+	}
+	return tmpRec;
 } 
 
 function akshuUpdSmsLog(rec) {
@@ -162,151 +173,6 @@ function akshuUpdSmsLog(rec) {
 	arun_smslog.push(rec);
 	rec.save();
 } 
-
-
-function akshuGetSMSConfigInternal(cid)  {
-	let retUser = arun_smsconfig.find(function(post) { if(post.cid === cid) return true; });
-	if (retUser) return retUser;
-	retUser =  getBlankSmsConfig(cid)
-	retUser.save();
-	arun_smsconfig.push(retUser);
-	return retUser
-}
-
-async function akshuGetSMSConfig(cid) {
-	if (arun_smsconfig.length === 0) {
-    console.log("A;; sms config  reading frmo database-------------------");
-		docs = await M_SmsConfig.find({});
-		arun_smsconfig = docs;
-		let retRec = akshuGetSMSConfigInternal(cid);
-		//console.log(retRec);
-		return retRec;
-	} else {
-		return akshuGetSMSConfigInternal(cid);
-  }
-  
-} 
-
-
-function akshuAddSmsConfig(cidData) {
-  arun_smsconfig.push(cidData);
-  cidData.save();;
-} 
-
-async function bulkBulkSmsSubscribed(cid) {
-	let rec = await akshuGetSMSConfig(cid);
-	return rec.bulkSmsPack;
-}
-
-async function birthdayPackSubscribed(cid) {
-	let rec = await akshuGetSMSConfig(cid);
-	return rec.birthDayPack;
-}
-
-async function birthdayFestivalPackSubscribed(cid) {
-	let rec = await akshuGetSMSConfig(cid);
-	return {pack1: rec.festivalPack1, pack2: festivalPack2, pack3: festivalPack3};
-}
-
-async function sendBirthdayGreeting(cid, patientRec) {
-	if (await birthdayPackSubscribed(cid)) {
-		console.log("birthday wish to "+patientRec.displayName);
-	}
-}
-
-async function sendFestialGreeting(cid, patientRec) {
-	let sts = await birthdayPackSubscribed(cid);
-
-}
-
-smsRouter.use('/', function(req, res, next) {
-  setHeader(res);
-  if (!db_connection) { senderr(res, DBERROR,  ERR_NODB); return; }
- 
-  next('route');
-});
-
-smsRouter.get('/list/:cid', async function(req, res, next) {
-  setHeader(res);
-	var {cid} = req.params;
-	
-	let rec = await M_Info.find({cid: cid}, {_id: 0});
-	sendok(res, rec);
-});
-
-smsRouter.get('/getconfig/:cid', async function(req, res, next) {
-  setHeader(res);
-	var {cid} = req.params;
-	
-	let rec = await akshuGetSMSConfig(cid);
-	console.log(rec);
-	sendok(res, rec);
-});
-
-smsRouter.get('/setconfig/:cid/:smsData', async function(req, res, next) {
-  setHeader(res);
-	var {cid, smsData} = req.params;
-	smsData = JSON.parse(smsData);
-
-	let rec = await M_SmsConfig.findOne({cid: cid});
-	if (!rec) {
-		rec = new M_SmsConfig();
-		rec.cid = cid;
-	}
-	rec.bulkSmsPack = smsData.bulkSmsPack;
-	rec.birthDayPack = smsData.birthDayPack;
-	rec.festivalPack1 = smsData.festivalPack1;
-	rec.festivalPack2 = smsData.festivalPack2;
-	rec.festivalPack3 = smsData.festivalPack3;
-	rec.save();
-	console.log(rec);
-	akshuClearSmsConfig();
-
-	sendok(res, rec);
-});
-
-
-smsRouter.get('/list/:cid/:pid', async function(req, res, next) {
-  setHeader(res);
-	var {cid, pid} = req.params;
-	
-	let rec = await M_Info.findOne({cid: cid, pid: Number(pid)});
-	console.log(rec);
-	sendok(res, rec);
-});
-
-smsRouter.get('/update/:cid/:pid/:infoMsg', async function(req, res, next) {
-  setHeader(res);
-  var {cid, pid, infoMsg} = req.params;
-
-	// just check if already exists
-	let myRec = await M_Info.findOne({cid: cid, pid: Number(pid)});
-	if (!myRec) {
-		// updating 1st time
-		myRec = new M_Info();
-		myRec.pid = Number(pid);
-	};
-	myRec.info = infoMsg
-	myRec.save();
-	
-	sendok(res, myRec);
-});
-
-smsRouter.get('/test/:cid', async function(req, res, next) {
-  setHeader(res);
-	var {cid} = req.params;
-	
-		let configrec = await sendAppointmentSms(cid, 'Arun', new Date());
-		sendok(res, "ok");	
-}); 
-
-smsRouter.get('/delete/:cid/:pid', async function(req, res, next) {
-  setHeader(res);
-	var {pid} = req.params;
-	
-	let rec = await M_Info.deleteOne({cid: cid, pid: Number(pid)});
-	sendok(res, "done");
-});
 
 
 
@@ -324,10 +190,8 @@ async function sendAppointmentSms(cid, pid, apptTime) {
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
 		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		let customerConfig = await akshuGetSMSConfig(cid);
-		//console.log(customerConfig);
-		if (!customerConfig.bulkSmsPack) {
-			console.log("Bulk Sms count Over");
+		if (!hasSubscribed(cid, AddOnList.bulk)) {
+			console.log("Deafult Sms count Over");
 			// How to inform constomer
 			return;
 		}
@@ -367,11 +231,8 @@ async function sendExpirySms(cid, pid, apptTime) {
 	let customerSmsLog = await akshuGetSmsLog(cid, t.getMonth(), t.getFullYear());
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
-		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		let customerConfig = await akshuGetSMSConfig(cid);
-		//console.log(customerConfig);
-		if (!customerConfig.bulkSmsPack) {
-			console.log("Buls Sms count Over");
+		if (!hasSubscribed(cid, AddOnList.bulk)) {
+			console.log("Default Sms count Over");
 			return;
 		}
 	}
@@ -399,6 +260,14 @@ async function sendExpirySms(cid, pid, apptTime) {
 	})
 }
 
+async function sendFestivalSms(customerRec, patRec, festRecord) {
+	// first find out if pastinet has mobile number
+	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	//	let patRec = await getPatientByPid(cid, pid);
+	
+}
+
+
 async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
 	// first find out if patinet has mobile number
 	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
@@ -413,10 +282,7 @@ async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
 	let customerSmsLog = await akshuGetSmsLog(cid, t.getMonth(), t.getFullYear());
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
-		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		let customerConfig = await akshuGetSMSConfig(cid);
-		//console.log(customerConfig);
-		if (!customerConfig.bulkSmsPack) {
+		if (!hasSubscribed(cid, AddOnList.bulk)) {
 			console.log("Buls Sms count Over");
 			return;
 		}
@@ -463,9 +329,7 @@ async function sendCancelSms(cid, pid, cancelTime) {
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
 		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		let customerConfig = await akshuGetSMSConfig(cid);
-		//console.log(customerConfig);
-		if (!customerConfig.bulkSmsPack) {
+		if (!hasSubscribed(cid, AddOnList.bulk)) {
 			console.log("Buls Sms count Over");
 			return;
 		}
@@ -491,6 +355,49 @@ async function sendCancelSms(cid, pid, cancelTime) {
 	})
 }
 
+async function sendReminderSms(cid, pid, apptTime) {
+	// first find out if patinet has mobile number
+	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
+	let patRec = await getPatientByPid(cid, pid);
+	//console.log(patRec);
+
+	if (patRec < 1000000000) {
+		console.log("Mobile number not configured");
+		return;
+	}
+
+	// find out how many sms sent by user this month
+	let t = new Date();
+	let customerSmsLog = await akshuGetSmsLog(cid, t.getMonth(), t.getFullYear());
+	//console.log(customerSmsLog);
+	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
+		// if default count has passed. CHeck if subscribed for bulk sms for patients
+		if (!hasSubscribed(cid, AddOnList.bulk)) {
+			console.log("Buls Sms count Over");
+			return;
+		}
+	}
+
+	// now prepare to send SMS
+	let customerRec = await akshuGetCustomer(cid);
+	//console.log(customerRec);
+
+	fast2SmsReminder(
+		patRec.mobile, 
+		customerRec.doctorName,
+		customerRec.clinicName,
+		makeDateTimeString(apptTime),
+		customerRec.mobile
+	).
+	then((body) => {
+		++customerSmsLog.bulkSmsCount;
+		akshuUpdSmsLog(customerSmsLog);
+	}).
+	catch((error) => {
+		console.log("Error sending message. ", error.status_code);
+	})
+}
+
 function sendok(res, usrmsg) { res.send(usrmsg); }
 function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
 function setHeader(res) { 
@@ -499,9 +406,15 @@ function setHeader(res) {
 } 
 
 module.exports = {
-	smsRouter,
+	// smsRouter,
+	generateSMSLogs,
 	sendAppointmentSms,
 	sendExpirySms,
 	sendVisitSms,
 	sendCancelSms,
+	sendReminderSms,
+	fast2SmsSendFestival,
+	fast2SmsSendBirthday,
+	akshuGetSmsLog,
+	akshuUpdSmsLog
 }

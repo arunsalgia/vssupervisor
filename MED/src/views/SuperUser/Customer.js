@@ -350,20 +350,18 @@ export default function Customer() {
 	const [festivalArray, setFestivalArray] = useState([]);
 
 
-  useEffect(() => {	
-		const getAllCustomers = async () => {		
-			try {
-				let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/customer/list`;
-				let resp = await axios.get(myURL);
-				//console.log(resp.data);
-				setCustomerArray(resp.data);
-				setIsDrawerOpened("");
-			} catch(e) {
-				console.log(e);
-			}
+	async function getAllCustomers () {
+		try {
+			let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/customer/list`;
+			let resp = await axios.get(myURL);
+			setCustomerArray(resp.data);
+			// setIsDrawerOpened("");
+		} catch(e) {
+			console.log(e);
+			setCustomerArray([]);
 		}
-		getAllCustomers();
-  }, []);
+
+	}
 
 
 	async function setSummaryMainSelect(item) {
@@ -375,8 +373,9 @@ export default function Customer() {
 		} else if (item === "Festival") {
 			await getFestivalDates();
 		} else if (item === "Customer") {
-			setCurrentCustomerData({});
+			//setCurrentCustomerData({});
 			setCurrentCustomer("");
+			getAllCustomers();
 		}
 		setCurrentSelection(item);
 	}
@@ -1047,6 +1046,13 @@ export default function Customer() {
 		setEmurDate1(d);
 	}
 
+	function handleBackToCustomer() {
+		getAllCustomers();
+		setCurrentCustomer("");
+	}
+
+
+
 	return (
 		<div className={gClasses.webPage} align="center" key="main">
 		<DisplayPageHeader headerName="Customer" groupName="" tournament=""/>
@@ -1081,7 +1087,7 @@ export default function Customer() {
 			}
 			{(currentCustomer !== "") &&
 				<div>
-				<VsButton align="right" name="Back to Customer list" onClick={() => { setCurrentCustomer("")}} />
+				<VsButton align="right" name="Back to Customer list" onClick={handleBackToCustomer} />
 				<CustomerInformation customer={currentCustomerData} />
 				</div>
 			}

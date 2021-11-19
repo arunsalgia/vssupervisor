@@ -84,13 +84,13 @@ treattypeRouter = require('./routes/treattype');
 dentalTreatmentRouter = require('./routes/dentaltreatment');
 profChargeRouter = require('./routes/profcharge');
 docxRouter = require('./routes/docx');
-addOnRouter = require('./routes/addon');
 doctorTypeRouter = require('./routes/doctortype')
 festivalRouter = require('./routes/festival');
 nextVisitRouter = require('./routes/nextvisit');
 
-const { smsRouter } = require('./routes/sms');
+//const { smsRouter } = require('./routes/sms');
 const { patientRouter } = require('./routes/patient');
+const { addOnRouter } = require('./routes/addon');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -144,7 +144,7 @@ app.use('/addon', addOnRouter);
 app.use('/doctortype', doctorTypeRouter);
 app.use('/festival', festivalRouter);
 app.use('/nextvisit', nextVisitRouter);
-app.use('/sms', smsRouter);
+//app.use('/sms', smsRouter);
 
 
 //Schema
@@ -439,6 +439,7 @@ FestivalSchema = mongoose.Schema({
 	pack3: Boolean
 });
 
+/* discarded. Not to be used
 SmsConfigSchema = mongoose.Schema({
 	cid: String,
 	bulkSmsPack: Boolean,
@@ -447,6 +448,7 @@ SmsConfigSchema = mongoose.Schema({
 	festivalPack2: Boolean,
 	festivalPack3: Boolean
 });
+*/
 
 SmsLogSchema = mongoose.Schema({
 	cid: String,
@@ -490,7 +492,7 @@ M_Payment = mongoose.model('payment', PaymentSchema);
 M_AddOn = mongoose.model('addon', AddOnSchema);
 M_DoctorType = mongoose.model('doctortype', DoctorTypeSchema);
 M_Festival = mongoose.model('festival', FestivalSchema);
-M_SmsConfig = mongoose.model('smsconfig', SmsConfigSchema);
+//M_SmsConfig = mongoose.model('smsconfig', SmsConfigSchema);
 M_SmsLog = mongoose.model('smslog', SmsLogSchema);
 M_Subscribe = mongoose.model('subscribe', SubscribeSchema);
 
@@ -695,3 +697,9 @@ ALLDOCTORS = 0xFFFFFFFF;
 MAGICNUMBER = 99999;
 
 defaultPatientSms = 500;
+
+BIRTHDAYGREETING = 'May the days ahead of you be filled with prosperity, great health and above all joy in its truest and purest form. Happy birthday!';
+
+AddOnList = {
+	bulk: 'Unlimited SMS', billing: 'Billing', birthday: 'Birthday',
+	Festival1: 'Festival Pack 1'}

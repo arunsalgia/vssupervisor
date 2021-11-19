@@ -1,4 +1,5 @@
 var router = express.Router();
+const { MathDenominator } = require('docx');
 const { 
 	checkDate,
 	dbToSvrText,
@@ -12,7 +13,18 @@ const {
 	rechargeCount,
 } = require('./functions');
 
-const { sendAppointmentSms, sendExpirySms,  } = require("./sms");
+const { sendExpirySms, generateSMSLogs, 
+	akshuGetSmsLog, akshuUpdSmsLog,
+	fast2SmsSendFestival, fast2SmsSendBirthday,
+} = require("./sms");
+
+const { hasSubscribed  } = require("./addon");
+const { getAllPatients  } = require("./patient");
+
+
+const EARLYMORNINGSCHEDULEAT=0;
+const MORNINGSCHEDULEAT=7;
+const AFTERNOONSCHEDULEAT=15;
 
 router.use('/', function(req, res, next) {
   setHeader(res);
@@ -125,64 +137,146 @@ router.get('/setworkinghours/:cid/:workingHours', async function(req, res, next)
 
 router.get('/test', async function(req, res, next) {
   setHeader(res);
-	let i, cNum;
-
-	let allRecs = await akshuGetAllCustomer();
-	for(i=0,cNum=100; i<allRecs.length; ++i, ++cNum) {
-		//allRecs[i].customerNumber = cNum;
-		//allRecs[i].save();
-		//console.log(allRecs[i]);
-		allRecs[i].workingHours = [148, 149, 150];
-		console.log(allRecs[i]);
-		allRecs[i].save();
-	}
-	sendok(res, "working hours days done");
+	await doBirthdayWishes();
+	sendok(res, "all brithday wishes");
 });
 
-cron.schedule('5 0 * * *', async () => {	
-	let retry = 30;
-	while (retry > 0) {
-		if (db_connection) break;
-		//await sleep(1000);	// sleep for 1 second
-		--retry;
-  }
-	if (!db_connection) return;
-	
+async function doBirthdayWishes() {
 	let today = new Date();
-	console.log(today);
 	let tDate = today.getDate();
 	let tMonth = today.getMonth();
 	let tYear = today.getFullYear();
-
-	// STEP 1 ---> check if  expiry for any customer
-	console.log("Check for expiry");
+	
 	let allCustomers = await akshuGetAllCustomer();
-	for(let i = 0; i < allCustomers.length; ++i) {
-		let isExpired = checkDate(allCustomers[i].expiryDate);
-		console.log(allCustomers[i].name, isExpired);
-	}
-	
-	// STEP 2 ---> any old pending appointment to be set as expired
-	//let myMon = today.getMonth();
-	//let myDat = today.getDate();
-	
-	//let chkOrder = ((today.getFullYear() * 100) + today.getMonth())*100 + today.getDate();
-	//console.log("Chkorder", chkOrder);
-	//chkOrder *= 100 * 100;
-	let chkOrder = generateOrder(today.getFullYear(),  today.getMonth(), today.getDate(), 0, 0)
-	//console.log(chkOrder);
-	
-	let allOldPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: chkOrder} } );	
-	//console.log(allOldPendingAppts);
+	for(let ccc=0; ccc <allCustomers.length; ++ccc) {
+		customerRec = allCustomers[ccc];
+		cid = customerRec._id;
+		console.log(cid);
 
-	for(let i=0; i<allOldPendingAppts.length; ++i) {
-		//console.log(allOldPendingAppts[i]);
-		sendExpirySms(allOldPendingAppts[i].cid, allOldPendingAppts[i].pid, allOldPendingAppts[i].apptTime);
-		allOldPendingAppts[i].visit = VISITTYPE.expired;
-		allOldPendingAppts[i].save();
+		// find if customer has subscribed birthday  pack
+		if (!hasSubscribed(cid, AddOnList.birthday)) continue;
+		
+		/*
+		let allPatients = await M_Patient.find({
+			cid: cid,
+			"$expr": { 
+				"$and": [
+					{ "$eq": [ { "$dayOfMonth": "$dob" }, { "$dayOfMonth": today } ] },
+					{ "$eq": [ { "$month"     : "$dob" }, { "$month"     : today } ] }
+				]
+			}
+		});
+		*/
+		
+		let allPatients = await M_Patient.find({
+			cid: cid,
+			"$expr": { 
+				"$and": [
+					{ "$eq": [ { "$dayOfMonth": "$dob" }, tDate ] },
+					{ "$eq": [ { "$month"     : "$dob" }, tMonth+1 ] }
+				]
+			}
+		});
+		console.log(allPatients);
+		if (allPatients.length === 0) continue;
+
+		let customerSmsLog = await akshuGetSmsLog(cid, tMonth, tYear);
+		for(let ppp=0; ppp<allPatients.length; ++ppp) {
+			patRec = allPatients[ppp];
+
+			// send sms wishes to patient
+			if (patRec < 1000000000) {
+				console.log("Mobile number not configured");
+				continue;
+			}
+		
+			fast2SmsSendBirthday(
+				patRec.mobile, 
+				BIRTHDAYGREETING,
+				customerRec.clinicName,
+			).
+			then((body) => {
+				if (body.return) {
+					// send sms success
+					++customerSmsLog.birthDayCount;
+				}
+			}).
+			catch((error) => {
+				console.log("Error sending message. ", error.status_code);
+			})
+		}
+		akshuUpdSmsLog(customerSmsLog);
 	}
+}
+
+async function doFestivalWishes() {
+	let today = new Date();
+	let tDate = today.getDate();
+	let tMonth = today.getMonth();
+	let tYear = today.getFullYear();
 	
-	// STEP 3 ---> all visits to be closed
+	let festRecord = await M_Festival.findOne({date: tDate, month: tMonth,  year: tYear});
+	if (!festRecord) return;
+
+	// today is festival. So find out all customers who have subscribed festial pack
+	let allCustomers = await akshuGetAllCustomer();
+	for(let ccc=0; ccc <allCustomers.length; ++ccc) {
+		customerRec = allCustomers[ccc];
+		cid = customerRec._id;
+
+		// find if customer has subscribed festival pack
+		if (!hasSubscribed(cid, AddOnList.Festival1)) continue;
+
+		let customerSmsLog = await akshuGetSmsLog(cid, tMonth, tYear);
+		// customer has subscribed. Now get all patient of this customer
+		let allPatients = await getAllPatients(cid);
+		for(let ppp=0; ppp<allPatients.length; ++ppp) {
+			patRec = allPatients[ppp];
+
+			// send sms wishes to patient
+			if (patRec < 1000000000) {
+				console.log("Mobile number not configured");
+				continue;
+			}
+		
+			fast2SmsSendFestival(
+				patRec.mobile, 
+				festRecord.greeting,
+				customerRec.clinicName,
+			).
+			then((body) => {
+				if (body.return) {
+					// send sms success
+					++customerSmsLog.festivalCount;
+				}
+			}).
+			catch((error) => {
+				console.log("Error sending message. ", error.status_code);
+			})
+		}
+		akshuUpdSmsLog(customerSmsLog);
+	}
+}
+
+async function doEarlyMorningSchedule() {
+	/*
+	In early monring.
+	1) Close all investigation, viist etc. which are opened (i.e. number is MAGICNUMBER)
+	2) On 1st of every month generate SMS Logs for all customer
+	*/
+
+	let today = new Date();
+	let tDate = today.getDate();
+	let tMonth = today.getMonth();
+	let tYear = today.getFullYear();
+	let allCustomers = await akshuGetAllCustomer();
+
+	// STEP 1 ---> Create sms log records on 1st of every month
+	if (tDate === 1) {
+		await generateSMSLogs(allCustomers, tMonth, tYear);
+	}
+
+	// STEP 2 ---> all visits to be closed
 	let allOpenVisits = await M_Visit.find({visitNumber: MAGICNUMBER});
 	for(let i=0; i<allOpenVisits.length; ++i) {
 		let visitRec = allOpenVisits[i];
@@ -198,7 +292,7 @@ cron.schedule('5 0 * * *', async () => {
 		visitRec.save();
 	}
 	
-	// STEP 4 ---> all investigation to be closed
+	// STEP 3 ---> all investigation to be closed
 	let allOpenInvest = await M_Investigation.find({investigationNumber: MAGICNUMBER});
 	for(let i=0; i<allOpenInvest.length; ++i) {
 		let investRec = allOpenInvest[i];
@@ -211,7 +305,7 @@ cron.schedule('5 0 * * *', async () => {
 		investRec.save();
 	}
 
-	// STEP 5 ---> all treatment to be closed
+	// STEP 4 ---> all treatment to be closed  (1 loop each for doctor type)
 	let allOpenTreat = await M_DentalTreatment.find({treatmentNumber: MAGICNUMBER});
 	for(let i=0; i<allOpenTreat.length; ++i) {
 		let myRec = allOpenTreat[i];
@@ -223,60 +317,10 @@ cron.schedule('5 0 * * *', async () => {
 		myRec.treatmentNumber = treatCount[0].count;
 		myRec.save();
 	}
-	
-
-/*
-	// STEP 6 ---> Send festival greetings
-	// find out if today is festival
-	let rec = await M_Festival.findOne({date: tDate, tMonth: tYear});
-	if (rec) {
-		// today is festival. So find out all customers who have subscribed festial pack
-
-		let smsScribedCustomers = await M_SmsConfig({$or:[ { festivalPack1: true }, { festivalPack2: true }, { festivalPack2: true } ] });
-		for(let c=0; c<smsScribedCustomers.length; ++c) {
-			let cRec = akshuGetCustomer(smsScribedCustomers[c]);
-			let count = 0;
-			let myPatientList = await M_Patient.find({cid: cRec._id});
-			for(let p=0; p<myPatientList.length; ++p) {
-				let pRec = myPatientList[p];
-				if (pRec.mobile >= 1000000000) {
-					// must be mobile number
-					let sts = sendSms();
-					if (sts) count++
-				}
-			}
-		}
-
-	}
-
-	// STEP 7 ---> Send Briday greetings
-	// find out patient who have birthday
-	let sDate = new Date(tYear, tMonth, tDate, 0, 0, 0, 0);
-	let eDate = new Date(tYear, tMonth, tDate+1, 0, 0, 0, 0);
-	
-	let birthDayList = await M_Patient.find({dob: {$gte: sDate, $lt: eDate} });
-	// find out list of unique customers
-	let cidList = _.map(birthDayList, 'cid');
-	cidList = _.uniqBy(cidList); 
-	for(let c=0; c<cidList.length; ++c) {
-		if (await birthdayPackSubscribed(cidList[c])) {
-			let count = 0;
-			let myPatientList = _.filter(birthDayList, x => x.cid == cidList[c]);
-			for(let p=0; p<myPatientList.length; ++p) {
-				let pRec = myPatientList[p];
-				if (pRec.mobile >= 1000000000) {
-					// must be mobile number
-					let sts = sendSms();
-					if (sts) count++
-				}
-			}
-		}
-	}
-*/
 
 	// Last Step ---> update age based on date of birth
 	// will be done of 1st of every month
-	if (today.getDate() === 1) {
+	if (tDate === 1) {
 		let todayTime = today.getTime();
 		let allPatients = await M_Patient.find({});
 		for(let i=0; i<allPatients.length; ++i) {
@@ -290,6 +334,90 @@ cron.schedule('5 0 * * *', async () => {
 			allPatients[i].save();
 		}
 	}
+
+	// all over
+}
+
+async function doMorningSchedule() {
+	let today = new Date();
+	let tDate = today.getDate();
+	let tMonth = today.getMonth();
+	let tYear = today.getFullYear();
+	//let allCustomers = await akshuGetAllCustomer();
+
+	// early mornig. send sms to patients whose apprintment has expired
+	// calculate Order (which is used for appointments)
+	let todayOrder = generateOrder(tYear,  tMonth, tDate, 0, 0)
+
+	// STEP 2 ---> any old pending appointment to be set as expired
+	let allOldPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: todayOrder} } );	
+	//console.log(allOldPendingAppts);
+
+	for(let i=0; i<allOldPendingAppts.length; ++i) {
+		//console.log(allOldPendingAppts[i]);
+		sendExpirySms(allOldPendingAppts[i].cid, allOldPendingAppts[i].pid, allOldPendingAppts[i].apptTime);
+		allOldPendingAppts[i].visit = VISITTYPE.expired;
+		allOldPendingAppts[i].save();
+	}
+	
+	// birthday wished
+	await doBirthdayWishes();
+
+	// festival wishes
+	await doFestivalWishes();
+}
+
+
+
+async function doAfternoonSchedule() {
+	let today = new Date();
+	let tDate = today.getDate();
+	let tMonth = today.getMonth();
+	let tYear = today.getFullYear();
+	let tomorrow = new Date(tYear, tMonth, tDate+1)
+
+	//let allCustomers = await akshuGetAllCustomer();
+
+	// calculate Order (which is used for appointments)
+	let todayOrder = generateOrder(tYear,  tMonth, tDate, 0, 0)
+	let tomorrowOrder = generateOrder(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0);
+	// Next step. Send reminder those who have appointment today
+	//let all2morrowAppt = await M_Appointment.find({$or:[ { festivalPack1: true }, { festivalPack2: true }, { festivalPack2: true } ] });
+	//({ b : { $gt :  4, $lt : 6}});
+	let all2morrowAppt = await M_Appointment.find({order: { gte: todayOrder, $lt: tomorrowOrder } });
+	for(let i=0; i<all2morrowAppt.length; ++i) {
+		//let myRec = all2morrowAppt[i];
+		sendReminderSms(all2morrowAppt[i].cid, all2morrowAppt[i].pid, all2morrowAppt[i].apptTime);
+	}	
+
+
+}
+
+
+cron.schedule('5 * * * *', async () => {	
+	let today = new Date();
+	console.log(today);
+	let tHour = today.getHours();
+	if (![EARLYMORNINGSCHEDULEAT, MORNINGSCHEDULEAT, AFTERNOONSCHEDULEAT].includes(tHour))
+		return;
+
+	let retry = 30;
+	while (retry > 0) {
+		if (db_connection) break;
+		//await sleep(1000);	// sleep for 1 second
+		--retry;
+  }
+	if (!db_connection) return;
+	
+
+	if (tHour === EARLYMORNINGSCHEDULEAT)
+		doEarlyMorningSchedule();
+	else if (tHour === MORNINGSCHEDULEAT)
+		doMorningSchedule()
+	else if (tHour === AFTERNOONSCHEDULEAT)
+		doAfternoonSchedule();
+
+	return;
 });
 
 
