@@ -159,10 +159,10 @@ const globalStyles = makeStyles((theme) => ({
 	},
 	patientInfo: {
 		//marginLeft: theme.spacing(3),
-		fontSize: theme.typography.pxToRem(14),
+		fontSize: theme.typography.pxToRem(16),
 	},
 	patientInfo2: {
-		fontSize: theme.typography.pxToRem(14),
+		fontSize: theme.typography.pxToRem(16),
 		fontWeight: theme.typography.fontWeightBold,
 	},
 	patientInfo2Green: {

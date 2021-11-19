@@ -2,14 +2,6 @@ import React, { useEffect, useState, useContext } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { InputAdornment, makeStyles, Container, CssBaseline } from '@material-ui/core';
 import axios from "axios";
-//import SwitchBtn from '@material-ui/core/Switch';
-//import { usePromiseTracker, trackPromise } from "react-promise-tracker";
-import InputLabel from '@material-ui/core/InputLabel';
-//import FormControlLabel from '@material-ui/core/FormControlLabel';
-//import FormControl from '@material-ui/core/FormControl';
-//import RadioGroup from '@material-ui/core/RadioGroup';
-//import Radio from '@material-ui/core/Radio';
-
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel";
 import VsList from "CustomComponents/VsList";
@@ -17,7 +9,6 @@ import VsCheckBox from "CustomComponents/VsCheckBox";
 import VsTextFilter from "CustomComponents/VsTextFilter";
 import VsRadioGroup from "CustomComponents/VsRadioGroup"
 
-import { useLoading, Audio } from '@agney/react-loading';
 import Drawer from '@material-ui/core/Drawer';
 import { useAlert } from 'react-alert'
 import fileDownload  from 'js-file-download';
@@ -26,37 +17,33 @@ import lodashSortBy from 'lodash/sortBy';
 import lodashCloneDeep from 'lodash/cloneDeep';
 
 import Grid from "@material-ui/core/Grid";
-import GridItem from "components/Grid/GridItem.js";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
-//import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-//import Accordion from '@material-ui/core/Accordion';
-//import AccordionSummary from '@material-ui/core/AccordionSummary';
-//import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Box from '@material-ui/core/Box';
-//import Modal from 'react-modal';
 import { borders } from '@material-ui/system';
-//import {dynamicModal } from "assets/dynamicModal";
-//import cloneDeep from 'lodash/cloneDeep';
-//import StepProgressBar from 'react-step-progress';
-// import the stylesheet
-//import 'react-step-progress/dist/index.css';
+
 
 // styles
 import globalStyles from "assets/globalStyles";
 //import modalStyles from "assets/modalStyles";
 
-// icons
-import IconButton from '@material-ui/core/IconButton';
+/*
 import SearchIcon from '@material-ui/icons/Search';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import CancelIcon from '@material-ui/icons/Cancel';
-import EventNoteIcon from '@material-ui/icons/EventNote';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
+import EventNoteIcon from '@material-ui/icons/EventNote';
+*/
+
+// icons
+import IconButton from '@material-ui/core/IconButton';
 import LeftIcon from '@material-ui/icons/ChevronLeft';
 import RightIcon from '@material-ui/icons/ChevronRight';
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Cancel';
+
 
 //import Switch from "@material-ui/core/Switch";
 
@@ -70,29 +57,17 @@ import RightIcon from '@material-ui/icons/ChevronRight';
 // import { UserContext } from "../../UserContext";
 
 import {
-DisplayPageHeader, ValidComp, BlankArea, LoadingMessage,
+DisplayPageHeader, BlankArea, 
 } from "CustomComponents/CustomComponents.js"
 
 import {
 str1by4, str1by2, str3by4,
-HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, MONTHSTR,
+HOURSTR, MINUTESTR, DATESTR, MONTHNUMBERSTR, WEEKSTR,
 MAGICNUMBER,
 } from "views/globals.js";
 
-// icons
-//import FileCopyIcon from '@material-ui/icons/FileCopy';
-//import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-//import DeleteIcon from '@material-ui/icons/Delete';
-//import VisibilityIcon from '@material-ui/icons/Visibility';
-//import CloseIcon from '@material-ui/icons/Close';
-
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Cancel';
 
 
-//colours 
-import { red, blue 
-} from '@material-ui/core/colors';
 
 import {  
 	downloadVisit,
@@ -100,6 +75,14 @@ import {
 	vsDialog,
 	ordinalSuffix,
 } from "views/functions.js";
+
+
+/*
+
+//colours 
+import { red, blue 
+} from '@material-ui/core/colors';
+
 
 const useStyles = makeStyles((theme) => ({
 	slotTitle: {
@@ -187,7 +170,7 @@ const useStyles = makeStyles((theme) => ({
 			padding: '1px', 
 		}
   }));
-
+*/
 
 
 let test=[];
@@ -219,14 +202,14 @@ function dose(dose1, dose2, dose3) {
 	return (medStr(dose1) + "-" + medStr(dose2) + "-" + medStr(dose3));
 }
 
-let searchText = "";
-function setSearchText(sss) { searchText = sss;}
+//let searchText = "";
+//function setSearchText(sss) { searchText = sss;}
 
 
 var userCid;
 export default function Visit(props) {
   
-  const classes = useStyles();
+  //const classes = useStyles();
 	const gClasses = globalStyles();
 	const alert = useAlert();
 	
@@ -267,9 +250,9 @@ export default function Visit(props) {
 	
 	const [editMedicine, setEditMedicine] = useState({});
 	
-	const [newPatient, setNewPatient] = useState(false)
+	//const [newPatient, setNewPatient] = useState(false)
 	
-	const [emurVisitNumber, setEmurVisitNumber] = useState(0);
+	//const [emurVisitNumber, setEmurVisitNumber] = useState(0);
 	const [emurNumber, setEmurNumber] = useState(0);
 	const [emurName, setEmurName] = useState("");
 	
@@ -976,15 +959,15 @@ export default function Visit(props) {
 	}	
 	<Box borderColor="primary.main" border={1}>
 	{x.medicines.map( (m, index) =>
-		<Grid className={classes.noPadding} key={"MED"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
+		<Grid  key={"MED"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
 		<Grid item xs={4} sm={4} md={6} lg={6} >
-			<Typography className={classes.heading}>{"Medicine: "+m.name}</Typography>
+			<Typography className={gClasses.patientInfo2}>{"Medicine: "+m.name}</Typography>
 		</Grid>
 		<Grid item xs={4} sm={4} md={2} lg={2} >
-			<Typography className={classes.heading}>{"Dose: "+dose(m.dose1, m.dose2, m.dose3)}</Typography>
+			<Typography className={gClasses.patientInfo2}>{"Dose: "+dose(m.dose1, m.dose2, m.dose3)}</Typography>
 		</Grid>
 		<Grid item xs={2} sm={2} md={2} lg={2} >
-			<Typography className={classes.heading}>{"Duration: "+m.time+" "+m.unit+((m.time > 1) ? "s" : "")}</Typography>
+			<Typography className={gClasses.patientInfo2}>{"Duration: "+m.time+" "+m.unit+((m.time > 1) ? "s" : "")}</Typography>
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
 			{(x.visitNumber === MAGICNUMBER) &&
@@ -1018,9 +1001,9 @@ export default function Visit(props) {
 	}
 	<Box borderColor="primary.main" border={1}>
 	{x.userNotes.map( (un, index) =>
-		<Grid className={classes.noPadding} key={"NOTES"+x.visitNumber+"notes"+index} container justify="center" alignItems="center" >
+		<Grid key={"NOTES"+x.visitNumber+"notes"+index} container justify="center" alignItems="center" >
 		<Grid item xs={10} sm={10} md={10} lg={10} >
-			<Typography className={classes.heading}>{un.name}</Typography>
+			<Typography className={gClasses.patientInfo2}>{un.name}</Typography>
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
 		{(x.visitNumber === MAGICNUMBER) &&
@@ -1053,9 +1036,9 @@ export default function Visit(props) {
 	}
 	<Box borderColor="primary.main" border={1}>
 	{x.remarks.map( (r, index) =>
-		<Grid className={classes.noPadding} key={"REM"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
+		<Grid key={"REM"+x.visitNumber+"-"+index} container justify="center" alignItems="center" >
 		<Grid item xs={10} sm={10} md={10} lg={10} >
-			<Typography className={classes.heading}>{r.name}</Typography>
+			<Typography className={gClasses.patientInfo2}>{r.name}</Typography>
 		</Grid>
 		<Grid item xs={1} sm={1} md={1} lg={1} >
 		{(x.visitNumber === MAGICNUMBER) &&
@@ -1113,17 +1096,18 @@ export default function Visit(props) {
 	}
 	//console.log(d);
 	let reviewDate = DATESTR[d.getDate()] + "/" + MONTHNUMBERSTR[d.getMonth()] + "/" + d.getFullYear();
+	reviewDate += " (" + WEEKSTR[d.getDay()] + ")";
 	return (
 		<div align="left">
-		<Typography className={classes.reviewDate}>{"Next visit scheduled on "+reviewDate}</Typography>
-		<Grid className={classes.noPadding} key={"UNIT"} container>
+		<Typography className={gClasses.title}>{"Next visit scheduled on "+reviewDate}</Typography>
+		<Grid key={"UNIT"} container>
 		<Grid item xs={12} sm={12} md={12} lg={12} >
-			<BlankArea />
+			<br />
 		</Grid>
 		<Grid item xs={12} sm={12} md={12} lg={12} />
 		<Grid item xs={12} sm={12} md={12} lg={12} />
 		<Grid item xs={12} sm={12} md={2} lg={2} >
-		<Typography className={classes.title}>Select Unit: </Typography>
+		<Typography className={gClasses.title}>Select Unit: </Typography>
 		</Grid>
 		<Grid item xs={12} sm={12} md={10} lg={10} >		
 		<VsRadioGroup value={nextVisitUnit} onChange={() => {updateUnit(event.target.value); }}
@@ -1131,7 +1115,7 @@ export default function Visit(props) {
 		</Grid>
 		<Grid item xs={12} sm={12} md={12} lg={12} />
 		<Grid item xs={12} sm={12} md={2} lg={2} >
-		<Typography className={classes.title}>Select Time: </Typography>
+		<Typography className={gClasses.title}>Select Time: </Typography>
 		</Grid>
 		<Grid item xs={12} sm={12} md={10} lg={10} >	
 			<VsRadioGroup value={nextVisitTime} onChange={() => {updateTime(Number(event.target.value)); }}
@@ -1226,16 +1210,12 @@ export default function Visit(props) {
 				</Box>
 			</Box>
 		}
-		<Drawer className={classes.drawer}
-			anchor="right"
-			variant="temporary"
-			open={isDrawerOpened !== ""}
-		>
+		<Drawer anchor="right" variant="temporary" open={isDrawerOpened !== ""} >
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 		<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
 		{((isDrawerOpened === "ADDMED") || (isDrawerOpened === "EDITMED")) &&
 			<ValidatorForm align="center" className={gClasses.form} onSubmit={handleMedicineUpdate}>
-				<Typography align="center" className={classes.modalHeader}>
+				<Typography align="center" className={gClasses.functionSelected}>
 					{((isDrawerOpened === "ADDMED") ? "New Medicine" : "Edit Medicine")+` for ${currentPatient}`}
 				</Typography>
 				{(false) && <VsButton name="Select Medicine" align="right" onClick={() => setIsListDrawer("LIST")} />}
@@ -1254,7 +1234,7 @@ export default function Visit(props) {
 				<BlankArea />
 				<Grid key="editmed" container justify="center" alignItems="left" >
 				<Grid className={gClasses.vgSpacing} item xs={1} sm={1} md={1} lg={1} >
-				<Typography className={classes.heading}>Dose1:</Typography>
+				<Typography className={gClasses.patientInfo2}>Dose1:</Typography>
 				</Grid>
 				<Grid className={gClasses.vgSpacing} item xs={2} sm={2} md={2} lg={2} >
 				<Select labelId='dose1' id='dose1' name="dose1" 
@@ -1270,7 +1250,7 @@ export default function Visit(props) {
 				</Select>
 				</Grid>
 				<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
-				<Typography className={classes.heading}>Dose2</Typography>
+				<Typography className={gClasses.patientInfo2}>Dose2</Typography>
 				</Grid>
 				<Grid item className={gClasses.vgSpacing}  xs={2} sm={2} md={2} lg={2} >
 				<Select labelId='dose2' id='dose2' name="dose2" 
@@ -1286,7 +1266,7 @@ export default function Visit(props) {
 				</Select>
 				</Grid>
 				<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
-				<Typography className={classes.heading}>Dose3</Typography>
+				<Typography className={gClasses.patientInfo2}>Dose3</Typography>
 				</Grid>
 				<Grid item className={gClasses.vgSpacing}  xs={2} sm={2} md={2} lg={2} >
 				<Select labelId='dose3' id='dose3' name="dose3" 
@@ -1303,7 +1283,7 @@ export default function Visit(props) {
 				</Grid>
 				<Grid className={gClasses.vgSpacing}  item xs={1} sm={1} md={1} lg={1} />
 				<Grid item className={gClasses.vgSpacing}  xs={1} sm={1} md={1} lg={1} >
-				<Typography className={classes.heading}>for</Typography>
+				<Typography className={gClasses.patientInfo2}>for</Typography>
 				</Grid>
 				<Grid className={gClasses.vgSpacing} item xs={2} sm={2} md={2} lg={2} >
 				<Select labelId='time' id='time' name="time"
@@ -1342,7 +1322,7 @@ export default function Visit(props) {
 		}
 		{((isDrawerOpened === "ADDNOTE") || (isDrawerOpened === "EDITNOTE")) &&
 			<ValidatorForm align="center" className={gClasses.form} onSubmit={updateUserNotes}>
-				<Typography align="center" className={classes.modalHeader}>
+				<Typography align="center" className={gClasses.functionSelected}>
 					{((isDrawerOpened === "ADDNOTE") ? "New Note" : "Edit Note")+` for ${currentPatient}`}
 				</Typography>
 				<BlankArea />
@@ -1364,7 +1344,7 @@ export default function Visit(props) {
 		}
 		{((isDrawerOpened === "ADDREM") || (isDrawerOpened === "EDITREM")) &&
 			<ValidatorForm align="center" className={gClasses.form} onSubmit={updateRemark} >
-				<Typography align="center" className={classes.modalHeader}>
+				<Typography align="center" className={gClasses.functionSelected}>
 					{((isDrawerOpened === "ADDREM") ? "New Remark" : "Edit Remark")+` for ${currentPatient}`}
 				</Typography>
 				<BlankArea />

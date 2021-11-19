@@ -16,7 +16,7 @@ router.post('/update/:cid/:pid/:newInfo', async function(req, res, next) {
   var {cid, pid, newInfo } = req.params;
 	pid = Number(pid);
 	newInfo = JSON.parse(newInfo);
-	console.log(newInfo);
+	//console.log(newInfo);
   var iRec = await M_DentalTreatment.findOne({cid: cid, pid: pid, treatmentNumber: MAGICNUMBER});
   if (!iRec) {
 		iRec = new M_DentalTreatment();
@@ -27,7 +27,7 @@ router.post('/update/:cid/:pid/:newInfo', async function(req, res, next) {
   }
 	iRec.treatmentDate = new Date();
 	iRec.treatment = newInfo.treatment;
-	console.log(iRec);
+	//console.log(iRec);
 	await iRec.save();
 	
 	// now update payment
