@@ -172,7 +172,8 @@ async function doBirthdayWishes() {
 		console.log(cid);
 
 		// find if customer has subscribed birthday  pack
-		if (!hasSubscribed(cid, AddOnList.birthday)) continue;
+		if (! await hasSubscribed(cid, AddOnList.birthday)) continue;
+		console.log("Has subscribed for birthday");
 		
 		/*
 		let allPatients = await M_Patient.find({
@@ -243,7 +244,7 @@ async function doFestivalWishes() {
 		cid = customerRec._id;
 
 		// find if customer has subscribed festival pack
-		if (!hasSubscribed(cid, AddOnList.Festival1)) continue;
+		if (! await hasSubscribed(cid, AddOnList.Festival1)) continue;
 
 		let customerSmsLog = await akshuGetSmsLog(cid, tMonth, tYear);
 		// customer has subscribed. Now get all patient of this customer

@@ -191,9 +191,9 @@ async function sendAppointmentSms(cid, pid, apptTime) {
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
 		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		if (!hasSubscribed(cid, AddOnList.bulk)) {
-			console.log("Deafult Sms count Over");
-			// How to inform constomer
+		if (! await hasSubscribed(cid, AddOnList.bulk)) {
+			console.log("Default Sms count Over");
+			// How to inform consumer
 			return;
 		}
 	}
@@ -232,7 +232,7 @@ async function sendExpirySms(cid, pid, apptTime) {
 	let customerSmsLog = await akshuGetSmsLog(cid, t.getMonth(), t.getFullYear());
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
-		if (!hasSubscribed(cid, AddOnList.bulk)) {
+		if (!await hasSubscribed(cid, AddOnList.bulk)) {
 			console.log("Default Sms count Over");
 			return;
 		}
@@ -283,7 +283,7 @@ async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
 	let customerSmsLog = await akshuGetSmsLog(cid, t.getMonth(), t.getFullYear());
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
-		if (!hasSubscribed(cid, AddOnList.bulk)) {
+		if (!await hasSubscribed(cid, AddOnList.bulk)) {
 			console.log("Buls Sms count Over");
 			return;
 		}
@@ -330,8 +330,8 @@ async function sendCancelSms(cid, pid, cancelTime) {
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
 		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		if (!hasSubscribed(cid, AddOnList.bulk)) {
-			console.log("Buls Sms count Over");
+		if (!await hasSubscribed(cid, AddOnList.bulk)) {
+			console.log("Bulk Sms count Over");
 			return;
 		}
 	}
@@ -373,7 +373,7 @@ async function sendReminderSms(cid, pid, apptTime) {
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
 		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		if (!hasSubscribed(cid, AddOnList.bulk)) {
+		if (!await hasSubscribed(cid, AddOnList.bulk)) {
 			console.log("Buls Sms count Over");
 			return;
 		}
