@@ -418,9 +418,10 @@ cron.schedule('5 * * * *', async () => {
 	let today = new Date();
 	console.log(today);
 	let tHour = today.getHours();
+	console.log("It is "+tHour);
 	if (![EARLYMORNINGSCHEDULEAT, MORNINGSCHEDULEAT, AFTERNOONSCHEDULEAT].includes(tHour))
 		return;
-
+	console.log("Proceed to work for "+tHour);
 	let retry = 30;
 	while (retry > 0) {
 		if (db_connection) break;
@@ -428,7 +429,7 @@ cron.schedule('5 * * * *', async () => {
 		--retry;
   }
 	if (!db_connection) return;
-	
+	console.log("Db connection found!!!!");
 
 	if (tHour === EARLYMORNINGSCHEDULEAT)
 		doEarlyMorningSchedule();
