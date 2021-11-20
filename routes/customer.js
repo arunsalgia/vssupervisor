@@ -24,7 +24,7 @@ const { getAllPatients  } = require("./patient");
 
 const EARLYMORNINGSCHEDULEAT=0;
 const MORNINGSCHEDULEAT=7;
-const AFTERNOONSCHEDULEAT=15;
+const AFTERNOONSCHEDULEAT=17;
 
 router.use('/', function(req, res, next) {
   setHeader(res);
