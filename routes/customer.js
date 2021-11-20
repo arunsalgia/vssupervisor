@@ -22,9 +22,9 @@ const { hasSubscribed  } = require("./addon");
 const { getAllPatients  } = require("./patient");
 
 
-const EARLYMORNINGSCHEDULEAT=0;
-const MORNINGSCHEDULEAT=7;
-const AFTERNOONSCHEDULEAT=17;
+const EARLYMORNINGSCHEDULEAT=2;
+const MORNINGSCHEDULEAT=2;
+const AFTERNOONSCHEDULEAT=5;
 
 router.use('/', function(req, res, next) {
   setHeader(res);
@@ -432,11 +432,13 @@ cron.schedule('5 * * * *', async () => {
 	console.log("Db connection found!!!!");
 
 	if (tHour === EARLYMORNINGSCHEDULEAT)
-		doEarlyMorningSchedule();
-	else if (tHour === MORNINGSCHEDULEAT)
-		doMorningSchedule()
-	else if (tHour === AFTERNOONSCHEDULEAT)
-		doAfternoonSchedule();
+		await doEarlyMorningSchedule();
+	
+	if (tHour === MORNINGSCHEDULEAT)
+		await doMorningSchedule()
+	
+	if (tHour === AFTERNOONSCHEDULEAT)
+		await doAfternoonSchedule();
 
 	return;
 });
