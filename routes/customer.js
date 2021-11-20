@@ -156,7 +156,7 @@ router.get('/afternoon', async function(req, res, next) {
 router.get('/test', async function(req, res, next) {
   setHeader(res);
 	await doBirthdayWishes();
-	sendok(res, "all brithday wishes");
+	sendok(res, "all birthday wishes");
 });
 
 async function doBirthdayWishes() {
@@ -397,8 +397,8 @@ async function doAfternoonSchedule() {
 	//let allCustomers = await akshuGetAllCustomer();
 
 	// calculate Order (which is used for appointments)
-	let todayOrder = generateOrder(tYear,  tMonth, tDate, 0, 0)
-	let tomorrowOrder = generateOrder(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0);
+	let todayOrder = await generateOrder(tYear,  tMonth, tDate, 0, 0)
+	let tomorrowOrder = await generateOrder(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0);
 	// Next step. Send reminder those who have appointment today
 	//let all2morrowAppt = await M_Appointment.find({$or:[ { festivalPack1: true }, { festivalPack2: true }, { festivalPack2: true } ] });
 	//({ b : { $gt :  4, $lt : 6}});
