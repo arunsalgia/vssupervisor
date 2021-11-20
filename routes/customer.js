@@ -15,7 +15,7 @@ const {
 
 const { sendExpirySms, generateSMSLogs, 
 	akshuGetSmsLog, akshuUpdSmsLog,
-	fast2SmsSendFestival, fast2SmsSendBirthday,
+	fast2SmsSendFestival, fast2SmsSendBirthday, sendReminderSms,
 } = require("./sms");
 
 const { hasSubscribed  } = require("./addon");
@@ -398,17 +398,14 @@ async function doAfternoonSchedule() {
 
 	// calculate Order (which is used for appointments)
 	let todayOrder = await generateOrder(tYear,  tMonth, tDate, 0, 0)
-	console.log(todayOrder);
 	let tomorrowOrder = await generateOrder(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0);
-	console.log(tomorrowOrder);
+	//console.log(todayOrder, tomorrowOrder);
+	
 	// Next step. Send reminder those who have appointment today
-	//let all2morrowAppt = await M_Appointment.find({$or:[ { festivalPack1: true }, { festivalPack2: true }, { festivalPack2: true } ] });
-	//({ b : { $gt :  4, $lt : 6}});
-	console.log("Now fetch appointment");
-	let all2morrowAppt = await M_Appointment.find({order: { gte: Number(todayOrder), $lt: Number(tomorrowOrder) } });
-	console.log(all2morrowAppt);
+	let all2morrowAppt = await M_Appointment.find({order: { $gte: todayOrder, $lt: tomorrowOrder } });
+	//console.log(all2morrowAppt);
+
 	for(let i=0; i<all2morrowAppt.length; ++i) {
-		//let myRec = all2morrowAppt[i];
 		sendReminderSms(all2morrowAppt[i].cid, all2morrowAppt[i].pid, all2morrowAppt[i].apptTime);
 	}	
 
