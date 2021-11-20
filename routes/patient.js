@@ -69,15 +69,12 @@ function getDob(age) {
 
 function getAge(birthDate) 
 {
-    var today = new Date();
-    //var birthDate = new Date(dateString);
-    var age = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) 
-    {
-        age--;
-    }
-    return age;
+	let age = 0;
+	if (birthDate.getFullYear() !== 1900) {
+		let tmp = (new Date().getTime() - birthDate.getTime()) / 86400000;
+    age = Math.round(tmp / 365);
+	}
+	return age;
 }
 
 patientRouter.get('/checkexpiry/:cid', async function(req, res, next) {

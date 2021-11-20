@@ -135,6 +135,24 @@ router.get('/setworkinghours/:cid/:workingHours', async function(req, res, next)
 	sendok(res, rec);
 })
 
+router.get('/morning', async function(req, res, next) {
+  setHeader(res);
+	await doMorningSchedule();
+	sendok(res, "Done");
+})
+
+router.get('/earlymorning', async function(req, res, next) {
+  setHeader(res);
+	await doEarlyMorningSchedule();
+	sendok(res, "Done");
+})
+
+router.get('/afternoon', async function(req, res, next) {
+  setHeader(res);
+	await doAfternoonSchedule();
+	sendok(res, "Done");
+})
+
 router.get('/test', async function(req, res, next) {
   setHeader(res);
 	await doBirthdayWishes();
@@ -345,7 +363,7 @@ async function doMorningSchedule() {
 	let tYear = today.getFullYear();
 	//let allCustomers = await akshuGetAllCustomer();
 
-	// early mornig. send sms to patients whose apprintment has expired
+	// early morning. send sms to patients whose appointment has expired
 	// calculate Order (which is used for appointments)
 	let todayOrder = generateOrder(tYear,  tMonth, tDate, 0, 0)
 
