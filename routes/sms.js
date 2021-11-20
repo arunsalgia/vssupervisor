@@ -168,10 +168,11 @@ async function akshuGetSmsLog(cid, month, year) {
 	return tmpRec;
 } 
 
-function akshuUpdSmsLog(rec) {
+async function akshuUpdSmsLog(rec) {
+	console.log("Upd sms log");
 	arun_smslog = arun_smslog.filter(x => x.cid !== rec.cid);
 	arun_smslog.push(rec);
-	rec.save();
+	await rec.save();
 } 
 
 
@@ -180,7 +181,7 @@ async function sendAppointmentSms(cid, pid, apptTime) {
 	// first find out if patinet has mobile number
 	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
 	let patRec = await getPatientByPid(cid, pid);
-	if (patRec < 1000000000) {
+	if (patRec.mobile < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
 	}
@@ -221,7 +222,7 @@ async function sendExpirySms(cid, pid, apptTime) {
 	// first find out if pastinet has mobile number
 	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
 	let patRec = await getPatientByPid(cid, pid);
-	if (patRec < 1000000000) {
+	if (patRec.mobile < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
 	}
@@ -272,7 +273,7 @@ async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
 	// first find out if patinet has mobile number
 	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
 	let patRec = await getPatientByPid(cid, pid);
-	if (patRec < 1000000000) {
+	if (patRec.mobile < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
 	}
@@ -318,7 +319,7 @@ async function sendCancelSms(cid, pid, cancelTime) {
 	let patRec = await getPatientByPid(cid, pid);
 	//console.log(patRec);
 
-	if (patRec < 1000000000) {
+	if (patRec.mobile < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
 	}
@@ -360,8 +361,8 @@ async function sendReminderSms(cid, pid, apptTime) {
 	//let patRec = await M_Patient.findOne({cid: cid, pid: pid});
 	let patRec = await getPatientByPid(cid, pid);
 	//console.log(patRec);
-
-	if (patRec < 1000000000) {
+	
+	if (patRec.mobile < 1000000000) {
 		console.log("Mobile number not configured");
 		return;
 	}
