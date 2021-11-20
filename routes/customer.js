@@ -405,7 +405,7 @@ async function doAfternoonSchedule() {
 	//let all2morrowAppt = await M_Appointment.find({$or:[ { festivalPack1: true }, { festivalPack2: true }, { festivalPack2: true } ] });
 	//({ b : { $gt :  4, $lt : 6}});
 	console.log("Now fetch appointment");
-	let all2morrowAppt = await M_Appointment.find({order: { gte: todayOrder, $lt: tomorrowOrder } });
+	let all2morrowAppt = await M_Appointment.find({order: { gte: Number(todayOrder), $lt: Number(tomorrowOrder) } });
 	console.log(all2morrowAppt);
 	for(let i=0; i<all2morrowAppt.length; ++i) {
 		//let myRec = all2morrowAppt[i];
