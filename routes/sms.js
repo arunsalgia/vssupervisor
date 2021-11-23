@@ -228,7 +228,7 @@ async function sendAppointmentSms(cid, pid, apptTime) {
 		).
 		then((body) => {
 				++customerSmsLog.bulkSmsCount;
-				akshuUpdSmsLog(customerSmsLog);
+				await akshuUpdSmsLog(customerSmsLog);
 			}).
 		catch((error) => {
 			console.log("Error sending message. ", error.status_code);
@@ -269,7 +269,7 @@ async function sendExpirySms(cid, pid, apptTime) {
 		if (body.return) {
 			// send sms success
 			++customerSmsLog.bulkSmsCount;
-			akshuUpdSmsLog(customerSmsLog);
+			await akshuUpdSmsLog(customerSmsLog);
 		}
 	}).
 	catch((error) => {
@@ -321,7 +321,7 @@ async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
 		if (body.return) {
 			// send sms success
 			++customerSmsLog.bulkSmsCount;
-			akshuUpdSmsLog(customerSmsLog);
+			await akshuUpdSmsLog(customerSmsLog);
 		}
 	}).
 	catch((error) => {
@@ -365,7 +365,7 @@ async function sendCancelSms(cid, pid, cancelTime) {
 	).
 	then((body) => {
 		++customerSmsLog.bulkSmsCount;
-		akshuUpdSmsLog(customerSmsLog);
+		await akshuUpdSmsLog(customerSmsLog);
 	}).
 	catch((error) => {
 		console.log("Error sending message. ", error.status_code);
@@ -408,7 +408,7 @@ async function sendReminderSms(cid, pid, apptTime) {
 	).
 	then((body) => {
 		++customerSmsLog.bulkSmsCount;
-		akshuUpdSmsLog(customerSmsLog);
+		await akshuUpdSmsLog(customerSmsLog);
 	}).
 	catch((error) => {
 		console.log("Error sending message. ", error.status_code);
