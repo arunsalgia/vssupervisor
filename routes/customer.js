@@ -381,6 +381,8 @@ async function doMorningSchedule() {
 			allOldPendingAppts[i].visit = VISITTYPE.expired;
 			allOldPendingAppts[i].save();
 		}
+	} else {
+		console.log("Sending Expired SMS is disabled by management");
 	}
 	// birthday wished
 	await doBirthdayWishes();
