@@ -5,8 +5,23 @@ const { akshuGetCustomer, getNextVisit,
  const { getPatientByPid  } = require("./patient");
  const { hasSubscribed  } = require("./addon");
 
- function makeDateTimeString(dStr) {
+ function makeIstDateString(dStr) {
 	let d = new Date(dStr)
+	d.setHours(d.getHours()+ISTTIME)
+	let retStr = `${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()}`;
+	return retStr
+}
+
+function makeIstDateTimeString(dStr) {
+	let d = new Date(dStr)
+	d.setHours(d.getHours()+ISTTIME)
+	let retStr = `${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()} ${HOURSTR[d.getHours()]}:${MINUTESTR[d.getMinutes()]}`;
+	return retStr
+}
+
+function makeDateTimeString(dStr) {
+	let d = new Date(dStr)
+	//d.setHours(d.getHours()+ISTTIME)
 	let retStr = `${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()} ${HOURSTR[d.getHours()]}:${MINUTESTR[d.getMinutes()]}`;
 	return retStr
 }
@@ -206,7 +221,7 @@ async function sendAppointmentSms(cid, pid, apptTime) {
 		patRec.mobile, 
 		customerRec.doctorName,
 		customerRec.clinicName,
-		makeDateTimeString(apptTime),
+		makeIstDateTimeString(apptTime),
 		customerRec.mobile
 		).
 		then((body) => {
@@ -246,7 +261,6 @@ async function sendExpirySms(cid, pid, apptTime) {
 		patRec.mobile, 
 		customerRec.doctorName,
 		customerRec.clinicName,
-		makeDateTimeString(apptTime),
 		customerRec.mobile
 	).
 	then((body) => {
@@ -298,7 +312,7 @@ async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
 		patRec.mobile, 
 		customerRec.doctorName,
 		customerRec.clinicName,
-		makeDateTimeString(d),
+		makeIstDateString(d),
 		customerRec.mobile
 	).
 	then((body) => {
@@ -344,7 +358,7 @@ async function sendCancelSms(cid, pid, cancelTime) {
 		patRec.mobile, 
 		customerRec.doctorName,
 		customerRec.clinicName,
-		makeDateTimeString(cancelTime),
+		makeIstDateTimeString(cancelTime),
 		customerRec.mobile
 	).
 	then((body) => {
@@ -387,7 +401,7 @@ async function sendReminderSms(cid, pid, apptTime) {
 		patRec.mobile, 
 		customerRec.doctorName,
 		customerRec.clinicName,
-		makeDateTimeString(apptTime),
+		makeIstDateTimeString(apptTime),
 		customerRec.mobile
 	).
 	then((body) => {

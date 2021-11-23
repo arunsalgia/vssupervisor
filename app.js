@@ -692,6 +692,8 @@ HUMDREDSTR = ' hundred';
 THOUSANDSTR = ' thousand';
 LAKHSTR = ' lakh';
 
+ISTTIME = 330;				// IST i s+5:30 GMT i.e. 330
+
 ALLDOCTORS = 0xFFFFFFFF;
 
 MAGICNUMBER = 99999;
