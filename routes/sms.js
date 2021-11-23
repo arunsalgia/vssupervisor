@@ -101,7 +101,7 @@ async function fast2SmsSend(senderid, messageid, myParams, destMobile) {
 		"route": "dlt",
 		"numbers": destMobile
 	};
-	console.log(queryMsg);
+	//console.log(queryMsg);
 	f2s.query(queryMsg);
 
 
@@ -115,7 +115,7 @@ async function fast2SmsSend(senderid, messageid, myParams, destMobile) {
 				console.log("Rejected");
 				return reject(response.body)
 			}
-			console.log("Send success");
+			//console.log("Send success");
 			return resolve(response.body);
 		});
 	});
@@ -228,7 +228,7 @@ async function sendAppointmentSms(cid, pid, apptTime) {
 		).
 		then((body) => {
 				++customerSmsLog.bulkSmsCount;
-				await akshuUpdSmsLog(customerSmsLog);
+				akshuUpdSmsLog(customerSmsLog);
 			}).
 		catch((error) => {
 			console.log("Error sending message. ", error.status_code);
@@ -265,11 +265,11 @@ async function sendExpirySms(cid, pid, apptTime) {
 		customerRec.clinicName,
 		customerRec.mobile
 	).
-	then((body) => {
+	then( (body) => {
 		if (body.return) {
 			// send sms success
 			++customerSmsLog.bulkSmsCount;
-			await akshuUpdSmsLog(customerSmsLog);
+			akshuUpdSmsLog(customerSmsLog);
 		}
 	}).
 	catch((error) => {
@@ -317,11 +317,11 @@ async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
 		makeIstDateString(d),
 		customerRec.mobile
 	).
-	then((body) => {
+	then( (body) => {
 		if (body.return) {
 			// send sms success
 			++customerSmsLog.bulkSmsCount;
-			await akshuUpdSmsLog(customerSmsLog);
+			akshuUpdSmsLog(customerSmsLog);
 		}
 	}).
 	catch((error) => {
@@ -363,9 +363,9 @@ async function sendCancelSms(cid, pid, cancelTime) {
 		makeIstDateTimeString(cancelTime),
 		customerRec.mobile
 	).
-	then((body) => {
+	then( (body) => {
 		++customerSmsLog.bulkSmsCount;
-		await akshuUpdSmsLog(customerSmsLog);
+		akshuUpdSmsLog(customerSmsLog);
 	}).
 	catch((error) => {
 		console.log("Error sending message. ", error.status_code);
@@ -406,9 +406,9 @@ async function sendReminderSms(cid, pid, apptTime) {
 		makeIstDateTimeString(apptTime),
 		customerRec.mobile
 	).
-	then((body) => {
+	then( (body) =>  {
 		++customerSmsLog.bulkSmsCount;
-		await akshuUpdSmsLog(customerSmsLog);
+		akshuUpdSmsLog(customerSmsLog);
 	}).
 	catch((error) => {
 		console.log("Error sending message. ", error.status_code);
@@ -432,6 +432,8 @@ module.exports = {
 	sendReminderSms,
 	fast2SmsSendFestival,
 	fast2SmsSendBirthday,
+	fast2SmsReminder,
 	akshuGetSmsLog,
-	akshuUpdSmsLog
+	akshuUpdSmsLog,
+	makeIstDateTimeString,
 }

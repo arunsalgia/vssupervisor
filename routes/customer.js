@@ -13,13 +13,17 @@ const {
 	rechargeCount,
 } = require('./functions');
 
-const { sendExpirySms, generateSMSLogs, 
+const { getPatientByPid  } = require("./patient");
+ 
+const { makeIstDateTimeString,
+	sendExpirySms, generateSMSLogs, 
 	akshuGetSmsLog, akshuUpdSmsLog,
-	fast2SmsSendFestival, fast2SmsSendBirthday, sendReminderSms,
+	fast2SmsSendFestival, fast2SmsSendBirthday, sendReminderSms, fast2SmsReminder,
 } = require("./sms");
 
-const { hasSubscribed  } = require("./addon");
+const { hasSubscribed  } = require("./addon");``
 const { getAllPatients  } = require("./patient");
+const { all } = require('.');
 
 
 const EARLYMORNINGSCHEDULEAT=2;
@@ -277,6 +281,75 @@ async function doFestivalWishes() {
 	}
 }
 
+async function doApptReminder() {
+	let today = new Date();
+	let tDate = today.getDate();
+	let tMonth = today.getMonth();
+	let tYear = today.getFullYear();
+	let tomorrow = new Date(tYear, tMonth, tDate+1)
+
+	//let allCustomers = await akshuGetAllCustomer();
+
+	// calculate Order (which is used for appointments)
+	let todayOrder = await generateOrder(tYear,  tMonth, tDate, 0, 0)
+	let tomorrowOrder = await generateOrder(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0);
+	console.log(todayOrder, tomorrowOrder);
+	
+	// Next step. Send reminder those who have appointment today and filter per customer
+	let all2morrowAppt = await M_Appointment.find({visit: 'pending', order: { $gte: todayOrder, $lt: tomorrowOrder } });
+	let cidList = _.map(all2morrowAppt, 'cid');
+	cidList = _.uniqBy(cidList);
+
+	console.log(cidList);
+	for(let c=0; c<cidList.length; ++c) {
+		let cid = cidList[c];
+		let myReminders = all2morrowAppt.filter(x => x.cid === cid);
+		//console.log(myReminders);
+		//continue;
+
+		let customerSmsLog = await akshuGetSmsLog(cid, tMonth, tYear);
+		// loop 1 by 1 to send reminder
+		for(let i=0; i<myReminders.length; ++i) {
+			let patRec = await getPatientByPid(cid, myReminders[i].pid);
+			//console.log(patRec);
+			
+			if (patRec.mobile < 1000000000) {
+				console.log("Mobile number not configured");
+				continue;
+			}
+
+			if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
+				// if default count has passed. CHeck if subscribed for bulk sms for patients
+				if (!await hasSubscribed(cid, AddOnList.bulk)) {
+					console.log("Bulk Sms count Over");
+					continue;
+				}
+			}
+
+				// now prepare to send SMS
+			let customerRec = await akshuGetCustomer(cid);
+			//console.log(customerRec);
+
+			fast2SmsReminder(
+				patRec.mobile, 
+				customerRec.doctorName,
+				customerRec.clinicName,
+				makeIstDateTimeString(myReminders[i].apptTime),
+				customerRec.mobile
+			).
+			then( (body) =>  {
+				++customerSmsLog.bulkSmsCount;
+				//akshuUpdSmsLog(customerSmsLog);
+			}).
+			catch((error) => {
+				console.log("Error sending message. ", error.status_code);
+			})
+		}	
+		akshuUpdSmsLog(customerSmsLog);
+	}
+
+}
+
 async function doEarlyMorningSchedule() {
 	/*
 	In early monring.
@@ -394,6 +467,9 @@ async function doMorningSchedule() {
 
 
 async function doAfternoonSchedule() {
+	await doApptReminder();
+
+	/*
 	let today = new Date();
 	let tDate = today.getDate();
 	let tMonth = today.getMonth();
@@ -414,7 +490,7 @@ async function doAfternoonSchedule() {
 	for(let i=0; i<all2morrowAppt.length; ++i) {
 		await sendReminderSms(all2morrowAppt[i].cid, all2morrowAppt[i].pid, all2morrowAppt[i].apptTime);
 	}	
-
+*/
 
 }
 
