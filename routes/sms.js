@@ -433,6 +433,7 @@ module.exports = {
 	fast2SmsSendFestival,
 	fast2SmsSendBirthday,
 	fast2SmsReminder,
+	fast2SmsSendAppointment,
 	akshuGetSmsLog,
 	akshuUpdSmsLog,
 	makeIstDateTimeString,

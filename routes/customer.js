@@ -18,7 +18,7 @@ const { getPatientByPid  } = require("./patient");
 const { makeIstDateTimeString,
 	sendExpirySms, generateSMSLogs, 
 	akshuGetSmsLog, akshuUpdSmsLog,
-	fast2SmsSendFestival, fast2SmsSendBirthday, sendReminderSms, fast2SmsReminder,
+	fast2SmsSendFestival, fast2SmsSendBirthday, sendReminderSms, fast2SmsReminder, fast2SmsSendAppointment,
 } = require("./sms");
 
 const { hasSubscribed  } = require("./addon");``
@@ -329,6 +329,7 @@ async function doApptReminder() {
 				// now prepare to send SMS
 			let customerRec = await akshuGetCustomer(cid);
 			//console.log(customerRec);
+			//console.log("Sending remoder to "+patRec.mobile);
 
 			fast2SmsReminder(
 				patRec.mobile, 
