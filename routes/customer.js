@@ -23,7 +23,7 @@ const { getAllPatients  } = require("./patient");
 
 
 const EARLYMORNINGSCHEDULEAT=2;
-const MORNINGSCHEDULEAT=2;
+const MORNINGSCHEDULEAT=3;
 const AFTERNOONSCHEDULEAT=5;
 
 router.use('/', function(req, res, next) {
