@@ -358,27 +358,30 @@ async function doEarlyMorningSchedule() {
 }
 
 async function doMorningSchedule() {
-	let today = new Date();
-	let tDate = today.getDate();
-	let tMonth = today.getMonth();
-	let tYear = today.getFullYear();
-	//let allCustomers = await akshuGetAllCustomer();
 
-	// early morning. send sms to patients whose appointment has expired
-	// calculate Order (which is used for appointments)
-	let todayOrder = generateOrder(tYear,  tMonth, tDate, 0, 0)
+	// send expiry message
+	if (process.env.SENDEXPIRY === "TRUE") {
+		let today = new Date();
+		let tDate = today.getDate();
+		let tMonth = today.getMonth();
+		let tYear = today.getFullYear();
+		//let allCustomers = await akshuGetAllCustomer();
 
-	// STEP 2 ---> any old pending appointment to be set as expired
-	let allOldPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: todayOrder} } );	
-	//console.log(allOldPendingAppts);
+		// early morning. send sms to patients whose appointment has expired
+		// calculate Order (which is used for appointments)
+		let todayOrder = generateOrder(tYear,  tMonth, tDate, 0, 0)
 
-	for(let i=0; i<allOldPendingAppts.length; ++i) {
-		//console.log(allOldPendingAppts[i]);
-		sendExpirySms(allOldPendingAppts[i].cid, allOldPendingAppts[i].pid, allOldPendingAppts[i].apptTime);
-		allOldPendingAppts[i].visit = VISITTYPE.expired;
-		allOldPendingAppts[i].save();
+		// STEP 2 ---> any old pending appointment to be set as expired
+		let allOldPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: todayOrder} } );	
+		//console.log(allOldPendingAppts);
+
+		for(let i=0; i<allOldPendingAppts.length; ++i) {
+			//console.log(allOldPendingAppts[i]);
+			await sendExpirySms(allOldPendingAppts[i].cid, allOldPendingAppts[i].pid, allOldPendingAppts[i].apptTime);
+			allOldPendingAppts[i].visit = VISITTYPE.expired;
+			allOldPendingAppts[i].save();
+		}
 	}
-	
 	// birthday wished
 	await doBirthdayWishes();
 
@@ -404,10 +407,10 @@ async function doAfternoonSchedule() {
 	
 	// Next step. Send reminder those who have appointment today
 	let all2morrowAppt = await M_Appointment.find({visit: 'pending', order: { $gte: todayOrder, $lt: tomorrowOrder } });
-	//console.log(all2morrowAppt);
+	console.log(all2morrowAppt);
 
 	for(let i=0; i<all2morrowAppt.length; ++i) {
-		sendReminderSms(all2morrowAppt[i].cid, all2morrowAppt[i].pid, all2morrowAppt[i].apptTime);
+		await sendReminderSms(all2morrowAppt[i].cid, all2morrowAppt[i].pid, all2morrowAppt[i].apptTime);
 	}	
 
 
