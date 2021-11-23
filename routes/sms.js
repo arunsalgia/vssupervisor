@@ -7,14 +7,14 @@ const { akshuGetCustomer, getNextVisit,
 
  function makeIstDateString(dStr) {
 	let d = new Date(dStr)
-	d.setHours(d.getHours()+ISTTIME)
+	d.setMinutes(d.getMinutes()+ISTTIME)
 	let retStr = `${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()}`;
 	return retStr
 }
 
 function makeIstDateTimeString(dStr) {
 	let d = new Date(dStr)
-	d.setHours(d.getHours()+ISTTIME)
+	d.setMinutes(d.getMinutes()+ISTTIME)
 	let retStr = `${DATESTR[d.getDate()]}/${MONTHNUMBERSTR[d.getMonth()]}/${d.getFullYear()} ${HOURSTR[d.getHours()]}:${MINUTESTR[d.getMinutes()]}`;
 	return retStr
 }
