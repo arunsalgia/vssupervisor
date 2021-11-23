@@ -101,7 +101,7 @@ async function fast2SmsSend(senderid, messageid, myParams, destMobile) {
 		"route": "dlt",
 		"numbers": destMobile
 	};
-
+	console.log(queryMsg);
 	f2s.query(queryMsg);
 
 
@@ -112,8 +112,10 @@ async function fast2SmsSend(senderid, messageid, myParams, destMobile) {
 	return new Promise((resolve, reject) => {
 		f2s.end(function (response) {
 			if (response.error) {
+				console.log("Rejected");
 				return reject(response.body)
 			}
+			console.log("Send success");
 			return resolve(response.body);
 		});
 	});
