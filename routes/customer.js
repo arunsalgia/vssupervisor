@@ -434,30 +434,31 @@ async function doEarlyMorningSchedule() {
 async function doMorningSchedule() {
 
 	// send expiry message
-	if (process.env.SENDEXPIRY === "TRUE") {
-		let today = new Date();
-		let tDate = today.getDate();
-		let tMonth = today.getMonth();
-		let tYear = today.getFullYear();
-		//let allCustomers = await akshuGetAllCustomer();
+	let today = new Date();
+	let tDate = today.getDate();
+	let tMonth = today.getMonth();
+	let tYear = today.getFullYear();
+	//let allCustomers = await akshuGetAllCustomer();
 
-		// early morning. send sms to patients whose appointment has expired
-		// calculate Order (which is used for appointments)
-		let todayOrder = generateOrder(tYear,  tMonth, tDate, 0, 0)
+	// early morning. send sms to patients whose appointment has expired
+	// calculate Order (which is used for appointments)
+	let todayOrder = generateOrder(tYear,  tMonth, tDate, 0, 0)
 
-		// STEP 2 ---> any old pending appointment to be set as expired
-		let allOldPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: todayOrder} } );	
-		//console.log(allOldPendingAppts);
+	// STEP 2 ---> any old pending appointment to be set as expired
+	let allOldPendingAppts = await M_Appointment.find({visit: VISITTYPE.pending, order: {$lte: todayOrder} } );	
+	//console.log(allOldPendingAppts);
 
-		for(let i=0; i<allOldPendingAppts.length; ++i) {
-			//console.log(allOldPendingAppts[i]);
+	for(let i=0; i<allOldPendingAppts.length; ++i) {
+		//console.log(allOldPendingAppts[i]);
+		if (process.env.SENDEXPIRY === "TRUE") {
 			await sendExpirySms(allOldPendingAppts[i].cid, allOldPendingAppts[i].pid, allOldPendingAppts[i].apptTime);
-			allOldPendingAppts[i].visit = VISITTYPE.expired;
-			allOldPendingAppts[i].save();
+		} else {
+			console.log("Sending Expired SMS is disabled by management");
 		}
-	} else {
-		console.log("Sending Expired SMS is disabled by management");
+		allOldPendingAppts[i].visit = VISITTYPE.expired;
+		allOldPendingAppts[i].save();
 	}
+	
 	// birthday wished
 	await doBirthdayWishes();
 
@@ -469,30 +470,6 @@ async function doMorningSchedule() {
 
 async function doAfternoonSchedule() {
 	await doApptReminder();
-
-	/*
-	let today = new Date();
-	let tDate = today.getDate();
-	let tMonth = today.getMonth();
-	let tYear = today.getFullYear();
-	let tomorrow = new Date(tYear, tMonth, tDate+1)
-
-	//let allCustomers = await akshuGetAllCustomer();
-
-	// calculate Order (which is used for appointments)
-	let todayOrder = await generateOrder(tYear,  tMonth, tDate, 0, 0)
-	let tomorrowOrder = await generateOrder(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0);
-	console.log(todayOrder, tomorrowOrder);
-	
-	// Next step. Send reminder those who have appointment today
-	let all2morrowAppt = await M_Appointment.find({visit: 'pending', order: { $gte: todayOrder, $lt: tomorrowOrder } });
-	console.log(all2morrowAppt);
-
-	for(let i=0; i<all2morrowAppt.length; ++i) {
-		await sendReminderSms(all2morrowAppt[i].cid, all2morrowAppt[i].pid, all2morrowAppt[i].apptTime);
-	}	
-*/
-
 }
 
 

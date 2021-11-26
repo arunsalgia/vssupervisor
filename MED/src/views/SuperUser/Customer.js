@@ -1172,11 +1172,9 @@ export default function Customer() {
 					value={custEmail}
 					onChange={(event) => setCustEmail(event.target.value)}
 				/>
-				<TextValidator fullWidth required className={gClasses.vgSpacing}  label="Mobile" type="number"
+				<TextValidator fullWidth required className={gClasses.vgSpacing}  label="Mobile"
 					value={custMobile} 
-					onChange={() => { setCustMobile(event.target.value) }}
-					validators={['minNumber:1000000000', 'maxNumber:9999999999']}
-					errorMessages={['Invalid Mobile number','Invalid Mobile number']}
+					onChange={(event) => { setCustMobile(event.target.value) }}
 				/>	
 				<TextValidator required fullWidth label="Location" className={gClasses.vgSpacing}
 					value={custLocation}
@@ -1184,7 +1182,7 @@ export default function Customer() {
 				/>
 				<TextValidator fullWidth required className={gClasses.vgSpacing} label="Pin Code" type="number"
 					value={custPinCode} 
-					onChange={() => { setCustPinCode(event.target.value) }}
+					onChange={(event) => { setCustPinCode(event.target.value) }}
 					validators={['minNumber:111111', 'maxNumber:999999']}
 					errorMessages={['Invalid Pin Code','Invalid Pin Code']}
 				/>
