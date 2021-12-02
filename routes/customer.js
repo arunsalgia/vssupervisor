@@ -1,4 +1,4 @@
-var router = express.Router();
+var customerRouter = express.Router();
 const { MathDenominator } = require('docx');
 const { 
 	checkDate,
@@ -30,21 +30,21 @@ const EARLYMORNINGSCHEDULEAT=2;
 const MORNINGSCHEDULEAT=2;
 const AFTERNOONSCHEDULEAT=5;
 
-router.use('/', function(req, res, next) {
+customerRouter.use('/', function(req, res, next) {
   setHeader(res);
   if (!db_connection) { senderr(res, DBERROR,  ERR_NODB); return; }
  
   next('route');
 });
 
-router.get('/list', async function(req, res, next) {
+customerRouter.get('/list', async function(req, res, next) {
   setHeader(res);
 	let rec = await akshuGetAllCustomer();
 	//console.log(rec);
 	sendok(res, rec);
 }); 
 
-router.get('/getinfo/:cid', async function(req, res, next) {
+customerRouter.get('/getinfo/:cid', async function(req, res, next) {
   setHeader(res);
 	var {cid} = req.params;
 	
@@ -53,7 +53,7 @@ router.get('/getinfo/:cid', async function(req, res, next) {
 	else      senderr(res, 601, "Invalid cid");
 })
 
-router.get('/add/:userName', async function(req, res, next) {
+customerRouter.get('/add/:userName', async function(req, res, next) {
   setHeader(res);
 	var {userName} = req.params;
 
@@ -66,7 +66,7 @@ router.get('/add/:userName', async function(req, res, next) {
 	sendok(res, rec);
 });
 
-router.get('/update/:custData', async function(req, res, next) {
+customerRouter.get('/update/:custData', async function(req, res, next) {
   setHeader(res);
 	var {custData} = req.params;
 	
@@ -129,7 +129,7 @@ router.get('/update/:custData', async function(req, res, next) {
 }); 
 
  
-router.get('/setworkinghours/:cid/:workingHours', async function(req, res, next) {
+customerRouter.get('/setworkinghours/:cid/:workingHours', async function(req, res, next) {
   setHeader(res);
 	var {cid, workingHours} = req.params;
 	
@@ -139,25 +139,25 @@ router.get('/setworkinghours/:cid/:workingHours', async function(req, res, next)
 	sendok(res, rec);
 })
 
-router.get('/morning', async function(req, res, next) {
+customerRouter.get('/morning', async function(req, res, next) {
   setHeader(res);
 	await doMorningSchedule();
 	sendok(res, "Done");
 })
 
-router.get('/earlymorning', async function(req, res, next) {
+customerRouter.get('/earlymorning', async function(req, res, next) {
   setHeader(res);
 	await doEarlyMorningSchedule();
 	sendok(res, "Done");
 })
 
-router.get('/afternoon', async function(req, res, next) {
+customerRouter.get('/afternoon', async function(req, res, next) {
   setHeader(res);
 	await doAfternoonSchedule();
 	sendok(res, "Done");
 })
 
-router.get('/test', async function(req, res, next) {
+customerRouter.get('/test', async function(req, res, next) {
   setHeader(res);
 	await doBirthdayWishes();
 	sendok(res, "all birthday wishes");
@@ -472,7 +472,7 @@ async function doAfternoonSchedule() {
 	await doApptReminder();
 }
 
-
+/*
 cron.schedule('5 * * * *', async () => {	
 	let today = new Date();
 	console.log(today);
@@ -501,7 +501,7 @@ cron.schedule('5 * * * *', async () => {
 
 	return;
 });
-
+*/
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
 function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
@@ -510,4 +510,8 @@ function setHeader(res) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 } 
 
-module.exports = router;
+
+module.exports = {
+	customerRouter,
+	doEarlyMorningSchedule, doMorningSchedule, doAfternoonSchedule
+}

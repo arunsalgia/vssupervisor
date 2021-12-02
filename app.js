@@ -61,6 +61,12 @@ io = require('socket.io')(httpServer, {
 
 // Routers
 router = express.Router();
+//const { smsRouter } = require('./routes/sms');
+const { patientRouter } = require('./routes/patient');
+const { customerRouter } = require('./routes/customer');
+const { addOnRouter } = require('./routes/addon');
+
+
 indexRouter = require('./routes/index');
 usersRouter = require('./routes/user');
 medicineRouter = require('./routes/medicine');
@@ -70,7 +76,7 @@ holidayRouter = require('./routes/holiday');
 appointmentRouter = require('./routes/appointment');
 infoRouter = require('./routes/info');
 quoteRouter = require('./routes/quote');
-customerRouter = require('./routes/customer');
+//customerRouter = require('./routes/customer');
 imageRouter = require('./routes/image');
 walletRouter = require('./routes/wallet');
 doctorRouter = require('./routes/doctor');
@@ -88,9 +94,6 @@ doctorTypeRouter = require('./routes/doctortype')
 festivalRouter = require('./routes/festival');
 nextVisitRouter = require('./routes/nextvisit');
 
-//const { smsRouter } = require('./routes/sms');
-const { patientRouter } = require('./routes/patient');
-const { addOnRouter } = require('./routes/addon');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));

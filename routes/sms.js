@@ -422,8 +422,23 @@ function setHeader(res) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 } 
 
+function dummyCall() {
+	console.log("Hello Dummy");
+}
+
+
+function clearSMSLog() {
+	arun_smslog = [];
+}
+
+function getSMSLog() {
+	return arun_smslog;
+}
+
 module.exports = {
 	// smsRouter,
+	dummyCall,
+	clearSMSLog, getSMSLog,
 	generateSMSLogs,
 	sendAppointmentSms,
 	sendExpirySms,
