@@ -91,7 +91,7 @@ router.get('/del/:dateStr', async function (req, res) {
 
 
 
-router.get('/add/:dateStr/:desc/:greeting/:p1/:p2/:p3', async function (req, res) {
+router.get('/add/:dateStr/:desc/:greeting', async function (req, res) {
   setHeader(res);
   var {dateStr, desc, greeting, p1, p2, p3} = req.params;
 	
@@ -111,14 +111,43 @@ router.get('/add/:dateStr/:desc/:greeting/:p1/:p2/:p3', async function (req, res
 	}
 	hRec.desc = desc;
 	hRec.greeting = greeting;
-	hRec.pack1 = (p1 === "true");
-	hRec.pack2 = (p2 === "true");
-	hRec.pack3 = (p3 === "true");
+	//hRec.pack1 = (p1 === "true");
+	//hRec.pack2 = (p2 === "true");
+	//hRec.pack3 = (p3 === "true");
 
 	hRec.save();
 	sendok(res, hRec);
 });	
 
+router.get('/update/:oldDateStr/:dateStr/:desc/:greeting', async function (req, res) {
+  setHeader(res);
+  var {oldDateStr, dateStr, desc, greeting, p1, p2, p3} = req.params;
+	
+	let myYear = 	Number(oldDateStr.substr(0, 4));
+	let myMonth = Number(oldDateStr.substr(4,2)) - 1;
+	let myDate =  Number(oldDateStr.substr(6,2));
+
+	let hRec = await M_Festival.findOne({date: myDate, month: myMonth, year: myYear});
+
+	if (!hRec) return senderr(res, 601, "Invalid original date");
+
+	myYear = 	Number(dateStr.substr(0, 4));
+	myMonth = Number(dateStr.substr(4,2)) - 1;
+	myDate =  Number(dateStr.substr(6,2));
+
+	hRec.date = myDate;
+	hRec.month = myMonth;
+	hRec.year = myYear;
+	hRec.festivalDate = new Date(Number(myYear), Number(myMonth), Number(myDate));
+	hRec.desc = desc;
+	hRec.greeting = greeting;
+	//hRec.pack1 = true;
+	//hRec.pack2 = true;
+	//hRec.pack3 = true;
+
+	hRec.save();
+	sendok(res, hRec);
+});	
 
 router.get('/monthly/:cid/:year/:month', async function (req, res) {
   setHeader(res);

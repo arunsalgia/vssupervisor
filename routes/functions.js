@@ -455,4 +455,5 @@ module.exports = {
   checkCustomerExpiry,
   getNextVisit,
   checksubscription,
+  compareDate,
 }; 

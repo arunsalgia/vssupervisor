@@ -29,6 +29,7 @@ const { all } = require('.');
 const EARLYMORNINGSCHEDULEAT=2;
 const MORNINGSCHEDULEAT=2;
 const AFTERNOONSCHEDULEAT=5;
+const OLDAPPTBACKDATE=3;
 
 customerRouter.use('/', function(req, res, next) {
   setHeader(res);
@@ -139,23 +140,46 @@ customerRouter.get('/setworkinghours/:cid/:workingHours', async function(req, re
 	sendok(res, rec);
 })
 
-customerRouter.get('/morning', async function(req, res, next) {
+
+
+customerRouter.get('/closevisit', async function(req, res, next) {
   setHeader(res);
-	await doMorningSchedule();
+	await closeVisit();
 	sendok(res, "Done");
 })
 
-customerRouter.get('/earlymorning', async function(req, res, next) {
+customerRouter.get('/expireappointment', async function(req, res, next) {
   setHeader(res);
-	await doEarlyMorningSchedule();
+	await expireAppoint();
 	sendok(res, "Done");
 })
 
-customerRouter.get('/afternoon', async function(req, res, next) {
+customerRouter.get('/clearoldappointment', async function(req, res, next) {
   setHeader(res);
-	await doAfternoonSchedule();
+	await clearOldAppointment();
 	sendok(res, "Done");
 })
+
+customerRouter.get('/greeting', async function(req, res, next) {
+  setHeader(res);
+	// birthday wishes
+	console.log("Starting BIRTHDAY wishes ........................");
+	await doBirthdayWishes();
+
+	// festival wishes
+	console.log("Starting FESTIVAL wishes ........................");
+	await doFestivalWishes();
+
+	console.log("All done dana-dna-dan-dan")
+	sendok(res, "Done");
+})
+
+customerRouter.get('/reminder', async function(req, res, next) {
+  setHeader(res);
+	await doApptReminder();
+	sendok(res, "Done");
+})
+
 
 customerRouter.get('/test', async function(req, res, next) {
   setHeader(res);
@@ -215,7 +239,7 @@ async function doBirthdayWishes() {
 		
 			fast2SmsSendBirthday(
 				patRec.mobile, 
-				BIRTHDAYGREETING,
+				//BIRTHDAYGREETING,		This is part of template now.
 				customerRec.clinicName,
 			).
 			then((body) => {
@@ -228,7 +252,7 @@ async function doBirthdayWishes() {
 				console.log("Error sending message. ", error.status_code);
 			})
 		}
-		akshuUpdSmsLog(customerSmsLog);
+		await akshuUpdSmsLog(customerSmsLog);
 	}
 }
 
@@ -262,9 +286,14 @@ async function doFestivalWishes() {
 				continue;
 			}
 		
+			/*
+				Note: Festival greeting MessageId is stored in Greeting.
+				Convert it to number and provide it to fast2SmsSendFestival.
+				Festival greeting text is part of the template.
+			*/
 			fast2SmsSendFestival(
 				patRec.mobile, 
-				festRecord.greeting,
+				Number(festRecord.greeting),		// This is message Id of festival greeting
 				customerRec.clinicName,
 			).
 			then((body) => {
@@ -283,20 +312,21 @@ async function doFestivalWishes() {
 
 async function doApptReminder() {
 	let today = new Date();
-	let tDate = today.getDate();
-	let tMonth = today.getMonth();
-	let tYear = today.getFullYear();
-	let tomorrow = new Date(tYear, tMonth, tDate+1)
-
-	//let allCustomers = await akshuGetAllCustomer();
+	let tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate()+1);
+	let tDate = tomorrow.getDate();
+	let tMonth = tomorrow.getMonth();
+	let tYear = tomorrow.getFullYear();
 
 	// calculate Order (which is used for appointments)
-	let todayOrder = await generateOrder(tYear,  tMonth, tDate, 0, 0)
-	let tomorrowOrder = await generateOrder(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0);
-	console.log(todayOrder, tomorrowOrder);
+	//let todayOrder = await generateOrder(tYear,  tMonth, tDate, 0, 0)
+	//let tomorrowOrder = await generateOrder(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0);
+	//console.log(todayOrder, tomorrowOrder);
 	
 	// Next step. Send reminder those who have appointment today and filter per customer
-	let all2morrowAppt = await M_Appointment.find({visit: 'pending', order: { $gte: todayOrder, $lt: tomorrowOrder } });
+	//let all2morrowAppt = await M_Appointment.find({visit: 'pending', order: { $gte: todayOrder, $lt: tomorrowOrder } });
+
+	let all2morrowAppt = await M_Appointment.find({visit: 'pending', year: tYear, month: tMonth, date: tDate });
+	// get the doctor list to which patients belongs
 	let cidList = _.map(all2morrowAppt, 'cid');
 	cidList = _.uniqBy(cidList);
 
@@ -351,7 +381,7 @@ async function doApptReminder() {
 
 }
 
-async function doEarlyMorningSchedule() {
+async function closeVisit() {
 	/*
 	In early monring.
 	1) Close all investigation, viist etc. which are opened (i.e. number is MAGICNUMBER)
@@ -431,9 +461,8 @@ async function doEarlyMorningSchedule() {
 	// all over
 }
 
-async function doMorningSchedule() {
-
-	// send expiry message
+async function expireAppoint() {
+	// all appointments which were not honured by patients need to be set as expred
 	let today = new Date();
 	let tDate = today.getDate();
 	let tMonth = today.getMonth();
@@ -459,17 +488,24 @@ async function doMorningSchedule() {
 		allOldPendingAppts[i].save();
 	}
 	
-	// birthday wished
-	await doBirthdayWishes();
 
-	// festival wishes
-	await doFestivalWishes();
 }
 
+async function clearOldAppointment() {
 
-
-async function doAfternoonSchedule() {
-	await doApptReminder();
+	let myTime = new Date();
+	myTime.setDate(myTime.getDate()-OLDAPPTBACKDATE);
+	console.log(myTime);
+	
+	let oldApptList = await M_Appointment.find({apptTime: {$lt: myTime} })
+	let allApptList = await M_Appointment.find({});
+	
+	console.log(allApptList.length, oldApptList.length);
+	
+	let myTest = 'pending';
+	let count1 = allApptList.filter(x => x.visit !== myTest).length;
+	let count2 = oldApptList.filter(x => x.visit !== myTest).length;
+	console.log(count1, count2);
 }
 
 /*
@@ -491,7 +527,7 @@ cron.schedule('5 * * * *', async () => {
 	console.log("Db connection found!!!!");
 
 	if (tHour === EARLYMORNINGSCHEDULEAT)
-		await doEarlyMorningSchedule();
+		await closeVisit();
 	
 	if (tHour === MORNINGSCHEDULEAT)
 		await doMorningSchedule()
@@ -513,5 +549,5 @@ function setHeader(res) {
 
 module.exports = {
 	customerRouter,
-	doEarlyMorningSchedule, doMorningSchedule, doAfternoonSchedule
+	//closeVisit, doMorningSchedule, doAfternoonSchedule
 }

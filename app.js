@@ -427,6 +427,7 @@ AddOnSchema = mongoose.Schema({
 	doctorType: Number,	
 	charges: Number,	
 	description: String,	
+	planType: String,
 	enabled: Boolean
 });
 
@@ -703,7 +704,9 @@ MAGICNUMBER = 99999;
 
 defaultPatientSms = 500;
 
-BIRTHDAYGREETING = 'May the days ahead of you be filled with prosperity, great health and above all joy in its truest and purest form. Happy birthday!';
+//BIRTHDAYGREETING = 'May the days ahead of you be filled with prosperity, great health and above all joy in its truest and purest form. Happy birthday!';
+
+ADDONPLANTYPE = ["ANNUAL", "MONTHLY", "LIFETIME"];
 
 AddOnList = {
 	bulk: 'Unlimited SMS', billing: 'Billing', birthday: 'Birthday',

@@ -63,10 +63,10 @@ addOnRouter.use('/', function(req, res, next) {
 // send list of in chunks of blocks.
 // Each Block will contain #medicines which is confgired in MEDBLOCK
 
-addOnRouter.get('/add/:newType/:charges/:desc/:eligible', async function(req, res, next) {
+addOnRouter.get('/add/:newType/:charges/:desc/:planType/:eligible', async function(req, res, next) {
   setHeader(res);
   
-  var {newType, charges, desc, eligible } = req.params;
+  var {newType, charges, desc, planType, eligible } = req.params;
 	charges = Number(charges);
 
   var tmp = await M_AddOn.findOne({name: newType});
@@ -81,15 +81,16 @@ addOnRouter.get('/add/:newType/:charges/:desc/:eligible', async function(req, re
 	mRec.charges = charges;
 	mRec.enabled = true;
 	mRec.description = desc;
+	mRec.planType = planType;
 	mRec.save();
 	sendok(res, mRec);
 
 });
 
-addOnRouter.get('/edit/:oldType/:newType/:charges/:desc/:eligible', async function(req, res, next) {
+addOnRouter.get('/edit/:oldType/:newType/:charges/:desc/:planType/:eligible', async function(req, res, next) {
   setHeader(res);
   
-  var {oldType, newType, charges, desc, eligible } = req.params;
+  var {oldType, newType, charges, desc, planType, eligible } = req.params;
 	charges = Number(charges);
 
 	var mRec;
@@ -109,6 +110,7 @@ addOnRouter.get('/edit/:oldType/:newType/:charges/:desc/:eligible', async functi
 	mRec.charges = charges;
 	mRec.enabled = true;
 	mRec.description = desc;
+	mRec.planType = planType;
 	mRec.save();
 	sendok(res, mRec);
 });
@@ -185,7 +187,16 @@ addOnRouter.get('/subscribelist/:cid', async function(req, res, next) {
 	sendok(res, tmpRec);
 });
 
-
+addOnRouter.get('/test', async function(req, res, next) {
+  setHeader(res);
+  
+	
+	let allTypes = await M_AddOn.find({});
+	for(let i=0; i<allTypes.length; ++i) {
+		console.log(allTypes[i]);		//.planType = ADDONPLANTYPE[0];
+	}
+	sendok(res, "Done");
+});
 addOnRouter.get('/list', async function(req, res, next) {
   setHeader(res);
   

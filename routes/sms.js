@@ -157,19 +157,20 @@ async function fast2SmsReminder(destMobile, docName, clinicName, apptDateStr, cl
 }
 
 
-async function fast2SmsSendFestival(destMobile, greeting, clinicName) {
-	let myParams = `${greeting}|${clinicName}`;
+async function fast2SmsSendBirthday(destMobile, clinicName) {
+	let myParams = `${clinicName}`;
 	getSMSIds();
 	let status = await fast2SmsSend(headerIdList[5], messageIdList[5], myParams, destMobile);
 	return status;
 }
 
-async function fast2SmsSendBirthday(destMobile, greeting, clinicName) {
-	let myParams = `${greeting}|${clinicName}`;
+async function fast2SmsSendFestival(destMobile, messageId, clinicName) {
+	let myParams = `${clinicName}`;
 	getSMSIds();
-	let status = await fast2SmsSend(headerIdList[6], messageIdList[6], myParams, destMobile);
+	let status = await fast2SmsSend(headerIdList[6], messageId, myParams, destMobile);
 	return status;
 }
+
 
 
 

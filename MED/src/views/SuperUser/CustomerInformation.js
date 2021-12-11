@@ -417,10 +417,13 @@ export default function CustomerInformations(props) {
 			<Grid item xs={6} sm={6} md={2} lg={2} >
 				<span className={gClasses.patientInfo2}>{d.name}</span>
 			</Grid>
-			<Grid item xs={6} sm={6} md={2} lg={2} >
-				<span className={gClasses.patientInfo2}>{d.charges+"/- per annum"}</span>
+			<Grid item xs={3} sm={3} md={1} lg={1} >
+				<span className={gClasses.patientInfo2}>{d.charges+"/-"}</span>
 			</Grid>
-			<Grid item xs={12} sm={12} md={7} lg={7} >
+			<Grid item xs={3} sm={3} md={1} lg={1} >
+				<span className={gClasses.patientInfo2}>{d.planType}</span>
+			</Grid>
+			<Grid item xs={9} sm={9} md={7} lg={7} >
 				<span className={gClasses.patientInfo2}>{d.description}</span>
 			</Grid>
 			<Grid item xs={2} sm={2} md={1} lg={1} >		
@@ -545,11 +548,11 @@ export default function CustomerInformations(props) {
 	return (
 		<Box key={"WALLET"}  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1}>
 		<Grid align="center"  className={gClasses.noPadding} key="PATHDR" container >
-		<Grid align="left" item xs={6} sm={6} md={2} lg={2} >
+		<Grid align="left" item xs={6} sm={6} md={4} lg={4} >
 			<span className={gClasses.functionSelected}>{"Wallet Balance: ₹"}</span>
 			<span className={gClasses.functionSelected}>{props.balance}</span>
 		</Grid>
-		<Grid item xs={3} sm={3} md={9} lg={9} />
+		<Grid item xs={3} sm={3} md={7} lg={7} />
 		<Grid item xs={3} sm={3} md={1} lg={1} >
 			<VsButton name="Add wallet" onClick={addToWallet} />
 		</Grid>

@@ -28,6 +28,7 @@ import moment from "moment";
  import VsCancel from "CustomComponents/VsCancel";
  import VsButton from "CustomComponents/VsButton";
  import VsCheckBox from "CustomComponents/VsCheckBox";
+ import VsRadioGroup from "CustomComponents/VsRadioGroup";
 
 import CustomerInformation from "views/SuperUser/CustomerInformation";
 
@@ -46,7 +47,7 @@ import {DisplayPageHeader, ValidComp, BlankArea, DisplayCustomerBox, DisplayCust
 import { dispEmail, disablePastDt, vsDialog,  encrypt} from 'views/functions';
 import { DATESTR, MONTHNUMBERSTR } from 'views/globals';
 
-
+const ADDONPLANTYPE = ["ANNUAL", "MONTHLY", "LIFETIME"];
 
 /*
 const useStyles = makeStyles((theme) => ({
@@ -309,12 +310,14 @@ export default function Customer() {
 	const [custLocation, setCustLocation] = useState("");
 	const [custPinCode, setCustPinCode] = useState(0);
 	const [emurDate1, setEmurDate1] = useState(moment());
+	const [emurRec, setEmurRec] = useState({});
 	const [custCommission, setCustCommission] = useState(10);
 
 	const [custFee, setCustFee] = useState(1000);
 	const [registerStatus, setRegisterStatus] = useState(0);
 
-	
+	const [addOnPlanType, setAddOnPlanType] = useState("");
+
 	//const [custOption, setCustOption] = useState("");
 
 	
@@ -454,7 +457,7 @@ export default function Customer() {
 
 	async function handleAddEditFestivalDate() {
 		console.log(emurDate1);
-		if (!emurCb1 && !emurCb2 && !emurCb3) return setRegisterStatus(1001);
+		//if (!emurCb1 && !emurCb2 && !emurCb3) return setRegisterStatus(1001);
 
 		let d = emurDate1.toDate();
 		let myMonth = d.getMonth();
@@ -462,15 +465,39 @@ export default function Customer() {
 		let myDate = d.getDate();
 		let dateStr = myYear + MONTHNUMBERSTR[myMonth] + DATESTR[myDate];
 		console.log(myDate, myMonth, myYear);
-		let tmp = festivalArray.find(x => x.date === myDate && x.month === myMonth && x.year === myYear);
-		if (tmp) return setRegisterStatus(1002);
-		try {
-			let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/festival/add/${dateStr}/${emurText1}/${emurText2}/${emurCb1}/${emurCb2}/${emurCb3}`);
-			let tmpArray = [resp.data].concat(festivalArray);
-			setFestivalArray(lodashSortBy(tmpArray, 'year', 'month', 'date'));
-			setIsDrawerOpened("");
-		} catch(e) {
-			alert.error(`Error adding festival date ${emurText1}`);
+		// Add or Update
+		if (isDrawerOpened === "ADDFESTIVALDATE") {
+			let tmp = festivalArray.find(x => x.date === myDate && x.month === myMonth && x.year === myYear);
+			if (tmp) return setRegisterStatus(1002);
+			try {
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/festival/add/${dateStr}/${emurText1}/${emurText2}`);
+				let tmpArray = [resp.data].concat(festivalArray);
+				setFestivalArray(lodashSortBy(tmpArray, 'year', 'month', 'date'));
+				setIsDrawerOpened("");
+			} catch(e) {
+				alert.error(`Error adding festival date ${emurText1}`);
+			}
+		} else {
+			// duplicate date check
+			if ((emurRec.date !== myDate) || (emurRec.month !== myMonth) || (emurRec.year !== myYear)) {
+				let tmp = festivalArray.find(x => x.date === myDate && x.month === myMonth && x.year === myYear);
+				if (tmp) return setRegisterStatus(1002);
+			}
+			let origDateStr = emurRec.year + MONTHNUMBERSTR[emurRec.month] + DATESTR[emurRec.date];
+			// now update
+			try {
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/festival/update/${origDateStr}/${dateStr}/${emurText1}/${emurText2}`);
+				// remove the entry with oiginal date
+				let tmp = festivalArray.filter(x => x.date !== emurRec.date || x.month !== emurRec.month || x.year !== emurRec.year);
+				// now add the update festival
+				let tmpArray = [resp.data].concat(tmp);
+				setFestivalArray(lodashSortBy(tmpArray, 'year', 'month', 'date'));
+				setIsDrawerOpened("");
+			} catch(e) {
+				alert.error(`Error updating festival date ${emurText1}`);
+			}
+
+	
 		}
 	}
 
@@ -496,7 +523,20 @@ export default function Customer() {
 		setEmurCb3(false);
 		setRegisterStatus(0);
 		setIsDrawerOpened("ADDFESTIVALDATE")
+	}
 
+	function editFestivalDate(f) {
+		let t = moment(f.festivalDate);
+		console.log(t);
+		setEmurDate1(t);
+		setEmurRec(f);
+		setEmurText1(f.desc);
+		setEmurText2(f.greeting);
+		setEmurCb1(true);
+		setEmurCb2(false);
+		setEmurCb3(false);
+		setRegisterStatus(0);
+		setIsDrawerOpened("EDITFESTIVALDATE")
 	}
 
 
@@ -507,7 +547,7 @@ export default function Customer() {
 			<Table style={{ width: '100%' }}>
 			<TableHead>
 				<TableRow align="center">
-					<TableCell key={"TH1"} colSpan={7} component="th" scope="row" align="center" padding="none"
+					<TableCell key={"TH1"} colSpan={4} component="th" scope="row" align="center" padding="none"
 					className={gClasses.th} >
 					Festival Dates
 					</TableCell>
@@ -523,8 +563,9 @@ export default function Customer() {
 					</TableCell>
 					<TableCell key={"TH23"} component="th" scope="row" align="center" padding="none"
 					className={gClasses.th} >
-						Greeting
+						Message Id
 					</TableCell>
+					{/*
 					<TableCell key={"TH31"} component="th" scope="row" align="center" padding="none"
 					className={gClasses.th} >
 						Pack1
@@ -537,6 +578,7 @@ export default function Customer() {
 					className={gClasses.th} >
 						Pack3
 					</TableCell>
+					*/}
 					<TableCell key={"TH41"} component="th" scope="row" align="center" padding="none"
 					className={gClasses.th} >
 					</TableCell>
@@ -561,10 +603,11 @@ export default function Customer() {
 					</TableCell>
 					<TableCell key={"TD3"+index} component="td" scope="row" padding="none"
 					className={gClasses.td} >
-						<Typography className={gClasses.patientInfo2}>
+						<Typography align="center" className={gClasses.patientInfo2}>
 							{a.greeting}
 						</Typography>
 					</TableCell>
+					{/*
 					<TableCell key={"TD4"+index} align="center" component="td" scope="row" padding="none"
 					className={gClasses.td} >
 						<Typography align="center" className={gClasses.patientInfo2}>
@@ -583,9 +626,11 @@ export default function Customer() {
 							{(a.pack3) ? "Yes" : ""}
 						</Typography>
 					</TableCell>
+					*/}
 					<TableCell key={"TD11"+index} align="center" component="td" scope="row" padding="none"
 					className={gClasses.td} >
 						<div align="center" >
+						<EditIcon color="primary" size="small" onClick={() => editFestivalDate(a)}  />
 						<CancelIcon color="secondary" size="small" onClick={() => handleCancelFestivalDate(a)}  />
 						</div>
 					</TableCell>
@@ -704,6 +749,7 @@ export default function Customer() {
 		setEmurText1("");
 		setEmurAmount(100);
 		setEmurText2("");
+		setAddOnPlanType(ADDONPLANTYPE[0]);
 		setIsDrawerOpened("ADDADDON")
 	}
 
@@ -712,6 +758,7 @@ export default function Customer() {
 		setEmurText1(d.name);
 		setEmurAmount(d.charges);
 		setEmurText2(d.description);
+		setAddOnPlanType(d.planType);
 		setIsDrawerOpened("EDITADDON")
 	}
 
@@ -719,7 +766,7 @@ export default function Customer() {
 		let docList = 0xFFFFFFFF;
 		if (isDrawerOpened === "ADDADDON") {
 			try {
-				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/add/${emurText1}/${emurAmount}/${emurText2}/${docList}`);
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/add/${emurText1}/${emurAmount}/${emurText2}/${addOnPlanType}/${docList}`);
 				let tmpArray = [resp.data].concat(addOnTypeArray);
 				setAddOnTypeArray(lodashSortBy(tmpArray, 'name'));
 				setIsDrawerOpened("");
@@ -728,7 +775,7 @@ export default function Customer() {
 			}
 		} else {
 			try {
-				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/edit/${emurData.name}/${emurText1}/${emurAmount}/${emurText2}/${docList}`);
+				let resp =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/addon/edit/${emurData.name}/${emurText1}/${emurAmount}/${emurText2}/${addOnPlanType}/${docList}`);
 				let tmpArray = addOnTypeArray.filter(x => x.name !== emurData.name);
 				tmpArray.push(resp.data);
 				setAddOnTypeArray(lodashSortBy(tmpArray, 'name'));
@@ -768,8 +815,11 @@ export default function Customer() {
 		<Grid item xs={6} sm={6} md={2} lg={2} >
 			<span className={gClasses.patientInfo2}>{d.name}</span>
 		</Grid>
-		<Grid item xs={6} sm={6} md={2} lg={2} >
-			<span className={gClasses.patientInfo2}>{d.charges+"/- per annum"}</span>
+		<Grid item xs={3} sm={3} md={1} lg={1} >
+			<span className={gClasses.patientInfo2}>{d.charges+"/-"}</span>
+		</Grid>
+		<Grid item xs={3} sm={3} md={1} lg={1} >
+			<span className={gClasses.patientInfo2}>{d.planType}</span>
 		</Grid>
 		<Grid item xs={12} sm={12} md={7} lg={7} >
 			<span className={gClasses.patientInfo2}>{d.description}</span>
@@ -1218,18 +1268,29 @@ export default function Customer() {
 		{((isDrawerOpened === "ADDADDON") || (isDrawerOpened === "EDITADDON")) &&
 				<ValidatorForm className={gClasses.form} onSubmit={handleAddEditAddOnType}>
 				<Typography className={gClasses.title}>{((isDrawerOpened === "ADDDT") ? "Add" : "Edit") + " Add On Type"}</Typography>
-				<TextValidator required fullWidth label="Add On Type" className={gClasses.vgSpacing}
+				<TextValidator required fullWidth label="Name" className={gClasses.vgSpacing}
 					value={emurText1}
 					onChange={(event) => setEmurText1(event.target.value)}
 					validators={['noSpecialCharacters']}
 					errorMessages={[`Special Characters not permitted`]}
 				/>
-				<TextValidator required fullWidth type="number" label="Yearly Charges" className={gClasses.vgSpacing}
+				<TextValidator required fullWidth type="number" label="Charges" className={gClasses.vgSpacing}
 					value={emurAmount}
 					onChange={(event) => setEmurAmount(Number(event.target.value))}
 					validators={['minNumber:100']}
-					errorMessages={[`Yearly charges should be alleast 100`]}
+					errorMessages={[`Charges should be alleast 100`]}
 				/>
+				<Grid className={gClasses.noPadding} key="ADDEDITPERS" container alignItems="center" align="center">
+				<Grid align="left"  item xs={6} sm={6} md={2} lg={2} >
+				<Typography className={gClasses.title}>Plan Type</Typography>
+				</Grid>
+				<Grid align="left"  item xs={6} sm={6} md={10} lg={10} >
+					<VsRadioGroup 					
+						value={addOnPlanType} onChange={(event) => setAddOnPlanType(event.target.value)}
+						radioList={ADDONPLANTYPE}
+					/>
+				</Grid>	
+				</Grid>
 				<TextValidator required fullWidth label="Description" className={gClasses.vgSpacing}
 					value={emurText2}
 					onChange={(event) => setEmurText2(event.target.value)}
@@ -1243,7 +1304,7 @@ export default function Customer() {
 				<ValidComp />  
 			</ValidatorForm>
 		}
-		{((isDrawerOpened === "ADDFESTIVALPACK") || (isDrawerOpened === "EDITFESTIVALPACK")) &&
+		{((isDrawerOpened === "ADDFESTIVALPACK")) &&
 			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditFestivalPack}>
 			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDFESTIVALPACK") ? "Add" : "Edit") + " Festival Pack"}</Typography>
 			<TextValidator required fullWidth label="Festival Pack Name" className={gClasses.vgSpacing}
@@ -1259,7 +1320,7 @@ export default function Customer() {
 			<ValidComp />  
 			</ValidatorForm>
 		}
-		{((isDrawerOpened === "ADDFESTIVALDATE") ) &&
+		{((isDrawerOpened === "ADDFESTIVALDATE") || (isDrawerOpened === "EDITFESTIVALDATE") ) &&
 			<ValidatorForm className={gClasses.form} onSubmit={handleAddEditFestivalDate}>
 			<Typography className={gClasses.title}>{((isDrawerOpened === "ADDFESTIVALDATE") ? "Add" : "Edit") + " new date to Festival"}</Typography>
 			<Datetime 
@@ -1283,10 +1344,12 @@ export default function Customer() {
 				validators={['noSpecialCharacters']}
 				errorMessages={[`Special Characters not permitted`]}
 			/>
+			{/*
 			<VsCheckBox label="Part of festival pack 1" align="left" checked={emurCb1} onClick={() => setEmurCb1(!emurCb1)} />
 			<VsCheckBox label="Part of festival pack 2" align="left" checked={emurCb2} onClick={() => setEmurCb2(!emurCb2)} />
 			<VsCheckBox label="Part of festival pack 3" align="left" checked={emurCb3} onClick={() => setEmurCb3(!emurCb3)} />
 			<BlankArea />
+			*/}
 			<ShowResisterStatus/>
 			<BlankArea/>
 			<VsButton align="center" name={(isDrawerOpened === "ADDFESTIVALDATE" ? "Add" : "Update")} type="submit" />

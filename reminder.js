@@ -25,14 +25,9 @@ function ProgramExit() {
 try {
 	
 	console.log(`Database connection status: Okay`);
-	let myUrl = 'https://doctorviraag.herokuapp.com/customer/earlymorning';
+	let myUrl = 'https://doctorviraag.herokuapp.com/customer/afternoon';
 	console.log(myUrl);
 	let resp = await axios.get(myUrl);
-	console.log(resp.data);
-	
-	myUrl = 'https://doctorviraag.herokuapp.com/customer/morning';
-	console.log(myUrl);
-	resp = await axios.get(myUrl);
 	console.log(resp.data);
 	
 	ProgramExit();
