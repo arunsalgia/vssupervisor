@@ -708,6 +708,25 @@ defaultPatientSms = 500;
 
 ADDONPLANTYPE = ["ANNUAL", "MONTHLY", "LIFETIME"];
 
+/*
 AddOnList = {
 	bulk: 'Unlimited SMS', billing: 'Billing', birthday: 'Birthday',
-	Festival1: 'Festival Pack 1'}
+	Festival: 'Festival Pack'}
+*/
+
+AddOnList = {
+	bulk: [
+		{ name: 'Unlimited SMS', count: 1000000 }
+	],
+	billing: [
+		{ name: 'Billing', count: 1 }
+	] , 
+	birthday: [
+		{ name: 'Birthday', count: 1 }, 
+		{ name: 'Combo 1' , count: 1 }
+	],
+	festival: [
+		{ name: 'Festival Pack', count: 1 },
+		{ name: 'Combo 1'      , count: 1 }
+	]
+}

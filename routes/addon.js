@@ -33,18 +33,24 @@ async function getAllSubscriptions(cid) {
 	return arun_subscriptionList[cid];
 }
 
-async function hasSubscribed(cid, subscriptionName) {
+async function hasSubscribed(cid, subscriptionPackList) {
 	await loadSubscriptionList(cid);
 	let hasSub = false;
-	//console.log(arun_subscriptionList[cid]);
-	let tmp = arun_subscriptionList[cid].find(x => x.name == subscriptionName);
-	//console.log(subscriptionName, tmp);
-	if (tmp) {
-	// also check if it has not expired. i.e. still active
-		if (compareDate(tmp.expiryDate, new Date()) >= 0) hasSub = true;
+	let subCount = 0;
+	for(let i=0; i<subscriptionPackList.length; ++i) {
+		let tmp = arun_subscriptionList[cid].find(x => x.name == subscriptionPackList[i].name);
+
+		if (tmp) {
+		// also check if it has not expired. i.e. still active
+			if (compareDate(tmp.expiryDate, new Date()) >= 0) {
+				hasSub = true;
+				subCount = subscriptionPackList[i].count;
+			}
+			break;
+		}
 	}
-	//console.log(hasSub);
-	return hasSub;
+	console.log(subCount);
+	return 	subCount;
 }
 
 async function getSubscribed(cid, subscriptionName) {

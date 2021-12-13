@@ -200,7 +200,9 @@ async function doBirthdayWishes() {
 		console.log(cid);
 
 		// find if customer has subscribed birthday  pack
-		if (! await hasSubscribed(cid, AddOnList.birthday)) continue;
+		var sts = await hasSubscribed(cid, AddOnList.birthday);
+		console.log("BDaySts: "+sts);
+		if (sts === 0 ) continue;
 		console.log("Has subscribed for birthday");
 		
 		/*
@@ -227,7 +229,7 @@ async function doBirthdayWishes() {
 		console.log(allPatients);
 		if (allPatients.length === 0) continue;
 
-		let customerSmsLog = await akshuGetSmsLog(cid, tMonth, tYear);
+		//let customerSmsLog = await akshuGetSmsLog(cid, tMonth, tYear);
 		for(let ppp=0; ppp<allPatients.length; ++ppp) {
 			patRec = allPatients[ppp];
 
@@ -239,20 +241,20 @@ async function doBirthdayWishes() {
 		
 			fast2SmsSendBirthday(
 				patRec.mobile, 
-				//BIRTHDAYGREETING,		This is part of template now.
+				patRec.displayName,
 				customerRec.clinicName,
 			).
 			then((body) => {
 				if (body.return) {
 					// send sms success
-					++customerSmsLog.birthDayCount;
+					//++customerSmsLog.birthDayCount;
 				}
 			}).
 			catch((error) => {
 				console.log("Error sending message. ", error.status_code);
 			})
 		}
-		await akshuUpdSmsLog(customerSmsLog);
+		//await akshuUpdSmsLog(customerSmsLog);
 	}
 }
 
@@ -272,9 +274,10 @@ async function doFestivalWishes() {
 		cid = customerRec._id;
 
 		// find if customer has subscribed festival pack
-		if (! await hasSubscribed(cid, AddOnList.Festival1)) continue;
+		var sts = await hasSubscribed(cid, AddOnList.festival);
+		if (sts === 0) continue;
 
-		let customerSmsLog = await akshuGetSmsLog(cid, tMonth, tYear);
+		//let customerSmsLog = await akshuGetSmsLog(cid, tMonth, tYear);
 		// customer has subscribed. Now get all patient of this customer
 		let allPatients = await getAllPatients(cid);
 		for(let ppp=0; ppp<allPatients.length; ++ppp) {
@@ -299,14 +302,14 @@ async function doFestivalWishes() {
 			then((body) => {
 				if (body.return) {
 					// send sms success
-					++customerSmsLog.festivalCount;
+					//++customerSmsLog.festivalCount;
 				}
 			}).
 			catch((error) => {
 				console.log("Error sending message. ", error.status_code);
 			})
 		}
-		akshuUpdSmsLog(customerSmsLog);
+		//akshuUpdSmsLog(customerSmsLog);
 	}
 }
 
@@ -350,7 +353,7 @@ async function doApptReminder() {
 
 			if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
 				// if default count has passed. CHeck if subscribed for bulk sms for patients
-				if (!await hasSubscribed(cid, AddOnList.bulk)) {
+				if (await hasSubscribed(cid, AddOnList.bulk) === 0) {
 					console.log("Bulk Sms count Over");
 					continue;
 				}

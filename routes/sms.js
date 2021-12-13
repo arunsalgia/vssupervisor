@@ -101,7 +101,7 @@ async function fast2SmsSend(senderid, messageid, myParams, destMobile) {
 		"route": "dlt",
 		"numbers": destMobile
 	};
-	//console.log(queryMsg);
+	console.log(queryMsg);
 	f2s.query(queryMsg);
 
 
@@ -115,7 +115,7 @@ async function fast2SmsSend(senderid, messageid, myParams, destMobile) {
 				console.log("Rejected");
 				return reject(response.body)
 			}
-			//console.log("Send success");
+			console.log("Send success");
 			return resolve(response.body);
 		});
 	});
@@ -157,8 +157,9 @@ async function fast2SmsReminder(destMobile, docName, clinicName, apptDateStr, cl
 }
 
 
-async function fast2SmsSendBirthday(destMobile, clinicName) {
-	let myParams = `${clinicName}`;
+async function fast2SmsSendBirthday(destMobile, patientName, clinicName) {
+	let myParams = `${patientName}|${clinicName}`;
+	console.log(myParams);
 	getSMSIds();
 	let status = await fast2SmsSend(headerIdList[5], messageIdList[5], myParams, destMobile);
 	return status;
@@ -209,7 +210,7 @@ async function sendAppointmentSms(cid, pid, apptTime) {
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
 		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		if (! await hasSubscribed(cid, AddOnList.bulk)) {
+		if (await hasSubscribed(cid, AddOnList.bulk) === 0) {
 			console.log("Default Sms count Over");
 			// How to inform consumer
 			return;
@@ -250,7 +251,7 @@ async function sendExpirySms(cid, pid, apptTime) {
 	let customerSmsLog = await akshuGetSmsLog(cid, t.getMonth(), t.getFullYear());
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
-		if (!await hasSubscribed(cid, AddOnList.bulk)) {
+		if (await hasSubscribed(cid, AddOnList.bulk) === 0) {
 			console.log("Default Sms count Over");
 			return;
 		}
@@ -300,7 +301,7 @@ async function sendVisitSms(cid, pid, nextVisitTime, nextVisitUnit) {
 	let customerSmsLog = await akshuGetSmsLog(cid, t.getMonth(), t.getFullYear());
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
-		if (!await hasSubscribed(cid, AddOnList.bulk)) {
+		if (await hasSubscribed(cid, AddOnList.bulk) === 0) {
 			console.log("Buls Sms count Over");
 			return;
 		}
@@ -347,7 +348,7 @@ async function sendCancelSms(cid, pid, cancelTime) {
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
 		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		if (!await hasSubscribed(cid, AddOnList.bulk)) {
+		if (await hasSubscribed(cid, AddOnList.bulk) === 0) {
 			console.log("Bulk Sms count Over");
 			return;
 		}
@@ -390,7 +391,7 @@ async function sendReminderSms(cid, pid, apptTime) {
 	//console.log(customerSmsLog);
 	if (customerSmsLog.bulkSmsCount >= defaultPatientSms) {
 		// if default count has passed. CHeck if subscribed for bulk sms for patients
-		if (!await hasSubscribed(cid, AddOnList.bulk)) {
+		if (await hasSubscribed(cid, AddOnList.bulk) === 0) {
 			console.log("Buls Sms count Over");
 			return;
 		}
