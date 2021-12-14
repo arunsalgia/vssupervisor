@@ -23,6 +23,19 @@ const globalStyles = makeStyles((theme) => ({
 		align: 'center',
 		//width: (isMobile()) ? '60%' : '20%',
 	},
+  drawer: {
+		width: '40%',
+		flexShrink: 0
+		//backgroundColor: "rgba(0,0,0,0.6)" Don't target here
+	},
+  normalAccordian: {
+    backgroundColor: '#FFCCBC',
+    borderRadius: 25,
+  },
+  selectedAccordian: {
+    backgroundColor: '#B2EBF2',
+    borderRadius: 25,
+  },
 	indexSelection: {
 		color: 'green',
 		fontSize: theme.typography.pxToRem(28),

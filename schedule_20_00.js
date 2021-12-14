@@ -22,6 +22,8 @@ function ProgramExit() {
 
 const RETRYCOUNT = 3;
 
+// This scriot will actually executed at 8:30PM
+
 async function processMessage(msgname) {
 	for(let i=0; i < RETRYCOUNT; ++i) { 
 		try {

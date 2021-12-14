@@ -306,6 +306,8 @@ AppointmentSchema = mongoose.Schema({
 	displayName: String,
 	apptTime: Date,
 	visit: String,	// be be visit Id. Else it will be pending cancelled.
+	doctorName: String,
+	doctorMobile: String,
 	cid: String,
 });
 
@@ -350,6 +352,8 @@ CustomerSchema = mongoose.Schema({
 	location: String,
 	pinCode: String,
 	workingHours: [Number], // clinic weekly working slots (15 minute slots
+	doctorPanel: [String],
+	doctorMobile: [String],
 	
 	// 
 	commission: Number,			// commission for each referral recharge

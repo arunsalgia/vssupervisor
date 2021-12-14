@@ -181,12 +181,6 @@ customerRouter.get('/reminder', async function(req, res, next) {
 })
 
 
-customerRouter.get('/test', async function(req, res, next) {
-  setHeader(res);
-	await doBirthdayWishes();
-	sendok(res, "all birthday wishes");
-});
-
 async function doBirthdayWishes() {
 	let today = new Date();
 	let tDate = today.getDate();
@@ -201,7 +195,7 @@ async function doBirthdayWishes() {
 
 		// find if customer has subscribed birthday  pack
 		var sts = await hasSubscribed(cid, AddOnList.birthday);
-		//console.log("BDaySts: "+sts);
+		//console.log("BDaySts: "+stsf);
 		if (sts === 0 ) continue;
 		console.log("Has subscribed for birthday");
 		
@@ -499,17 +493,40 @@ async function clearOldAppointment() {
 	let myTime = new Date();
 	myTime.setDate(myTime.getDate()-OLDAPPTBACKDATE);
 	console.log(myTime);
+	await M_Appointment.deleteMany({apptTime: {$lt: myTime}, visit: {$ne: "pending"} });
 	
-	let oldApptList = await M_Appointment.find({apptTime: {$lt: myTime} })
-	let allApptList = await M_Appointment.find({});
-	
-	console.log(allApptList.length, oldApptList.length);
-	
-	let myTest = 'pending';
-	let count1 = allApptList.filter(x => x.visit !== myTest).length;
-	let count2 = oldApptList.filter(x => x.visit !== myTest).length;
-	console.log(count1, count2);
+	let balanceApptList = await M_Appointment.find({});
+	console.log(balanceApptList.length);
+
 }
+
+
+
+customerRouter.get('/test', async function(req, res, next) {
+  setHeader(res);
+/*
+	await doBirthdayWishes();
+*/
+
+/*
+	let allCustomers = await M_Customer.find({});
+	for(let i=0; i<allCustomers.length; ++i) {
+		allCustomers[i].doctorPanel = [];
+		allCustomers[i].doctorMobile = [];
+		allCustomers[i].save();
+	}
+*/
+
+	// update doctor name and mobile in appt document
+	let allAppt = await M_Appointment.find({});
+	for(let i=0; i<allAppt.length; ++i) {
+		let customerRec = await M_Customer.findOne({_id: allAppt[i].cid});
+		allAppt[i].doctorName = customerRec.doctorName;
+		allAppt[i].doctorMobile = customerRec.mobile;
+		allAppt[i].save();
+	}
+	sendok(res, "all birthday wishes");
+});
 
 /*
 cron.schedule('5 * * * *', async () => {	

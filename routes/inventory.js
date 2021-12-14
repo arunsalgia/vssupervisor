@@ -46,7 +46,7 @@ router.get('/edit/:cid/:oldInventory/:newInventory', async function(req, res, ne
 	newInventory = newInventory.trim();
 	
 	let old_lname = getLoginName(oldInventory);
-	let new_lname = getLoginName(newInventory);
+	let new_lname = getLoginName(newInventory); 
 	
 	
 	// check if old name really exists!!!! Only then we can modify it
@@ -75,7 +75,7 @@ router.get('/delete/:cid/:delInventory', async function(req, res, next) {
 	if (!mRec) return senderr(res, 601, "Inventory name not found");
 	
 	await M_Inventory.deleteOne({cid: cid, loginName: old_lname});
-	await InventoryListSchema.deleteMany({cid: cid, id: mRec.id});
+	await M_InventoryList.deleteMany({cid: cid, inventoryNumber: mRec.id});
 	
 	sendok(res, "Delete successful");
 });
@@ -114,13 +114,21 @@ router.get('/listinventory/:cid/:inventoryNumber', async function(req, res, next
 	sendok(res, allRecs);
 });
 
-
+router.get('/listallinventory/:cid', async function(req, res, next) {
+  setHeader(res);
+  
+  var { cid } = req.params;
+	
+	let allRecs = await M_InventoryList.find({cid: cid}).sort({date: -1});
+	sendok(res, allRecs);
+});
 
 router.get('/addinventory/:cid/:inventoryNumber/:quantity', async function(req, res, next) {
   setHeader(res);
   
   var { cid, inventoryNumber,  quantity } = req.params;
-	
+	console.log(inventoryNumber, quantity);
+
 	let tmpRec = await M_InventoryList.find({cid: cid, inventoryNumber: Number(inventoryNumber)}).limit(1).sort({id: -1});
 	
 	let iRec = new M_InventoryList();
@@ -170,6 +178,22 @@ router.get('/editinventory/:cid/:inventoryNumber/:id/:quantity', async function(
 	
 	sendok(res, iRec);
 });
+
+
+router.get('/delinventory/:cid/:inventoryNumber/:id', async function(req, res, next) {
+  setHeader(res);
+  
+  var { cid, inventoryNumber,  id} = req.params;
+	inventoryNumber = Number(inventoryNumber);
+	id = Number(id);
+	
+	let iRec = await M_InventoryList.findOne({cid: cid, inventoryNumber: inventoryNumber, id: id});
+	if (!iRec) return senderr(res, 601, "Invalid Inventory number or Id");
+	await M_InventoryList.deleteOne({cid: cid, inventoryNumber: inventoryNumber, id: id});
+		
+	sendok(res, "Deleted");
+});
+
 
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
