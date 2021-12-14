@@ -201,7 +201,7 @@ async function doBirthdayWishes() {
 
 		// find if customer has subscribed birthday  pack
 		var sts = await hasSubscribed(cid, AddOnList.birthday);
-		console.log("BDaySts: "+sts);
+		//console.log("BDaySts: "+sts);
 		if (sts === 0 ) continue;
 		console.log("Has subscribed for birthday");
 		
@@ -226,7 +226,7 @@ async function doBirthdayWishes() {
 				]
 			}
 		});
-		console.log(allPatients);
+		//console.log(allPatients);
 		if (allPatients.length === 0) continue;
 
 		//let customerSmsLog = await akshuGetSmsLog(cid, tMonth, tYear);

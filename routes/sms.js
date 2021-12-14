@@ -101,7 +101,7 @@ async function fast2SmsSend(senderid, messageid, myParams, destMobile) {
 		"route": "dlt",
 		"numbers": destMobile
 	};
-	console.log(queryMsg);
+	//console.log(queryMsg);
 	f2s.query(queryMsg);
 
 
@@ -115,7 +115,7 @@ async function fast2SmsSend(senderid, messageid, myParams, destMobile) {
 				console.log("Rejected");
 				return reject(response.body)
 			}
-			console.log("Send success");
+			//console.log("Send success");
 			return resolve(response.body);
 		});
 	});
@@ -159,7 +159,7 @@ async function fast2SmsReminder(destMobile, docName, clinicName, apptDateStr, cl
 
 async function fast2SmsSendBirthday(destMobile, patientName, clinicName) {
 	let myParams = `${patientName}|${clinicName}`;
-	console.log(myParams);
+	//console.log(myParams);
 	getSMSIds();
 	let status = await fast2SmsSend(headerIdList[5], messageIdList[5], myParams, destMobile);
 	return status;

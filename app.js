@@ -1,4 +1,3 @@
-
 require('dotenv').config()
 express = require('express');
 path = require('path');
@@ -93,7 +92,7 @@ docxRouter = require('./routes/docx');
 doctorTypeRouter = require('./routes/doctortype')
 festivalRouter = require('./routes/festival');
 nextVisitRouter = require('./routes/nextvisit');
-
+inventoryRouter = require('./routes/inventory');
 
 app.set('view engine', 'html');
 app.use(logger('dev'));
@@ -148,7 +147,7 @@ app.use('/doctortype', doctorTypeRouter);
 app.use('/festival', festivalRouter);
 app.use('/nextvisit', nextVisitRouter);
 //app.use('/sms', smsRouter);
-
+app.use('/inventory', inventoryRouter);
 
 //Schema
 
@@ -470,6 +469,24 @@ SubscribeSchema = mongoose.Schema({
 	enabled: Boolean
 });
 
+InventorySchema = mongoose.Schema({
+	cid: String,
+	id: Number,
+	loginName: String,
+	name: String,
+	enabled: Boolean
+});
+
+InventoryListSchema = mongoose.Schema({
+	cid: String,
+	id: Number,
+	inventoryNumber: Number,
+	quantity: Number,
+	date:		Date,
+	enabled: Boolean
+});
+
+
 // models
 User = mongoose.model("user", UserSchema);
 M_Medicine = mongoose.model('Medicine', MedicineSchema);
@@ -499,7 +516,9 @@ M_Festival = mongoose.model('festival', FestivalSchema);
 //M_SmsConfig = mongoose.model('smsconfig', SmsConfigSchema);
 M_SmsLog = mongoose.model('smslog', SmsLogSchema);
 M_Subscribe = mongoose.model('subscribe', SubscribeSchema);
-
+M_Inventory =  mongoose.model('Inventory', InventorySchema);  
+M_InventoryList =  mongoose.model('InventoryList', InventoryListSchema);  
+	
 
 router = express.Router();
 

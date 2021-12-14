@@ -46,7 +46,7 @@ import Home from "views/MED/Home.js";
 import WorkingHours from "views/Settings/WorkingHours";
 import Holiday from "views/Settings/Holiday";
 import Assistant from "views/Settings/Assistant";
-
+import Inventory from "views/Inventory/Inventory";
 
 import Modal from 'react-modal';
 // import download from 'js-file-downloader';
@@ -250,6 +250,7 @@ export function CricDreamTabs() {
 
 	const handleHome = () => { setMenuValue(1);  }
   const handleAppointment = () => { setMenuValue(2);  }
+	const handleInventory = () => { setMenuValue(4);  }
 
 /*
   //const handleVisit = () => { setMenuValue(3);  }
@@ -284,6 +285,7 @@ export function CricDreamTabs() {
 					return <Patient />
       case 2: return <Appointment/>;
       case 3: return <Visit/>; 	
+			case 4: return <Inventory />; 
       case 101: 
         if (window.sessionStorage.getItem("userType") === "Developer")
           return <Customer />
@@ -466,6 +468,7 @@ export function CricDreamTabs() {
 						<Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
 						<Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>
 						<Button color="inherit" className={classes.visitButton} onClick={handleSummary}>Summary</Button>
+						<Button color="inherit" className={classes.visitButton} onClick={handleInventory}>Inventory</Button>
 						</div>
 					}
 					{(false) &&
