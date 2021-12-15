@@ -751,5 +751,8 @@ AddOnList = {
 	festival: [
 		{ name: 'Festival Pack', count: 1 },
 		{ name: 'Combo 1'      , count: 1 }
+	],
+	panel: [
+			{ name: 'Panel Doctors', count: 1 }
 	]
 }

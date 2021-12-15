@@ -20,7 +20,6 @@ function ProgramExit() {
 	process.exit(0);
 }
 
-const RETRYCOUNT = 3;
 
 // This scriot will actually executed at 8:30PM
 

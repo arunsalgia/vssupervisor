@@ -13,6 +13,8 @@ import Box from '@material-ui/core/Box';
 import VsButton from "CustomComponents/VsButton";
 import VsCancel from "CustomComponents/VsCancel"
 import VsTextSearch from "CustomComponents/VsTextSearch";
+import VsRadio from "CustomComponents/VsRadio";
+
 
 import FormControl from '@material-ui/core/FormControl';
 import RadioGroup from '@material-ui/core/RadioGroup';
@@ -474,6 +476,11 @@ export default function Appointment() {
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [allTimeSlots, setAllTimeSlots] = useState([]);
 	
+	const [doctorList, setDoctorList] = useState([]);
+	const [mobileList, setMobileList] = useState([]);
+	const [currApptInfo, setCurrApptInfo] = useState({});
+	const [currentDoctor, setCurrentDoctor] = useState("");
+
   useEffect(() => {	
 
 		userCid = sessionStorage.getItem("cid");
@@ -487,6 +494,8 @@ export default function Appointment() {
 			if (sessionStorage.getItem("userType") !== "Developer") {
 				console.log("starting JSON");
 				customerData = JSON.parse(sessionStorage.getItem("customerData"));
+				setDoctorList([customerData.doctorName].concat(customerData.doctorPanel));
+				setMobileList([customerData.mobile].concat(customerData.doctorMobile));
 				console.log("starting axios");
 				console.log(userCid);
 				let rrr =  await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/patient/checkexpiry/${userCid}`);
@@ -968,6 +977,72 @@ export default function Appointment() {
 	}
 	
 
+	function selectPanelDoctor(apptInfo) {
+		setCurrApptInfo(apptInfo);
+		setCurrentDoctor(doctorList[0]);
+		setIsDrawerOpened("PANELDOCTOR");
+	}
+
+	async function sendAppointmentRequest(slot, apptInfo, doctorName, doctorMobile) {
+		apptInfo["doctorName"] = doctorName;
+		apptInfo["doctorMobile"] = doctorMobile;
+		
+		let jTmp = JSON.stringify(apptInfo);
+		// add this to database
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/appointment/add/${userCid}/${jTmp}`;
+			let resp = await axios.get(myUrl);
+			alert.success("Appointment set of "+currentPatientData.displayName);
+			// update patient appointment
+			let tmpArray=[resp.data].concat(apptArray);
+			tmpArray = lodashSortBy(tmpArray, ['order']);
+			setApptArray(tmpArray);
+			
+			// now update all pending appointment
+			tmpArray=[resp.data].concat(allPendingAppt);
+			tmpArray = lodashSortBy(tmpArray, ['order']);
+			setAllPendingAppt(tmpArray);
+
+			// update slot as pending
+			if (true) {
+				//console.log(currentIndex);
+				
+				let myTmpSlots = [].concat(allTimeSlots);
+				// check if add apt is in morning
+				let ttt = myTmpSlots[currentIndex].morningSlots.find(x => x.hour === slot.hour &&
+					x.minute === slot.minute);
+				//console.log("morning",ttt);
+				if (ttt) {
+					ttt.name = currentPatientData.displayName
+					ttt.visit = 'pending';
+				}
+
+				ttt = myTmpSlots[currentIndex].afternoonSlots.find(x => x.hour === slot.hour &&
+					x.minute === slot.minute);
+				//console.log("afternoon",ttt);
+				if (ttt) {
+					ttt.name = currentPatientData.displayName
+					ttt.visit = 'pending';
+				}
+				
+				ttt = myTmpSlots[currentIndex].eveningSlots.find(x => x.hour === slot.hour &&
+					x.minute === slot.minute);
+				//console.log("evening",ttt);
+				if (ttt) {
+					ttt.name = currentPatientData.displayName
+					ttt.visit = 'pending';
+				}	
+				setAllTimeSlots(myTmpSlots);
+			}	
+		} catch (e) {
+			console.log(e);
+			alert.error("Error setting appointment of "+currentPatientData.displayName);
+			return;
+		}
+
+	}
+
+
 	async function handleAddAppointment(slot) {	
 		// check if appoint time before current time. If yes then do not allow.
 		let myOrder = generateOrder(slot.year, slot.month, slot.date, slot.hour, slot.minute)
@@ -975,7 +1050,8 @@ export default function Appointment() {
 		if (myOrder < currentValidOrder) {
 			return alert.error("Appointment of past date/time is not permitted");
 		}
-			
+		console.log(`Panel Count: ${doctorList.length} ${mobileList.length}`);
+
 		let tmp = {
 			cid: userCid,
 			//data: currentPatientData,
@@ -992,6 +1068,12 @@ export default function Appointment() {
 								slot.hour, slot.minute, 0),
 		};
 		
+		if (doctorList.length > 1) {
+			selectPanelDoctor(tmp)
+		} else {
+			sendAppointmentRequest(slot, tmp, doctorList[0], mobileList[0]);
+		}
+		return;
 		let jTmp = JSON.stringify(tmp);
 		// add this to database
 		try {
@@ -1049,9 +1131,11 @@ export default function Appointment() {
 	function DisplayAvailableAppointments() {
 	if (allTimeSlots.length === 0) return null;
 	
+	//console.log(currentIndex);
+	//console.log(allTimeSlots[currentIndex]);
 	let tStr = DATESTR[allTimeSlots[currentIndex].date];
 	tStr += "/";
-	tStr += MONTHNUMBERSTR[allTimeSlots[currentIndex].month+1];
+	tStr += MONTHNUMBERSTR[allTimeSlots[currentIndex].month];
 	tStr += "/";
 	tStr += allTimeSlots[currentIndex].year;
 
@@ -1413,7 +1497,7 @@ export default function Appointment() {
 		setPatientDob(moment(new Date(2000, 1, 1)));
 		
 		//setIsAdd(true);
-		setIsDrawerOpened(true);
+		setIsDrawerOpened("ADDPATIENT");
 	}
 	
 	async function handleAddEditSubmit() {
@@ -1442,12 +1526,12 @@ export default function Appointment() {
 			setRegisterStatus(error.response.status);
 			return;
 		}
-		setIsDrawerOpened(false);
+		setIsDrawerOpened("");
 
 		let ppp = await getAllPatients(userCid);
 		setPatientMasterArray(ppp);
 		setPatientFilter(ppp, searchText);
-		setIsDrawerOpened(false);
+		setIsDrawerOpened("");
 		return; 
 	}
 	
@@ -1525,10 +1609,10 @@ export default function Appointment() {
 			variant="temporary"
 			open={isDrawerOpened}
 		>
-		{(true) &&
 		<Box className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
-		<VsCancel align="right" onClick={() => { setIsDrawerOpened(false)}} />
-		<ValidatorForm align="center" className={classes.form} onSubmit={handleAddEditSubmit}>
+		<VsCancel align="right" onClick={() => { setIsDrawerOpened("")}} />
+		{(isDrawerOpened == "ADDPATIENT") &&
+		<ValidatorForm align="center" className={gClasses.form} onSubmit={handleAddEditSubmit}>
 			<Typography className={gClasses.title}>{"Add Patient"}</Typography>
 			<TextValidator fullWidth  className={gClasses.vgSpacing}
 				id="newPatientName" label="Name" type="text"
@@ -1580,9 +1664,19 @@ export default function Appointment() {
 			<ShowResisterStatus />
 			<BlankArea />
 			<VsButton name={"Add"} />
-			</ValidatorForm>    		
-			</Box>
+		</ValidatorForm>    		
 		}
+		{(isDrawerOpened == "PANELDOCTOR") &&
+		<ValidatorForm align="center" className={gClasses.form}>
+			<Typography className={gClasses.title}>{"Select panel Doctor"}</Typography>
+			<br />
+			{doctorList.map( (d, index) =>
+				<VsRadio label={d} checked={currentDoctor === d} align="left" onClick={() => setCurrentDoctor(d)} />
+			)}
+			<VsButton name={"Select Panel Doctor"} /> 
+		</ValidatorForm>    		
+		}
+		</Box>
 		</Drawer>		
 		</Container>				
   </div>

@@ -89,12 +89,17 @@ router.get('/add/:cid/:apptdata', async function (req, res) {
 	
 	hRec.date = newData.date;
 	hRec.month = newData.month;
-	hRec.year = newData.year;	
+	hRec.year = newData.year;	  
 	hRec.hour = newData.hour;
 	hRec.minute = newData.minute;
 	
 	hRec.visit = newData.visit;
 	
+	hRec.doctorName = newData.doctorName;
+	hRec.doctorMobile = newData.doctorMobile;
+
+	console.log(hRec);
+
 	hRec.save();
 
 	sendAppointmentSms(cid, newData.pid, newData.apptTime)
