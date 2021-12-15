@@ -1668,7 +1668,7 @@ export default function Appointment() {
 		}
 		{(isDrawerOpened == "PANELDOCTOR") &&
 		<ValidatorForm align="center" className={gClasses.form}>
-			<Typography className={gClasses.title}>{"Select panel Doctor"}</Typography>
+			<Typography className={gClasses.title}>{"Select Doctor from the Panel List"}</Typography>
 			<br />
 			{doctorList.map( (d, index) =>
 				<VsRadio label={d} checked={currentDoctor === d} align="left" onClick={() => setCurrentDoctor(d)} />
