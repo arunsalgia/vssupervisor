@@ -12,30 +12,13 @@ import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 
-/*
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormGroup from '@material-ui/core/FormGroup';
-import HomeIcon from '@material-ui/icons/Home';
-import GroupIcon from '@material-ui/icons/Group';
-
-import NextVisit from "views/NextVisit/NextVisit";
-import Report from "views/Report/Report.js" 
-import Wallet from "views/Wallet/Wallet.js"
-import Sample from "views/SuperUser/Sample.js"
-import Profile from "views/Profile/UserProfile"
-*/
 import Button from '@material-ui/core/Button';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu'; 
 import {red, blue, green, deepOrange, white} from '@material-ui/core/colors';
 import Divider from '@material-ui/core/Divider';
 
-import Visit from "views/Visit/Visit"
-import Appointment from "views/Appointment/Appointment"
-import Patient from "views/Patient/Patient.js" 
-import Summary from "views/Summary/Summary.js"
+
 import Customer from "views/SuperUser/Customer";
 import CustomerInformation from 'views/SuperUser/CustomerInformation';
 
@@ -43,10 +26,19 @@ import ChangePassword from "views/Login/ChangePassword.js"
 import Home from "views/MED/Home.js";
 //import ContactUs from "views/MED/ContactUs.js";
 
+/*
+import Visit from "views/Visit/Visit"
+import Appointment from "views/Appointment/Appointment"
+import Patient from "views/Patient/Patient.js" 
+import Summary from "views/Summary/Summary.js"
+
+
 import WorkingHours from "views/Settings/WorkingHours";
 import Holiday from "views/Settings/Holiday";
 import Assistant from "views/Settings/Assistant";
 import Inventory from "views/Inventory/Inventory";
+*/
+
 
 import Modal from 'react-modal';
 // import download from 'js-file-downloader';
@@ -198,17 +190,7 @@ export function CricDreamTabs() {
   //console.log(location.pathname);
 
   useEffect(() => {       
-/*    
-    const checkVersion = async () => {
-      //console.log("about to call upgrade");
-      let upg = await upGradeRequired();
-      // console.log(upg);
-      if (upg.latest) setLatestApk(upg.latest);
-
-      setUpgrade(upg.status);
-      if (upg.status) setIsOpen(true);
-    }
-*/    
+    
     function setMenuValue() {
       setValue(parseInt(localStorage.getItem("menuValue")));
       setIdle(false);
@@ -223,12 +205,6 @@ export function CricDreamTabs() {
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
-  };
-
-  function handleGrpMenu(event) {
-    setGrpAnchorEl(event.currentTarget);
-    //console.log(event.currentTarget);
-		setArunGroup(true);
   };
 
   
@@ -248,65 +224,22 @@ export function CricDreamTabs() {
   }
 
 
-	const handleHome = () => { setMenuValue(1);  }
-  const handleAppointment = () => { setMenuValue(2);  }
-	const handleInventory = () => { setMenuValue(4);  }
-
-/*
-  //const handleVisit = () => { setMenuValue(3);  }
-	const handleNextVisit = () => { handleClose(); setMenuValue(904);}
-	const handleReport = () => { handleClose(); setMenuValue(905);}
-	const handleSample = () => { handleClose(); setMenuValue(801);}
-	const handleCustomer = () => { handleClose(); setMenuValue(802);}
-	//const handleMedicine = () => { handleClose(); setMenuValue(704);}
-*/
-
-  const handlePatient = () => { handleClose(); setMenuValue(901);}
-	
   const handleProfile = () => { handleClose(); handleGrpClose(); setMenuValue(101);}
-	const handleWallet = () => { handleClose(); handleGrpClose(); setMenuValue(102);}
 	const handleChangePassword = () => { handleClose(); handleGrpClose(); setMenuValue(103);}
-	const handleSummary = () => { handleClose(); handleGrpClose(); setMenuValue(104);}
-	//const handleContactUs = () => { handleClose(); setMenuValue(202);}
-	
-	
-	const handleWorkingHours = () => { handleClose(); setMenuValue(701);}
-	const handleHoliday = () => { handleClose(); setMenuValue(702);}
-	const handleAssistant = () => { handleClose(); setMenuValue(703);}
+
+
   
 
   function DisplayCdItems() {
 		//console.log("CD Value", value);
     switch(value) {
-      case 1: 
-				if (process.env.REACT_APP_SHOWHOMEPAGE === 'true')
-					return <Home />;
-				else 
-					return <Patient />
-      case 2: return <Appointment/>;
-      case 3: return <Visit/>; 	
-			case 4: return <Inventory />; 
+      case 1: return <Customer /> 
       case 101: 
         if (window.sessionStorage.getItem("userType") === "Developer")
           return <Customer />
         else
           return <CustomerInformation />;
-      //case 102: return <Wallet />;
 			case 103: return <ChangePassword />;
-			case 104: return <Summary />;
-
-			//case 801: return <Sample />
-			//case 802: return <Customer />
-
-      case 901: return <Patient />;
-			//case 903: return <Sample />
-			//case 904: return <NextVisit />
-			//case 905: return <Report />
-
-			case 701: return <WorkingHours />
-			case 702: return <Holiday />
-			case 703: return <Assistant />
-      //case 704: return <Medicine />;
 
       default: return  null;
     }
@@ -393,53 +326,12 @@ export function CricDreamTabs() {
               >
 								<Typography className={classes.title}>{sessionStorage.getItem("userName")}</Typography>
 								<Divider className={classes.divider} />
-                {(window.sessionStorage.getItem("userType") !== "Assistant") &&
                 <MenuItem onClick={handleProfile}>
-									<Typography className={classes.menuStyle}>Profile</Typography>
+									<Typography className={classes.menuStyle}>Customer</Typography>
 								</MenuItem>
-                }
 								<MenuItem onClick={handleChangePassword}>
 									<Typography className={classes.menuStyle}>Change Password</Typography>
 								</MenuItem>
-                <Divider className={classes.divider}/>
-								{(itIsMobile) &&
-									<div>
-									<MenuItem onClick={handleAppointment}>
-									<Typography className={classes.menuStyle}>Appointment</Typography>
-									</MenuItem>
-									<MenuItem onClick={handlePatient}>
-									<Typography className={classes.menuStyle}>Patient</Typography>
-									</MenuItem>
-									<MenuItem onClick={handleSummary}>
-									<Typography className={classes.menuStyle}>Summary</Typography>
-									</MenuItem>
-									<Divider className={classes.divider} />
-									</div>
-								} 
-								<div align="center">
-								<Typography className={classes.title}>Settings</Typography>
-								<MenuItem onClick={handleWorkingHours}>
-								<Typography className={classes.menuStyle}>Working Hours</Typography>
-								</MenuItem>	
-								<MenuItem onClick={handleHoliday}>
-								<Typography className={classes.menuStyle}>Holidays</Typography>
-								</MenuItem>
-								<MenuItem onClick={handleAssistant}>
-								<Typography className={classes.menuStyle}>User</Typography>
-								</MenuItem>
-								</div>
-								{((false) && (window.sessionStorage.getItem("userType") === "Developer")) &&
-									<div>
-									<Divider className={classes.divider}/>
-									<MenuItem onClick={handleSample}>
-									<Typography className={classes.menuStyle}>Sample</Typography>
-									</MenuItem>
-									<MenuItem onClick={handleCustomer}>
-									<Typography className={classes.menuStyle}>Customer</Typography>
-									</MenuItem>
-									</div>
-								}
-                {/*<MenuItem onClick={handleContactUs}>Contact Us</MenuItem>*/}
 								<Divider className={classes.divider}/>
 								<MenuItem onClick={() => {handleClose(); handleLogout(); }}>
 									<Typography className={classes.menuStyle}>Logout</Typography>
@@ -447,67 +339,18 @@ export function CricDreamTabs() {
               </Menu>
             </div>
           )}
-          {/* <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-            <MenuIcon />
-          </IconButton> */}
-					<Typography onClick={handleHome}>
+					<Typography>
 						<span className={classes.doctor}>+</span>
 						<span className={classes.ankit}> Doctor Viraag</span>
 					</Typography>
-          {/*<IconButton
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleHome}
-            color="inherit"
-          >
-            <HomeIcon className={classes.icon}/>
-          </IconButton>*/}
 					{(itIsMobile === false) &&
 						<div>
-						<Button color="inherit" className={classes.statButton} onClick={handleAppointment}>Appt</Button>
-						<Button color="inherit" className={classes.visitButton} onClick={handlePatient}>Patient</Button>
-						<Button color="inherit" className={classes.visitButton} onClick={handleSummary}>Summary</Button>
-						<Button color="inherit" className={classes.visitButton} onClick={handleInventory}>Inventory</Button>
+						<Button color="inherit" className={classes.statButton} onClick={handleProfile}>Customer</Button>
 						</div>
 					}
-					{(false) &&
-					<div align="right">
-					<Avatar 
-            aria-label="account of current user"
-            aria-controls="user-appbar"
-            aria-haspopup="true"
-            color="inherit"
-            variant="circular" 
-						onClick={handleGrpMenu}
-						className={classes.avatar1}>{sessionStorage.getItem("userName").substr(0,1)}
-          </Avatar>
-					<Menu
-            id="group-appbar"
-            anchorEl={grpAnchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            // keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={arunGroup}
-            onClose={handleGrpClose}
-          >
-            <DisplayGroupMenu />
-          </Menu>
-					</div>
-					}
-					{/*<Typography onClick={handleHome}>
-						<span className={classes.userName}>{sessionStorage.getItem("userName")}</span>
-					</Typography>*/}
 			 </Toolbar>
       </AppBar>
       <DisplayCdItems/>
-      {/* <DisplayUpgrade/> */}
     </div>
   );
 }

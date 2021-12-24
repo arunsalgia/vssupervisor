@@ -26,7 +26,7 @@ const { getAllPatients  } = require("./patient");
 const { all } = require('.');
 
 
-const EARLYMORNINGSCHEDULEAT=2;
+const EARLYMORNINGSCHEDULEAT=2; 
 const MORNINGSCHEDULEAT=2;
 const AFTERNOONSCHEDULEAT=5;
 const OLDAPPTBACKDATE=3;
@@ -86,6 +86,8 @@ customerRouter.get('/update/:custData', async function(req, res, next) {
 		//console.log(tmp);
 		rec = new M_Customer();
 		rec.customerNumber = (tmp.length > 0) ? tmp[0].customerNumber+1 : 999;
+		rec.doctorPanel = [];
+		rec.doctorMobile = [];
 	}
 
 	rec.enabled = true;
@@ -140,6 +142,21 @@ customerRouter.get('/setworkinghours/:cid/:workingHours', async function(req, re
 	sendok(res, rec);
 })
 
+customerRouter.get('/updatepaneldoctors/:cid/:docList', async function(req, res, next) {
+  setHeader(res);
+	var {cid, docList} = req.params;
+	
+	return senderr(res, 601, "Currently not implemented");
+
+	let newList = JSON.parse(docList);
+	let rec = await akshuGetCustomer(cid);
+	
+	rec.doctorPanel = newList.name;
+	rec.doctorMobile = newList.mobile;``
+	
+	akshuUpdateCustomer(rec);
+	sendok(res, rec);
+})
 
 
 customerRouter.get('/closevisit', async function(req, res, next) {

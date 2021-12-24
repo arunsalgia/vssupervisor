@@ -31,7 +31,7 @@ import moment from "moment";
  import VsRadioGroup from "CustomComponents/VsRadioGroup";
 
 import CustomerInformation from "views/SuperUser/CustomerInformation";
-
+import Doctorsms from "views/SuperUser/Doctorsms";
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 
@@ -49,245 +49,6 @@ import { DATESTR, MONTHNUMBERSTR } from 'views/globals';
 
 const ADDONPLANTYPE = ["ANNUAL", "MONTHLY", "LIFETIME"];
 
-/*
-const useStyles = makeStyles((theme) => ({
-	root: {
-		width: '100%',
-	}, 
-	dateTime: {
-		color: 'blue',
-		fontSize: theme.typography.pxToRem(28),
-		fontWeight: theme.typography.fontWeightBold,
-		backgroundColor: pink[100],
-		align: 'center',
-		width: (isMobile()) ? '60%' : '20%',
-	}, 
-	dateTimeNormal: {
-		color: 'blue',
-		fontSize: theme.typography.pxToRem(14),
-		fontWeight: theme.typography.fontWeightBold,
-		//backgroundColor: pink[100],
-		align: 'center',
-		//width: (isMobile()) ? '60%' : '20%',
-	}, 
-	dateTimeBlock: {
-		color: 'blue',
-		//fontSize: theme.typography.pxToRem(28),
-		fontWeight: theme.typography.fontWeightBold,
-		//backgroundColor: pink[100],
-	}, 
-	info: {
-			color: blue[700],
-	}, 
-	filterRadio: {
-			fontSize: theme.typography.pxToRem(14),
-			fontWeight: theme.typography.fontWeightBold,
-			color: '#000000',	
-	},
-	switchText: {
-		fontSize: theme.typography.pxToRem(14),
-		fontWeight: theme.typography.fontWeightBold,
-	}, 
-		orange: {
-			backgroundColor: orange[300],
-			color: '#000000',
-		},
-    header: {
-			color: '#D84315',
-    }, 
-    error:  {
-      // right: 0,
-      fontSize: '12px',
-      color: red[700],
-      // position: 'absolute',
-      alignItems: 'center',
-      marginTop: '0px',
-		},
-		editdelete: {
-			marginLeft:  '50px',
-			marginRight: '50px',
-		},
-		NoMedicines: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			color: blue[700]
-		},  
-		radio: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			color: "blue",
-		},
-		medicine: {
-			fontSize: theme.typography.pxToRem(15),
-			fontWeight: theme.typography.fontWeightBold,
-			color: blue[700]
-		},  
-		modalHeader: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			color: blue[700]
-		},
-		messageText: {
-			color: '#4CC417',
-			fontSize: 12,
-			// backgroundColor: green[700],
-    },
-    symbolText: {
-        color: '#4CC417',
-        // backgroundColor: green[700],
-    },
-    button: {
-			margin: theme.spacing(0, 1, 0),
-    },
-		title: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			color: blue[700],
-		},
-    heading: {
-			fontSize: theme.typography.pxToRem(15),
-			fontWeight: theme.typography.fontWeightBold,
-		},
-		accordianSummary: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			//backgroundColor: pink[100],
-		},
-		zeroAppt: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			backgroundColor: pink[100],
-		},
-		normalAccordian: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			backgroundColor: pink[100],
-		},
-		selectedAccordian: {
-			fontSize: theme.typography.pxToRem(20),
-			fontWeight: theme.typography.fontWeightBold,
-			backgroundColor: yellow[100],
-		},
-    secondaryHeading: {
-      fontSize: theme.typography.pxToRem(15),
-      color: theme.palette.text.secondary,
-    },
-		noPadding: {
-			padding: "none", 
-		},
-	apptName: {
-		fontSize: theme.typography.pxToRem(15),
-		fontWeight: theme.typography.fontWeightBold,
-		color: blue[700]
-	},  
-	newAppt: {
-		backgroundColor: pink[100],
-	},
-	allAppt: {
-		backgroundColor: blue[100],
-	},
-	select: {
-		padding: "none", 
-		backgroundColor: '#B3E5FC',
-		margin: "none",
-	},
-	table: {
-    //minWidth: 750,
-  },
-  td : {
-    border: 5,
-    align: "center",
-    padding: "none",
-		borderWidth: 1,
-		borderColor: 'black',
-		borderStyle: 'solid',
-  },
-	tdPending : {
-    border: 5,
-    align: "center",
-    padding: "none",
-		borderWidth: 1,
-		backgroundColor: blue[100],
-		borderColor: 'black',
-		borderStyle: 'solid',
-  },
-	tdCancel : {
-		backgroundColor: pink[100],
-    border: 5,
-    align: "center",
-    padding: "none",
-		borderWidth: 1,
-		borderColor: 'black',
-		borderStyle: 'solid',
-  },
-	tdVisit : {
-		backgroundColor: lightGreen[300],
-    border: 5,
-    align: "center",
-    padding: "none",
-		borderWidth: 1,
-		borderColor: 'black',
-		borderStyle: 'solid',
-  },
-	th: { 
-		border: 5,
-    align: "center",
-    padding: "none",
-		fontSize: theme.typography.pxToRem(13),
-		fontWeight: theme.typography.fontWeightBold,
-		//backgroundColor: '#FFA726',
-		backgroundColor: deepOrange[200],
-		borderWidth: 1,
-		borderColor: 'black',
-		borderStyle: 'solid',
-	},
-	wd: {
-		border: 5,
-    align: "center",
-    padding: "none",
-		backgroundColor: '#E0E0E0',
-		borderWidth: 1,
-		borderColor: 'black',
-		borderStyle: 'solid',
-	},
-	we: {
-		border: 5,
-    align: "center",
-    padding: "none",
-		backgroundColor: '#F8BBD0',
-		borderWidth: 1,
-		borderColor: 'black',
-		borderStyle: 'solid',
-	},
-	today: {
-		border: 5,
-    align: "center",
-    padding: "none",
-		backgroundColor: green[300],
-		borderWidth: 1,
-		borderColor: 'black',
-		borderStyle: 'solid',
-	},
-	noday: {
-		border: 5,
-    align: "center",
-    padding: "none",
-		backgroundColor: '#FFFFFF',
-		borderWidth: 1,
-		borderColor: 'black',
-		borderStyle: 'solid',
-	},
-	ho: {
-		border: 5,
-    align: "center",
-    padding: "none",
-		backgroundColor: yellow[400],
-		borderWidth: 1,
-		borderColor: 'black',
-		borderStyle: 'solid',
-	},
-}));
-*/
 
 export default function Customer() {
   //const classes = useStyles();
@@ -405,6 +166,7 @@ export default function Customer() {
 		<DisplayFunctionItem item="AddOn"  match={currentSelection}  onClick={setSummaryMainSelect} />
 		<DisplayFunctionItem item="Festival"  match={currentSelection} onClick={setSummaryMainSelect} />
 		<DisplayFunctionItem item="Customer"  match={currentSelection}  onClick={setSummaryMainSelect} />
+		<DisplayFunctionItem item="DRSMS"  match={currentSelection}  onClick={setSummaryMainSelect} />
 	</Grid>	
 	</Box>
 	)}
@@ -1143,6 +905,9 @@ export default function Customer() {
 			}
 			</div>
 		}	
+		{(currentSelection === "DRSMS") &&
+			<Doctorsms />
+		}
 		<Drawer anchor="right" variant="temporary"	open={isDrawerOpened !== ""} >
 		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 		<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />

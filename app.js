@@ -39,7 +39,7 @@ if (PRODUCTION) {
 console.log(BASELINK);
 ARCHIVEDIR= (PRODUCTION) ? "public/" : "public/" ;       // binary will be stored here
 
-PORT = process.env.PORT || 4000;
+PORT = process.env.PORT || 5000;
 VISITTYPE = {pending: 'pending', cancelled: 'cancelled', over: 'over', expired: 'expired'};
 
 

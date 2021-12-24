@@ -443,7 +443,8 @@ router.get('/jaijinendra/:uName/:uPassword', async function (req, res, next) {
   var isValid = false;
 	//console.log(getLoginName(uName));
   let uRec = await User.findOne({ userName:  getLoginName(uName)});
-  //console.log(uRec)
+  console.log(uRec);
+	
 	if (uRec) {
 		//console.log(dbdecrypt(uRec.password));
 		uPassword = decrypt(uPassword);
@@ -455,11 +456,14 @@ router.get('/jaijinendra/:uName/:uPassword', async function (req, res, next) {
   }
 	 
   if (isValid) {
-		//let myDoctor = await M_Doctor.findOne({cid: uRec.cid});
-		//let myCustomer = await M_Customer.findOne({_id: uRec.cid});
+		
+		if (uRec.userType.toLowerCase() !== "developer") {
+			senderr(res, 602, "Invalid User name or password");
+			return;
+		}
+
     let myCustomer = await akshuGetCustomer(uRec.cid);
 		sendok(res, {user: uRec, customer: myCustomer});
-		//sendok(res, "OK");
 		console.log("Done");
 	}
   else        

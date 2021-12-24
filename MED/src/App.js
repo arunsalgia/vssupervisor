@@ -6,10 +6,10 @@ import { UserContext } from "./UserContext";
 //import Admin from "layouts/Admin.js";
 import "assets/css/material-dashboard-react.css?v=1.9.0";
 // import { DesktopWindows } from "@material-ui/icons";
-import { CricDreamTabs, setTab }from "CustomComponents/CricDreamTabs"
+import { CricDreamTabs,  setTab }from "CustomComponents/CricDreamTabs"
 import axios from "axios";
 import SignIn from "views/Login/SignIn"
-import Welcome from "views/MED/Welcome";
+//import Welcome from "views/MED/Welcome";
 //import SignUp from "views/Login/SignUp.js";
 //import Doctor from "views/MED/Doctor";
 import ResetPassword from "views/Login/ResetPassword";
@@ -20,6 +20,7 @@ import IdleTimer from 'react-idle-timer'
 
 import { PinDropSharp } from "@material-ui/icons";
 
+import Customer from "views/SuperUser/Customer";
 
 import firebase from 'firebase';
 //import arunfb from 'firebase';
@@ -121,7 +122,7 @@ function AppRouter() {
     if (isLogged) {
       return (
         <div>
-          <CricDreamTabs/>
+          <CricDreamTabs />
         </div>
       )  
     } 
@@ -148,10 +149,6 @@ function AppRouter() {
 				//console.log(history, hist);
 				return (<ResetPassword />);
 			} else {
-				//console.log("About to call Welcome");
-				if (process.env.REACT_APP_SHOWWELCOMEPAGE === 'true')
-					return (<Welcome/>)
-				else
 					return <SignIn />
 			}
 		} 
