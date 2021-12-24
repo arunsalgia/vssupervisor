@@ -68,7 +68,9 @@ export default function Doctorsms() {
 	const [emurText5, setEmurText5] = useState("");
 	
 	const [customerSelection, setCustomerSelection] = useState([]);
-
+	const [docSelected, setDocSelected] = useState(true);
+	
+	
 	const [custNumber, setCustNumber] = useState(0);
 	const [doctorName, setDoctorName] = useState("");
 	const [doctorType, setDoctorType] = useState("");
@@ -185,36 +187,78 @@ export default function Doctorsms() {
 	}
 
 	function addCustomer(idx) {
-		let tmpArray = customerSelection;
+		let tmpArray = lodashCloneDeep(customerSelection);
 		tmpArray[idx] = !tmpArray[idx];
 		setCustomerSelection(tmpArray);
+		
+		let newSel = true;
+		for(let i=0; i<tmpArray.length; ++i) {
+			if (tmpArray[i]) { newSel = false; break; }
+		}
+		setDocSelected(newSel);
 	}
 	
 	function DisplayAllDoctors() {
 	return (	
-	<div>
+	<Grid className={gClasses.noPadding} key="DOCLIST" container>
 	{customerArray.map( (d, index) =>
-		<VsCheckBox align="left" value={currentCustomer[index]} onClick={() => addCustomer(index)} label={d.doctorName} />
+		<Grid align="left" key={"DOC"+index} item xs={6} sm={6} md={3} lg={3} >
+		<VsCheckBox align="left" checked={customerSelection[index]} onClick={() => addCustomer(index)} label={d.doctorName} />
+		</Grid>
 	)}
-	</div>
+	</Grid>
 	)}
 	
-	function sendSmsToDoctors() {
-		alert.info("Send SMS");
-		setIsDrawerOpened("");
+	async function sendSmsToDoctors() {
+		// make parameters list
+		let myParamList = [];
+		switch (emurCount) {
+			case 5: myParamList.push(emurText5);
+			case 4: myParamList.push(emurText4);
+			case 3: myParamList.push(emurText3);
+			case 2: myParamList.push(emurText2);
+			case 1: myParamList.push(emurText1);			
+		}
+		myParamList = myParamList.reverse();
+		let myParams = myParamList.join("|");
+		
+		// Make doctor list`
+		let myDoctorList=[];
+		for(let i=0; i<customerSelection.length; ++i) {
+			if (customerSelection[i]) myDoctorList.push(customerArray[i]._id);
+		}
+		
+		let tmp = {
+			receiver: receiver,
+			doctorList: myDoctorList,
+			header: header,
+			messageId: messageId,
+			params: myParams
+		};
+		tmp = encodeURIComponent(JSON.stringify(tmp));
+		
+		try {
+			let myURL = `${process.env.REACT_APP_AXIOS_BASEPATH}/sms/supervisor/${tmp}`;
+			await axios.get(myURL);
+		} catch(e) {
+			console.log(e);
+			alert.error("Unable to send SMS");
+		}
+		setIsDrawerOpened("");		
 	}
 
 	return (
 		<div className={gClasses.webPage} align="center" key="main">
-		<Container component="main" maxWidth="xs">
+		<Container component="main" maxWidth="lg">
 		<br />
 		<DisplayPageHeader headerName="SMS to Doctors / Patients" groupName="" tournament=""/>
 		<br />
-		<Grid className={gClasses.noPadding} key="SMS" container alignItems="center" align="center">
-		<Grid align="center"  item xs={12} sm={12} md={4} lg={4} >
+		<Grid className={gClasses.noPadding} key="SMS" container>
+		<Grid align="right"  item xs={12} sm={12} md={5} lg={5} >
 			<Typography className={gClasses.title}>Send SMS to </Typography>
 		</Grid>
-		<Grid align="center"  item xs={12} sm={12} md={8} lg={8} >
+		<Grid align="right"  item xs={false} sm={false} md={1} lg={1} />
+		<Grid align="left"  item xs={12} sm={12} md={6} lg={6} >
 			<VsRadioGroup label="Send SMS to " color="primary" value={receiver} 
 				onChange={(event) => setReceiver(event.target.value)}
 				radioList={SMSRECEIVERS}
@@ -224,7 +268,7 @@ export default function Doctorsms() {
 		<br />
 		<DisplayAllDoctors />
 		<br />
-		<VsButton name={"Send SMS to selected "+receiver+"s"} align="left" onClick={() => setIsDrawerOpened("SENDSMS")} />
+		<VsButton disabled={docSelected} name={"Send SMS to selected "+receiver+"s"} align="center" onClick={() => setIsDrawerOpened("SENDSMS")} />
 		<Drawer anchor="right" variant="temporary"	open={isDrawerOpened !== ""} >
 		<Box  className={gClasses.boxStyle} borderColor="black" borderRadius={7} border={1} >
 		<VsCancel align="right" onClick={() => {setIsDrawerOpened("")}} />
@@ -272,7 +316,7 @@ export default function Doctorsms() {
 			<BlankArea />
 			<ShowResisterStatus/>
 			<BlankArea/>
-			<VsButton align="center" name={"Send Message to "+receiver+"s"} type="submit" />
+			<VsButton align="center" name={"Send Message to "+receiver+"s"}  type="submit" />
 			<ValidComp />  
 		</ValidatorForm>
 	}

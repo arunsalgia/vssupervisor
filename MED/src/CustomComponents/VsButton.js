@@ -14,7 +14,6 @@ function disabled() {
 
 export default function VsButton(props) {
 var bSTyle = {padding: "5px 10px", margin: "4px 2px", color: 'white', fontSize:'14px', borderRadius:7, border: 2};
-
 bSTyle.backgroundColor = (props.color) ? props.color: 'blue';
 let handler=disabled;
 if (props.disabled) {

@@ -113,8 +113,11 @@ export default function SignIn() {
 	try { 
 		let enPassword = encrypt(password);
 		let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/jaijinendra/${userName}/${enPassword}`); 
-		setError("", false);
 		let userData = response.data.user;
+		if (userData.userType.toLowerCase() !== "developer")
+			return setError("Invalid User name / Password", true);
+
+		setError("", false);
 		window.sessionStorage.setItem("uid", userData.uid)
 		window.sessionStorage.setItem("userName", userData.displayName);
 		window.sessionStorage.setItem("userType", userData.userType);
@@ -149,16 +152,18 @@ export default function SignIn() {
     try { 
       let enPassword = encrypt(myPassword);
       response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/jaijinendra/${myUserName}/${enPassword}`); 
-      setError("", false);
     } catch (err) {
-      setError("Invalid Username / Password", true);
+      return setError("Invalid User name / Password", true);
     }
-    // console.log("Signinresponse", response.data);
-
     if (response.status === 200) {
-			console.log("Signinresponse", response.data);
 			
 			let userData = response.data.user;
+			console.log(userData);
+			
+			if (userData.userType.toLowerCase() !== "developer")
+				
+				return setError("Invalid User name / Password", true);
+			
       window.sessionStorage.setItem("uid", userData.uid)
       window.sessionStorage.setItem("userName", userData.displayName);
       window.sessionStorage.setItem("userType", userData.userType);
@@ -167,34 +172,9 @@ export default function SignIn() {
 			window.sessionStorage.setItem("customerData", JSON.stringify(response.data.customer));
 			
 			window.sessionStorage.setItem("doctorData", JSON.stringify(response.data.doctor));
-			 
-			//window.sessionStorage.setItem("admin", true)
-			setTab(process.env.REACT_APP_HOME);
-			 
-			//setUser({ uid: myUID, admin: true })
-			
-			/*
-      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/default/${myUID}`);
-      // console.log("default respose", response.data);
-      // SAMPLE OUTPUT
-      // {"uid":"8","gid":2,"displayName":"Salgia Super Stars",
-      // "groupName":"Happy Home Society Grp 2","tournament":"ENGAUST20","ismember":true,"admin":true}
-      window.localStorage.setItem("gid", response.data.gid);
-      window.localStorage.setItem("groupName", response.data.groupName);
-      window.localStorage.setItem("tournament", response.data.tournament);
-      
-      window.localStorage.setItem("SNG", "");
-      window.localStorage.setItem("cGroup", "");
-      clearBackupData();
-			*/
-			
-      // setUser({ uid: myUID, admin: response.data.admin });
-      // cdRefresh(true);
-      //let newPos = specialSetPos();
-      //if (newPos < 0) newPos = 0;
-      // let newPos = (response.data.gid > 0) ? process.env.REACT_APP_DASHBOARD : process.env.REACT_APP_GROUP;
-      // console.log(`User is ${localStorage.getItem("uid")}`)
-     
+
+			//setTab(process.env.REACT_APP_HOME);
+
     }
   }
   
@@ -206,7 +186,7 @@ export default function SignIn() {
       setDownloadMessage("APL Android app download complete.")
       // console.log("APK has to be downloaded");
     } catch (e) {
-      setDownloadMessage("Error encountred while downloading APL Android app", true)
+      setDownloadMessage("Error encountered while downloading APL Android app", true)
     }
   }
 
@@ -229,9 +209,6 @@ export default function SignIn() {
         <Grid item xs={12} sm={12} md={12} lg={12} >
         <button><img src={androidImage} alt="my image" onClick={handleAndroid} /></button>
         </Grid>
-        {/* <Grid item className={classes.downloadButon} xs={6} sm={6} md={6} lg={6} >
-        <button disabled><img src={iosImage}  alt="my image" onClick={handleIos} /></button>
-        </Grid> */}
       </Grid>
       </div>
     )  
