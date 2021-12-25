@@ -396,23 +396,28 @@ export default function CustomerInformations(props) {
 	}
 
 	async function handleSubscribe(d) {
-		if (balance < d.charges) {
-			alert.error(`Low balance. Balance of ${d.charges} required to subscribe '${d.name}'.`)
-			return;
-		}
-		try {
-			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/addon/subscribe/${userCid}/${d.name}/${d.charges}`;
-			let resp = await axios.get(myUrl);
-			let tmp = subscriptionList.filter(x => x.name !== d.name);
-			tmp.push(resp.data);
-			setSubscriptionList(tmp);
-			setBalance(balance-d.charges);
-		} catch (e) {
-			console.log(e)
-			alert.error(`Error in subscribing ${d.name}`);
-		}
+		setEmurText1(d.name);
+		let tmp  = moment();
+		setEmurDate1(tmp);
+		setIsDrawerOpened("ADDADDON")
 	}
 
+	async function handleAddonConfirm() {
+		let d = emurDate1.toDate();
+		console.log(d);
+		let expiryStr = `${d.getFullYear()}${MONTHNUMBERSTR[d.getMonth()]}${DATESTR[d.getDate()]}`;
+		
+		try {
+			let myUrl = `${process.env.REACT_APP_AXIOS_BASEPATH}/addon/subscribe/${userCid}/${emurText1}/${expiryStr}`;
+			let resp = await axios.get(myUrl);
+			let tmp = subscriptionList.filter(x => x.name !== emurText1);
+			tmp.push(resp.data);
+			setSubscriptionList(tmp);
+		} catch (e) {
+			console.log(e)
+			alert.error(`Error in subscribing ${emurText1}`);
+		}
+	}
 
 	function DisplayAllOnType() {
 		//console.log(subscriptionList);
@@ -1056,7 +1061,27 @@ export default function CustomerInformations(props) {
 			<ValidComp />  
     </ValidatorForm>
 	}
-	{((isDrawerOpened === "ADDPANEL") || (isDrawerOpened === "EDITPANEL")) &&
+	{(isDrawerOpened === "ADDADDON") &&
+			<ValidatorForm className={gClasses.form} onSubmit={handleAddonConfirm}>
+			<Typography className={gClasses.title}>{"Subscribe add on facility "+emurText1}</Typography>
+			<br />
+			<Typography className={gClasses.title}>{"Set Expiry date"}</Typography>
+			<br />
+			<Datetime 
+				className={gClasses.dateTimeBlock}
+				inputProps={{className: gClasses.dateTimeNormal}}
+				timeFormat={false} 
+				initialValue={emurDate1}
+				dateFormat="DD/MM/yyyy"
+				isValidDate={disablePastDt}
+				onClose={handleDate1}
+				closeOnSelect={true}
+			/>
+			<ShowResisterStatus/>
+			<br />
+			<VsButton align="center" name={"Subscribe"} type="submit" />
+    </ValidatorForm>
+	}	{((isDrawerOpened === "ADDPANEL") || (isDrawerOpened === "EDITPANEL")) &&
 	<ValidatorForm className={gClasses.form} onSubmit={handleAddEditPanel}>
  		<Typography className={gClasses.title}>{(isDrawerOpened === "ADDPANEL") ? "Add New Panel Doctor" : "Edit Panel Doctor details"}</Typography>
 		 <br />
